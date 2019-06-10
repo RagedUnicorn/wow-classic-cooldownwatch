@@ -35,9 +35,14 @@ me.tag = "CombatLog"
 function me.ProcessUnfilteredCombatLogEvent()
   -- carefull target and targetName might be null if the caster is not your current target
   local _, event, _, caster, casterName, sourceFlags, _, target, targetName, _, _, spellId, spellName, _ = CombatLogGetCurrentEventInfo()
-  mod.logger.LogError(me.tag, "event: " .. event)
 
-  if not CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS) then
+  --[[
+    While debug mode is active we also allow friendly events to be processed. Otherwise only hostile player events are
+    considered for processing.
+  ]]--
+  if not RGCW_ENVIRONMENT.DEBUG and not CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS)
+    and not bit.band(sourceFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 then
+
     mod.logger.LogDebug(me.tag, "Ignored non-hostile combatlog")
     return
   end
@@ -53,20 +58,6 @@ function me.ProcessUnfilteredCombatLogEvent()
     mod.logger.LogWarn(me.tag, "itemIcon: " .. iconId)
     mod.logger.LogWarn(me.tag, "Caster:" .. casterName)
     mod.logger.LogWarn(me.tag, "SourceFlags:" .. sourceFlags)
-
-    if bit.band(sourceFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0 then
-      print("Nope hostile to me")
-    else
-      print("friendly?")
-    end
-
-
-
-    if bit.band(sourceFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 then
-      print("Controller: a player")
-    else
-      print("Not a player")
-    end
 
     if caster == mod.target.GetCurrentTarget() then
       mod.logger.LogDebug(me.tag, "Caster and current target are the same")
