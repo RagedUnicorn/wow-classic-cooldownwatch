@@ -35,6 +35,7 @@ me.tag = "CombatLog"
 function me.ProcessUnfilteredCombatLogEvent()
   -- carefull target and targetName might be null if the caster is not your current target
   local _, event, _, caster, casterName, sourceFlags, _, target, targetName, _, _, spellId, spellName, _ = CombatLogGetCurrentEventInfo()
+  mod.logger.LogError(me.tag, "Event: " .. event)
 
   --[[
     While debug mode is active we also allow friendly events to be processed. Otherwise only hostile player events are
