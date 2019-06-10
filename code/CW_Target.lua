@@ -1,0 +1,63 @@
+--[[
+  MIT License
+
+  Copyright (c) 2019 Michael Wiesendanger
+
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+]]--
+
+local mod = rgcw
+local me = {}
+mod.target = me
+
+me.tag = "Target"
+
+local currentTarget = ""
+
+--[[
+  Returns the players current target or an empty string if the player has no target.
+
+  @return {string}
+]]--
+function me.GetCurrentTarget()
+  return currentTarget
+end
+
+--[[
+  Get players current target (if enemy) in the form of the targets unique id and update the currentTarget.
+]]--
+function me.UpdateCurrentTarget()
+  local targetId
+
+  --[[
+    For debugging purpose allow friendly target in debug mode
+  ]]--
+  if UnitIsEnemy("player", "target") or RGCW_ENVIRONMENT.DEBUG then
+    targetId = UnitGUID("target")
+  end
+
+  if targetId == nil then
+    currentTarget = ""
+    mod.logger.LogDebug(me.tag, "Update players target: [Empty-target]")
+  else
+    currentTarget = targetId
+    mod.logger.LogDebug(me.tag, "Update players target: " .. currentTarget)
+  end
+end

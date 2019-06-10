@@ -1,24 +1,3 @@
-# CooldownWatch
-
-![](/docs/cw_ragedunicorn_love_classic.png)
-
-> CooldownWatch aims to track your enemies cooldowns and making them visible to the player
-
-
-## Cooldowns vs Proximity Cooldowns
-
-Proximity cooldowns are cooldowns that where detected within a certain proximity
-but could not be matched to a caster. This means that we know that a certain spell
-was casted but we don't know by what player. It can however still be very helpful
-to see a notification about those spells. If the spell is specific to a class the
-player can often guess himself who casted the spell. Only if there are multiple enemy
-players with the same class it might get tricky to guess which one of them just used
-his cooldown.
-
-Proximity probably not needed there should always be a caster
-
-## License
-
 MIT License
 
 Copyright (c) 2019 Michael Wiesendanger
