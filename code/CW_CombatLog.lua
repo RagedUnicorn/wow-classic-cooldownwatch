@@ -35,6 +35,7 @@ me.tag = "CombatLog"
 function me.ProcessUnfilteredCombatLogEvent()
   -- carefull target and targetName might be null if the caster is not your current target
   local _, event, _, caster, casterName, sourceFlags, _, target, targetName, _, _, spellId, spellName, _ = CombatLogGetCurrentEventInfo()
+
   mod.logger.LogError(me.tag, "Event: " .. event)
 
   --[[
@@ -51,34 +52,47 @@ function me.ProcessUnfilteredCombatLogEvent()
   if event == "SPELL_CAST_SUCCESS" then
     mod.logger.LogEvent(me.tag, "SPELL_CAST_SUCCESS")
 
-    local name, rank, iconId, castTime, _, _, spellUid = GetSpellInfo(spellId)
+    local castTime = GetTime()
+    local name, rank, iconId, _, _, _, spellUid = GetSpellInfo(spellId)
     local texture = GetSpellTexture(spellUid)
     local itemIcon = GetItemIcon(iconId)
 
-    mod.logger.LogWarn(me.tag, "SpellId: " .. spellId)
-    mod.logger.LogWarn(me.tag, "itemIcon: " .. iconId)
-    mod.logger.LogWarn(me.tag, "Caster:" .. casterName)
-    mod.logger.LogWarn(me.tag, "SourceFlags:" .. sourceFlags)
+    mod.logger.LogDebug(me.tag, "SpellId: " .. spellId)
+    mod.logger.LogDebug(me.tag, "itemIcon: " .. iconId)
+    mod.logger.LogDebug(me.tag, "Caster:" .. casterName)
+    mod.logger.LogDebug(me.tag, "SourceFlags:" .. sourceFlags)
 
+    local spell
+    --[[
+      If the caster of the detected spell is our current target we can speed up
+      the process of searching for the spell in the spellmap by figuring out the
+      targets class.
+    ]]--
     if caster == mod.target.GetCurrentTarget() then
-      mod.logger.LogDebug(me.tag, "Caster and current target are the same")
-
       local _, englishClass, _ = UnitClass("target");
-
-      me.TrackCooldown(caster, casterName, mod.spellMap.FindSpell(spellId, englishClass))
+      spell = mod.spellMap.FindSpell(spellId, englishClass)
     else
-      me.TrackCooldown(caster, casterName, mod.spellMap.FindSpell(spellId))
+      spell = mod.spellMap.FindSpell(spellId)
     end
+
+    me.TrackCooldown(caster, casterName, spell, castTime)
   end
 end
 
 
 --[[
+  Add a cooldown to the cooldownqueue
+
+  @param {string} caster
+  @param {string} casterName
+  @param {table} spell
+  @param {number} castTime
 
 ]]--
-function me.TrackCooldown(caster, casterName, spell)
+function me.TrackCooldown(caster, casterName, spell, castTime)
   if spell ~= nil then
     mod.logger.LogInfo(me.tag, "Found tracked spell: " .. spell.spellName)
+    spell.castTime = castTime -- add time when spell was detected
     mod.cooldownQueue.AddCooldown(caster, casterName, spell)
   else
     mod.logger.LogDebug(me.tag, "Spell is non-essential")

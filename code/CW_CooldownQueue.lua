@@ -36,11 +36,10 @@ me.tag = "CooldownQueue"
       - {string} a unique identification for a caster (player or npc)
     ["casterName"] = casterName,
       - {string} actual name of the caster
-    ["spell"] = {
+    ["spellId"] = {
+      - {number} spellId of the spell
       ["spellName"] = spellName,
         - {string} name of the spell
-      ["spellId"] = spellId,
-        - {number} id of the spell
       ["castTime"] = castTime,
         - {number} time at which the spell was detected
       ["cooldown"] cooldown,
@@ -54,7 +53,7 @@ me.tag = "CooldownQueue"
     }
   }
 ]]--
-local cooldownQueue = {}
+cooldownQueue = {}
 
 --[[
   Add a cooldown to the queue

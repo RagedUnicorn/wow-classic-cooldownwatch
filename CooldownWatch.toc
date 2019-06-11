@@ -6,13 +6,13 @@
 ## SavedVariablesPerCharacter: CooldownWatchConfiguration
 
 # constant values
-# code/CW_Constants.lua
+code/CW_Constants.lua
 # environment variables
 code/CW_Environment.lua
 
 # localization
-# localization/enUS.lua
-# localization/deDE.lua
+localization/enUS.lua
+localization/deDE.lua
 
 code/CW_Core.lua
 code/CW_Logger.lua
@@ -25,10 +25,10 @@ code/CW_Constants.lua
 code/CW_Ticker.lua
 code/CW_Configuration.lua
 
-
 # debug
 # code/CW_Debug.lua
 
 # gui
 gui/CW_Frame.xml
 gui/CW_TargetCooldownBar.lua
+gui/CW_AddonConfiguration.lua

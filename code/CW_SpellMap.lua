@@ -65,10 +65,6 @@ local spellMap = {
   },
 }
 
-function me.GetSpellById()
-
-end
-
 --[[
   Find a spell by its spellId and optionally by a className. Knowing the className
   narrows the search down and thus speeds up the process but is not required.
@@ -85,7 +81,6 @@ end
     nil - if no matching spell was found in the list
 ]]--
 function me.FindSpell(spellId, className)
-
   assert(type(spellId) == "number",
     string.format("bad argument #1 to `FindSpell` (expected number got %s)", type(spellId)))
 
@@ -100,8 +95,6 @@ function me.FindSpell(spellId, className)
           return spellMap[index][spellId]
         end
     end
-
-    return nil
   end
 
   return nil -- no spell found

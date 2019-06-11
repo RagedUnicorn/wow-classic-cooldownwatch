@@ -25,7 +25,12 @@
 
 RGCW_CONSTANTS = {
   --[[
-    TargetCastBar
+    Update Intervals for tickers
+  ]]--
+  TARGET_COOLDOWN_BAR_UPDATE_INTERVAL = 0.1,
+
+  --[[
+    TargetCooldownFrame
   ]]--
   ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME = "CW_TargetCooldownWatchBar",
   ELEMENT_TARGET_COOLDOWN_WATCH_BAR_WIDTH = 650,
@@ -43,6 +48,19 @@ RGCW_CONSTANTS = {
   ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SMALL_COOLDOWN = "$parentSmallTimeFrame",
   ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SMALL_COOLDOWN_TEXT = "$parentText",
 
-  TARGET_COOLDOWN_BAR_UPDATE_INTERVAL = 0.1,
 
+  --[[
+    Addon configuration
+  ]]--
+  ELEMENT_ADDON_PANEL = "CooldownWatchPanel",
+  ELEMENT_ADDON_PANEL_NAME = "CooldownWatch",
+  ELEMENT_TOOLTIP = "GameTooltip",
+  --[[
+    about
+  ]]--
+  ELEMENT_ABOUT_LOGO = "CW_AboutLogo",
+  ELEMENT_ABOUT_AUTHOR_FONT_STRING = "CW_AboutAuthor",
+  ELEMENT_ABOUT_EMAIL_FONT_STRING = "CW_AboutEmail",
+  ELEMENT_ABOUT_VERSION_FONT_STRING = "CW_AboutVersion",
+  ELEMENT_ABOUT_ISSUES_FONT_STRING = "CW_AboutIssues",
 }

@@ -79,7 +79,8 @@ end
 ]]--
 function me.Initialize()
   me.logger.LogDebug(me.tag, "Initialize addon")
-
+  -- setup addon configuration ui
+  me.addonConfiguration.SetupAddonConfiguration()
   -- build ui for targetcooldownbar
   me.targetCooldownBar.BuildUi()
   -- load addon variables
