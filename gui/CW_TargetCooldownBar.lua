@@ -50,19 +50,23 @@ function me.BuildUi()
   targetCooldownBarFrame:SetMovable(true)
   targetCooldownBarFrame:SetClampedToScreen(true)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+  local framePosition = mod.configuration.GetUserPlacedFramePosition(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME)
+  --[[
+    Set user frame position if there is one saved
+  ]]--
+  if framePosition ~= nil then
+    targetCooldownBarFrame:ClearAllPoints() -- very important to clear all points first
+    targetCooldownBarFrame:SetPoint(
+      framePosition.point,
+      framePosition.relativeTo,
+      framePosition.relativePoint,
+      framePosition.posX,
+      framePosition.posY
+    )
+  else
+    -- initial position for first time use
+    targetCooldownBarFrame:SetPoint("CENTER", 0, 0)
+  end
 
   me.SetupDragFrame(targetCooldownBarFrame)
 
@@ -73,7 +77,7 @@ end
 
 function me.CreateCooldownWatchSlot(frame, position)
   local cooldownWatchSlot = CreateFrame("FRAME", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT .. position, frame)
-  local _, _, icon_texture = GetSpellInfo(6673)
+  local _, _, icon_texture = GetSpellInfo(1766)
 
   cooldownWatchSlot:SetFrameLevel(1)
   cooldownWatchSlot:SetSize(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE)
@@ -110,7 +114,7 @@ function me.CreateCooldownWatchSlot(frame, position)
   t:SetTexCoord(0.1, 0.9, 0.1, 0.9)
   cooldownWatchSlot.t = t
 
-  local s = CreateFrame("FRAME", "somename",cooldownWatchSlot)
+  local s = CreateFrame("FRAME", "somename", cooldownWatchSlot)
   s:SetFrameLevel(2)
   s:SetPoint("TOPLEFT", cooldownWatchSlot, "TOPLEFT", 1, -1)
   s:SetPoint("BOTTOMRIGHT", cooldownWatchSlot, "BOTTOMRIGHT", -1, 1)
@@ -135,15 +139,57 @@ function me.CreateCooldownWatchSlot(frame, position)
 
   cooldownWatchSlot.g = s
 
-  local myCooldown = CreateFrame(
+  me.CreateCooldownOverlay(cooldownWatchSlot)
+  me.CreateBigTimerCooldown(cooldownWatchSlot)
+  me.CreateSmallTimerCooldown(cooldownWatchSlot)
+end
+
+--[[
+  TODO
+]]--
+function me.CreateCooldownOverlay(frame)
+  local cooldownOverlay = CreateFrame(
     "Cooldown",
     RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_COOLDOWN_FRAME,
-    cooldownWatchSlot,
+    frame,
     "CooldownFrameTemplate"
   )
-  myCooldown:SetSize(32, 32)
-  myCooldown:SetAllPoints()
-  myCooldown:SetCooldown(GetTime(), 10)
+  cooldownOverlay:SetSize(32, 32)
+  cooldownOverlay:SetAllPoints()
+  cooldownOverlay:SetCooldown(GetTime(), 10)
+end
+
+--[[
+  TODO
+]]--
+function me.CreateBigTimerCooldown(frame)
+  local bigTimeFrame = CreateFrame("FRAME", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_BIG_COOLDOWN, frame)
+  bigTimeFrame:SetSize(18, 18)
+  bigTimeFrame:SetPoint("CENTER")
+
+  local spellNameFontString = bigTimeFrame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_BIG_COOLDOWN_TEXT, "OVERLAY")
+  -- TODO should have a logic to figure out whether there is a two digit number for the coolodnw (minutes) or one and adapt size
+  spellNameFontString:SetFont("Fonts\\FRIZQT__.TTF", 17)
+  spellNameFontString:SetPoint("CENTER", 0, 0)
+  spellNameFontString:SetSize(50, 35)
+  spellNameFontString:SetTextColor(1, 1, 0)
+  spellNameFontString:SetText("12:30")
+end
+
+--[[
+  TODO
+]]--
+function me.CreateSmallTimerCooldown(frame)
+  local smallTimeFrame = CreateFrame("FRAME", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SMALL_COOLDOWN, frame)
+  smallTimeFrame:SetSize(18, 18)
+  smallTimeFrame:SetPoint("TOPRIGHT", -15, -2)
+
+  local spellNameFontString = smallTimeFrame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SMALL_COOLDOWN_TEXT, "OVERLAY")
+  spellNameFontString:SetFont("Fonts\\FRIZQT__.TTF", 15)
+  spellNameFontString:SetPoint("CENTER", 0, 0)
+  spellNameFontString:SetSize(50, 35)
+  spellNameFontString:SetTextColor(.01, .66, 0.95, 1)
+  spellNameFontString:SetText("12:30")
 end
 
 --[[
@@ -179,11 +225,15 @@ function me.StopDragFrame(self)
   local point, relativeTo, relativePoint, posX, posY = self:GetPoint();
 
   mod.configuration.SaveUserPlacedFramePosition(
-    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT,
+    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME,
     point,
     relativeTo,
     relativePoint,
     posX,
     posY
   )
+end
+
+function me.TargetCooldownBarOnUpdate()
+
 end

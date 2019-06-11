@@ -23,26 +23,31 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
-RGCW_CONSTANTS = {
-  --[[
-    TargetCastBar
-  ]]--
-  ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME = "CW_TargetCooldownWatchBar",
-  ELEMENT_TARGET_COOLDOWN_WATCH_BAR_WIDTH = 650,
-  ELEMENT_TARGET_COOLDOWN_WATCH_BAR_HEIGHT = 70,
-  ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT = "$parentSlot_",
-  ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE = 64,
-  ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_BASE_X = 5,
-  ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_X = 5,
-  ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_Y = 0,
-  ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_AMOUNT = 10,
-  ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_COOLDOWN_FRAME = "$parentCooldown",
+local mod = rgcw
+local me = {}
+mod.ticker = me
 
-  ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_BIG_COOLDOWN = "$parentBigTimeFrame",
-  ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_BIG_COOLDOWN_TEXT = "$parentText",
-  ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SMALL_COOLDOWN = "$parentSmallTimeFrame",
-  ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SMALL_COOLDOWN_TEXT = "$parentText",
+me.tag = "Ticker"
 
-  TARGET_COOLDOWN_BAR_UPDATE_INTERVAL = 0.1,
+local targetCooldownBarTicker
 
-}
+--[[
+  Start the repeating update ticker for targetCastBar
+]]--
+function me.StartTickerTargetCooldownBar()
+  if targetCooldownBarTicker == nil or targetCooldownBarTicker._cancelled then
+    targetCooldownBarTicker = C_Timer.NewTicker(
+      RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_UPDATE_INTERVAL, mod.targetCooldownBar.TargetCooldownBarOnUpdate)
+      mod.logger.LogInfo(me.tag, "Started 'TargetCooldownBarTicker'")
+  end
+end
+
+--[[
+  Stop the repeating update ticker for targetCastBar
+]]--
+function me.StopTickerTargetCooldownBar()
+  if targetCooldownBarTicker then
+    targetCooldownBarTicker:Cancel()
+    mod.logger.LogInfo(me.tag, "Stopped 'TargetCooldownBarTicker'")
+  end
+end

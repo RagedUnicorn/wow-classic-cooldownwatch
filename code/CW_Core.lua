@@ -82,4 +82,8 @@ function me.Initialize()
 
   -- build ui for targetcooldownbar
   me.targetCooldownBar.BuildUi()
+  -- load addon variables
+  me.configuration.SetupConfiguration()
+  -- setup tickers
+  me.ticker.StartTickerTargetCooldownBar()
 end
