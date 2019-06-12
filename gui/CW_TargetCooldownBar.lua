@@ -90,8 +90,8 @@ function me.CreateCooldownWatchSlot(frame, position)
   )
 
   local backdrop = {
-    bgFile = "Interface\\AddOns\\rSetBackdrop\\tga\\background_flat",
-    edgeFile = "Interface\\AddOns\\rSetBackdrop\\tga\\glow",
+    bgFile = [[Interface\AddOns\CooldownWatch\assets\ui_slot_background]],
+    edgeFile = [[Interface\\AddOns\\CooldownWatch\assets\ui_slot_glow]],
     tile = false,
     tileSize = 32,
     edgeSize = 12,
