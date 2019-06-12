@@ -35,7 +35,9 @@ me.tag = "TargetCooldownBar"
 ]]--
 local targetCooldownBarFrame
 
-
+--[[
+  Build initial targetCooldownBarFrame ui
+]]--
 function me.BuildUi()
   targetCooldownBarFrame = CreateFrame("Frame", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME, UIParent)
   targetCooldownBarFrame:SetWidth(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_WIDTH)
@@ -75,6 +77,12 @@ function me.BuildUi()
   end
 end
 
+--[[
+  Create a cooldownslot and attach it to the cooldownframe
+
+  @param {table} frame
+  @param {number} position
+]]--
 function me.CreateCooldownWatchSlot(frame, position)
   local cooldownWatchSlot = CreateFrame("FRAME", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT .. position, frame)
   local _, _, icon_texture = GetSpellInfo(1766)
@@ -99,8 +107,8 @@ function me.CreateCooldownWatchSlot(frame, position)
       left = 12,
       right = 12,
       top = 12,
-      bottom = 12,
-    },
+      bottom = 12
+    }
   }
 
   cooldownWatchSlot:SetBackdrop(backdrop)
@@ -129,8 +137,8 @@ function me.CreateCooldownWatchSlot(frame, position)
       left = 10,
       right = 10,
       top = 10,
-      bottom = 10,
-    },
+      bottom = 10
+    }
   }
 
   s:SetBackdrop(backdrop_innerglow)
@@ -145,7 +153,9 @@ function me.CreateCooldownWatchSlot(frame, position)
 end
 
 --[[
-  TODO
+  Create a cooldown overlay and attach it to the cooldownslot
+
+  @param {table} frame
 ]]--
 function me.CreateCooldownOverlay(frame)
   local cooldownOverlay = CreateFrame(
@@ -160,7 +170,9 @@ function me.CreateCooldownOverlay(frame)
 end
 
 --[[
-  TODO
+  Create a big timer cooldown and attach it to the cooldownslot
+
+  @param {table} frame
 ]]--
 function me.CreateBigTimerCooldown(frame)
   local bigTimeFrame = CreateFrame("FRAME", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_BIG_COOLDOWN, frame)
@@ -177,7 +189,9 @@ function me.CreateBigTimerCooldown(frame)
 end
 
 --[[
-  TODO
+  Create a small timer cooldown and attach it to the cooldownslot
+
+  @param {table} frame
 ]]--
 function me.CreateSmallTimerCooldown(frame)
   local smallTimeFrame = CreateFrame("FRAME", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SMALL_COOLDOWN, frame)
