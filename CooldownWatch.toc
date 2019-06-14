@@ -26,7 +26,7 @@ code/CW_Ticker.lua
 code/CW_Configuration.lua
 
 # debug
-# code/CW_Debug.lua
+code/CW_Debug.lua
 
 # gui
 gui/CW_Frame.xml

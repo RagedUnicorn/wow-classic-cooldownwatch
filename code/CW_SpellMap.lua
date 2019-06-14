@@ -876,7 +876,7 @@ local spellMap = {
   @param {string} className
     Optional classname in english
 
-  @return {table | nil}
+  @return {table | nil}, {number}
     table - if a spell could be found
     nil - if no matching spell was found in the list
 ]]--

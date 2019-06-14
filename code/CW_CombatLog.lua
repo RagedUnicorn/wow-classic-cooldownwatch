@@ -62,7 +62,7 @@ function me.ProcessUnfilteredCombatLogEvent()
     mod.logger.LogDebug(me.tag, "Caster:" .. casterName)
     mod.logger.LogDebug(me.tag, "SourceFlags:" .. sourceFlags)
 
-    local spell
+    -- local spell
     --[[
       If the caster of the detected spell is our current target we can speed up
       the process of searching for the spell in the spellmap by figuring out the
@@ -75,7 +75,7 @@ function me.ProcessUnfilteredCombatLogEvent()
       spell = mod.spellMap.FindSpell(spellId)
     end
 
-    me.TrackCooldown(caster, casterName, spell, castTime)
+    me.TrackCooldown(caster, casterName, spell, spellId, castTime)
   end
 end
 
@@ -86,13 +86,15 @@ end
   @param {string} caster
   @param {string} casterName
   @param {table} spell
+  @param {number} spellId
   @param {number} castTime
 
 ]]--
-function me.TrackCooldown(caster, casterName, spell, castTime)
+function me.TrackCooldown(caster, casterName, spell, spellId, castTime)
   if spell ~= nil then
     mod.logger.LogInfo(me.tag, "Found tracked spell: " .. spell.spellName)
     spell.castTime = castTime -- add time when spell was detected
+    spell.spellId = spellId
     mod.cooldownQueue.AddCooldown(caster, casterName, spell)
   else
     mod.logger.LogDebug(me.tag, "Spell is non-essential")

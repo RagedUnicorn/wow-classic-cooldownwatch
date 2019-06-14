@@ -36,10 +36,13 @@ me.tag = "CooldownQueue"
       - {string} a unique identification for a caster (player or npc)
     ["casterName"] = casterName,
       - {string} actual name of the caster
-    ["spellId"] = {
+    ["spell"] = {
+      ["spellId"] = spellId
       - {number} spellId of the spell
       ["spellName"] = spellName,
         - {string} name of the spell
+      ["rank"] = rank,
+        - {number  nil} rank of the spell or nil if independent of rank
       ["castTime"] = castTime,
         - {number} time at which the spell was detected
       ["cooldown"] cooldown,
@@ -93,23 +96,31 @@ end
   @param {number} spellId
 ]]--
 function me.RemoveCooldown(caster, spellId)
-  -- TODO what if we have multiple unknown
+  for i = 1, table.getn(cooldownQueue) do
+    if cooldownQueue[i].caster == caster and cooldownQueue[i].spell.spellId == spellId then
+      tremove(cooldownQueue, i)
+    end
+  end
 end
 
 --[[
-  Retrieve a cast for a specific target
-  @param {string} target
+  TODO only return spell if it is active also add a warning log!
+
+  Retrieve a cast for a specific caster
+  @param {string} caster
     A unique identification for a target (player or npc)
   @return {table | nil}
     table - the castEvent that was found for the target
     nil   - if no cast for the target could be found
 ]]--
-function me.GetCastByTarget(target)
-  for i = 1, table.getn(castQueue) do
-    if castQueue[i].caster == target then
-      return castQueue[i]
+function me.GetCooldownsByTarget(caster)
+  local cooldowns = {}
+
+  for i = 1, table.getn(cooldownQueue) do
+    if cooldownQueue[i].caster == caster then
+      tinsert(cooldowns, cooldownQueue[i])
     end
   end
-  -- no cast for target found
-  return nil
+
+  return cooldowns
 end
