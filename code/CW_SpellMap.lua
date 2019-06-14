@@ -428,7 +428,360 @@ local spellMap = {
     }
   },
   ["mage"] = {
-
+    [11129] = {
+      ["spellName"] = "Combustion",
+      ["cooldown"] = 180,
+      ["active"] = true
+    },
+    [120] = {
+      ["spellName"] = "Cone of Cold",
+      ["rank"] = 1,
+      ["cooldown"] = 10,
+      ["active"] = true
+    },
+    [8492] = {
+      ["spellName"] = "Cone of Cold",
+      ["rank"] = 2,
+      ["cooldown"] = 10,
+      ["active"] = true
+    },
+    [10159] = {
+      ["spellName"] = "Cone of Cold",
+      ["rank"] = 3,
+      ["cooldown"] = 10,
+      ["active"] = true
+    },
+    [10160] = {
+      ["spellName"] = "Cone of Cold",
+      ["rank"] = 4,
+      ["cooldown"] = 10,
+      ["active"] = true
+    },
+    [10161] = {
+      ["spellName"] = "Cone of Cold",
+      ["rank"] = 5,
+      ["cooldown"] = 10,
+      ["active"] = true
+    },
+    [2139] = {
+      ["spellName"] = "Counterspell",
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [12043] = {
+      ["spellName"] = "Presence of Mind",
+      ["cooldown"] = 180,
+      ["active"] = true
+    },
+    [1953] = {
+      ["spellName"] = "Blink",
+      ["cooldown"] = 15,
+      ["cooldownWorstCase"] = 13,
+      ["active"] = true
+    },
+    [2136] = {
+      ["spellName"] = "Fire Blast",
+      ["rank"] = 1,
+      ["cooldown"] = 8,
+      ["cooldownWorstCase"] = 6.5,
+      ["active"] = true
+    },
+    [2137] = {
+      ["spellName"] = "Fire Blast",
+      ["rank"] = 2,
+      ["cooldown"] = 8,
+      ["cooldownWorstCase"] = 6.5,
+      ["active"] = true
+    },
+    [2138] = {
+      ["spellName"] = "Fire Blast",
+      ["rank"] = 3,
+      ["cooldown"] = 8,
+      ["cooldownWorstCase"] = 6.5,
+      ["active"] = true
+    },
+    [8412] = {
+      ["spellName"] = "Fire Blast",
+      ["rank"] = 4,
+      ["cooldown"] = 8,
+      ["cooldownWorstCase"] = 6.5,
+      ["active"] = true
+    },
+    [8413] = {
+      ["spellName"] = "Fire Blast",
+      ["rank"] = 5,
+      ["cooldown"] = 8,
+      ["cooldownWorstCase"] = 6.5,
+      ["active"] = true
+    },
+    [10197] = {
+      ["spellName"] = "Fire Blast",
+      ["rank"] = 6,
+      ["cooldown"] = 8,
+      ["cooldownWorstCase"] = 6.5,
+      ["active"] = true
+    },
+    [10199] = {
+      ["spellName"] = "Fire Blast",
+      ["rank"] = 7,
+      ["cooldown"] = 8,
+      ["cooldownWorstCase"] = 6.5,
+      ["active"] = true
+    },
+    [543] = {
+      ["spellName"] = "Fire Ward",
+      ["rank"] = 1,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [8457] = {
+      ["spellName"] = "Fire Ward",
+      ["rank"] = 2,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [8458] = {
+      ["spellName"] = "Fire Ward",
+      ["rank"] = 3,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [10223] = {
+      ["spellName"] = "Fire Ward",
+      ["rank"] = 4,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [10225] = {
+      ["spellName"] = "Fire Ward",
+      ["rank"] = 5,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [6143] = {
+      ["spellName"] = "Frost Ward",
+      ["rank"] = 1,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [8461] = {
+      ["spellName"] = "Frost Ward",
+      ["rank"] = 2,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [8462] = {
+      ["spellName"] = "Frost Ward",
+      ["rank"] = 3,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [10177] = {
+      ["spellName"] = "Frost Ward",
+      ["rank"] = 4,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [28609] = {
+      ["spellName"] = "Frost Ward",
+      ["rank"] = 5,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [11426] = {
+      ["spellName"] = "Ice Barrier",
+      ["rank"] = 1,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [13031] = {
+      ["spellName"] = "Ice Barrier",
+      ["rank"] = 2,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [13032] = {
+      ["spellName"] = "Ice Barrier",
+      ["rank"] = 3,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [13033] = {
+      ["spellName"] = "Ice Barrier",
+      ["rank"] = 4,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [11958] = {
+      ["spellName"] = "Ice Block",
+      ["cooldown"] = 300,
+      ["active"] = true
+    }
+  },
+  ["hunter"] = {
+    [19434] = {
+      ["spellName"] = "Aimed Shot",
+      ["rank"] = 1,
+      ["cooldown"] = 6,
+      ["active"] = true
+    },
+    [20900] = {
+      ["spellName"] = "Aimed Shot",
+      ["rank"] = 2,
+      ["cooldown"] = 6,
+      ["active"] = true
+    },
+    [20901] = {
+      ["spellName"] = "Aimed Shot",
+      ["rank"] = 3,
+      ["cooldown"] = 6,
+      ["active"] = true
+    },
+    [20902] = {
+      ["spellName"] = "Aimed Shot",
+      ["rank"] = 4,
+      ["cooldown"] = 6,
+      ["active"] = true
+    },
+    [20903] = {
+      ["spellName"] = "Aimed Shot",
+      ["rank"] = 5,
+      ["cooldown"] = 6,
+      ["active"] = true
+    },
+    [20904] = {
+      ["spellName"] = "Aimed Shot",
+      ["rank"] = 6,
+      ["cooldown"] = 6,
+      ["active"] = true
+    },
+    [3044] = {
+      ["spellName"] = "Arcane Shot",
+      ["rank"] = 1,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [14281] = {
+      ["spellName"] = "Arcane Shot",
+      ["rank"] = 2,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [14282] = {
+      ["spellName"] = "Arcane Shot",
+      ["rank"] = 3,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [14283] = {
+      ["spellName"] = "Arcane Shot",
+      ["rank"] = 4,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [14284] = {
+      ["spellName"] = "Arcane Shot",
+      ["rank"] = 5,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [14285] = {
+      ["spellName"] = "Arcane Shot",
+      ["rank"] = 6,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [14286] = {
+      ["spellName"] = "Arcane Shot",
+      ["rank"] = 7,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [14287] = {
+      ["spellName"] = "Arcane Shot",
+      ["rank"] = 8,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [19574] = {
+      ["spellName"] = "Bestial Wrath",
+      ["cooldown"] = 120,
+      ["active"] = true
+    },
+    [5116] = {
+      ["spellName"] = "Concussive Shot",
+      ["cooldown"] = 12,
+      ["active"] = true
+    },
+    [19306] = {
+      ["spellName"] = "Counterattack",
+      ["rank"] = 1,
+      ["cooldown"] = 5,
+      ["active"] = true
+    },
+    [20909] = {
+      ["spellName"] = "Counterattack",
+      ["rank"] = 2,
+      ["cooldown"] = 5,
+      ["active"] = true
+    },
+    [20910] = {
+      ["spellName"] = "Counterattack",
+      ["rank"] = 3,
+      ["cooldown"] = 5,
+      ["active"] = true
+    },
+    [3045] = {
+      ["spellName"] = "Rapid Fire",
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    [19503] = {
+      ["spellName"] = "Scatter Shot",
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [19263] = {
+      ["spellName"] = "Deterrence",
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    [19386] = {
+      ["spellName"] = "Wyvern Sting",
+      ["rank"] = 1,
+      ["cooldown"] = 120,
+      ["active"] = true
+    },
+    [24132] = {
+      ["spellName"] = "Wyvern Sting",
+      ["rank"] = 2,
+      ["cooldown"] = 120,
+      ["active"] = true
+    },
+    [24133] = {
+      ["spellName"] = "Wyvern Sting",
+      ["rank"] = 3,
+      ["cooldown"] = 120,
+      ["active"] = true
+    },
+    [19577] = {
+      ["spellName"] = "Intimidation",
+      ["cooldown"] = 60,
+      ["active"] = true
+    },
+    [1543] = {
+      ["spellName"] = "Flare",
+      ["cooldown"] = 15,
+      ["active"] = true
+    }
   },
   ["warrior"] = {
     [18499] = {
