@@ -783,6 +783,460 @@ local spellMap = {
       ["active"] = true
     }
   },
+  ["warlock"] = {
+    [18288] = {
+      ["spellName"] = "Amplify Curse",
+      ["cooldown"] = 180,
+      ["active"] = true
+    },
+    [6789] = {
+      ["spellName"] = "Death Coil",
+      ["rank"] = 1,
+      ["cooldown"] = 120,
+      ["active"] = true
+    },
+    [17925] = {
+      ["spellName"] = "Death Coil",
+      ["rank"] = 2,
+      ["cooldown"] = 120,
+      ["active"] = true
+    },
+    [17926] = {
+      ["spellName"] = "Death Coil",
+      ["rank"] = 3,
+      ["cooldown"] = 120,
+      ["active"] = true
+    },
+    [5484] = {
+      ["spellName"] = "Howl of Terror",
+      ["rank"]  = 1,
+      ["cooldown"] = 40,
+      ["active"] = true
+    },
+    [17928] = {
+      ["spellName"] = "Howl of Terror",
+      ["rank"]  = 1,
+      ["cooldown"] = 40,
+      ["active"] = true
+    },
+    [6229] = {
+      ["spellName"] = "Shadow Ward",
+      ["rank"] = 1,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [11739] = {
+      ["spellName"] = "Shadow Ward",
+      ["rank"] = 2,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [11740] = {
+      ["spellName"] = "Shadow Ward",
+      ["rank"] = 3,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [28610] = {
+      ["spellName"] = "Shadow Ward",
+      ["rank"] = 4,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [6353] = {
+      ["spellName"] = "Soul Fire",
+      ["rank"] = 1,
+      ["cooldown"] = 60,
+      ["active"] = true
+    },
+    [17924] = {
+      ["spellName"] = "Soul Fire",
+      ["rank"] = 2,
+      ["cooldown"] = 60,
+      ["active"] = true
+    },
+    [18708] = {
+      ["spellName"] = "Fel Domination",
+      ["cooldown"] = 900,
+      ["active"] = true
+    },
+    [17877] = {
+      ["spellName"] = "Shadowburn",
+      ["rank"] = 1,
+      ["cooldown"] = 15,
+      ["active"] = true
+    },
+    [18867] = {
+      ["spellName"] = "Shadowburn",
+      ["rank"] = 2,
+      ["cooldown"] = 15,
+      ["active"] = true
+    },
+    [18868] = {
+      ["spellName"] = "Shadowburn",
+      ["rank"] = 3,
+      ["cooldown"] = 15,
+      ["active"] = true
+    },
+    [18869] = {
+      ["spellName"] = "Shadowburn",
+      ["rank"] = 4,
+      ["cooldown"] = 15,
+      ["active"] = true
+    },
+    [18870] = {
+      ["spellName"] = "Shadowburn",
+      ["rank"] = 5,
+      ["cooldown"] = 15,
+      ["active"] = true
+    },
+    [18871] = {
+      ["spellName"] = "Shadowburn",
+      ["rank"] = 6,
+      ["cooldown"] = 15,
+      ["active"] = true
+    },
+    [17962] = {
+      ["spellName"] = "Conflagrate",
+      ["rank"] = 1,
+      ["cooldown"] = 10,
+      ["active"] = true
+    },
+    [18930] = {
+      ["spellName"] = "Conflagrate",
+      ["rank"] = 2,
+      ["cooldown"] = 10,
+      ["active"] = true
+    },
+    [18931] = {
+      ["spellName"] = "Conflagrate",
+      ["rank"] = 3,
+      ["cooldown"] = 10,
+      ["active"] = true
+    },
+    [18932] = {
+      ["spellName"] = "Conflagrate",
+      ["rank"] = 4,
+      ["cooldown"] = 10,
+      ["active"] = true
+    }
+  },
+  ["paladin"] = {
+    [1044] = {
+      ["spellName"] = "Blessing of Freedom",
+      ["cooldown"] = 20,
+      ["active"] = true
+    },
+    [1022] = {
+      ["spellName"] = "Blessing of Protection",
+      ["rank"] = 1,
+      ["cooldown"] = 180,
+      ["active"] = true
+    },
+    [5599] = {
+      ["spellName"] = "Blessing of Protection",
+      ["rank"] = 2,
+      ["cooldown"] = 180,
+      ["active"] = true
+    },
+    [10278] = {
+      ["spellName"] = "Blessing of Protection",
+      ["rank"] = 3,
+      ["cooldown"] = 180,
+      ["active"] = true
+    },
+    [642] = {
+      ["spellName"] = "Divine Shield",
+      ["rank"] = 1,
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    [1020] = {
+      ["spellName"] = "Divine Shield",
+      ["rank"] = 2,
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    [498] = {
+      ["spellName"] = "Divine Protection",
+      ["rank"] = 1,
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    [5573] = {
+      ["spellName"] = "Divine Protection",
+      ["rank"] = 2,
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    [853] = {
+      ["spellName"] = "Hammer of Justice",
+      ["rank"] = 1,
+      ["cooldown"] = 60,
+      ["cooldownWorstCase"] = 45,
+      ["active"] = true
+    },
+    [5588] = {
+      ["spellName"] = "Hammer of Justice",
+      ["rank"] = 2,
+      ["cooldown"] = 60,
+      ["cooldownWorstCase"] = 45,
+      ["active"] = true
+    },
+    [5589] = {
+      ["spellName"] = "Hammer of Justice",
+      ["rank"] = 3,
+      ["cooldown"] = 60,
+      ["cooldownWorstCase"] = 45,
+      ["active"] = true
+    },
+    [10308] = {
+      ["spellName"] = "Hammer of Justice",
+      ["rank"] = 4,
+      ["cooldown"] = 60,
+      ["cooldownWorstCase"] = 45,
+      ["active"] = true
+    },
+    [20066] = {
+      ["spellName"] = "Repentance",
+      ["cooldown"] = 60,
+      ["active"] = true
+    },
+    [20216] = {
+      ["spellName"] = "Divine Favor",
+      ["cooldown"] = 120,
+      ["active"] = true
+    },
+    [24275] = {
+      ["spellName"] = "Hammer of Wrath",
+      ["rank"] = 1,
+      ["cooldown"] = 6,
+      ["active"] = true
+    },
+    [24274] = {
+      ["spellName"] = "Hammer of Wrath",
+      ["rank"] = 2,
+      ["cooldown"] = 6,
+      ["active"] = true
+    },
+    [24239] = {
+      ["spellName"] = "Hammer of Wrath",
+      ["rank"] = 3,
+      ["cooldown"] = 6,
+      ["active"] = true
+    },
+    [20473] = {
+      ["spellName"] = "Holy Shock",
+      ["rank"] = 1,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [20929] = {
+      ["spellName"] = "Holy Shock",
+      ["rank"] = 2,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [20930] = {
+      ["spellName"] = "Holy Shock",
+      ["rank"] = 3,
+      ["cooldown"] = 30,
+      ["active"] = true
+    },
+    [633] = {
+      ["spellName"] = "Lay on Hands",
+      ["rank"] = 1,
+      ["cooldown"] = 3600,
+      ["cooldownWorstCase"] = 2400,
+      ["active"] = true
+    },
+    [2800] = {
+      ["spellName"] = "Lay on Hands",
+      ["rank"] = 2,
+      ["cooldown"] = 3600,
+      ["cooldownWorstCase"] = 2400,
+      ["active"] = true
+    },
+    [10310] = {
+      ["spellName"] = "Lay on Hands",
+      ["rank"] = 3,
+      ["cooldown"] = 3600,
+      ["cooldownWorstCase"] = 2400,
+      ["active"] = true
+    }
+  },
+  ["druid"] = {
+    [5211] = {
+      ["spellName"] = "Bash",
+      ["rank"] = 1,
+      ["cooldown"] = 60,
+      ["active"] = true
+    },
+    [6798] = {
+      ["spellName"] = "Bash",
+      ["rank"] = 2,
+      ["cooldown"] = 60,
+      ["active"] = true
+    },
+    [8983] = {
+      ["spellName"] = "Bash",
+      ["rank"] = 3,
+      ["cooldown"] = 60,
+      ["active"] = true
+    },
+    [16979] = {
+      ["spellName"] = "Feral Charge",
+      ["cooldown"] = 15,
+      ["active"] = true
+    },
+    [22842] = {
+      ["spellName"] = "Frenzied Regeneration",
+      ["rank"] = 1,
+      ["cooldown"] = 180,
+      ["active"] = true
+    },
+    [22895] = {
+      ["spellName"] = "Frenzied Regeneration",
+      ["rank"] = 2,
+      ["cooldown"] = 180,
+      ["active"] = true
+    },
+    [22896] = {
+      ["spellName"] = "Frenzied Regeneration",
+      ["rank"] = 3,
+      ["cooldown"] = 180,
+      ["active"] = true
+    },
+    [17116] = {
+      ["spellName"] = "Nature's Swiftness",
+      ["cooldown"] = 180,
+      ["cooldownWorstCase"] = ,
+      ["active"] = true
+    },
+    [29166] = {
+      ["spellName"] = "Innervate",
+      ["cooldown"] = 360,
+      ["active"] = true
+    },
+    [18562] = {
+      ["spellName"] = "Swiftmend",
+      ["cooldown"] = 15,
+      ["active"] = true
+    },
+    [22812] = {
+      ["spellName"] = "Barkskin",
+      ["cooldown"] = 60,
+      ["active"] = true
+    },
+    [1850] = {
+      ["spellName"] = "Dash",
+      ["rank"] = 1,
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    [9821] = {
+      ["spellName"] = "Dash",
+      ["rank"] = 2,
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    [5229] = {
+      ["spellName"] = "Enrage",
+      ["cooldown"] = 60,
+      ["active"] = true
+    },
+    [20484] = {
+      ["spellName"] = "Rebirth",
+      ["rank"] = 1,
+      ["cooldown"] = 1800,
+      ["active"] = true
+    },
+    [20739] = {
+      ["spellName"] = "Rebirth",
+      ["rank"] = 2,
+      ["cooldown"] = 1800,
+      ["active"] = true
+    },
+    [20742] = {
+      ["spellName"] = "Rebirth",
+      ["rank"] = 3,
+      ["cooldown"] = 1800,
+      ["active"] = true
+    },
+    [20747] = {
+      ["spellName"] = "Rebirth",
+      ["rank"] = 4,
+      ["cooldown"] = 1800,
+      ["active"] = true
+    },
+    [20748] = {
+      ["spellName"] = "Rebirth",
+      ["rank"] = 5,
+      ["cooldown"] = 1800,
+      ["active"] = true
+    },
+    [740] = {
+      ["spellName"] = "Tranquility",
+      ["rank"] = 1,
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    [8918] = {
+      ["spellName"] = "Tranquility",
+      ["rank"] = 2,
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    [9862] = {
+      ["spellName"] = "Tranquility",
+      ["rank"] = 3,
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    [9863] = {
+      ["spellName"] = "Tranquility",
+      ["rank"] = 4,
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    [16689] = {
+      ["spellName"] = "Nature's Grasp",
+      ["rank"] = 1,
+      ["cooldown"] = 60,
+      ["active"] = true
+    },
+    [16810] = {
+      ["spellName"] = "Nature's Grasp",
+      ["rank"] = 2,
+      ["cooldown"] = 60,
+      ["active"] = true
+    },
+    [16811] = {
+      ["spellName"] = "Nature's Grasp",
+      ["rank"] = 3,
+      ["cooldown"] = 60,
+      ["active"] = true
+    },
+    [16812] = {
+      ["spellName"] = "Nature's Grasp",
+      ["rank"] = 4,
+      ["cooldown"] = 60,
+      ["active"] = true
+    },
+    [16813] = {
+      ["spellName"] = "Nature's Grasp",
+      ["rank"] = 5,
+      ["cooldown"] = 60,
+      ["active"] = true
+    },
+    [17329] = {
+      ["spellName"] = "Nature's Grasp",
+      ["rank"] = 6,
+      ["cooldown"] = 60,
+      ["active"] = true
+    }
+
+  },
   ["warrior"] = {
     [18499] = {
       ["spellName"] = "Berserker Rage",

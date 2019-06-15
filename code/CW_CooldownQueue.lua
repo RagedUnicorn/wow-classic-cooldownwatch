@@ -56,7 +56,7 @@ me.tag = "CooldownQueue"
     }
   }
 ]]--
-cooldownQueue = {}
+local cooldownQueue = {}
 
 --[[
   Add a cooldown to the queue

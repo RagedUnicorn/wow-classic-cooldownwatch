@@ -257,7 +257,7 @@ end
   TODO
 ]]--
 function me.TargetCooldownBarOnUpdate()
-  cooldowns = mod.cooldownQueue.GetCooldownsByTarget("dummytarget")
+  local cooldowns = mod.cooldownQueue.GetCooldownsByTarget("dummytarget")
   local cooldownSlots = {targetCooldownBarFrame:GetChildren()}
 
   if cooldowns == nil then return end
