@@ -78,6 +78,10 @@ function me.AddCooldown(caster, casterName, spell)
   assert(type(spell) == "table",
     string.format("bad argument #3 to `AddCooldown` (expected table got %s)", type(spell)))
 
+  if not spell.active then
+    mod.logger.LogWarn(me.tag, "Ignored inactive spell: " .. spell.spellName)
+  end
+
   local cooldownEvent = {
     ["caster"] = caster,
     ["casterName"] = casterName,
@@ -104,8 +108,6 @@ function me.RemoveCooldown(caster, spellId)
 end
 
 --[[
-  TODO only return spell if it is active also add a warning log!
-
   Retrieve a cast for a specific caster
   @param {string} caster
     A unique identification for a target (player or npc)
