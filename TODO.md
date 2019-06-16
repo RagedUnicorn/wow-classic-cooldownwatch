@@ -1,3 +1,5 @@
+Shaman shocks such as frost shock and earth shock share their cooldown - need to implement this.
+
 Initial WORKING
 
 function me.Test()

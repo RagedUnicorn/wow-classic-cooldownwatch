@@ -1235,7 +1235,178 @@ local spellMap = {
       ["cooldown"] = 60,
       ["active"] = true
     }
-
+  },
+  -- TODO link shock spells together on same cooldown
+  ["shaman"] = {
+    [8042] = {
+      ["spellName"] = "Earth Shock",
+      ["rank"]  = 1,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [8044] = {
+      ["spellName"] = "Earth Shock",
+      ["rank"]  = 2,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [8045] = {
+      ["spellName"] = "Earth Shock",
+      ["rank"]  = 3,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [8046] = {
+      ["spellName"] = "Earth Shock",
+      ["rank"]  = 4,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [10412] = {
+      ["spellName"] = "Earth Shock",
+      ["rank"]  = 5,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [10413] = {
+      ["spellName"] = "Earth Shock",
+      ["rank"]  = 6,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [10414] = {
+      ["spellName"] = "Earth Shock",
+      ["rank"]  = 7,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [8056] = {
+      ["spellName"] = "Frost Shock",
+      ["rank"] = 1,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [8058] = {
+      ["spellName"] = "Frost Shock",
+      ["rank"] = 2,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [10472] = {
+      ["spellName"] = "Frost Shock",
+      ["rank"] = 3,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [10473] = {
+      ["spellName"] = "Frost Shock",
+      ["rank"] = 4,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [8050] = {
+      ["spellName"] = "Flame Shock",
+      ["rank"] = 1,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [8052] = {
+      ["spellName"] = "Flame Shock",
+      ["rank"] = 2,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [8053] = {
+      ["spellName"] = "Flame Shock",
+      ["rank"] = 3,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [10447] = {
+      ["spellName"] = "Flame Shock",
+      ["rank"] = 4,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [10448] = {
+      ["spellName"] = "Flame Shock",
+      ["rank"] = 5,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [29228] = {
+      ["spellName"] = "Flame Shock",
+      ["rank"] = 6,
+      ["cooldown"] = 6,
+      ["cooldownWorstCase"] = 5,
+      ["active"] = true
+    },
+    [16166] = {
+      ["spellName"] = "Elemental Mastery",
+      ["cooldown"] = 180,
+      ["active"] = true
+    },
+    [1535] = {
+      ["spellName"] = "Fire Nova Totem",
+      ["rank"] = 1,
+      ["cooldown"] = 15,
+      ["active"] = true
+    },
+    [8498] = {
+      ["spellName"] = "Fire Nova Totem",
+      ["rank"] = 2,
+      ["cooldown"] = 15,
+      ["active"] = true
+    },
+    [8499] = {
+      ["spellName"] = "Fire Nova Totem",
+      ["rank"] = 3,
+      ["cooldown"] = 15,
+      ["active"] = true
+    },
+    [11314] = {
+      ["spellName"] = "Fire Nova Totem",
+      ["rank"] = 4,
+      ["cooldown"] = 15,
+      ["active"] = true
+    },
+    [11315] = {
+      ["spellName"] = "Fire Nova Totem",
+      ["rank"] = 5,
+      ["cooldown"] = 15,
+      ["active"] = true
+    },
+    [8177] = {
+      ["spellName"] = "Grounding Totem",
+      ["cooldown"] = 15,
+      ["active"] = true
+    },
+    [2484] = {
+      ["spellName"] = "Earthbind Totem",
+      ["cooldown"] = 15,
+      ["active"] = true
+    },
+    [16188] = {
+      ["spellName"] = "Nature's Swiftness",
+      ["cooldown"] = 180,
+      ["active"] = true
+    }
   },
   ["warrior"] = {
     [18499] = {
@@ -1314,6 +1485,82 @@ local spellMap = {
       ["spellName"] = "Charge",
       ["rank"] = 3,
       ["cooldown"] = 15,
+      ["active"] = true
+    }
+  },
+  ["racials"] = {
+    [20589] = {
+      ["spellName"] = "Escape Artist",
+      ["cooldown"] = 60,
+      ["active"] = true
+    },
+    [20600] = {
+      ["spellName"] = "Perception",
+      ["cooldown"] = 180,
+      ["active"] = true
+    },
+    [20594] = {
+      ["spellName"] = "Stoneform",
+      ["cooldown"] = 180,
+      ["active"] = true
+    },
+    [7744] = {
+      ["spellName"] = "Will of the Forsaken",
+      ["cooldown"] = 120,
+      ["active"] = true
+    },
+    [20549] = {
+      ["spellName"] = "War Stomp",
+      ["cooldown"] = 120,
+      ["active"] = true
+    }
+  },
+  --[[
+    TODO might need an additonal property here for the item icon because the spell
+    itself might not give it aways which item was used
+  ]]--
+  ["items"] = {
+    [23132] = {
+      ["spellName"] = "Ultra-Flash Shadow Reflector",
+      ["itemId"] = 18639,
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    [23131] = {
+      ["spellName"] = "Gyrofreeze Ice Reflector",
+      ["itemId"] = 18634,
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    [23097] = {
+      ["spellName"] = "Hyper-Radiant Flame Reflector",
+      ["itemId"] = 18638,
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    -- used 22641 by both goblin and viking helmet
+    [22641] = {
+      ["spellName"] = "Goblin Rocket Helmet",
+      ["itemId"] = 10588,
+      ["cooldown"] = 1200,
+      ["active"] = true
+    },
+    [13141] = {
+      ["spellName"] = "Gnomish Rocket Boots",
+      ["itemId"] = 10724,
+      ["cooldown"] = 1800,
+      ["active"] = true
+    },
+    [8892] = {
+      ["spellName"] = "Goblin Rocket Boots",
+      ["itemId"] = 7189,
+      ["cooldown"] = 300,
+      ["active"] = true
+    },
+    [13120] = {
+      ["spellName"] = "Gnomish Net-o-Matic Projector",
+      ["itemId"] = 10720,
+      ["cooldown"] = 600,
       ["active"] = true
     }
   }
