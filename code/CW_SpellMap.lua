@@ -1513,6 +1513,33 @@ local spellMap = {
       ["spellName"] = "War Stomp",
       ["cooldown"] = 120,
       ["active"] = true
+    },
+    [20572] = {
+      ["spellName"] = "Blood Fury",
+      ["cooldown"] = 120,
+      ["active"] = true
+    },
+    [] = {
+      ["spellName"] = "",
+      ["cooldown"] = ,
+      ["active"] = true
+    },
+    -- TODO same spell different ids because of what is required to activate
+    -- probably okay to treat as 3 different spells
+    [26296] = {
+      ["spellName"] = "Berserking",
+      ["cooldown"] = 180,
+      ["active"] = true
+    },
+    [26297] = {
+      ["spellName"] = "Berserking",
+      ["cooldown"] = 180,
+      ["active"] = true
+    },
+    [20554] = {
+      ["spellName"] = "Berserking",
+      ["cooldown"] = 180,
+      ["active"] = true
     }
   },
   --[[
