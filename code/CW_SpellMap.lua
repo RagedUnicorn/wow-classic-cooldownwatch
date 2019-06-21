@@ -1110,7 +1110,6 @@ local spellMap = {
     [17116] = {
       ["spellName"] = "Nature's Swiftness",
       ["cooldown"] = 180,
-      ["cooldownWorstCase"] = ,
       ["active"] = true
     },
     [29166] = {
@@ -1517,11 +1516,6 @@ local spellMap = {
     [20572] = {
       ["spellName"] = "Blood Fury",
       ["cooldown"] = 120,
-      ["active"] = true
-    },
-    [] = {
-      ["spellName"] = "",
-      ["cooldown"] = ,
       ["active"] = true
     },
     -- TODO same spell different ids because of what is required to activate

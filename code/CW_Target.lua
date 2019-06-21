@@ -29,15 +29,25 @@ mod.target = me
 
 me.tag = "Target"
 
-local currentTarget = ""
+local currentTargetGuid = ""
+local currentTargetName = ""
 
 --[[
-  Returns the players current target or an empty string if the player has no target.
+  Returns the players current target uid or an empty string if the player has no target.
 
   @return {string}
 ]]--
-function me.GetCurrentTarget()
-  return currentTarget
+function me.GetCurrentTargetGuid()
+  return currentTargetGuid
+end
+
+--[[
+  Returns the players current target name or an empty string if the player has no target.
+
+  @return {string}
+]]--
+function me.GetCurrentTargetName()
+  return currentTargetName
 end
 
 --[[
@@ -45,19 +55,29 @@ end
 ]]--
 function me.UpdateCurrentTarget()
   local targetId
+  local targetName
 
   --[[
     For debugging purpose allow friendly target in debug mode
   ]]--
   if UnitIsEnemy("player", "target") or RGCW_ENVIRONMENT.DEBUG then
     targetId = UnitGUID("target")
+    targetName, _ = UnitName("unit")
   end
 
   if targetId == nil then
-    currentTarget = ""
-    mod.logger.LogDebug(me.tag, "Update players target: [Empty-target]")
+    currentTargetGuid = ""
+    mod.logger.LogDebug(me.tag, "Update players targetGUID: [Empty-target]")
   else
-    currentTarget = targetId
-    mod.logger.LogDebug(me.tag, "Update players target: " .. currentTarget)
+    currentTargetGuid = targetId
+    mod.logger.LogDebug(me.tag, "Update players targetGUID: " .. currentTargetGuid)
+  end
+
+  if targetName == nil then
+    currentTargetName = ""
+    mod.logger.LogDebug(me.tag, "Update players targetName: [Empty-target]")
+  else
+    currentTargetName = targetName
+    mod.logger.LogDebug(me.tag, "Update players targetName: " .. currentTargetName)
   end
 end

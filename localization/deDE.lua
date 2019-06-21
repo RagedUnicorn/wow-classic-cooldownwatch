@@ -5,7 +5,7 @@ if (GetLocale() == "deDE") then
   rgcw.L["addon_name"] = "CooldownWatch"
 
   -- console
-  rgcw.L["help"] = "|cFFFFFF00(%s)|r: Benutze |cFFFFFF00/cw|r oder |cFFFFFF00/cooldownwatch|r für eine Liste der verfügbaren Optionen"
+  rgcw.L["help"] = "|cFFFFFF00(%s)|r: Benutze |cFFFFFF00/rgcw|r oder |cFFFFFF00/cooldownwatch|r für eine Liste der verfügbaren Optionen"
   rgcw.L["reload"] = "|cFFFFFF00reload|r - UI neu laden"
   rgcw.L["info_title"] = "|cFFFFFF00CooldownWatch:|r"
 

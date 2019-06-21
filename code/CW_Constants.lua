@@ -27,7 +27,7 @@ RGCW_CONSTANTS = {
   --[[
     Update Intervals for tickers
   ]]--
-  TARGET_COOLDOWN_BAR_UPDATE_INTERVAL = 0.1,
+  TARGET_COOLDOWN_BAR_UPDATE_INTERVAL = 0.05,
 
   --[[
     TargetCooldownFrame

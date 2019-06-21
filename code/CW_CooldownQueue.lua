@@ -108,6 +108,13 @@ function me.RemoveCooldown(caster, spellId)
 end
 
 --[[
+  Remove all cooldowns from queue
+]]--
+function me.ClearCooldownQueue()
+  cooldownQueue = {}
+end
+
+--[[
   Retrieve a cast for a specific caster
   @param {string} caster
     A unique identification for a target (player or npc)

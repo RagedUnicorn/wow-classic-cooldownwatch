@@ -4,7 +4,7 @@ rgcw.L = {}
 rgcw.L["addon_name"] = "CooldownWatch"
 
 -- console
-rgcw.L["help"] = "|cFFFFFF00(%s)|r: Use |cFFFFFF00/cw|r or |cFFFFFF00/cooldownwatch|r for a list of options"
+rgcw.L["help"] = "|cFFFFFF00(%s)|r: Use |cFFFFFF00/rgcw|r or |cFFFFFF00/cooldownwatch|r for a list of options"
 rgcw.L["reload"] = "|cFFFFFF00reload|r - reload UI"
 rgcw.L["info_title"] = "|cFFFFFF00CooldownWatch:|r"
 

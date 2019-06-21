@@ -155,6 +155,9 @@ function me.CreateCooldownWatchSlot(frame, position)
   me.CreateCooldownOverlay(cooldownWatchSlot)
   me.CreateBigTimerCooldown(cooldownWatchSlot)
   me.CreateSmallTimerCooldown(cooldownWatchSlot)
+
+  -- initially hide slots
+  cooldownWatchSlot:Hide()
 end
 
 --[[
@@ -180,12 +183,8 @@ end
   @param {table} frame
 ]]--
 function me.CreateBigTimerCooldown(frame)
-  -- local bigTimeFrame = CreateFrame("FRAME", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_BIG_COOLDOWN, frame)
-  -- bigTimeFrame:SetSize(18, 18)
-  -- bigTimeFrame:SetPoint("CENTER")
-
   local spellNameFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_BIG_COOLDOWN_TEXT, "OVERLAY")
-  -- TODO should have a logic to figure out whether there is a two digit number for the coolodnw (minutes) or one and adapt size
+  -- TODO should have a logic to figure out whether there is a two digit number for the cooldown (minutes) or one and adapt size
   spellNameFontString:SetFont("Fonts\\FRIZQT__.TTF", 17)
   spellNameFontString:SetPoint("CENTER", 0, 0)
   spellNameFontString:SetSize(50, 35)
@@ -199,10 +198,6 @@ end
   @param {table} frame
 ]]--
 function me.CreateSmallTimerCooldown(frame)
-  -- local smallTimeFrame = CreateFrame("FRAME", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SMALL_COOLDOWN, frame)
-  -- smallTimeFrame:SetSize(18, 18)
-  -- smallTimeFrame:SetPoint("TOPRIGHT", -15, -2)
-
   local spellNameFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SMALL_COOLDOWN_TEXT, "OVERLAY")
   spellNameFontString:SetFont("Fonts\\FRIZQT__.TTF", 15)
   spellNameFontString:SetPoint("TOPRIGHT", -2, 6)
@@ -257,7 +252,7 @@ end
   TODO
 ]]--
 function me.TargetCooldownBarOnUpdate()
-  local cooldowns = mod.cooldownQueue.GetCooldownsByTarget("dummytarget")
+  local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(mod.target.GetCurrentTargetGuid())
   local cooldownSlots = {targetCooldownBarFrame:GetChildren()}
 
   if cooldowns == nil then return end
@@ -266,7 +261,7 @@ function me.TargetCooldownBarOnUpdate()
     if cooldowns[i] ~= nil then
       me.UpdateCooldownWatchSlot(cooldownSlots[i], cooldowns[i])
     else
-      -- clear slot and hide
+      me.ClearCooldownWatchSlot(cooldownSlots[i])
     end
   end
 end
@@ -277,7 +272,11 @@ end
 function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   local timePassed = (GetTime() - cooldown.spell.castTime)
   local timeLeftBig = cooldown.spell.cooldown - timePassed
-  local timeLeftSmall = cooldown.spell.cooldownWorstCase - timePassed
+  local timeLeftSmall
+
+  if cooldown.spell.cooldownWorstCase ~= nil then
+    timeLeftSmall = cooldown.spell.cooldownWorstCase - timePassed
+  end
 
   if timeLeftBig <= 0 then
     -- have to remove spell from queue
@@ -286,12 +285,13 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   end
 
   for _, region in ipairs({cooldownWatchSlot:GetRegions()}) do
-
     if region:GetName() ~= nil then
       if string.find(region:GetName(), "_BigText$") then
-        -- region:SetText(timeLeftBig)
+        region:SetText(timeLeftBig)
       elseif string.find(region:GetName(), "_SmallText$") then
-        -- region:SetText(timeLeftSmall)
+        if timeLeftSmall ~= nil then
+          region:SetText(timeLeftSmall)
+        end
       elseif string.find(region:GetName(), "_Icon$") then
         local _, _, icon_texture = GetSpellInfo(cooldown.spell.spellId)
         region:SetTexture(icon_texture)
@@ -301,10 +301,75 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
 
   for _, child in ipairs({cooldownWatchSlot:GetChildren()}) do
     if child:GetName() ~= nil then
-      -- mod.logger.LogError(me.tag, "child: " .. child:GetName())
       if string.find(child:GetName(), "_Cooldown$") then
           child:SetCooldown(cooldown.spell.castTime, cooldown.spell.cooldown)
       end
     end
   end
+
+  cooldownWatchSlot:Show()
+end
+
+--[[
+  TODO
+]]--
+function me.ClearCooldownWatchSlot(cooldownWatchSlot)
+  for _, region in ipairs({cooldownWatchSlot:GetRegions()}) do
+    if region:GetName() ~= nil then
+      if string.find(region:GetName(), "_BigText$") then
+        region:SetText("")
+      elseif string.find(region:GetName(), "_SmallText$") then
+        region:SetText("")
+      elseif string.find(region:GetName(), "_Icon$") then
+        region:SetTexture(nil)
+      end
+    end
+  end
+
+  cooldownWatchSlot:Hide()
+end
+
+--[[
+  Interrupt regular onUpdate for the TargetCooldownBar and show example cooldowns to the player
+]]--
+function me.ShowExampleTargetCooldownBar()
+  mod.ticker.StopTickerTargetCooldownBar() -- stop regular updates
+  mod.cooldownQueue.ClearCooldownQueue() -- drop all current cooldowns
+
+  local cooldownSlots = {targetCooldownBarFrame:GetChildren()}
+  local cooldowns = {}
+
+  for i = 1, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_AMOUNT do
+    cooldowns[i] = {
+      ["caster"] = "dummytarget",
+      ["casterName"] = "casterName",
+      ["spell"] = {
+        ["spellId"] = 2094,
+        ["spellName"] = "spellname",
+        ["rank"] = nil,
+        ["castTime"] = GetTime(),
+        ["cooldown"] = 10,
+        ["cooldownWorstCase"] = 5,
+        ["active"] = true
+      }
+    }
+    me.UpdateCooldownWatchSlot(cooldownSlots[i], cooldowns[i])
+  end
+
+  targetCooldownBarFrame:Show()
+end
+
+--[[
+  Restart regular onUpdate ticks for the TargetCooldownBar
+]]--
+function me.HideExampleTargetCooldownBar()
+  local cooldownSlots = {targetCooldownBarFrame:GetChildren()}
+
+  for i = 1, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_AMOUNT do
+    cooldownSlots[i]:Hide()
+  end
+
+  targetCooldownBarFrame:Show()
+
+  mod.ticker.StartTickerTargetCooldownBar() -- restart regular updates
 end

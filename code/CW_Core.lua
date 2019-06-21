@@ -79,6 +79,8 @@ end
 ]]--
 function me.Initialize()
   me.logger.LogDebug(me.tag, "Initialize addon")
+  -- setup slash commands
+  me.cmd.SetupSlashCmdList()
   -- setup addon configuration ui
   me.addonConfiguration.SetupAddonConfiguration()
   -- build ui for targetcooldownbar

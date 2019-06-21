@@ -68,7 +68,7 @@ function me.ProcessUnfilteredCombatLogEvent()
       the process of searching for the spell in the spellmap by figuring out the
       targets class.
     ]]--
-    if caster == mod.target.GetCurrentTarget() then
+    if caster == mod.target.GetCurrentTargetGuid() then
       local _, englishClass, _ = UnitClass("target");
       spell = mod.spellMap.FindSpell(spellId, englishClass)
     else
