@@ -32,6 +32,10 @@ me.tag = "Configuration"
 CooldownWatchConfiguration = {
   ["addonVersion"] = nil,
   --[[
+    Whether the targetCooldownBar is locked from moving or not
+  ]]--
+  ["targetCastBarLocked"] = true,
+  --[[
     Framepositions for user draggable Frames
     frames = {
       -- should match the actual frame name

@@ -156,6 +156,15 @@ function me.CreateCooldownWatchSlot(frame, position)
   me.CreateBigTimerCooldown(cooldownWatchSlot)
   me.CreateSmallTimerCooldown(cooldownWatchSlot)
 
+  -- prepare animationgroup
+  local animationGroup = cooldownWatchSlot:CreateAnimationGroup(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_ANIMATION)
+
+  local animation = animationGroup:CreateAnimation("Alpha")
+  animation:SetDuration(2)
+  animation:SetFromAlpha(1)
+  animation:SetToAlpha(0)
+  animation:SetSmoothing("OUT")
+
   -- initially hide slots
   cooldownWatchSlot:Hide()
 end
@@ -283,7 +292,8 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   end
 
   if timeLeftBig <= 0 then
-    mod.cooldownQueue.RemoveCooldown(cooldown.caster, cooldown.spell.spellId)
+    me.AnimationTest(cooldownWatchSlot, cooldown)
+    return
   end
 
   for _, region in ipairs({cooldownWatchSlot:GetRegions()}) do
@@ -304,12 +314,54 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   for _, child in ipairs({cooldownWatchSlot:GetChildren()}) do
     if child:GetName() ~= nil then
       if string.find(child:GetName(), "_Cooldown$") then
+        -- set cooldown should only be applied a single time
+        if not child.cooldownStarted then
           child:SetCooldown(cooldown.spell.castTime, cooldown.spell.cooldown)
+          child.cooldownStarted = true
+        end
       end
     end
   end
 
   cooldownWatchSlot:Show()
+end
+
+function me.AnimationTest(cooldownWatchSlot, cooldown)
+  local texture
+
+  for _, region in ipairs({cooldownWatchSlot:GetRegions()}) do
+    if region:GetName() ~= nil then
+      if string.find(region:GetName(), "_BigText$") then
+        region:SetText("")
+      elseif string.find(region:GetName(), "_SmallText$") then
+        region:SetText("")
+      elseif string.find(region:GetName(), "_Icon$") then
+        texture = region
+      end
+    end
+  end
+
+  for _, child in ipairs({cooldownWatchSlot:GetChildren()}) do
+    if child:GetName() ~= nil then
+      if string.find(child:GetName(), "_Cooldown$") then
+        child.cooldownStarted = false
+      end
+    end
+  end
+
+  local animationGroup = cooldownWatchSlot:GetAnimationGroups()
+  animationGroup:SetScript("OnFinished", function()
+    mod.cooldownQueue.RemoveCooldown(cooldown.caster, cooldown.spell.spellId)
+    texture:SetTexture(nil)
+    cooldownWatchSlot:SetAlpha(1)
+    cooldownWatchSlot:Hide()
+  end)
+
+  if animationGroup:IsPlaying() then
+
+  else
+    animationGroup:Play()
+  end
 end
 
 --[[
@@ -324,6 +376,14 @@ function me.ClearCooldownWatchSlot(cooldownWatchSlot)
         region:SetText("")
       elseif string.find(region:GetName(), "_Icon$") then
         region:SetTexture(nil)
+      end
+    end
+  end
+
+  for _, child in ipairs({cooldownWatchSlot:GetChildren()}) do
+    if child:GetName() ~= nil then
+      if string.find(child:GetName(), "_Cooldown$") then
+        child.cooldownStarted = false
       end
     end
   end
