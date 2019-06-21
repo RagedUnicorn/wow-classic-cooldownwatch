@@ -45,21 +45,3 @@ _G["__ECB__DEBUG__ADDEXAMPLECOOLDOWN"] = function()
 
   mod.cooldownQueue.AddCooldown(caster, casterName, spell)
 end
-
-
-_G["__ECB__DEBUG__ANIMATIONTEST"] = function()
-  local test = _G["CW_TargetCooldownWatchBar"]
-  local ag = test:CreateAnimationGroup()
-
-  local a4 = ag:CreateAnimation("Alpha")
-  a4:SetDuration(5)
-  a4:SetSmoothing("OUT")
-  a4:SetFromAlpha(1)
-  a4:SetToAlpha(0)
-  ag:SetScript("OnPlay", function()
-    print("test")
-  end)
-  ag:Play()
-  -- a4:Play()
-
-end
