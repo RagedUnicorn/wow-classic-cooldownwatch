@@ -249,7 +249,10 @@ function me.StopDragFrame(self)
 end
 
 --[[
-  TODO
+  GUI callback for updating the targetCooldownBar - invoked regularly by a timer
+
+  Note: Operations within TargetCooldownBarOnUpdate should not be expensive because it is invoked heavily
+  to create a smooth visual representation. Make sure to abort as soon as possible.
 ]]--
 function me.TargetCooldownBarOnUpdate()
   local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(mod.target.GetCurrentTargetGuid())
@@ -267,7 +270,8 @@ function me.TargetCooldownBarOnUpdate()
 end
 
 --[[
-  TODO
+  @param {table} cooldownWatchSlot
+  @param {table} cooldown
 ]]--
 function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   local timePassed = (GetTime() - cooldown.spell.castTime)
@@ -279,8 +283,6 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   end
 
   if timeLeftBig <= 0 then
-    -- have to remove spell from queue
-    mod.logger.LogError(me.tag, "Should remove spell")
     mod.cooldownQueue.RemoveCooldown(cooldown.caster, cooldown.spell.spellId)
   end
 
