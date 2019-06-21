@@ -85,7 +85,7 @@ end
 ]]--
 function me.CreateCooldownWatchSlot(frame, position)
   local cooldownWatchSlot = CreateFrame("FRAME", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT .. position, frame)
-  local _, _, icon_texture = GetSpellInfo(1543)
+  local _, _, iconTexture = GetSpellInfo(1543)
 
   cooldownWatchSlot:SetFrameLevel(1)
   cooldownWatchSlot:SetSize(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE)
@@ -123,7 +123,7 @@ function me.CreateCooldownWatchSlot(frame, position)
   )
   iconHolderTexture:SetPoint("TOPLEFT", cooldownWatchSlot, "TOPLEFT", 4, -4)
   iconHolderTexture:SetPoint("BOTTOMRIGHT", cooldownWatchSlot, "BOTTOMRIGHT", -4, 4)
-  iconHolderTexture:SetTexture(icon_texture)
+  iconHolderTexture:SetTexture(iconTexture)
   iconHolderTexture:SetTexCoord(0.1, 0.9, 0.1, 0.9)
   cooldownWatchSlot.iconHolderTexture = iconHolderTexture
 
@@ -292,7 +292,7 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   end
 
   if timeLeftBig <= 0 then
-    me.AnimationTest(cooldownWatchSlot, cooldown)
+    me.ClearCooldownWatchSlotAnimated(cooldownWatchSlot, cooldown)
     return
   end
 
@@ -305,8 +305,8 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
           region:SetText(timeLeftSmall)
         end
       elseif string.find(region:GetName(), "_Icon$") then
-        local _, _, icon_texture = GetSpellInfo(cooldown.spell.spellId)
-        region:SetTexture(icon_texture)
+        local _, _, iconTexture = GetSpellInfo(cooldown.spell.spellId)
+        region:SetTexture(iconTexture)
       end
     end
   end
@@ -326,7 +326,17 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   cooldownWatchSlot:Show()
 end
 
-function me.AnimationTest(cooldownWatchSlot, cooldown)
+--[[
+  Delayed removal of an expired cooldown. Remove a cooldown step by step.
+
+  Step 1 - Hide cooldowntexts
+  Step 2 - Start animating fade alpha
+  Step 3 - Execute cleanup script once animation is done
+
+  @param {table} cooldownWatchSlot
+  @param {table} cooldow
+]]--
+function me.ClearCooldownWatchSlotAnimated(cooldownWatchSlot, cooldown)
   local texture
 
   for _, region in ipairs({cooldownWatchSlot:GetRegions()}) do
@@ -357,17 +367,20 @@ function me.AnimationTest(cooldownWatchSlot, cooldown)
     cooldownWatchSlot:Hide()
   end)
 
-  if animationGroup:IsPlaying() then
-
-  else
+  if not animationGroup:IsPlaying() then
     animationGroup:Play()
   end
 end
 
 --[[
-  TODO
+  Clear a cooldownWatchSlot without any animation
+
+  @param {table} cooldownWatchSlot
+  @param {table} cooldow
 ]]--
-function me.ClearCooldownWatchSlot(cooldownWatchSlot)
+function me.ClearCooldownWatchSlot(cooldownWatchSlot, cooldown)
+  local texture
+
   for _, region in ipairs({cooldownWatchSlot:GetRegions()}) do
     if region:GetName() ~= nil then
       if string.find(region:GetName(), "_BigText$") then
