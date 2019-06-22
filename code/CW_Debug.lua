@@ -30,7 +30,7 @@ mod.debug = me
 
 me.tag = "Debug"
 
-_G["__ECB__DEBUG__ADDEXAMPLECOOLDOWN"] = function()
+_G["__CW__DEBUG__ADDEXAMPLECOOLDOWN"] = function()
   local caster = "dummytarget"
   local casterName = "casterName"
   local spell = {

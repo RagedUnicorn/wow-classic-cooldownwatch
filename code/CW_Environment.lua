@@ -24,7 +24,7 @@
 ]]--
 
 RGCW_ENVIRONMENT = {
-  ADDON_IDENTIFIER = "com.ragedunicorn.wow.classic.pvpcooldown",
+  ADDON_IDENTIFIER = "com.ragedunicorn.wow.classic.cooldownwatch",
   LOG_LEVEL = 4,
   LOG_EVENT = true,
   DEBUG = true

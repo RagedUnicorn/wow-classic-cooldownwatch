@@ -7,7 +7,7 @@
         rgcw.OnLoad(self)
       </OnLoad>
       <OnEvent>
-        rgcw.OnEvent(event)
+        rgcw.OnEvent(event, ...)
       </OnEvent>
     </Scripts>
   </Frame>
