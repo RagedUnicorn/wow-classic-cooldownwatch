@@ -46,8 +46,8 @@ function me.BuildUi()
   targetCooldownBarFrame:SetBackdrop({
     bgFile = [[Interface\DialogFrame\UI-DialogBox-Background]]
   })
-  targetCooldownBarFrame:SetBackdropColor(0, 0, 0, .5);
-  targetCooldownBarFrame:SetBackdropBorderColor(0, 0, 0, .8);
+  targetCooldownBarFrame:SetBackdropColor(0, 0, 0, .5)
+  targetCooldownBarFrame:SetBackdropBorderColor(0, 0, 0, .8)
   targetCooldownBarFrame:SetPoint("CENTER", 0, 0)
   targetCooldownBarFrame:SetMovable(true)
   targetCooldownBarFrame:SetClampedToScreen(true)
@@ -245,7 +245,7 @@ function me.StopDragFrame(self)
 
   self:StopMovingOrSizing()
 
-  local point, relativeTo, relativePoint, posX, posY = self:GetPoint();
+  local point, relativeTo, relativePoint, posX, posY = self:GetPoint()
 
   mod.configuration.SaveUserPlacedFramePosition(
     RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME,
