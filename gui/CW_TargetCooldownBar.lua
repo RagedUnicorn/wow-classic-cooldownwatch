@@ -135,7 +135,7 @@ function me.CreateCooldownWatchSlot(frame, position)
 
   innerGlowFrame:SetBackdrop(backdrop_innerglow)
   innerGlowFrame:SetBackdropColor(1, 1, 1, 0)
-  innerGlowFrame:SetBackdropBorderColor(1, 0.2, 0, 1)
+  innerGlowFrame:SetBackdropBorderColor(1, 0.2, 0, 1) -- TODO remove?
   innerGlowFrame:Hide()
 
   cooldownWatchSlot.innerGlowFrame = innerGlowFrame
@@ -318,13 +318,14 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
     return
   end
 
-  --[[
-    Show inner glow warning when treshold is breached
-  ]]--
-  if 100 / cooldown.spell.cooldown * timeLeftBig <= RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WARN_TRESHOLD then
+  if me.IsWarningTresholdBreached(cooldown.spell.cooldown, timeLeftBig) then
+    cooldownWatchSlot.innerGlowFrame:SetBackdropBorderColor(0.8, 1, 0, 1)
     cooldownWatchSlot.innerGlowFrame:Show()
-  else
-    cooldownWatchSlot.innerGlowFrame:Hide()
+  end
+
+  if me.IsAlertTresholdBreached(cooldown.spell.cooldown, timeLeftBig) then
+    cooldownWatchSlot.innerGlowFrame:SetBackdropBorderColor(1, 0.2, 0, 1)
+    cooldownWatchSlot.innerGlowFrame:Show()
   end
 
   -- position text based on its cooldown duration
@@ -353,6 +354,43 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
 end
 
 --[[
+  @param {number} cooldown
+  @param {number} timeLeft
+
+  @return {boolean}
+    true - if the treshold was breached
+    false - if the treshold was not breached
+]]--
+function me.IsWarningTresholdBreached(cooldown, timeLeft)
+  return me.IsTresholdBreached(cooldown, timeLeft, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WARN_TRESHOLD)
+end
+
+--[[
+  @param {number} cooldown
+  @param {number} timeLeft
+
+  @return {boolean}
+    true - if the treshold was breached
+    false - if the treshold was not breached
+]]--
+function me.IsAlertTresholdBreached(cooldown, timeLeft)
+  return me.IsTresholdBreached(cooldown, timeLeft, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_ALERT_TRESHOLD)
+end
+
+--[[
+  @param {number} cooldown
+  @param {number} timeLeft
+  @param {number} treshold
+
+  @return {boolean}
+    true - if the treshold was breached
+    false - if the treshold was not breached
+]]--
+function me.IsTresholdBreached(cooldown, timeLeft, treshold)
+  return 100 / cooldown * timeLeft <= treshold
+end
+
+--[[
   Delayed removal of an expired cooldown. Remove a cooldown step by step.
 
   Step 1 - Hide cooldowntexts
@@ -366,9 +404,6 @@ function me.ClearCooldownWatchSlotAnimated(cooldownWatchSlot, cooldown)
   local texture
 
   --TODO remove searching
-
-  -- TODO review
-  cooldownWatchSlot.innerGlowFrame:Hide()
 
   for _, region in ipairs({cooldownWatchSlot:GetRegions()}) do
     if region:GetName() ~= nil then
@@ -394,6 +429,7 @@ function me.ClearCooldownWatchSlotAnimated(cooldownWatchSlot, cooldown)
   animationGroup:SetScript("OnFinished", function()
     mod.cooldownQueue.RemoveCooldown(cooldown.caster, cooldown.spell.spellId)
     texture:SetTexture(nil)
+    cooldownWatchSlot.innerGlowFrame:Hide()
     cooldownWatchSlot:SetAlpha(1)
     cooldownWatchSlot:Hide()
   end)

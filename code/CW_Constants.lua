@@ -51,7 +51,8 @@ RGCW_CONSTANTS = {
   --[[
     Treshold in percent of the total cooldowntime to trigger warning glow for the cooldownslot
   ]]--
-  ELEMENT_TARGET_COOLDOWN_WARN_TRESHOLD = 20,
+  ELEMENT_TARGET_COOLDOWN_WARN_TRESHOLD = 50,
+  ELEMENT_TARGET_COOLDOWN_ALERT_TRESHOLD = 20,
   --[[
     Positions
   ]]--
