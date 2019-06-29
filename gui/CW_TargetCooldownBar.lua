@@ -114,7 +114,31 @@ function me.CreateCooldownWatchSlot(frame, position)
   cooldownWatchSlot:SetBackdropColor(0.15, 0.15, 0.15, 1)
   cooldownWatchSlot:SetBackdropBorderColor(0, 0, 0, 1)
 
+  local innerGlowFrame = CreateFrame("FRAME", nil, cooldownWatchSlot)
+  innerGlowFrame:SetFrameLevel(2)
+  innerGlowFrame:SetPoint("TOPLEFT", cooldownWatchSlot, "TOPLEFT")
+  innerGlowFrame:SetPoint("BOTTOMRIGHT", cooldownWatchSlot, "BOTTOMRIGHT")
 
+  backdrop_innerglow = {
+    bgFile = [[Interface\AddOns\CooldownWatch\assets\ui_slot_background]],
+    edgeFile = [[Interface\AddOns\CooldownWatch\assets\ui_slot_inner_glow]],
+    tile = false,
+    tileSize = 16,
+    edgeSize = 16,
+    insets = {
+      left = 10,
+      right = 10,
+      top = 10,
+      bottom = 10
+    }
+  }
+
+  innerGlowFrame:SetBackdrop(backdrop_innerglow)
+  innerGlowFrame:SetBackdropColor(1, 1, 1, 0)
+  innerGlowFrame:SetBackdropBorderColor(1, 0.2, 0, 1)
+  innerGlowFrame:Hide()
+
+  cooldownWatchSlot.innerGlowFrame = innerGlowFrame
   cooldownWatchSlot.iconHolderTexture = me.CreateIconHolder(cooldownWatchSlot)
   cooldownWatchSlot.targetCooldownOverlay = me.CreateCooldownOverlay(cooldownWatchSlot)
   cooldownWatchSlot.targetSpellTimeBig = me.CreateBigTimerCooldown(cooldownWatchSlot)
@@ -187,15 +211,12 @@ end
     The created fontString
 ]]--
 function me.CreateBigTimerCooldown(frame)
-  local spellNameFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_BIG_COOLDOWN_TEXT, "OVERLAY")
-  -- TODO should have a logic to figure out whether there is a two digit number for the cooldown (minutes) or one and adapt size
-  spellNameFontString:SetFont("Fonts\\FRIZQT__.TTF", 17)
-  spellNameFontString:SetPoint("CENTER", 0, 0)
-  spellNameFontString:SetSize(50, 35)
-  spellNameFontString:SetTextColor(1, 1, 0)
-  spellNameFontString:SetText("12:30")
+  local bigTimerFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT, "OVERLAY")
+  bigTimerFontString:SetFont("Fonts\\FRIZQT__.TTF", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_SIZE)
+  bigTimerFontString:SetTextColor(1, 1, 0)
+  bigTimerFontString:SetJustifyH("LEFT")
 
-  return spellNameFontString
+  return bigTimerFontString
 end
 
 --[[
@@ -207,14 +228,13 @@ end
     The created fontString
 ]]--
 function me.CreateSmallTimerCooldown(frame)
-  local spellNameFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SMALL_COOLDOWN_TEXT, "OVERLAY")
-  spellNameFontString:SetFont("Fonts\\FRIZQT__.TTF", 15)
-  spellNameFontString:SetPoint("TOPRIGHT", -2, 6)
-  spellNameFontString:SetSize(50, 35)
-  spellNameFontString:SetTextColor(.01, .66, 0.95, 1)
-  spellNameFontString:SetText("12:30")
+  local smallTimerFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT, "OVERLAY")
+  smallTimerFontString:SetFont("Fonts\\FRIZQT__.TTF", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT_SIZE)
+  smallTimerFontString:SetPoint("TOPLEFT", 5, -5)
+  smallTimerFontString:SetTextColor(.01, .66, 0.95, 1)
+  smallTimerFontString:SetJustifyH("LEFT")
 
-  return spellNameFontString
+  return smallTimerFontString
 end
 
 --[[
@@ -298,9 +318,27 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
     return
   end
 
+  --[[
+    Show inner glow warning when treshold is breached
+  ]]--
+  if 100 / cooldown.spell.cooldown * timeLeftBig <= RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WARN_TRESHOLD then
+    cooldownWatchSlot.innerGlowFrame:Show()
+  else
+    cooldownWatchSlot.innerGlowFrame:Hide()
+  end
+
+  -- position text based on its cooldown duration
+  if timeLeftBig > 9 then
+    cooldownWatchSlot.targetSpellTimeBig:SetPoint("LEFT", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_HIGH, 0)
+  else
+    cooldownWatchSlot.targetSpellTimeBig:SetPoint("LEFT", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_LOW, 0)
+  end
+
   cooldownWatchSlot.targetSpellTimeBig:SetText(string.format("%.1f", timeLeftBig))
-  if timeLeftSmall ~= nil then
+  if timeLeftSmall ~= nil and timeLeftSmall >= 0 then
     cooldownWatchSlot.targetSpellTimeSmall:SetText(string.format("%.1f", timeLeftSmall))
+  else
+    cooldownWatchSlot.targetSpellTimeSmall:SetText("")
   end
 
   local _, _, iconTexture = GetSpellInfo(cooldown.spell.spellId)
@@ -326,6 +364,11 @@ end
 ]]--
 function me.ClearCooldownWatchSlotAnimated(cooldownWatchSlot, cooldown)
   local texture
+
+  --TODO remove searching
+
+  -- TODO review
+  cooldownWatchSlot.innerGlowFrame:Hide()
 
   for _, region in ipairs({cooldownWatchSlot:GetRegions()}) do
     if region:GetName() ~= nil then
@@ -368,6 +411,10 @@ end
 ]]--
 function me.ClearCooldownWatchSlot(cooldownWatchSlot, cooldown)
   local texture
+  -- TODO remove searching
+
+  -- TODO review
+  cooldownWatchSlot.innerGlowFrame:Hide()
 
   for _, region in ipairs({cooldownWatchSlot:GetRegions()}) do
     if region:GetName() ~= nil then
