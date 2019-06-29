@@ -85,7 +85,6 @@ end
 ]]--
 function me.CreateCooldownWatchSlot(frame, position)
   local cooldownWatchSlot = CreateFrame("FRAME", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT .. position, frame)
-  local _, _, iconTexture = GetSpellInfo(1543)
 
   cooldownWatchSlot:SetFrameLevel(1)
   cooldownWatchSlot:SetSize(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE)
@@ -102,7 +101,7 @@ function me.CreateCooldownWatchSlot(frame, position)
     edgeFile = [[Interface\\AddOns\\CooldownWatch\assets\ui_slot_glow]],
     tile = false,
     tileSize = 32,
-    edgeSize = 12,
+    edgeSize = 20,
     insets = {
       left = 12,
       right = 12,
@@ -115,46 +114,11 @@ function me.CreateCooldownWatchSlot(frame, position)
   cooldownWatchSlot:SetBackdropColor(0.15, 0.15, 0.15, 1)
   cooldownWatchSlot:SetBackdropBorderColor(0, 0, 0, 1)
 
-  local iconHolderTexture = cooldownWatchSlot:CreateTexture(
-    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_ICON_TEXTURE_NAME,
-    "LOW",
-    nil,
-    -8
-  )
-  iconHolderTexture:SetPoint("TOPLEFT", cooldownWatchSlot, "TOPLEFT", 4, -4)
-  iconHolderTexture:SetPoint("BOTTOMRIGHT", cooldownWatchSlot, "BOTTOMRIGHT", -4, 4)
-  iconHolderTexture:SetTexture(iconTexture)
-  iconHolderTexture:SetTexCoord(0.1, 0.9, 0.1, 0.9)
-  cooldownWatchSlot.iconHolderTexture = iconHolderTexture
 
-  local innerGlowFrame = CreateFrame("FRAME", nil, cooldownWatchSlot)
-  innerGlowFrame:SetFrameLevel(2)
-  innerGlowFrame:SetPoint("TOPLEFT", cooldownWatchSlot, "TOPLEFT", 1, -1)
-  innerGlowFrame:SetPoint("BOTTOMRIGHT", cooldownWatchSlot, "BOTTOMRIGHT", -1, 1)
-
-  backdrop_innerglow = {
-    bgFile = [[Interface\AddOns\CooldownWatch\assets\ui_slot_background]],
-    edgeFile = [[Interface\AddOns\CooldownWatch\assets\ui_slot_inner_glow]],
-    tile = false,
-    tileSize = 16,
-    edgeSize = 16,
-    insets = {
-      left = 10,
-      right = 10,
-      top = 10,
-      bottom = 10
-    }
-  }
-
-  innerGlowFrame:SetBackdrop(backdrop_innerglow)
-  innerGlowFrame:SetBackdropColor(1, 1, 1, 0)
-  innerGlowFrame:SetBackdropBorderColor(0, 0, 0, 1)
-
-  cooldownWatchSlot.innerGlowFrame = innerGlowFrame
-
-  me.CreateCooldownOverlay(cooldownWatchSlot)
-  me.CreateBigTimerCooldown(cooldownWatchSlot)
-  me.CreateSmallTimerCooldown(cooldownWatchSlot)
+  cooldownWatchSlot.iconHolderTexture = me.CreateIconHolder(cooldownWatchSlot)
+  cooldownWatchSlot.targetCooldownOverlay = me.CreateCooldownOverlay(cooldownWatchSlot)
+  cooldownWatchSlot.targetSpellTimeBig = me.CreateBigTimerCooldown(cooldownWatchSlot)
+  cooldownWatchSlot.targetSpellTimeSmall = me.CreateSmallTimerCooldown(cooldownWatchSlot)
 
   -- prepare animationgroup
   local animationGroup = cooldownWatchSlot:CreateAnimationGroup(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_ANIMATION)
@@ -173,6 +137,31 @@ end
   Create a cooldown overlay and attach it to the cooldownslot
 
   @param {table} frame
+
+  @return {table}
+    The created texture
+]]--
+function me.CreateIconHolder(frame)
+  local iconHolderTexture = frame:CreateTexture(
+    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_ICON_TEXTURE_NAME,
+    "LOW",
+    nil,
+    -8
+  )
+  iconHolderTexture:SetPoint("TOPLEFT", frame, "TOPLEFT", 4, -4)
+  iconHolderTexture:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -4, 4)
+  iconHolderTexture:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+
+  return iconHolderTexture
+end
+
+--[[
+  Create a cooldown overlay and attach it to the cooldownslot
+
+  @param {table} frame
+
+  @return {table}
+    The created cooldown overlay
 ]]--
 function me.CreateCooldownOverlay(frame)
   local cooldownOverlay = CreateFrame(
@@ -184,12 +173,18 @@ function me.CreateCooldownOverlay(frame)
   cooldownOverlay:SetSize(32, 32)
   cooldownOverlay:SetAllPoints()
   cooldownOverlay:SetCooldown(GetTime(), 10)
+  cooldownOverlay:SetFrameLevel(cooldownOverlay:GetFrameLevel() - 1)
+
+  return cooldownOverlay
 end
 
 --[[
   Create a big timer cooldown and attach it to the cooldownslot
 
   @param {table} frame
+
+  @return {table}
+    The created fontString
 ]]--
 function me.CreateBigTimerCooldown(frame)
   local spellNameFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_BIG_COOLDOWN_TEXT, "OVERLAY")
@@ -199,12 +194,17 @@ function me.CreateBigTimerCooldown(frame)
   spellNameFontString:SetSize(50, 35)
   spellNameFontString:SetTextColor(1, 1, 0)
   spellNameFontString:SetText("12:30")
+
+  return spellNameFontString
 end
 
 --[[
   Create a small timer cooldown and attach it to the cooldownslot
 
   @param {table} frame
+
+  @return {table}
+    The created fontString
 ]]--
 function me.CreateSmallTimerCooldown(frame)
   local spellNameFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SMALL_COOLDOWN_TEXT, "OVERLAY")
@@ -213,6 +213,8 @@ function me.CreateSmallTimerCooldown(frame)
   spellNameFontString:SetSize(50, 35)
   spellNameFontString:SetTextColor(.01, .66, 0.95, 1)
   spellNameFontString:SetText("12:30")
+
+  return spellNameFontString
 end
 
 --[[
@@ -296,31 +298,17 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
     return
   end
 
-  for _, region in ipairs({cooldownWatchSlot:GetRegions()}) do
-    if region:GetName() ~= nil then
-      if string.find(region:GetName(), "_BigText$") then
-        region:SetText(timeLeftBig)
-      elseif string.find(region:GetName(), "_SmallText$") then
-        if timeLeftSmall ~= nil then
-          region:SetText(timeLeftSmall)
-        end
-      elseif string.find(region:GetName(), "_Icon$") then
-        local _, _, iconTexture = GetSpellInfo(cooldown.spell.spellId)
-        region:SetTexture(iconTexture)
-      end
-    end
+  cooldownWatchSlot.targetSpellTimeBig:SetText(string.format("%.1f", timeLeftBig))
+  if timeLeftSmall ~= nil then
+    cooldownWatchSlot.targetSpellTimeSmall:SetText(string.format("%.1f", timeLeftSmall))
   end
 
-  for _, child in ipairs({cooldownWatchSlot:GetChildren()}) do
-    if child:GetName() ~= nil then
-      if string.find(child:GetName(), "_Cooldown$") then
-        -- set cooldown should only be applied a single time
-        if not child.cooldownStarted then
-          child:SetCooldown(cooldown.spell.castTime, cooldown.spell.cooldown)
-          child.cooldownStarted = true
-        end
-      end
-    end
+  local _, _, iconTexture = GetSpellInfo(cooldown.spell.spellId)
+  cooldownWatchSlot.iconHolderTexture:SetTexture(iconTexture)
+
+  if not cooldownWatchSlot.targetCooldownOverlay.cooldownStarted then
+    cooldownWatchSlot.targetCooldownOverlay:SetCooldown(cooldown.spell.castTime, cooldown.spell.cooldown)
+    cooldownWatchSlot.targetCooldownOverlay.cooldownStarted = true
   end
 
   cooldownWatchSlot:Show()
