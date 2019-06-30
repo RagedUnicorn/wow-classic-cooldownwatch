@@ -401,34 +401,14 @@ end
   @param {table} cooldow
 ]]--
 function me.ClearCooldownWatchSlotAnimated(cooldownWatchSlot, cooldown)
-  local texture
-
-  --TODO remove searching
-
-  for _, region in ipairs({cooldownWatchSlot:GetRegions()}) do
-    if region:GetName() ~= nil then
-      if string.find(region:GetName(), "_BigText$") then
-        region:SetText("")
-      elseif string.find(region:GetName(), "_SmallText$") then
-        region:SetText("")
-      elseif string.find(region:GetName(), "_Icon$") then
-        texture = region
-      end
-    end
-  end
-
-  for _, child in ipairs({cooldownWatchSlot:GetChildren()}) do
-    if child:GetName() ~= nil then
-      if string.find(child:GetName(), "_Cooldown$") then
-        child.cooldownStarted = false
-      end
-    end
-  end
+  cooldownWatchSlot.targetSpellTimeBig:SetText("")
+  cooldownWatchSlot.targetSpellTimeSmall:SetText("")
+  cooldownWatchSlot.targetCooldownOverlay.cooldownStarted = false
 
   local animationGroup = cooldownWatchSlot:GetAnimationGroups()
   animationGroup:SetScript("OnFinished", function()
     mod.cooldownQueue.RemoveCooldown(cooldown.caster, cooldown.spell.spellId)
-    texture:SetTexture(nil)
+    cooldownWatchSlot.iconHolderTexture:SetTexture(nil)
     cooldownWatchSlot.innerGlowFrame:Hide()
     cooldownWatchSlot:SetAlpha(1)
     cooldownWatchSlot:Hide()
@@ -443,34 +423,13 @@ end
   Clear a cooldownWatchSlot without any animation
 
   @param {table} cooldownWatchSlot
-  @param {table} cooldow
 ]]--
-function me.ClearCooldownWatchSlot(cooldownWatchSlot, cooldown)
-  local texture
-  -- TODO remove searching
-
-  -- TODO review
+function me.ClearCooldownWatchSlot(cooldownWatchSlot)
+  cooldownWatchSlot.targetSpellTimeBig:SetText("")
+  cooldownWatchSlot.targetSpellTimeSmall:SetText("")
+  cooldownWatchSlot.iconHolderTexture:SetTexture(nil)
   cooldownWatchSlot.innerGlowFrame:Hide()
-
-  for _, region in ipairs({cooldownWatchSlot:GetRegions()}) do
-    if region:GetName() ~= nil then
-      if string.find(region:GetName(), "_BigText$") then
-        region:SetText("")
-      elseif string.find(region:GetName(), "_SmallText$") then
-        region:SetText("")
-      elseif string.find(region:GetName(), "_Icon$") then
-        region:SetTexture(nil)
-      end
-    end
-  end
-
-  for _, child in ipairs({cooldownWatchSlot:GetChildren()}) do
-    if child:GetName() ~= nil then
-      if string.find(child:GetName(), "_Cooldown$") then
-        child.cooldownStarted = false
-      end
-    end
-  end
+  cooldownWatchSlot.targetCooldownOverlay.cooldownStarted = false
 
   cooldownWatchSlot:Hide()
 end
