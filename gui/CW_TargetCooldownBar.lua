@@ -42,7 +42,6 @@ function me.BuildUi()
   targetCooldownBarFrame = CreateFrame("Frame", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME, UIParent)
   targetCooldownBarFrame:SetWidth(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_WIDTH)
   targetCooldownBarFrame:SetHeight(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_HEIGHT)
-
   targetCooldownBarFrame:SetBackdrop({
     bgFile = [[Interface\DialogFrame\UI-DialogBox-Background]]
   })
@@ -135,7 +134,6 @@ function me.CreateCooldownWatchSlot(frame, position)
 
   innerGlowFrame:SetBackdrop(backdrop_innerglow)
   innerGlowFrame:SetBackdropColor(1, 1, 1, 0)
-  innerGlowFrame:SetBackdropBorderColor(1, 0.2, 0, 1) -- TODO remove?
   innerGlowFrame:Hide()
 
   cooldownWatchSlot.innerGlowFrame = innerGlowFrame
