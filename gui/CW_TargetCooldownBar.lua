@@ -82,6 +82,7 @@ end
   @param {table} frame
   @param {number} position
 ]]--
+-- TODO choose better naming
 function me.CreateCooldownWatchSlot(frame, position)
   local cooldownWatchSlot = CreateFrame("FRAME", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT .. position, frame)
 
@@ -97,7 +98,8 @@ function me.CreateCooldownWatchSlot(frame, position)
 
   local backdrop = {
     bgFile = [[Interface\AddOns\CooldownWatch\assets\ui_slot_background]],
-    edgeFile = [[Interface\\AddOns\\CooldownWatch\assets\ui_slot_glow]],
+    edgeFile = [[Interface\AddOns\CooldownWatch\assets\ui_slot_background]],
+    -- edgeFile = nil,
     tile = false,
     tileSize = 32,
     edgeSize = 20,
@@ -250,7 +252,7 @@ end
   @param {table} self
 ]]--
 function me.StartDragFrame(self)
-  -- if mod.configuration.IsTargetCastBarLocked() then return end
+  -- if mod.configuration.IsTargetCastBarLocked() then return end TODO
 
   self:StartMoving()
 end
@@ -261,7 +263,7 @@ end
   @param {table} self
 ]]--
 function me.StopDragFrame(self)
-  -- if mod.configuration.IsTargetCastBarLocked() then return end
+  -- if mod.configuration.IsTargetCastBarLocked() then return end TODO
 
   self:StopMovingOrSizing()
 
