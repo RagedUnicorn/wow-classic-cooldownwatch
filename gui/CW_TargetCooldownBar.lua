@@ -115,12 +115,12 @@ function me.CreateCooldownWatchSlot(frame, position)
   cooldownWatchSlot:SetBackdropColor(0.15, 0.15, 0.15, 1)
   cooldownWatchSlot:SetBackdropBorderColor(0, 0, 0, 1)
 
-  local innerGlowFrame = CreateFrame("FRAME", nil, cooldownWatchSlot)
-  innerGlowFrame:SetFrameLevel(2)
-  innerGlowFrame:SetPoint("TOPLEFT", cooldownWatchSlot, "TOPLEFT")
-  innerGlowFrame:SetPoint("BOTTOMRIGHT", cooldownWatchSlot, "BOTTOMRIGHT")
+  local highlightFrame = CreateFrame("FRAME", nil, cooldownWatchSlot)
+  highlightFrame:SetFrameLevel(2)
+  highlightFrame:SetPoint("TOPLEFT", cooldownWatchSlot, "TOPLEFT")
+  highlightFrame:SetPoint("BOTTOMRIGHT", cooldownWatchSlot, "BOTTOMRIGHT")
 
-  backdrop_innerglow = {
+  local innerBackdrop = {
     bgFile = [[Interface\AddOns\CooldownWatch\assets\ui_slot_background]],
     edgeFile = [[Interface\AddOns\CooldownWatch\assets\ui_slot_inner_glow]],
     tile = false,
@@ -134,11 +134,11 @@ function me.CreateCooldownWatchSlot(frame, position)
     }
   }
 
-  innerGlowFrame:SetBackdrop(backdrop_innerglow)
-  innerGlowFrame:SetBackdropColor(1, 1, 1, 0)
-  innerGlowFrame:Hide()
+  highlightFrame:SetBackdrop(innerBackdrop)
+  highlightFrame:SetBackdropColor(1, 1, 1, 0)
+  highlightFrame:Hide()
 
-  cooldownWatchSlot.innerGlowFrame = innerGlowFrame
+  cooldownWatchSlot.highlightFrame = highlightFrame
   cooldownWatchSlot.iconHolderTexture = me.CreateIconHolder(cooldownWatchSlot)
   cooldownWatchSlot.targetCooldownOverlay = me.CreateCooldownOverlay(cooldownWatchSlot)
   cooldownWatchSlot.targetSpellTimeBig = me.CreateBigTimerCooldown(cooldownWatchSlot)
@@ -194,9 +194,9 @@ function me.CreateCooldownOverlay(frame)
     frame,
     "CooldownFrameTemplate"
   )
-  cooldownOverlay:SetSize(32, 32)
+  cooldownOverlay:SetSize(32, 32) -- TODO use constants
   cooldownOverlay:SetAllPoints()
-  cooldownOverlay:SetCooldown(GetTime(), 10)
+  cooldownOverlay:SetCooldown(GetTime(), 10) -- TODO ?remove?
   cooldownOverlay:SetFrameLevel(cooldownOverlay:GetFrameLevel() - 1)
 
   return cooldownOverlay
@@ -235,48 +235,6 @@ function me.CreateSmallTimerCooldown(frame)
   smallTimerFontString:SetJustifyH("LEFT")
 
   return smallTimerFontString
-end
-
---[[
-  @param {table} frame
-    the frame to attach drag handlers
-]]--
-function me.SetupDragFrame(frame)
-  frame:SetScript("OnMouseDown", me.StartDragFrame)
-  frame:SetScript("OnMouseUp", me.StopDragFrame)
-end
-
---[[
-  Frame callback to start moving the passed (self) frame
-
-  @param {table} self
-]]--
-function me.StartDragFrame(self)
-  -- if mod.configuration.IsTargetCastBarLocked() then return end TODO
-
-  self:StartMoving()
-end
-
---[[
-  Frame callback to stop moving the passed (self) frame
-
-  @param {table} self
-]]--
-function me.StopDragFrame(self)
-  -- if mod.configuration.IsTargetCastBarLocked() then return end TODO
-
-  self:StopMovingOrSizing()
-
-  local point, relativeTo, relativePoint, posX, posY = self:GetPoint()
-
-  mod.configuration.SaveUserPlacedFramePosition(
-    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME,
-    point,
-    relativeTo,
-    relativePoint,
-    posX,
-    posY
-  )
 end
 
 --[[
@@ -319,13 +277,13 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   end
 
   if me.IsWarningTresholdBreached(cooldown.spell.cooldown, timeLeftBig) then
-    cooldownWatchSlot.innerGlowFrame:SetBackdropBorderColor(0.8, 1, 0, 1)
-    cooldownWatchSlot.innerGlowFrame:Show()
+    cooldownWatchSlot.highlightFrame:SetBackdropBorderColor(0.8, 1, 0, 1)
+    cooldownWatchSlot.highlightFrame:Show()
   end
 
   if me.IsAlertTresholdBreached(cooldown.spell.cooldown, timeLeftBig) then
-    cooldownWatchSlot.innerGlowFrame:SetBackdropBorderColor(1, 0.2, 0, 1)
-    cooldownWatchSlot.innerGlowFrame:Show()
+    cooldownWatchSlot.highlightFrame:SetBackdropBorderColor(1, 0.2, 0, 1)
+    cooldownWatchSlot.highlightFrame:Show()
   end
 
   -- position text based on its cooldown duration
@@ -409,7 +367,7 @@ function me.ClearCooldownWatchSlotAnimated(cooldownWatchSlot, cooldown)
   animationGroup:SetScript("OnFinished", function()
     mod.cooldownQueue.RemoveCooldown(cooldown.caster, cooldown.spell.spellId)
     cooldownWatchSlot.iconHolderTexture:SetTexture(nil)
-    cooldownWatchSlot.innerGlowFrame:Hide()
+    cooldownWatchSlot.highlightFrame:Hide()
     cooldownWatchSlot:SetAlpha(1)
     cooldownWatchSlot:Hide()
   end)
@@ -428,7 +386,7 @@ function me.ClearCooldownWatchSlot(cooldownWatchSlot)
   cooldownWatchSlot.targetSpellTimeBig:SetText("")
   cooldownWatchSlot.targetSpellTimeSmall:SetText("")
   cooldownWatchSlot.iconHolderTexture:SetTexture(nil)
-  cooldownWatchSlot.innerGlowFrame:Hide()
+  cooldownWatchSlot.highlightFrame:Hide()
   cooldownWatchSlot.targetCooldownOverlay.cooldownStarted = false
 
   cooldownWatchSlot:Hide()
@@ -477,4 +435,46 @@ function me.HideExampleTargetCooldownBar()
   targetCooldownBarFrame:Show()
 
   mod.ticker.StartTickerTargetCooldownBar() -- restart regular updates
+end
+
+--[[
+  @param {table} frame
+    the frame to attach drag handlers
+]]--
+function me.SetupDragFrame(frame)
+  frame:SetScript("OnMouseDown", me.StartDragFrame)
+  frame:SetScript("OnMouseUp", me.StopDragFrame)
+end
+
+--[[
+  Frame callback to start moving the passed (self) frame
+
+  @param {table} self
+]]--
+function me.StartDragFrame(self)
+  if mod.configuration.IsTargetCooldownBarLocked() then return end
+
+  self:StartMoving()
+end
+
+--[[
+  Frame callback to stop moving the passed (self) frame
+
+  @param {table} self
+]]--
+function me.StopDragFrame(self)
+  if mod.configuration.IsTargetCooldownBarLocked() then return end
+
+  self:StopMovingOrSizing()
+
+  local point, relativeTo, relativePoint, posX, posY = self:GetPoint()
+
+  mod.configuration.SaveUserPlacedFramePosition(
+    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME,
+    point,
+    relativeTo,
+    relativePoint,
+    posX,
+    posY
+  )
 end

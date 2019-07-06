@@ -82,6 +82,29 @@ function me.SetAddonVersion()
 end
 
 --[[
+  Enable moving of targetCooldownBar window
+]]--
+function me.UnlockTargetCooldownBar()
+  CooldownWatchConfiguration.targetCastBarLocked = false
+end
+
+--[[
+  Disable moving of targetCooldownBar window
+]]--
+function me.LockTargetCooldownBar()
+  CooldownWatchConfiguration.targetCastBarLocked = true
+end
+
+--[[
+  @return {boolean}
+    true - if the targetCooldownBar is locked
+    false - if the targetCooldownBar is not locked
+]]--
+function me.IsTargetCooldownBarLocked()
+  return CooldownWatchConfiguration.targetCastBarLocked
+end
+
+--[[
   Save the position of a frame in the addon variables allowing to persist its position
 
   @param {string} frameName
