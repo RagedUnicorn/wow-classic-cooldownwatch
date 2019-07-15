@@ -33,20 +33,20 @@ me.tag = "AddonConfiguration"
   Create addon configuration menu(s)
 ]]--
 function me.SetupAddonConfiguration()
-  local cooldownWatch = {}
-  cooldownWatch.panel = CreateFrame("Frame", RGCW_CONSTANTS.ELEMENT_ADDON_PANEL, UIParent)
+  local configurationPanel = CreateFrame("Frame", nil, UIParent)
 
   -- Register in the Interface Addon Options GUI
-  cooldownWatch.panel.name = rgcw.L["addon_name"]
+  configurationPanel.name = rgcw.L["addon_name"]
   -- Add the panel to the Interface Options
-  InterfaceOptions_AddCategory(cooldownWatch.panel)
+  InterfaceOptions_AddCategory(configurationPanel)
 
   -- Create subcategory
-  cooldownWatch.generalMenu = CreateFrame("Frame", RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME, cooldownWatch.panel)
-  cooldownWatch.generalMenu.name = rgcw.L["general_category_name"]
-  cooldownWatch.generalMenu.parent = cooldownWatch.panel.name
+  local generalMenu = CreateFrame("Frame", RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME, configurationPanel)
+  generalMenu.name = rgcw.L["general_category_name"]
+  generalMenu.parent = configurationPanel
   -- Add the child to the Interface Options
-  InterfaceOptions_AddCategory(cooldownWatch.generalMenu)
+  InterfaceOptions_AddCategory(generalMenu)
+  configurationPanel:Hide()
 
   --[[
     For development purpose the InterfaceOptionsFrame_OpenToCategory function can be used to directly
@@ -54,15 +54,15 @@ function me.SetupAddonConfiguration()
 
     Example:
 
-    InterfaceOptionsFrame_OpenToCategory(cooldownWatch.generalMenu)
-    InterfaceOptionsFrame_OpenToCategory(cooldownWatch.generalMenu)
+    InterfaceOptionsFrame_OpenToCategory(generalMenu)
+    InterfaceOptionsFrame_OpenToCategory(generalMenu)
 
     Note: The behavior with how events fire might change quite a bit when using the above debug method.
     Because of this it is important that the "normal" manuall way of opening the menu is tested as well.
   ]]--
 
-  me.BuildAboutContent(cooldownWatch.panel)
-  -- mod.generalMenu.BuildUi(cooldownWatch.generalMenu)
+  me.BuildAboutContent(configurationPanel)
+  -- mod.generalMenu.BuildUi(generalMenu)
 end
 
 --[[
