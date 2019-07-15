@@ -34,12 +34,12 @@ CooldownWatchConfiguration = {
   --[[
     Whether the targetCooldownBar is locked from moving or not
   ]]--
-  ["targetCastBarLocked"] = true,
+  ["targetCooldownBar"] = true,
   --[[
     Framepositions for user draggable Frames
     frames = {
       -- should match the actual frame name
-      ["ECB_Frame"] = {
+      ["CW_Frame"] = {
       point: "CENTER",
         posX: 0,
         posY: 0
@@ -54,6 +54,11 @@ CooldownWatchConfiguration = {
   Set default values if property is nil. This might happen after an addon upgrade
 ]]--
 function me.SetupConfiguration()
+  if CooldownWatchConfiguration.targetCooldownBar == nil then
+    mod.logger.LogInfo(me.tag, "targetCooldownBar has unexpected nil value")
+    CooldownWatchConfiguration.targetCooldownBar = true
+  end
+
   if CooldownWatchConfiguration.frames == nil then
     mod.logger.LogInfo(me.tag, "frames has unexpected nil value")
     CooldownWatchConfiguration.frames = {}
@@ -85,14 +90,14 @@ end
   Enable moving of targetCooldownBar window
 ]]--
 function me.UnlockTargetCooldownBar()
-  CooldownWatchConfiguration.targetCastBarLocked = false
+  CooldownWatchConfiguration.targetCooldownBar = false
 end
 
 --[[
   Disable moving of targetCooldownBar window
 ]]--
 function me.LockTargetCooldownBar()
-  CooldownWatchConfiguration.targetCastBarLocked = true
+  CooldownWatchConfiguration.targetCooldownBar = true
 end
 
 --[[
@@ -101,7 +106,7 @@ end
     false - if the targetCooldownBar is not locked
 ]]--
 function me.IsTargetCooldownBarLocked()
-  return CooldownWatchConfiguration.targetCastBarLocked
+  return CooldownWatchConfiguration.targetCooldownBar
 end
 
 --[[
