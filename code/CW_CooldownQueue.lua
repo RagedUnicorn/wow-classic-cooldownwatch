@@ -38,7 +38,7 @@ me.tag = "CooldownQueue"
       - {string} actual name of the caster
     ["spell"] = {
       ["spellId"] = spellId
-      - {number} spellId of the spell
+        - {number} spellId of the spell
       ["spellName"] = spellName,
         - {string} name of the spell
       ["rank"] = rank,
@@ -50,7 +50,7 @@ me.tag = "CooldownQueue"
       ["cooldownWorstCase"] = cooldownWorstCase,
         - {number} Worst case cooldown for the cooldown. Assuming the enemy player has its spell
         fully reduces with either a talent or an item.
-        Note: if an item is unlikely to be worn by players it might get ommited here
+        Note: if an item is unlikely to be worn by players it might get omitted here
       ["active"] = boolean
         - {boolean} Whether the spell is active and tracked or not
     }
@@ -80,6 +80,7 @@ function me.AddCooldown(caster, casterName, spell)
 
   if not spell.active then
     mod.logger.LogWarn(me.tag, "Ignored inactive spell: " .. spell.spellName)
+    return -- abort
   end
 
   local cooldownEvent = {
