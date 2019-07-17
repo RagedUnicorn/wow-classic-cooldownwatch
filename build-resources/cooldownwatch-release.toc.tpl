@@ -1,9 +1,9 @@
 ## Interface: ${addon.interface}
 ## Title: ${addon.name}
 ## Author: ${addon.author}
-## Notes: Addon that tracks cooldowns of enemy players
+## Notes: ${addon.description}
 ## Version: ${addon.tag.version}
-## SavedVariablesPerCharacter: CooldownWatchConfiguration
+## SavedVariablesPerCharacter: ${addon.savedVariablesPerCharacter}
 
 # constant values
 code/CW_Constants.lua
@@ -22,7 +22,6 @@ code/CW_CombatLog.lua
 code/CW_SpellMap.lua
 code/CW_CooldownQueue.lua
 code/CW_Target.lua
-code/CW_Constants.lua
 code/CW_Ticker.lua
 code/CW_Configuration.lua
 
