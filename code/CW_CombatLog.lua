@@ -33,10 +33,8 @@ me.tag = "CombatLog"
   Processing the details of the current combat log event. Invoked when 'COMBAT_LOG_EVENT_UNFILTERED' is fired
 ]]--
 function me.ProcessUnfilteredCombatLogEvent()
-  -- carefull target and targetName might be null if the caster is not your current target
+  -- careful target and targetName might be null if the caster is not your current target
   local _, event, _, caster, casterName, sourceFlags, _, target, targetName, _, _, spellId, spellName, _ = CombatLogGetCurrentEventInfo()
-
-  mod.logger.LogError(me.tag, "Event: " .. event)
 
   --[[
     While debug mode is active we also allow friendly events to be processed. Otherwise only hostile player events are
@@ -62,7 +60,7 @@ function me.ProcessUnfilteredCombatLogEvent()
     mod.logger.LogDebug(me.tag, "Caster:" .. casterName)
     mod.logger.LogDebug(me.tag, "SourceFlags:" .. sourceFlags)
 
-    -- local spell
+    local spell
     --[[
       If the caster of the detected spell is our current target we can speed up
       the process of searching for the spell in the spellmap by figuring out the
@@ -88,7 +86,6 @@ end
   @param {table} spell
   @param {number} spellId
   @param {number} castTime
-
 ]]--
 function me.TrackCooldown(caster, casterName, spell, spellId, castTime)
   if spell ~= nil then

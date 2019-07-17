@@ -12,7 +12,7 @@ if (GetLocale() == "deDE") then
   -- about tab
   rgcw.L["author"] = "Autor: Michael Wiesendanger"
   rgcw.L["email"] = "E-Mail: michael.wiesendanger@gmail.com"
-  rgcw.L["version"] = "Version: " .. GetAddOnMetadata("CooldownWatch", "Version")
+  rgcw.L["version"] = "Version: " .. GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
   rgcw.L["issues"] = "Probleme: https://github.com/RagedUnicorn/wow-classic-cooldownwatch/issues"
 
   -- general

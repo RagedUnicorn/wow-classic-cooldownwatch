@@ -32,6 +32,7 @@ me.tag = "Cmd"
   Print cmd options for addon
 ]]--
 local function ShowInfoMessage()
+  -- TODO what about rgcw.L["help"] where is it used (if at all)
   DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["info_title"])
   DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["reload"])
   DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["conf"])

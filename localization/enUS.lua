@@ -11,7 +11,7 @@ rgcw.L["info_title"] = "|cFFFFFF00CooldownWatch:|r"
 -- about
 rgcw.L["author"] = "Author: Michael Wiesendanger"
 rgcw.L["email"] = "E-Mail: michael.wiesendanger@gmail.com"
-rgcw.L["version"] = "Version: " .. GetAddOnMetadata("CooldownWatch", "Version")
+rgcw.L["version"] = "Version: " .. GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
 rgcw.L["issues"] = "Issues: https://github.com/RagedUnicorn/wow-classic-cooldownwatch/issues"
 
 -- general

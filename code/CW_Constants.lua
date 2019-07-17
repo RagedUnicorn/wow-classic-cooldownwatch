@@ -24,6 +24,7 @@
 ]]--
 
 RGCW_CONSTANTS = {
+  ADDON_NAME = "CooldownWatch",
   --[[
     Update Intervals for tickers
   ]]--

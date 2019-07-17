@@ -34,7 +34,7 @@ CooldownWatchConfiguration = {
   --[[
     Whether the targetCooldownBar is locked from moving or not
   ]]--
-  ["targetCooldownBar"] = true,
+  ["lockTargetCooldownBar"] = false,
   --[[
     Framepositions for user draggable Frames
     frames = {
@@ -54,9 +54,9 @@ CooldownWatchConfiguration = {
   Set default values if property is nil. This might happen after an addon upgrade
 ]]--
 function me.SetupConfiguration()
-  if CooldownWatchConfiguration.targetCooldownBar == nil then
-    mod.logger.LogInfo(me.tag, "targetCooldownBar has unexpected nil value")
-    CooldownWatchConfiguration.targetCooldownBar = true
+  if CooldownWatchConfiguration.lockTargetCooldownBar == nil then
+    mod.logger.LogInfo(me.tag, "lockTargetCooldownBar has unexpected nil value")
+    CooldownWatchConfiguration.lockTargetCooldownBar = false
   end
 
   if CooldownWatchConfiguration.frames == nil then
@@ -78,26 +78,26 @@ end
 function me.SetAddonVersion()
   -- if no version set so far make sure to set the current one
   if CooldownWatchConfiguration.addonVersion == nil then
-    CooldownWatchConfiguration.addonVersion = GetAddOnMetadata("CooldownWatch", "Version")
+    CooldownWatchConfiguration.addonVersion = GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
   end
 
   -- me.MigrationPath()
   -- migration done update addon version to current
-  CooldownWatchConfiguration.addonVersion = GetAddOnMetadata("CooldownWatch", "Version")
+  CooldownWatchConfiguration.addonVersion = GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
 end
 
 --[[
   Enable moving of targetCooldownBar window
 ]]--
 function me.UnlockTargetCooldownBar()
-  CooldownWatchConfiguration.targetCooldownBar = false
+  CooldownWatchConfiguration.lockTargetCooldownBar = false
 end
 
 --[[
   Disable moving of targetCooldownBar window
 ]]--
 function me.LockTargetCooldownBar()
-  CooldownWatchConfiguration.targetCooldownBar = true
+  CooldownWatchConfiguration.lockTargetCooldownBar = true
 end
 
 --[[
@@ -106,7 +106,7 @@ end
     false - if the targetCooldownBar is not locked
 ]]--
 function me.IsTargetCooldownBarLocked()
-  return CooldownWatchConfiguration.targetCooldownBar
+  return CooldownWatchConfiguration.lockTargetCooldownBar
 end
 
 --[[
@@ -135,7 +135,7 @@ function me.SaveUserPlacedFramePosition(frameName, point, relativeTo, relativePo
 end
 
 --[[
-  Get the position of a save frame
+  Get the position of a saved frame
 
   @param {string} frameName
   @return {table | nil}
