@@ -29,39 +29,26 @@ mod.spellMap = me
 
 me.tag = "SpellMap"
 
--- /run t = {GetSpellInfo(2687)};/dump t TODO
 --[[
-  Some of the spells do no longer return anything because they were removed. We should write a script that
-  we can try out on the beta and verify the spells
-]]--
-
-
---[[
-  Need to try here with all the ranks because we have to assume the we get a different id for a different rank
-  unlike when parsing the plain text of the combatlog
-]]--
-
-local spellMap = {
-  --[[
-    ["class"] = {
-      The idea behind using spellId is to have the easiest way to find a casted spell in the list.
-      This should be faster than searching through the list until a match is found.
-      [spellId] = {
-        ["spellName"] = {string},
-          Name of the spell how it shows in the spellbook
-        ["rank"] = {number},
-          The rank of the spell often not available
-        ["cooldown"] = {number},
-          Cooldown of the spell in seconds without any modifiers such as talent or items
-        ["cooldownWorstCase"] = {number},
-          Optional worst case cooldown for the cooldown. Assuming the enemy player has its spell
-          fully reduced with either a talent or an item.
-          Note: if an item is unlikely to be worn by players it might get ommited here
-        ["active"] = {boolean}
-          Whether the spell is active and tracked or not
-      }
+  ["class"] = {
+    The idea behind using spellId is to have the easiest way to find a casted spell in the list.
+    This should be faster than searching through the list until a match is found.
+    [spellId] = {
+      ["spellName"] = spellName,
+        - {string} Name of the spell how it shows in the spellbook
+      ["rank"] = rank,
+        - {number | nil} The rank of the spell often not available
+      ["cooldown"] = cooldown,
+        - {number} Cooldown of the spell in seconds without any modifiers such as talent or items
+      ["cooldownWorstCase"] = cooldownWorstCase,
+        - {number} Optional worst case cooldown for the cooldown. Assuming the enemy player has its spell fully reduced with either a talent or an item.
+        Note: if an item is unlikely to be worn by players it might get omitted here
+      ["active"] = true
+        - {boolean} Whether the spell is active and tracked or not
     }
-  ]]--
+  }
+]]--
+local spellMap = {
   ["priest"] = {
     [8122] = {
       ["spellName"] = "Psychic Scream",
@@ -1598,7 +1585,7 @@ local spellMap = {
   @param {string} className
     Optional classname in english
 
-  @return {table | nil}, {number}
+  @return {table | nil}
     table - if a spell could be found
     nil - if no matching spell was found in the list
 ]]--

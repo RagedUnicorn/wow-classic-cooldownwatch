@@ -49,7 +49,7 @@ RGCW_CONSTANTS = {
   ELEMENT_TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT = "$parent_SmallText",
   ELEMENT_TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT_SIZE = 15,
   --[[
-    Treshold in percent of the total cooldowntime to trigger warning glow for the cooldownslot
+    Threshold in percent of the total cooldowntime to trigger warning glow for the cooldownslot
   ]]--
   ELEMENT_TARGET_COOLDOWN_WARN_TRESHOLD = 50,
   ELEMENT_TARGET_COOLDOWN_ALERT_TRESHOLD = 20,
@@ -75,5 +75,5 @@ RGCW_CONSTANTS = {
   --[[
     General
   ]]--
-  ELEMENT_GENERAL_SUB_OPTION_FRAME = "CW_GeneralMenuOptionsFrame",
+  ELEMENT_GENERAL_SUB_OPTION_FRAME = "CW_GeneralMenuOptionsFrame"
 }

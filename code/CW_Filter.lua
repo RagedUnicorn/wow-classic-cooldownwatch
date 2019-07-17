@@ -31,7 +31,7 @@ mod.filter = me
 local filters = {}
 
 --[[
-  Register a new pattern in the form of a string to the filterlist. A pattern can be a simple string
+  Register a new pattern in the form of a string to the filter list. A pattern can be a simple string
   or a regular expression to filter for.
 
   @param {String} name
@@ -49,7 +49,7 @@ function me.RegisterFilter(name, pattern)
 end
 
 --[[
-  Deregister a previously filtered tag in the form of a string from the filterlist.
+  Deregister a previously filtered tag in the form of a string from the filter list.
   If the tag is not filtered this has no effect.
 
   @param {string} name
