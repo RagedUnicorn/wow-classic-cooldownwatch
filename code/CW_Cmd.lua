@@ -32,9 +32,9 @@ me.tag = "Cmd"
   Print cmd options for addon
 ]]--
 local function ShowInfoMessage()
-  DEFAULT_CHAT_FRAME:AddMessage(ecb.L["info_title"])
-  DEFAULT_CHAT_FRAME:AddMessage(ecb.L["reload"])
-  DEFAULT_CHAT_FRAME:AddMessage(ecb.L["conf"])
+  DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["info_title"])
+  DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["reload"])
+  DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["conf"])
 end
 
 --[[
