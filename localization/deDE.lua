@@ -7,6 +7,7 @@ if (GetLocale() == "deDE") then
   -- console
   rgcw.L["help"] = "|cFFFFFF00(%s)|r: Benutze |cFFFFFF00/rgcw|r oder |cFFFFFF00/cooldownwatch|r für eine Liste der verfügbaren Optionen"
   rgcw.L["reload"] = "|cFFFFFF00reload|r - UI neu laden"
+  rgcw.L["opt"] = "|cFFFFFF00opt|r - zeige Optionsmenu an"
   rgcw.L["info_title"] = "|cFFFFFF00CooldownWatch:|r"
 
   -- about tab

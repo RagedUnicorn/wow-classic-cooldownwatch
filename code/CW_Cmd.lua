@@ -32,7 +32,6 @@ me.tag = "Cmd"
   Print cmd options for addon
 ]]--
 local function ShowInfoMessage()
-  -- TODO what about rgcw.L["help"] where is it used (if at all)
   DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["info_title"])
   DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["reload"])
   DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["conf"])
@@ -55,10 +54,12 @@ function me.SetupSlashCmdList()
       table.insert(args, arg)
     end
 
-    if args[1] == "" or args[1] == "info" or table.getn(args) == 0 then
+    if args[1] == "" or args[1] == "help" or table.getn(args) == 0 then
       ShowInfoMessage()
     elseif args[1] == "rl" or args[1] == "reload" then
       ReloadUI()
+    elseif args[1] == "opt" then
+      mod.addonConfiguration.OpenAddonPanel() -- TODO testing
     elseif args[1] == "conf" or "configure" then
       if args[2] == "enable" then
         mod.targetCooldownBar.ShowExampleTargetCooldownBar()
