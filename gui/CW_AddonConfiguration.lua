@@ -33,7 +33,7 @@ me.tag = "AddonConfiguration"
   Create addon configuration menu(s)
 ]]--
 function me.SetupAddonConfiguration()
-  local configurationPanel = CreateFrame("Frame", nil, UIParent)
+  local configurationPanel = CreateFrame("Frame", RGCW_CONSTANTS.ELEMENT_ADDON_PANEL, UIParent)
 
   -- Register in the Interface Addon Options GUI
   configurationPanel.name = rgcw.L["addon_name"]
@@ -70,6 +70,6 @@ end
 function me.OpenAddonPanel()
   -- TODO double call needed?
   -- Because of a blizzard bug this usually has to be called twice to actually work
-  InterfaceOptionsFrame_OpenToCategory(_G[RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME])
-  InterfaceOptionsFrame_OpenToCategory(_G[RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME])
+  InterfaceOptionsFrame_OpenToCategory(_G[RGCW_CONSTANTS.ELEMENT_ADDON_PANEL])
+  InterfaceOptionsFrame_OpenToCategory(_G[RGCW_CONSTANTS.ELEMENT_ADDON_PANEL])
 end

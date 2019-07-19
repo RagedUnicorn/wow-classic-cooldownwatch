@@ -63,6 +63,7 @@ RGCW_CONSTANTS = {
   --[[
     Addon configuration
   ]]--
+  ELEMENT_ADDON_PANEL = "CW_AddonPanel",
   ELEMENT_TOOLTIP = "GameTooltip",
   --[[
     About
