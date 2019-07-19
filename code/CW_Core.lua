@@ -98,7 +98,7 @@ end
   Show welcome message to user
 ]]--
 function me.ShowWelcomeMessage()
-  DEFAULT_CHAT_FRAME:AddMessage(
+  print(
     string.format(RGCW_CONSTANTS.ADDON_NAME .. rgcw.L["help"],
     GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
   )
