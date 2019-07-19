@@ -60,43 +60,16 @@ function me.SetupAddonConfiguration()
     Note: The behavior with how events fire might change quite a bit when using the above debug method.
     Because of this it is important that the "normal" manuall way of opening the menu is tested as well.
   ]]--
-
-  me.BuildAboutContent(configurationPanel)
+  mod.aboutContent(configurationPanel)
   -- mod.generalMenu.BuildUi(generalMenu)
 end
 
 --[[
-  Main tab for addon - show about content
-
-  @param {table} frame
+  Open the Blizzard addon configurations panel for the addon
 ]]--
-function me.BuildAboutContent(frame)
-  local ragedUnicornLogo  = frame:CreateTexture(RGCW_CONSTANTS.ELEMENT_ABOUT_LOGO, "ARTWORK")
-  ragedUnicornLogo:SetPoint("TOP", 0, -20)
-  ragedUnicornLogo:SetSize(256, 256)
-  ragedUnicornLogo:SetTexture([[Interface\AddOns\EnemyCastBar\assets\logo_ragedunicorn]])
-
-  local authorFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_ABOUT_AUTHOR_FONT_STRING, "OVERLAY")
-  authorFontString:SetFont("Fonts\\FRIZQT__.TTF", 15)
-  authorFontString:SetPoint("TOP", 0, -300)
-  authorFontString:SetSize(frame:GetWidth(), 20)
-  authorFontString:SetText(rgcw.L["author"])
-
-  local emailFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_ABOUT_EMAIL_FONT_STRING, "OVERLAY")
-  emailFontString:SetFont("Fonts\\FRIZQT__.TTF", 15)
-  emailFontString:SetPoint("TOP", 0, -320)
-  emailFontString:SetSize(frame:GetWidth(), 20)
-  emailFontString:SetText(rgcw.L["email"])
-
-  local versionFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_ABOUT_VERSION_FONT_STRING, "OVERLAY")
-  versionFontString:SetFont("Fonts\\FRIZQT__.TTF", 15)
-  versionFontString:SetPoint("TOP", 0, -340)
-  versionFontString:SetSize(frame:GetWidth(), 20)
-  versionFontString:SetText(rgcw.L["version"])
-
-  local issuesSimpleHtml = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_ABOUT_ISSUES_FONT_STRING, "OVERLAY")
-  issuesSimpleHtml:SetFont("Fonts\\FRIZQT__.TTF", 15)
-  issuesSimpleHtml:SetPoint("TOP", 0, -360)
-  issuesSimpleHtml:SetSize(frame:GetWidth(), 20)
-  issuesSimpleHtml:SetText(rgcw.L["issues"])
+function me.OpenAddonPanel()
+  -- TODO double call needed?
+  -- Because of a blizzard bug this usually has to be called twice to actually work
+  InterfaceOptionsFrame_OpenToCategory(_G[RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME])
+  InterfaceOptionsFrame_OpenToCategory(_G[RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME])
 end

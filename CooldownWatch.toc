@@ -22,7 +22,6 @@ code/CW_CombatLog.lua
 code/CW_SpellMap.lua
 code/CW_CooldownQueue.lua
 code/CW_Target.lua
-code/CW_Constants.lua
 code/CW_Ticker.lua
 code/CW_Configuration.lua
 
@@ -33,3 +32,4 @@ code/CW_Debug.lua
 gui/CW_Frame.xml
 gui/CW_TargetCooldownBar.lua
 gui/CW_AddonConfiguration.lua
+gui/CW_AboutContent.lua

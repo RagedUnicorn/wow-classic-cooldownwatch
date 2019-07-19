@@ -29,3 +29,4 @@ code/CW_Configuration.lua
 gui/CW_Frame.xml
 gui/CW_TargetCooldownBar.lua
 gui/CW_AddonConfiguration.lua
+gui/CW_AboutContent.lua
