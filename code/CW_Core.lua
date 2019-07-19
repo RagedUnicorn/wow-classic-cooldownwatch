@@ -99,5 +99,7 @@ end
 ]]--
 function me.ShowWelcomeMessage()
   DEFAULT_CHAT_FRAME:AddMessage(
-    string.format(RGCW_CONSTANTS.ADDON_NAME .. rgcw.L["help"], GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version"))
+    string.format(RGCW_CONSTANTS.ADDON_NAME .. rgcw.L["help"],
+    GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
+  )
 end
