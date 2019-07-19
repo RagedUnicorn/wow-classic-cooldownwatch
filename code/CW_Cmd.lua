@@ -34,6 +34,7 @@ me.tag = "Cmd"
 local function ShowInfoMessage()
   DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["info_title"])
   DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["reload"])
+  DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["opt"])
   DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["conf"])
 end
 
