@@ -90,4 +90,14 @@ function me.Initialize()
   me.configuration.SetupConfiguration()
   -- setup tickers
   me.ticker.StartTickerTargetCooldownBar()
+
+  me.ShowWelcomeMessage()
+end
+
+--[[
+  Show welcome message to user
+]]--
+function me.ShowWelcomeMessage()
+  DEFAULT_CHAT_FRAME:AddMessage(
+    string.format(RGCW_CONSTANTS.ADDON_NAME .. rgcw.L["help"], GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version"))
 end
