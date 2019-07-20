@@ -18,4 +18,17 @@ if (GetLocale() == "deDE") then
 
   -- general
   rgecb.L["general_category_name"] = "Allgemein"
+
+  -- cooldown menu TODO translate
+  rgcw.L["category_priest"] = "Priester"
+  rgcw.L["category_rogue"] = "Schurke"
+  rgcw.L["category_mage"] = "Magier"
+  rgcw.L["category_hunter"] = "Jäger"
+  rgcw.L["category_warlock"] = "Hexenmeister"
+  rgcw.L["category_paladin"] = "Paladin"
+  rgcw.L["category_druid"] = "Druide"
+  rgcw.L["category_shaman"] = "Shamane"
+  rgcw.L["category_warrior"] = "Krieger"
+  rgcw.L["category_racials"] = "Rassenfähigkeiten"
+  rgcw.L["category_items"] = "Items"
 end

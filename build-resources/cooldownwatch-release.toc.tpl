@@ -30,3 +30,5 @@ gui/CW_Frame.xml
 gui/CW_TargetCooldownBar.lua
 gui/CW_AddonConfiguration.lua
 gui/CW_AboutContent.lua
+gui/CW_GeneralMenu.lua
+gui/CW_CooldownMenu.lua

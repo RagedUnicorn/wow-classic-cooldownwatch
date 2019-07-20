@@ -46,6 +46,7 @@ function me.SetupAddonConfiguration()
   generalMenu.parent = configurationPanel
   -- Add the child to the Interface Options
   InterfaceOptions_AddCategory(generalMenu)
+
   configurationPanel:Hide()
 
   --[[
@@ -62,6 +63,20 @@ function me.SetupAddonConfiguration()
   ]]--
   mod.aboutContent.BuildAboutContent(configurationPanel)
   -- mod.generalMenu.BuildUi(generalMenu)
+  me.BuildSubCategories(configurationPanel)
+end
+--[[
+  @param {table} configurationPanel
+]]--
+function me.BuildSubCategories(configurationPanel)
+  for i = 1, table.getn(RGCW_CONSTANTS.CATEGORIES) do
+    -- Create subcategory
+    local menu = CreateFrame("Frame", RGCW_CONSTANTS.CATEGORIES[i].name, configurationPanel)
+    menu.name = rgcw.L[RGCW_CONSTANTS.CATEGORIES[i].localizationKey]
+    menu.parent = configurationPanel
+    -- Add the child to the Interface Options
+    InterfaceOptions_AddCategory(menu)
+  end
 end
 
 --[[

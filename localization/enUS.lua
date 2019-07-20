@@ -17,3 +17,16 @@ rgcw.L["issues"] = "Issues: https://github.com/RagedUnicorn/wow-classic-cooldown
 
 -- general
 rgcw.L["general_category_name"] = "General"
+
+-- cooldown menu
+rgcw.L["category_priest"] = "Priest"
+rgcw.L["category_rogue"] = "Rogue"
+rgcw.L["category_mage"] = "Mage"
+rgcw.L["category_hunter"] = "Hunter"
+rgcw.L["category_warlock"] = "Warlock"
+rgcw.L["category_paladin"] = "Paladin"
+rgcw.L["category_druid"] = "Druid"
+rgcw.L["category_shaman"] = "Shaman"
+rgcw.L["category_warrior"] = "Warrior"
+rgcw.L["category_racials"] = "Racials"
+rgcw.L["category_items"] = "Items"

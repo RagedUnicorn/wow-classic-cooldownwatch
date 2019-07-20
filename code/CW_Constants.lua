@@ -66,7 +66,7 @@ RGCW_CONSTANTS = {
   ELEMENT_ADDON_PANEL = "CW_AddonPanel",
   ELEMENT_TOOLTIP = "GameTooltip",
   --[[
-    About
+    AboutMenu
   ]]--
   ELEMENT_ABOUT_LOGO = "CW_AboutLogo",
   ELEMENT_ABOUT_AUTHOR_FONT_STRING = "CW_AboutAuthor",
@@ -74,7 +74,56 @@ RGCW_CONSTANTS = {
   ELEMENT_ABOUT_VERSION_FONT_STRING = "CW_AboutVersion",
   ELEMENT_ABOUT_ISSUES_FONT_STRING = "CW_AboutIssues",
   --[[
-    General
+    GeneralMenu
   ]]--
-  ELEMENT_GENERAL_SUB_OPTION_FRAME = "CW_GeneralMenuOptionsFrame"
+  ELEMENT_GENERAL_SUB_OPTION_FRAME = "CW_GeneralMenuOptionsFrame",
+  --[[
+    CooldownMenu
+  ]]
+  CATEGORIES = {
+    [1] = {
+      ["localizationKey"] = "category_priest",
+      ["name"] = "CW_PriestOptionsFrame"
+    },
+    [2] = {
+      ["localizationKey"] = "category_rogue",
+      ["name"] = "CW_RogueOptionsFrame"
+    },
+    [3] = {
+      ["localizationKey"] = "category_mage",
+      ["name"] = "CW_MageOptionsFrame"
+    },
+    [4] = {
+      ["localizationKey"] = "category_hunter",
+      ["name"] = "CW_HunterOptionsFrame"
+    },
+    [5] = {
+      ["localizationKey"] = "category_warlock",
+      ["name"] = "CW_WarlockOptionsFrame"
+    },
+    [6] = {
+      ["localizationKey"] = "category_paladin",
+      ["name"] = "CW_PaladinOptionsFrame"
+    },
+    [7] = {
+      ["localizationKey"] = "category_druid",
+      ["name"] = "CW_DruidOptionsFrame"
+    },
+    [8] = {
+      ["localizationKey"] = "category_shaman",
+      ["name"] = "CW_ShamanOptionsFrame"
+    },
+    [9] = {
+      ["localizationKey"] = "category_warrior",
+      ["name"] = "CW_WarriorOptionsFrame"
+    },
+    [10] = {
+      ["localizationKey"] = "category_racials",
+      ["name"] = "CW_RacialsOptionsFrame"
+    },
+    [11] = {
+      ["localizationKey"] = "category_items",
+      ["name"] = "CW_ItemsOptionsFrame"
+    }
+  }
 }
