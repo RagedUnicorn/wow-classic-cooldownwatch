@@ -100,6 +100,6 @@ end
 function me.ShowWelcomeMessage()
   print(
     string.format(RGCW_CONSTANTS.ADDON_NAME .. rgcw.L["help"],
-    GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
+    GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version"))
   )
 end

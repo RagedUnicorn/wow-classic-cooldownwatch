@@ -60,7 +60,7 @@ function me.SetupAddonConfiguration()
     Note: The behavior with how events fire might change quite a bit when using the above debug method.
     Because of this it is important that the "normal" manuall way of opening the menu is tested as well.
   ]]--
-  mod.aboutContent(configurationPanel)
+  mod.aboutContent.BuildAboutContent(configurationPanel)
   -- mod.generalMenu.BuildUi(generalMenu)
 end
 
@@ -68,7 +68,6 @@ end
   Open the Blizzard addon configurations panel for the addon
 ]]--
 function me.OpenAddonPanel()
-  -- TODO double call needed?
   -- Because of a blizzard bug this usually has to be called twice to actually work
   InterfaceOptionsFrame_OpenToCategory(_G[RGCW_CONSTANTS.ELEMENT_ADDON_PANEL])
   InterfaceOptionsFrame_OpenToCategory(_G[RGCW_CONSTANTS.ELEMENT_ADDON_PANEL])
