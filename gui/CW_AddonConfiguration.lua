@@ -33,22 +33,10 @@ me.tag = "AddonConfiguration"
   Create addon configuration menu(s)
 ]]--
 function me.SetupAddonConfiguration()
-  local configurationPanel = CreateFrame("Frame", RGCW_CONSTANTS.ELEMENT_ADDON_PANEL, UIParent)
+  local configurationPanel = me.BuildCategory(RGCW_CONSTANTS.ELEMENT_ADDON_PANEL, nil, rgcw.L["addon_name"])
+  local generalMenu = me.BuildCategory(RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME, configurationPanel, rgcw.L["general_category_name"])
 
-  -- Register in the Interface Addon Options GUI
-  configurationPanel.name = rgcw.L["addon_name"]
-  -- Add the panel to the Interface Options
-  InterfaceOptions_AddCategory(configurationPanel)
-
-  -- Create subcategory
-  local generalMenu = CreateFrame("Frame", RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME, configurationPanel)
-  generalMenu.name = rgcw.L["general_category_name"]
-  generalMenu.parent = configurationPanel
-  -- Add the child to the Interface Options
-  InterfaceOptions_AddCategory(generalMenu)
-
-  configurationPanel:Hide()
-
+  me.BuildCooldownCategories(configurationPanel)
   --[[
     For development purpose the InterfaceOptionsFrame_OpenToCategory function can be used to directly
     open a specific category. Because of a blizzard bug this usually has to be called twice to actually work.
@@ -63,17 +51,49 @@ function me.SetupAddonConfiguration()
   ]]--
   mod.aboutContent.BuildAboutContent(configurationPanel)
   -- mod.generalMenu.BuildUi(generalMenu)
-  me.BuildSubCategories(configurationPanel)
+  mod.cooldownMenu.BuildUi()
 end
+
 --[[
+  @param {string} frameName
+  @param {table} parent
+  @param {string} panelText
+
+  @return {table}
+]]--
+function me.BuildCategory(frameName, parent, panelText)
+  local menu
+
+  if parent == nil then
+    menu = CreateFrame("Frame", frameName, UIParent)
+  else
+    menu = CreateFrame("Frame", frameName, parent)
+    menu.parent = parent
+  end
+  menu.name = panelText
+  -- Important to hide panel initially. Interface addon options will take care of showing the menu
+  menu:Hide()
+  -- Add the child to the Interface Options
+  InterfaceOptions_AddCategory(menu)
+
+  return menu
+end
+
+--[[
+  Build configuration panels for all categories
+
   @param {table} configurationPanel
 ]]--
-function me.BuildSubCategories(configurationPanel)
-  for i = 1, table.getn(RGCW_CONSTANTS.CATEGORIES) do
-    -- Create subcategory
-    local menu = CreateFrame("Frame", RGCW_CONSTANTS.CATEGORIES[i].name, configurationPanel)
-    menu.name = rgcw.L[RGCW_CONSTANTS.CATEGORIES[i].localizationKey]
+function me.BuildCooldownCategories(configurationPanel)
+  for index, category in ipairs(RGCW_CONSTANTS.CATEGORIES) do
+    local menu = CreateFrame("Frame", category.name, configurationPanel)
+    menu.name = rgcw.L[category.localizationKey]
     menu.parent = configurationPanel
+    menu.value = index
+
+    menu:SetScript("OnShow", mod.cooldownMenu.cooldownMenuOnShow)
+    -- Important to hide panel initially. Interface addon options will take care of showing the menu
+    menu:Hide()
     -- Add the child to the Interface Options
     InterfaceOptions_AddCategory(menu)
   end

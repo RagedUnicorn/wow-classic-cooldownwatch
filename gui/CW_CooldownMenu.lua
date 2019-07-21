@@ -34,6 +34,10 @@ me.tag = "CooldownMenu"
   @param {table} frame
     The addon configuration frame to attach to
 ]]--
-function me.BuildUi(frame)
+function me.BuildUi()
+ mod.logger.LogError(me.tag, "Build Ui CooldownMenu")
+end
 
+function me.cooldownMenuOnShow(self)
+  mod.logger.LogError(me.tag, "OnShow: " .. self.value)
 end
