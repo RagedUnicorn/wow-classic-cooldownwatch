@@ -1608,3 +1608,18 @@ function me.FindSpell(spellId, className)
 
   return nil -- no spell found
 end
+
+--[[
+TODO
+  Get map for a certain category
+
+  @param {string} category
+
+  @return {table}
+    Map for the passed category
+]]--
+function me.GetAllForCategory(category)
+  if not category then return nil end
+
+  return spellMap[category]
+end

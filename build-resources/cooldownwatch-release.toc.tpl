@@ -32,3 +32,4 @@ gui/CW_AddonConfiguration.lua
 gui/CW_AboutContent.lua
 gui/CW_GeneralMenu.lua
 gui/CW_CooldownMenu.lua
+gui/CW_UiHelper.lua

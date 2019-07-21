@@ -51,7 +51,7 @@ function me.SetupAddonConfiguration()
   ]]--
   mod.aboutContent.BuildAboutContent(configurationPanel)
   -- mod.generalMenu.BuildUi(generalMenu)
-  mod.cooldownMenu.BuildUi()
+  -- mod.cooldownMenu.BuildUi()
 end
 
 --[[

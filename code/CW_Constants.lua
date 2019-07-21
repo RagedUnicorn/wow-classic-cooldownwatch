@@ -82,48 +82,76 @@ RGCW_CONSTANTS = {
   ]]
   CATEGORIES = {
     [1] = {
+      ["categoryName"] = "priest",
       ["localizationKey"] = "category_priest",
       ["name"] = "CW_PriestOptionsFrame"
     },
     [2] = {
+      ["categoryName"] = "rogue",
       ["localizationKey"] = "category_rogue",
       ["name"] = "CW_RogueOptionsFrame"
     },
     [3] = {
+      ["categoryName"] = "mage",
       ["localizationKey"] = "category_mage",
       ["name"] = "CW_MageOptionsFrame"
     },
     [4] = {
+      ["categoryName"] = "hunter",
       ["localizationKey"] = "category_hunter",
       ["name"] = "CW_HunterOptionsFrame"
     },
     [5] = {
+      ["categoryName"] = "warlock",
       ["localizationKey"] = "category_warlock",
       ["name"] = "CW_WarlockOptionsFrame"
     },
     [6] = {
+      ["categoryName"] = "paladin",
       ["localizationKey"] = "category_paladin",
       ["name"] = "CW_PaladinOptionsFrame"
     },
     [7] = {
+      ["categoryName"] = "druid",
       ["localizationKey"] = "category_druid",
       ["name"] = "CW_DruidOptionsFrame"
     },
     [8] = {
+      ["categoryName"] = "shaman",
       ["localizationKey"] = "category_shaman",
       ["name"] = "CW_ShamanOptionsFrame"
     },
     [9] = {
+      ["categoryName"] = "warrior",
       ["localizationKey"] = "category_warrior",
       ["name"] = "CW_WarriorOptionsFrame"
     },
     [10] = {
+      ["categoryName"] = "racials",
       ["localizationKey"] = "category_racials",
       ["name"] = "CW_RacialsOptionsFrame"
     },
     [11] = {
+      ["categoryName"] = "items",
       ["localizationKey"] = "category_items",
       ["name"] = "CW_ItemsOptionsFrame"
     }
-  }
+  },
+  ELEMENT_CATEGORY_SCROLL_FRAME = "CW_CategoryScrollFrame",
+  ELEMENT_CATEGORY_SCROLL_FRAME_SLIDER = "CW_CategoryScrollFrameSlider",
+  ELEMENT_CATEGORY_CONTENT_FRAME = "CW_CategoryContentFrame",
+  ELEMENT_CATEGORY_COOLDOWN_SPELL_FRAME = "CW_CategoryCooldownSpellFrame_",
+  ELEMENT_CATEGORY_COOLDOWN_SPELL_FRAME_HEIGHT = 50,
+  ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON = "$parentIcon",
+  ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON_SIZE = 32,
+  ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS = "$parentStatus",
+  ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS_SIZE = 32,
+  --[[
+    Configuration values for scrollframe slider
+    0 is all the way up
+    100 is all the way down
+  ]]--
+  CATEGORY_CONFIG_SLIDER_MIN_VALUE = 0,
+  CATEGORY_CONFIG_SLIDER_MAX_VALUE = 100,
+
 }
