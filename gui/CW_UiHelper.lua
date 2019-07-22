@@ -35,7 +35,7 @@ me.tag = "UiHelper"
   @param {table} parent
 
   @return {table}
-    the created scrollFrame
+    The created scrollFrame
 ]]--
 function me.CreateCategoryScrollFrame(scrollFrameName, parent)
   local scrollFrame = CreateFrame("ScrollFrame", scrollFrameName, parent)
@@ -50,10 +50,12 @@ function me.CreateCategoryScrollFrame(scrollFrameName, parent)
 end
 
 --[[
-  Scroll callback for scrollable content. Also updates the associated
-  scrollFrameSlider to its new position
+  Scroll callback for scrollable content. Also updates the associated scrollFrameSlider to its new position
 
   @param {table} self
+  @param {number} arg1
+    1  - spinning up
+    -1 - spinning down
 ]]--
 function me.ScrollFrameOnMouseWheel(self, arg1)
   local maxScroll = self:GetVerticalScrollRange()
@@ -88,8 +90,6 @@ end
   @param {number} maxScroll
 ]]--
 function me.SliderUpdatePosition(scrollFrameSlider, scrollPosition, maxScroll)
-  local position
-
   mod.logger.LogDebug(me.tag, "Content scrollposition: " .. scrollPosition)
 
   if scrollFrameSlider == nil then
@@ -97,7 +97,7 @@ function me.SliderUpdatePosition(scrollFrameSlider, scrollPosition, maxScroll)
     return
   end
 
-  position = 100 / (maxScroll / math.floor(scrollPosition))
+  local position = 100 / (maxScroll / math.floor(scrollPosition))
   mod.logger.LogDebug(me.tag, "New Slider scrollposition: " .. math.ceil(position))
   scrollFrameSlider:SetValue(math.ceil(position))
 end
@@ -109,9 +109,9 @@ end
   @param {table} scrollFrame
 
   @return {table}
+    The created contentFrame
 ]]--
 function me.CreateCategoryContentFrame(contentFrameName, scrollFrame)
-  mod.logger.LogError(me.tag, "ContentFrame called")
   local contentFrame = CreateFrame("Frame", contentFrameName, scrollFrame)
 
   contentFrame:SetWidth(scrollFrame:GetWidth())
@@ -129,9 +129,9 @@ end
   @param {table} parent
 
   @return {table}
+    The created scrollFrameSlider
 ]]--
 function me.CreateCategoryScrollFrameSlider(scrollFrameSliderName, scrollFrame, parent)
-  local scrollBackground
   local scrollFrameSlider = CreateFrame("Slider", scrollFrameSliderName,
     scrollFrame, "UIPanelScrollBarTemplate")
 
@@ -145,9 +145,9 @@ function me.CreateCategoryScrollFrameSlider(scrollFrameSliderName, scrollFrame, 
   scrollFrameSlider:SetValue(0)
   scrollFrameSlider:SetWidth(16)
   -- sets the stepsize that is made when clicking on up or down arrow button
-  scrollFrameSlider:SetHeight(10)
+  scrollFrameSlider:SetHeight(10) -- TODO constant
   scrollFrameSlider:SetScript("OnValueChanged", me.ScrollFrameSliderOnValueChanged)
-  scrollBackground = scrollFrameSlider:CreateTexture(nil, "BACKGROUND")
+  local scrollBackground = scrollFrameSlider:CreateTexture(nil, "BACKGROUND")
   scrollBackground:SetAllPoints(scrollFrameSlider)
   scrollBackground:SetTexture(0, 0, 0, 0.4)
 
@@ -181,18 +181,22 @@ end
   @param {table} contentFrame
     Base for the spellFrame name. Builds a fully name combinend with position
   @param {number} position
+
   @return {table}
-    the created spellFrame
+    The created spellFrame
 ]]--
 function me.CreateCooldownSpellFrame(spellFrameName, contentFrame, position)
   mod.logger.LogDebug(me.tag, "Creating new Spellcontainer" .. position
     .. " because it did not yet exist")
-    testing = contentFrame
 
-  -- TODO consider the template that can be used
-  -- local spellFrame = CreateFrame("Frame", spellFrameName .. position, contentFrame, PVPW_CONSTANTS.ELEMENT_PVPW_CLASS_SPELL_CONFIGURATION_TEMPLATE)
   local spellFrame = CreateFrame("Frame", spellFrameName .. position, contentFrame)
-  spellFrame:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 4, -position * RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_FRAME_HEIGHT)
+  spellFrame:SetPoint(
+    "TOPLEFT",
+    contentFrame,
+    "TOPLEFT",
+    4,
+    -position * RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_FRAME_HEIGHT
+  )
   spellFrame:SetWidth(contentFrame:GetWidth() - 8)
   spellFrame:SetHeight(RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_FRAME_HEIGHT)
 
@@ -233,7 +237,11 @@ function me.CreateCooldownSpellIcon(spellFrame)
 end
 
 --[[
-  TODO
+  @param {table} spellFrame
+  @param {table} spellIcon
+
+  @return {table}
+    The created checkbox
 ]]--
 function me.CreateCooldownSpell(spellFrame, spellIcon)
   local cooldownSpellStatusCheckBox = CreateFrame("CheckButton", RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS, spellFrame, "UICheckButtonTemplate")
@@ -244,14 +252,14 @@ function me.CreateCooldownSpell(spellFrame, spellIcon)
 end
 
 --[[
-  TODO
+  @param {table} cooldownSpellFrame
+  @param {number} spellId
 
   TODO need to build a workaround here because a lot of our spells don't exist in the _retail_ version of the game
   but will again in wow classic
 ]]--
-function me.ConfigureSpellFrame(cooldownSpellFrame, spellId, spellData)
-  mod.logger.LogError(me.tag, "SpellInfo: " .. spellId)
-  local name, rank, icon, castTime, minRange, maxRange = GetSpellInfo(spellId)
+function me.ConfigureSpellFrame(cooldownSpellFrame, spellId)
+  local name, rank, icon = GetSpellInfo(spellId)
 
   if name ~= nil and icon ~= nil then
     cooldownSpellFrame.cooldownIcon:SetTexture(icon)

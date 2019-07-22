@@ -29,17 +29,16 @@ mod.cooldownMenu = me
 me.tag = "CooldownMenu"
 
 --[[
-  TODO description
+  Build the cooldown configuration ui for a category
+
+  @param {number} category
+    A category value that matches to RGCW_CONSTANTS.CATEGORIES
 
   @param {table} frame
     The addon configuration frame to attach to
 ]]--
 function me.BuildUi(category)
-
-  mod.logger.LogError(me.tag, "Build Ui CooldownMenu")
-
-  -- TODO need to prevent build menu over and over again slots that already exist should not be rebuilt
-
+  local cooldownList = mod.spellMap.GetAllForCategory(RGCW_CONSTANTS.CATEGORIES[category].categoryName)
   local categoryScrollFrame = _G[RGCW_CONSTANTS.ELEMENT_CATEGORY_SCROLL_FRAME]
   local categoryScrollFrameSlider = _G[RGCW_CONSTANTS.ELEMENT_CATEGORY_SCROLL_FRAME_SLIDER]
   local categoryContentFrame = _G[RGCW_CONSTANTS.ELEMENT_CATEGORY_CONTENT_FRAME]
@@ -52,7 +51,6 @@ function me.BuildUi(category)
     )
   end
 
-  -- create contentFrame if it does not yet exist
   if categoryContentFrame == nil then
     mod.logger.LogDebug(me.tag, "categoryContentFrame did not exist - creating")
     mod.uiHelper.CreateCategoryContentFrame(
@@ -70,12 +68,9 @@ function me.BuildUi(category)
     )
   end
 
-  -- TODO local
-  cooldownList = mod.spellMap.GetAllForCategory(RGCW_CONSTANTS.CATEGORIES[category].categoryName)
-
   local position = 0
 
-  for spellId, spellData in pairs(cooldownList) do
+  for spellId, _ in pairs(cooldownList) do
     local cooldownSpellFrame = _G[RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_FRAME .. position]
 
     if cooldownSpellFrame == nil then
@@ -88,8 +83,7 @@ function me.BuildUi(category)
 
     mod.uiHelper.ConfigureSpellFrame(
       cooldownSpellFrame,
-      spellId,
-      spellData
+      spellId
     )
 
     cooldownSpellFrame:Show()
@@ -97,6 +91,11 @@ function me.BuildUi(category)
   end
 end
 
+--[[
+  TODO consider doing this for all the menus. They should only built when needed an not before
+
+  @param {table} self
+]]--
 function me.cooldownMenuOnShow(self)
   mod.logger.LogError(me.tag, "OnShow: " .. self.value)
   me.BuildUi(self.value)
