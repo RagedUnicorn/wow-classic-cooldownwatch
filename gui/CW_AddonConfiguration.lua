@@ -34,7 +34,9 @@ me.tag = "AddonConfiguration"
 ]]--
 function me.SetupAddonConfiguration()
   local configurationPanel = me.BuildCategory(RGCW_CONSTANTS.ELEMENT_ADDON_PANEL, nil, rgcw.L["addon_name"])
-  local generalMenu = me.BuildCategory(RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME, configurationPanel, rgcw.L["general_category_name"])
+  local generalMenu = me.BuildCategory(RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME, configurationPanel, rgcw.L["general_category_name"], function()
+    mod.generalMenu.BuildUi(generalMenu)
+  end)
 
   me.BuildCooldownCategories(configurationPanel)
   --[[
@@ -50,18 +52,17 @@ function me.SetupAddonConfiguration()
     Because of this it is important that the "normal" manuall way of opening the menu is tested as well.
   ]]--
   mod.aboutContent.BuildAboutContent(configurationPanel)
-  -- mod.generalMenu.BuildUi(generalMenu)
-  -- mod.cooldownMenu.BuildUi()
 end
 
 --[[
   @param {string} frameName
   @param {table} parent
   @param {string} panelText
+  @param {function} onShowCallback
 
   @return {table}
 ]]--
-function me.BuildCategory(frameName, parent, panelText)
+function me.BuildCategory(frameName, parent, panelText, onShowCallback)
   local menu
 
   if parent == nil then
@@ -71,6 +72,10 @@ function me.BuildCategory(frameName, parent, panelText)
     menu.parent = parent
   end
   menu.name = panelText
+
+  if onShowCallback ~= nil then
+    menu:SetScript("OnShow", onShowCallback)
+  end
   -- Important to hide panel initially. Interface addon options will take care of showing the menu
   menu:Hide()
   -- Add the child to the Interface Options

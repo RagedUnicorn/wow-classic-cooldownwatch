@@ -28,6 +28,9 @@ mod.generalMenu = me
 
 me.tag = "GeneralMenu"
 
+-- track whether the menu was already built
+local builtMenu = false
+
 --[[
   Build the ui for the general menu
 
@@ -35,5 +38,9 @@ me.tag = "GeneralMenu"
     The addon configuration frame to attach to
 ]]--
 function me.BuildUi(frame)
+  if builtMenu then return end
 
+  mod.logger.LogInfo(me.tag, "GeneralMenu called")
+
+  builtMenu = true
 end
