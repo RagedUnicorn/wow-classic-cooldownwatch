@@ -29,6 +29,13 @@ mod.cooldownMenu = me
 me.tag = "CooldownMenu"
 
 --[[
+  @param {table} self
+]]--
+function me.cooldownMenuOnShow(self)
+  me.BuildUi(self.value)
+end
+
+--[[
   Build the cooldown configuration ui for a category
 
   @param {number} category
@@ -89,14 +96,4 @@ function me.BuildUi(category)
     cooldownSpellFrame:Show()
     position = position + 1
   end
-end
-
---[[
-  TODO consider doing this for all the menus. They should only built when needed an not before
-
-  @param {table} self
-]]--
-function me.cooldownMenuOnShow(self)
-  mod.logger.LogError(me.tag, "OnShow: " .. self.value)
-  me.BuildUi(self.value)
 end

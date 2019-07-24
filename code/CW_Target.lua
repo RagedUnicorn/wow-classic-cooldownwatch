@@ -60,9 +60,9 @@ function me.UpdateCurrentTarget()
   --[[
     For debugging purpose allow friendly target in debug mode
   ]]--
-  if UnitIsEnemy("player", "target") or RGCW_ENVIRONMENT.DEBUG then
-    targetId = UnitGUID("target")
-    targetName, _ = UnitName("unit")
+  if UnitIsEnemy(RGCW_CONSTANTS.UNIT_ID_PLAYER, RGCW_CONSTANTS.UNIT_ID_TARGET) or RGCW_ENVIRONMENT.DEBUG then
+    targetId = UnitGUID(RGCW_CONSTANTS.UNIT_ID_TARGET)
+    targetName, _ = UnitName(RGCW_CONSTANTS.UNIT_ID_TARGET)
   end
 
   if targetId == nil then

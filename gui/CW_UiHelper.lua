@@ -85,7 +85,7 @@ end
   Update scrollframeslider position
 
   @param {table} scrollFrameSlider
-    reference to the scrollframeslider that should get updated
+    Reference to the scrollframeslider that should get updated
   @param {number} scrollPosition
   @param {number} maxScroll
 ]]--
@@ -145,7 +145,7 @@ function me.CreateCategoryScrollFrameSlider(scrollFrameSliderName, scrollFrame, 
   scrollFrameSlider:SetValue(0)
   scrollFrameSlider:SetWidth(16)
   -- sets the stepsize that is made when clicking on up or down arrow button
-  scrollFrameSlider:SetHeight(10) -- TODO constant
+  scrollFrameSlider:SetHeight(RGCW_CONSTANTS.ELEMENT_CATEGORY_SCROLL_FRAME_SLIDER_STEP_SIZE)
   scrollFrameSlider:SetScript("OnValueChanged", me.ScrollFrameSliderOnValueChanged)
   local scrollBackground = scrollFrameSlider:CreateTexture(nil, "BACKGROUND")
   scrollBackground:SetAllPoints(scrollFrameSlider)
@@ -178,8 +178,8 @@ end
   Creates a new spellFrame
 
   @param {string} spellFrameName
-  @param {table} contentFrame
     Base for the spellFrame name. Builds a fully name combinend with position
+  @param {table} contentFrame
   @param {number} position
 
   @return {table}

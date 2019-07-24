@@ -1525,7 +1525,7 @@ local spellMap = {
   },
   --[[
     TODO might need an additonal property here for the item icon because the spell
-    itself might not give it aways which item was used
+    itself might not give it away which item was used
   ]]--
   ["items"] = {
     [23132] = {
@@ -1610,13 +1610,13 @@ function me.FindSpell(spellId, className)
 end
 
 --[[
-TODO
-  Get map for a certain category
+  Get list for a certain category
 
   @param {string} category
 
-  @return {table}
-    Map for the passed category
+  @return {table | nil}
+    table - The category that was found in the list
+    nil - if no category was found in the list
 ]]--
 function me.GetAllForCategory(category)
   if not category then return nil end

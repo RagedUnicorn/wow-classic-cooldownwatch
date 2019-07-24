@@ -26,6 +26,11 @@
 RGCW_CONSTANTS = {
   ADDON_NAME = "CooldownWatch",
   --[[
+    Unit ids
+  ]]--
+  UNIT_ID_TARGET = "target",
+  UNIT_ID_PLAYER = "player",
+  --[[
     Update Intervals for tickers
   ]]--
   TARGET_COOLDOWN_BAR_UPDATE_INTERVAL = 0.05,
@@ -139,6 +144,7 @@ RGCW_CONSTANTS = {
   },
   ELEMENT_CATEGORY_SCROLL_FRAME = "CW_CategoryScrollFrame",
   ELEMENT_CATEGORY_SCROLL_FRAME_SLIDER = "CW_CategoryScrollFrameSlider",
+  ELEMENT_CATEGORY_SCROLL_FRAME_SLIDER_STEP_SIZE = 10,
   ELEMENT_CATEGORY_CONTENT_FRAME = "CW_CategoryContentFrame",
   ELEMENT_CATEGORY_COOLDOWN_SPELL_FRAME = "CW_CategoryCooldownSpellFrame_",
   ELEMENT_CATEGORY_COOLDOWN_SPELL_FRAME_HEIGHT = 50,

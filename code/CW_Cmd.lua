@@ -60,7 +60,7 @@ function me.SetupSlashCmdList()
     elseif args[1] == "rl" or args[1] == "reload" then
       ReloadUI()
     elseif args[1] == "opt" then
-      mod.addonConfiguration.OpenAddonPanel() -- TODO testing
+      mod.addonConfiguration.OpenAddonPanel()
     elseif args[1] == "conf" or "configure" then
       if args[2] == "enable" then
         mod.targetCooldownBar.ShowExampleTargetCooldownBar()

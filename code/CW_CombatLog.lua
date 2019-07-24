@@ -33,8 +33,7 @@ me.tag = "CombatLog"
   Processing the details of the current combat log event. Invoked when 'COMBAT_LOG_EVENT_UNFILTERED' is fired
 ]]--
 function me.ProcessUnfilteredCombatLogEvent()
-  -- careful target and targetName might be null if the caster is not your current target
-  local _, event, _, caster, casterName, sourceFlags, _, target, targetName, _, _, spellId, spellName, _ = CombatLogGetCurrentEventInfo()
+  local _, event, _, caster, casterName, sourceFlags, _, _, _, _, _, spellId = CombatLogGetCurrentEventInfo()
 
   --[[
     While debug mode is active we also allow friendly events to be processed. Otherwise only hostile player events are
@@ -67,13 +66,19 @@ function me.ProcessUnfilteredCombatLogEvent()
       targets class.
     ]]--
     if caster == mod.target.GetCurrentTargetGuid() then
-      local _, englishClass, _ = UnitClass("target");
+      local _, englishClass = UnitClass(RGCW_CONSTANTS.UNIT_ID_TARGET)
       spell = mod.spellMap.FindSpell(spellId, englishClass)
     else
       spell = mod.spellMap.FindSpell(spellId)
     end
 
-    me.TrackCooldown(caster, casterName, spell, spellId, castTime)
+    if spell == nil then
+      mod.logger.LogDebug(me.tag, "Spell is non-essential")
+      return
+    else
+      mod.logger.LogInfo(me.tag, "Found tracked spell: " .. spell.spellName)
+      me.TrackCooldown(caster, casterName, spell, spellId, castTime)
+    end
   end
 end
 
@@ -88,12 +93,7 @@ end
   @param {number} castTime
 ]]--
 function me.TrackCooldown(caster, casterName, spell, spellId, castTime)
-  if spell ~= nil then
-    mod.logger.LogInfo(me.tag, "Found tracked spell: " .. spell.spellName)
-    spell.castTime = castTime -- add time when spell was detected
-    spell.spellId = spellId
-    mod.cooldownQueue.AddCooldown(caster, casterName, spell)
-  else
-    mod.logger.LogDebug(me.tag, "Spell is non-essential")
-  end
+  spell.castTime = castTime -- add time when spell was detected
+  spell.spellId = spellId
+  mod.cooldownQueue.AddCooldown(caster, casterName, spell)
 end

@@ -87,7 +87,6 @@ end
 ]]--
 function me.LogDebug(tag, message)
   if me.logLevel == me.debug then
-
     PrintLogMessage(me.colors.debug, tag, message)
   end
 end

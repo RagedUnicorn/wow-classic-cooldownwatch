@@ -72,7 +72,7 @@ function me.BuildUi()
   me.SetupDragFrame(targetCooldownBarFrame)
 
   for i = 1, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_AMOUNT do
-    me.CreateCooldownWatchSlot(targetCooldownBarFrame, i)
+    me.CreateCooldownSlot(targetCooldownBarFrame, i)
   end
 end
 
@@ -82,8 +82,7 @@ end
   @param {table} frame
   @param {number} position
 ]]--
--- TODO choose better naming
-function me.CreateCooldownWatchSlot(frame, position)
+function me.CreateCooldownSlot(frame, position)
   local cooldownWatchSlot = CreateFrame("FRAME", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT .. position, frame)
 
   cooldownWatchSlot:SetFrameLevel(1)
@@ -146,7 +145,6 @@ function me.CreateCooldownWatchSlot(frame, position)
 
   -- prepare animationgroup
   local animationGroup = cooldownWatchSlot:CreateAnimationGroup(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_ANIMATION)
-
   local animation = animationGroup:CreateAnimation("Alpha")
   animation:SetDuration(2)
   animation:SetFromAlpha(1)
@@ -272,7 +270,7 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   end
 
   if timeLeftBig <= 0 then
-    me.ClearCooldownWatchSlotAnimated(cooldownWatchSlot, cooldown)
+    me.ClearCooldownSlotAnimated(cooldownWatchSlot, cooldown)
     return
   end
 
@@ -358,7 +356,7 @@ end
   @param {table} cooldownWatchSlot
   @param {table} cooldow
 ]]--
-function me.ClearCooldownWatchSlotAnimated(cooldownWatchSlot, cooldown)
+function me.ClearCooldownSlotAnimated(cooldownWatchSlot, cooldown)
   cooldownWatchSlot.targetSpellTimeBig:SetText("")
   cooldownWatchSlot.targetSpellTimeSmall:SetText("")
   cooldownWatchSlot.targetCooldownOverlay.cooldownStarted = false
@@ -439,7 +437,7 @@ end
 
 --[[
   @param {table} frame
-    the frame to attach drag handlers
+    The frame to attach drag handlers
 ]]--
 function me.SetupDragFrame(frame)
   frame:SetScript("OnMouseDown", me.StartDragFrame)

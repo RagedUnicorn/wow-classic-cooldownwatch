@@ -33,7 +33,7 @@ me.tag = "CooldownQueue"
 --[[
   {
     ["caster"] = caster,
-      - {string} A unique identification for a caster (player or npc)
+      - {string} A unique identification for a caster
     ["casterName"] = casterName,
       - {string} Actual name of the caster
     ["spell"] = {
@@ -49,7 +49,7 @@ me.tag = "CooldownQueue"
         - {number} Cooldown of the spell
       ["cooldownWorstCase"] = cooldownWorstCase,
         - {number} Worst case cooldown for the cooldown. Assuming the enemy player has its spell fully reduces with either a talent or an item.
-        Note: if an item is unlikely to be worn by players it might get omitted here
+        Note: If an item is unlikely to be worn by players it might get omitted here
       ["active"] = boolean
         - {boolean} Whether the spell is active and tracked or not
     }
@@ -93,10 +93,10 @@ function me.AddCooldown(caster, casterName, spell)
 end
 
 --[[
-  Remove a cooldown from the queue
+  Remove a cooldown for a specific caster from the queue
 
   @param {string} caster
-    A unique identification for a caster (player or npc)
+    A unique identification for a caster
   @param {number} spellId
 ]]--
 function me.RemoveCooldown(caster, spellId)
@@ -117,12 +117,14 @@ function me.ClearCooldownQueue()
 end
 
 --[[
-  Retrieve a cast for a specific caster
+  Retrieve cooldowns for a specific caster
+
   @param {string} caster
-    A unique identification for a target (player or npc)
-  @return {table | nil}
-    table - the castEvent that was found for the target
-    nil   - if no castEvent for the target could be found
+    A unique identification for a caster
+
+  @return {table}
+    The castEvents that were found for the caste
+    Note: May be an empty table
 ]]--
 function me.GetCooldownsByTarget(caster)
   local cooldowns = {}

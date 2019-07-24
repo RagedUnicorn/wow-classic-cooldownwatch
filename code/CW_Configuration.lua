@@ -30,11 +30,14 @@ mod.configuration = me
 me.tag = "Configuration"
 
 CooldownWatchConfiguration = {
-  ["addonVersion"] = nil,
   --[[
     Whether the targetCooldownBar is locked from moving or not
   ]]--
   ["lockTargetCooldownBar"] = false,
+  --[[
+    Initial addon version
+  ]]--
+  ["addonVersion"] = nil,
   --[[
     Framepositions for user draggable Frames
     frames = {
@@ -138,6 +141,7 @@ end
   Get the position of a saved frame
 
   @param {string} frameName
+
   @return {table | nil}
     table - the returned x and y position
     nil - if no frame with the passed name could be found
