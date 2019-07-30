@@ -33,12 +33,13 @@ me.tag = "AddonConfiguration"
   Create addon configuration menu(s)
 ]]--
 function me.SetupAddonConfiguration()
-  local configurationPanel = me.BuildCategory(RGCW_CONSTANTS.ELEMENT_ADDON_PANEL, nil, rgcw.L["addon_name"])
-  local generalMenu = me.BuildCategory(RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME, configurationPanel, rgcw.L["general_category_name"], function()
-    mod.generalMenu.BuildUi(generalMenu)
+  local panel = {}
+  panel.main = me.BuildCategory(RGCW_CONSTANTS.ELEMENT_ADDON_PANEL, nil, rgcw.L["addon_name"])
+  me.BuildCategory(RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME, panel.main, rgcw.L["general_category_name"], function(self)
+    mod.generalMenu.BuildUi(self)
   end)
 
-  me.BuildCooldownCategories(configurationPanel)
+  me.BuildCooldownCategories(panel.main)
   --[[
     For development purpose the InterfaceOptionsFrame_OpenToCategory function can be used to directly
     open a specific category. Because of a blizzard bug this usually has to be called twice to actually work.
@@ -51,7 +52,7 @@ function me.SetupAddonConfiguration()
     Note: The behavior with how events fire might change quite a bit when using the above debug method.
     Because of this it is important that the "normal" manuall way of opening the menu is tested as well.
   ]]--
-  mod.aboutContent.BuildAboutContent(configurationPanel)
+  mod.aboutContent.BuildAboutContent(panel.main)
 end
 
 --[[
@@ -69,15 +70,18 @@ function me.BuildCategory(frameName, parent, panelText, onShowCallback)
     menu = CreateFrame("Frame", frameName, UIParent)
   else
     menu = CreateFrame("Frame", frameName, parent)
-    menu.parent = parent
+    menu.parent = parent.name
   end
+
   menu.name = panelText
 
   if onShowCallback ~= nil then
     menu:SetScript("OnShow", onShowCallback)
   end
+
   -- Important to hide panel initially. Interface addon options will take care of showing the menu
   menu:Hide()
+
   -- Add the child to the Interface Options
   InterfaceOptions_AddCategory(menu)
 
@@ -89,11 +93,11 @@ end
 
   @param {table} configurationPanel
 ]]--
-function me.BuildCooldownCategories(configurationPanel)
+function me.BuildCooldownCategories(parent)
   for index, category in ipairs(RGCW_CONSTANTS.CATEGORIES) do
-    local menu = CreateFrame("Frame", category.name, configurationPanel)
+    local menu = CreateFrame("Frame", category.name, parent)
     menu.name = rgcw.L[category.localizationKey]
-    menu.parent = configurationPanel
+    menu.parent = parent.name
     menu.value = index
 
     menu:SetScript("OnShow", mod.cooldownMenu.cooldownMenuOnShow)
