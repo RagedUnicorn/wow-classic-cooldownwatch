@@ -37,12 +37,12 @@ me.tag = "CooldownQueue"
     ["casterName"] = casterName,
       - {string} Actual name of the caster
     ["spell"] = {
-      ["spellId"] = spellId
+      ["spellId"] = spellId,
         - {number} SpellId of the spell
+      ["iconId"] = iconId,
+        - {number} Icon id of the spell
       ["spellName"] = spellName,
         - {string} Name of the spell
-      ["rank"] = rank,
-        - {number | nil} Rank of the spell or nil if independent of rank
       ["castTime"] = castTime,
         - {number} Time at which the spell was detected
       ["cooldown"] cooldown,

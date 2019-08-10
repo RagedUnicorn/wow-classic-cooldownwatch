@@ -28,72 +28,157 @@ mod.cooldownMenu = me
 
 me.tag = "CooldownMenu"
 
+local spellRows = {}
+
 --[[
   @param {table} self
 ]]--
 function me.cooldownMenuOnShow(self)
-  me.BuildUi(self.value)
+  me.BuildUiNew(self, self.value)
+end
+
+function me.BuildUiNew(frame, category) -- TODO
+  local spellListScrollFrame = CreateFrame(
+    "ScrollFrame",
+    RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SCROLL_FRAME,
+    frame,
+    "FauxScrollFrameTemplate"
+  )
+
+  -- scrollFrame:SetWidth(parent:GetWidth())
+  -- scrollFrame:SetHeight(parent:GetHeight() - 10) TODO?
+  spellListScrollFrame:SetWidth(RGCW_CONSTANTS.ELEMENT_SPELL_LIST_CONTENT_FRAME_WIDTH)
+  spellListScrollFrame:SetHeight(RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT * RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS)
+  spellListScrollFrame:SetPoint("TOPLEFT", 10, -50)
+  spellListScrollFrame:EnableMouseWheel(true)
+  spellListScrollFrame:SetBackdrop({
+    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background"
+  })
+
+  spellListScrollFrame:SetScript("OnVerticalScroll", me.RuleListOnVerticalScroll)
+
+  for i = 1, RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS do
+    table.insert(spellRows, me.CreateRuleRowFrame(spellListScrollFrame, i))
+  end
+
+  me.SpellListScrollFrameOnUpdate(spellListScrollFrame, category)
+
+  return spellListScrollFrame
 end
 
 --[[
-  Build the cooldown configuration ui for a category
+  OnVerticalScroll callback for scrollable rule list
 
-  @param {number} category
-    A category value that matches to RGCW_CONSTANTS.CATEGORIES
-
-  @param {table} frame
-    The addon configuration frame to attach to
+  @param {table} self
+  @param {number} offset
 ]]--
-function me.BuildUi(category)
+function me.RuleListOnVerticalScroll(self, offset)
+  self.ScrollBar:SetValue(offset)
+  self.offset = math.floor(offset / RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT + 0.5)
+  me.SpellListScrollFrameOnUpdate(self, self:GetParent().value)
+end
+
+--[[
+  @param {table} frame
+  @param {number} position
+
+  @return {table}
+    The created row
+]]--
+function me.CreateRuleRowFrame(frame, position)
+  local row = CreateFrame("Button", RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SPELL_ROW .. position, frame)
+  row:SetSize(frame:GetWidth() -5, RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT)
+  row:SetPoint("TOPLEFT", frame, 0, (position -1) * RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT * -1)
+
+  row:SetBackdrop({
+    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+    insets = {left = 0, right = 0, top = 0, bottom = 0},
+  })
+
+  if math.fmod(position, 2) == 0 then
+    row:SetBackdropColor(0.37, 0.37, 0.37, .4)
+  else
+    row:SetBackdropColor(.25, .25, .25, .8)
+  end
+
+  row.cooldownIcon = me.CreateCooldownSpellIcon(row)
+  row.cooldownStatus = me.CreateCooldownSpell(row)
+
+  return row
+end
+
+--[[
+  @param {table} spellFrame
+
+  @return {table}
+    The created icon texture holder
+]]--
+function me.CreateCooldownSpellIcon(spellFrame)
+  local cooldownIcon = spellFrame:CreateTexture(RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON, "ARTWORK")
+  cooldownIcon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+  cooldownIcon:SetPoint("CENTER", 10, 0)
+  cooldownIcon:SetSize(
+    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON_SIZE,
+    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON_SIZE
+  )
+
+  return cooldownIcon
+end
+
+--[[
+  @param {table} spellFrame
+  @param {table} spellIcon
+
+  @return {table}
+    The created checkbox
+]]--
+function me.CreateCooldownSpell(spellFrame)
+  local cooldownSpellStatusCheckBox = CreateFrame("CheckButton", RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS, spellFrame, "UICheckButtonTemplate")
+  cooldownSpellStatusCheckBox:SetSize(RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS_SIZE, RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS_SIZE)
+  cooldownSpellStatusCheckBox:SetPoint("RIGHT", 50, 0)
+
+  cooldownSpellStatusCheckBox.text = _G[cooldownSpellStatusCheckBox:GetName() .. 'Text']
+  cooldownSpellStatusCheckBox.text:SetFont(STANDARD_TEXT_FONT, 15)
+  cooldownSpellStatusCheckBox.text:SetTextColor(.95, .95, .95)
+
+  return cooldownSpellStatusCheckBox
+end
+
+--[[
+  Update the quickchange rules list
+
+  TODO category param
+
+  @param {table} scrollFrame
+]]--
+function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
   local cooldownList = mod.spellMap.GetAllForCategory(RGCW_CONSTANTS.CATEGORIES[category].categoryName)
-  local categoryScrollFrame = _G[RGCW_CONSTANTS.ELEMENT_CATEGORY_SCROLL_FRAME]
-  local categoryScrollFrameSlider = _G[RGCW_CONSTANTS.ELEMENT_CATEGORY_SCROLL_FRAME_SLIDER]
-  local categoryContentFrame = _G[RGCW_CONSTANTS.ELEMENT_CATEGORY_CONTENT_FRAME]
+  local count = 0
+  for _ in pairs(cooldownList) do count = count + 1 end
+  local maxValue = count or 0
 
-  if categoryScrollFrame == nil then
-    mod.logger.LogDebug(me.tag, "categoryScrollFrame did not exist - creating")
-    mod.uiHelper.CreateCategoryScrollFrame(
-      RGCW_CONSTANTS.ELEMENT_CATEGORY_SCROLL_FRAME,
-      _G[RGCW_CONSTANTS.CATEGORIES[category].name]
-    )
+  if maxValue <= RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS then
+    maxValue = RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS + 1
   end
+  -- Note: maxValue needs to be at least max_rows + 1
+  FauxScrollFrame_Update(scrollFrame, maxValue, RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS, RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT)
 
-  if categoryContentFrame == nil then
-    mod.logger.LogDebug(me.tag, "categoryContentFrame did not exist - creating")
-    mod.uiHelper.CreateCategoryContentFrame(
-      RGCW_CONSTANTS.ELEMENT_CATEGORY_CONTENT_FRAME,
-      _G[RGCW_CONSTANTS.ELEMENT_CATEGORY_SCROLL_FRAME]
-    )
-  end
+  local offset = FauxScrollFrame_GetOffset(scrollFrame)
+  for index = 1, RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS do
+    local value = index + offset
+    local idx = 1
+    local row = spellRows[index]
 
-  -- create slider if it does not yet exist
-  if categoryScrollFrameSlider == nil then
-    mod.uiHelper.CreateCategoryScrollFrameSlider(
-      RGCW_CONSTANTS.ELEMENT_CATEGORY_SCROLL_FRAME_SLIDER,
-      _G[RGCW_CONSTANTS.ELEMENT_CATEGORY_SCROLL_FRAME],
-      _G[RGCW_CONSTANTS.CATEGORIES[category].name]
-    )
-  end
+    for spellName, cooldown in pairs(cooldownList) do
+      if idx == value then
+        local name, _, iconId, _, _, _, spellUid = GetSpellInfo(cooldown.spellId)
+        row.cooldownIcon:SetTexture(iconId)
+        row.cooldownStatus.text:SetText(cooldown.spellName)
 
-  local position = 0
+        row:Show()
+      end
 
-  for spellId, _ in pairs(cooldownList) do
-    local cooldownSpellFrame = _G[RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_FRAME .. position]
-
-    if cooldownSpellFrame == nil then
-      cooldownSpellFrame = mod.uiHelper.CreateCooldownSpellFrame(
-        RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_FRAME,
-        _G[RGCW_CONSTANTS.ELEMENT_CATEGORY_CONTENT_FRAME],
-        position
-      )
+      idx = idx + 1
     end
-
-    mod.uiHelper.ConfigureSpellFrame(
-      cooldownSpellFrame,
-      spellId
-    )
-
-    cooldownSpellFrame:Show()
-    position = position + 1
   end
 end

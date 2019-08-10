@@ -41,22 +41,22 @@ function me.BuildAboutContent(frame)
   ragedUnicornLogo:SetTexture([[Interface\AddOns\EnemyCastBar\assets\logo_ragedunicorn]])
 
   local authorFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_ABOUT_AUTHOR_FONT_STRING, "OVERLAY")
-  authorFontString:SetFont("Fonts\\FRIZQT__.TTF", 15)
+  authorFontString:SetFont(STANDARD_TEXT_FONT, 15)
   authorFontString:SetPoint("TOP", 0, -300)
   authorFontString:SetText(rgcw.L["author"])
 
   local emailFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_ABOUT_EMAIL_FONT_STRING, "OVERLAY")
-  emailFontString:SetFont("Fonts\\FRIZQT__.TTF", 15)
+  emailFontString:SetFont(STANDARD_TEXT_FONT, 15)
   emailFontString:SetPoint("TOP", 0, -320)
   emailFontString:SetText(rgcw.L["email"])
 
   local versionFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_ABOUT_VERSION_FONT_STRING, "OVERLAY")
-  versionFontString:SetFont("Fonts\\FRIZQT__.TTF", 15)
+  versionFontString:SetFont(STANDARD_TEXT_FONT, 15)
   versionFontString:SetPoint("TOP", 0, -340)
   versionFontString:SetText(rgcw.L["version"])
 
   local issueFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_ABOUT_ISSUES_FONT_STRING, "OVERLAY")
-  issueFontString:SetFont("Fonts\\FRIZQT__.TTF", 15)
+  issueFontString:SetFont(STANDARD_TEXT_FONT, 15)
   issueFontString:SetPoint("TOP", 0, -360)
   issueFontString:SetText(rgcw.L["issues"])
 end

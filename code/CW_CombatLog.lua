@@ -70,7 +70,7 @@ function me.ProcessUnfilteredCombatLogEvent()
     else
       local name, _, iconId, _, _, _, spellUid = GetSpellInfo(spellId)
 
-      me.TrackCooldown(caster, casterName, spell, spellId, castTime)
+      me.TrackCooldown(caster, casterName, spell, spellId, castTime, iconId)
     end
   end
 end
@@ -83,9 +83,11 @@ end
   @param {table} spell
   @param {number} spellId
   @param {number} castTime
+  @param {number} iconId
 ]]--
-function me.TrackCooldown(caster, casterName, spell, spellId, castTime)
+function me.TrackCooldown(caster, casterName, spell, spellId, castTime, iconId)
   spell.castTime = castTime -- add time when spell was detected
   spell.spellId = spellId
+  spell.iconId = iconId
   mod.cooldownQueue.AddCooldown(caster, casterName, spell)
 end
