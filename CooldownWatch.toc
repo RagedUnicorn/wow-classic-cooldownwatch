@@ -19,6 +19,7 @@ code/CW_Logger.lua
 code/CW_Cmd.lua
 code/CW_Filter.lua
 code/CW_CombatLog.lua
+code/CW_Common.lua
 code/CW_SpellMap.lua
 code/CW_CooldownQueue.lua
 code/CW_Target.lua

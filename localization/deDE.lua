@@ -17,7 +17,7 @@ if (GetLocale() == "deDE") then
   rgcw.L["issues"] = "Probleme: https://github.com/RagedUnicorn/wow-classic-cooldownwatch/issues"
 
   -- general
-  rgecb.L["general_category_name"] = "Allgemein"
+  rgcw.L["general_category_name"] = "Allgemein"
 
   -- cooldown menu TODO translate
   rgcw.L["category_priest"] = "Priester"

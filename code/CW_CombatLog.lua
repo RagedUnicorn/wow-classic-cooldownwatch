@@ -33,7 +33,7 @@ me.tag = "CombatLog"
   Processing the details of the current combat log event. Invoked when 'COMBAT_LOG_EVENT_UNFILTERED' is fired
 ]]--
 function me.ProcessUnfilteredCombatLogEvent()
-  local _, event, _, caster, casterName, sourceFlags, _, _, _, _, _, spellId = CombatLogGetCurrentEventInfo()
+  local _, event, _, caster, casterName, sourceFlags, _, _, _, _, _, _, spellName = CombatLogGetCurrentEventInfo()
 
   --[[
     While debug mode is active we also allow friendly events to be processed. Otherwise only hostile player events are
@@ -50,15 +50,7 @@ function me.ProcessUnfilteredCombatLogEvent()
     mod.logger.LogEvent(me.tag, "SPELL_CAST_SUCCESS")
 
     local castTime = GetTime()
-    local name, rank, iconId, _, _, _, spellUid = GetSpellInfo(spellId)
-    local texture = GetSpellTexture(spellUid)
-    local itemIcon = GetItemIcon(iconId)
-
-    mod.logger.LogDebug(me.tag, "SpellId: " .. spellId)
-    mod.logger.LogDebug(me.tag, "itemIcon: " .. iconId)
-    mod.logger.LogDebug(me.tag, "Caster:" .. casterName)
-    mod.logger.LogDebug(me.tag, "SourceFlags:" .. sourceFlags)
-
+    local normalizedSpellName = mod.common.NormalizeSpellname(spellName)
     local spell
     --[[
       If the caster of the detected spell is our current target we can speed up
@@ -67,21 +59,21 @@ function me.ProcessUnfilteredCombatLogEvent()
     ]]--
     if caster == mod.target.GetCurrentTargetGuid() then
       local _, englishClass = UnitClass(RGCW_CONSTANTS.UNIT_ID_TARGET)
-      spell = mod.spellMap.FindSpell(spellId, englishClass)
+      spell = mod.spellMap.FindSpell(normalizedSpellName, englishClass)
     else
-      spell = mod.spellMap.FindSpell(spellId)
+      spell = mod.spellMap.FindSpell(normalizedSpellName)
     end
 
     if spell == nil then
       mod.logger.LogDebug(me.tag, "Spell is non-essential")
       return
     else
-      mod.logger.LogInfo(me.tag, "Found tracked spell: " .. spell.spellName)
+      local name, _, iconId, _, _, _, spellUid = GetSpellInfo(spellId)
+
       me.TrackCooldown(caster, casterName, spell, spellId, castTime)
     end
   end
 end
-
 
 --[[
   Add a cooldown to the cooldownqueue
