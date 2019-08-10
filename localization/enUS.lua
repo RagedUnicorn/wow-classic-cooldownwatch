@@ -4,10 +4,10 @@ rgcw.L = {}
 rgcw.L["addon_name"] = "CooldownWatch"
 
 -- console
-rgcw.L["help"] = "|cFFFFFF00(%s)|r: Use |cFFFFFF00/rgcw|r or |cFFFFFF00/cooldownwatch|r for a list of options"
-rgcw.L["reload"] = "|cFFFFFF00reload|r - reload UI"
-rgcw.L["opt"] = "|cFFFFFF00opt|r - display Optionsmenu"
-rgcw.L["info_title"] = "|cFFFFFF00CooldownWatch:|r"
+rgcw.L["help"] = "|cFFFFC300(%s)|r: Use |cFFFFC300/rgcw|r or |cFFFFC300/cooldownwatch|r for a list of options"
+rgcw.L["reload"] = "|cFFFFC300reload|r - reload UI"
+rgcw.L["opt"] = "|cFFFFC300opt|r - display Optionsmenu"
+rgcw.L["info_title"] = "|cFF00FFB0CooldownWatch:|r"
 
 -- about
 rgcw.L["author"] = "Author: Michael Wiesendanger"

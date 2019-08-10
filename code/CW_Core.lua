@@ -99,7 +99,7 @@ end
 ]]--
 function me.ShowWelcomeMessage()
   print(
-    string.format(RGCW_CONSTANTS.ADDON_NAME .. rgcw.L["help"],
+    string.format("|cFF00FFB0" .. RGCW_CONSTANTS.ADDON_NAME .. rgcw.L["help"],
     GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version"))
   )
 end
