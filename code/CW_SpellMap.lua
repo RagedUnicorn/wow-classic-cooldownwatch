@@ -32,6 +32,7 @@ me.tag = "SpellMap"
 local spellMap
 
 --[[
+  TODO translate german classnames
   TODO Depending on what locale the client has a different implementation is used
   to normalize a spellname (this is determined once during addon load). This is done because this function is time critical
   and can be called a lot during fights with a lot of players.
@@ -1237,7 +1238,7 @@ else
       }
     },
     ["racials"] = {
-      ["escaoe_artis"] = {
+      ["escape_artist"] = {
         ["spellName"] = "Escape Artist",
         ["spellId"] = 20589,
         ["cooldown"] = 60,

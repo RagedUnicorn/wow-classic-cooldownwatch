@@ -127,7 +127,6 @@ end
 
 --[[
   @param {table} spellFrame
-  @param {table} spellIcon
 
   @return {table}
     The created checkbox
@@ -135,7 +134,7 @@ end
 function me.CreateCooldownSpell(spellFrame)
   local cooldownSpellStatusCheckBox = CreateFrame("CheckButton", RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS, spellFrame, "UICheckButtonTemplate")
   cooldownSpellStatusCheckBox:SetSize(RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS_SIZE, RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS_SIZE)
-  cooldownSpellStatusCheckBox:SetPoint("RIGHT", 50, 0)
+  cooldownSpellStatusCheckBox:SetPoint("LEFT", 0, 0)
 
   cooldownSpellStatusCheckBox.text = _G[cooldownSpellStatusCheckBox:GetName() .. 'Text']
   cooldownSpellStatusCheckBox.text:SetFont(STANDARD_TEXT_FONT, 15)
@@ -147,19 +146,20 @@ end
 --[[
   Update the quickchange rules list
 
-  TODO category param
-
   @param {table} scrollFrame
+  @param {number} category
 ]]--
 function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
+  print("called")
   local cooldownList = mod.spellMap.GetAllForCategory(RGCW_CONSTANTS.CATEGORIES[category].categoryName)
   local count = 0
   for _ in pairs(cooldownList) do count = count + 1 end
   local maxValue = count or 0
-
+  mod.logger.LogError(me.tag, "before maxValue: " .. maxValue)
   if maxValue <= RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS then
-    maxValue = RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS + 1
+    maxValue = RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS + 1 -- 2 seems to help a bit
   end
+  mod.logger.LogError(me.tag, "maxValue: " .. maxValue)
   -- Note: maxValue needs to be at least max_rows + 1
   FauxScrollFrame_Update(scrollFrame, maxValue, RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS, RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT)
 
@@ -168,6 +168,7 @@ function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
     local value = index + offset
     local idx = 1
     local row = spellRows[index]
+    local wasShown = false
 
     for spellName, cooldown in pairs(cooldownList) do
       if idx == value then
@@ -176,9 +177,15 @@ function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
         row.cooldownStatus.text:SetText(cooldown.spellName)
 
         row:Show()
+        wasShown = true
       end
 
       idx = idx + 1
+    end
+
+    if not wasShown then
+      mod.logger.LogError(me.tag, "Hiding empty row")
+      spellRows[index]:Hide()
     end
   end
 end
