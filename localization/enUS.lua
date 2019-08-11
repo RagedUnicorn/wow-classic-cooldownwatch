@@ -8,6 +8,7 @@ rgcw.L["help"] = "|cFFFFC300(%s)|r: Use |cFFFFC300/rgcw|r or |cFFFFC300/cooldown
 rgcw.L["reload"] = "|cFFFFC300reload|r - reload UI"
 rgcw.L["opt"] = "|cFFFFC300opt|r - display Optionsmenu"
 rgcw.L["info_title"] = "|cFF00FFB0CooldownWatch:|r"
+rgcw.L["invalid_argument"] = "Invalid argument passed"
 
 -- about
 rgcw.L["author"] = "Author: Michael Wiesendanger"

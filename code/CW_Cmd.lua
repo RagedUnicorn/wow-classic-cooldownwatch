@@ -67,10 +67,10 @@ function me.SetupSlashCmdList()
       elseif args[2] == "disable" then
         mod.targetCooldownBar.HideExampleTargetCooldownBar()
       else
-        mod.logger.PrintUserError("Invalid argument passed")
+        mod.logger.PrintUserError(rgcw.L["invalid_argument"])
       end
     else
-      mod.logger.PrintUserError("Invalid argument passed")
+      mod.logger.PrintUserError(rgcw.L["invalid_argument"])
     end
   end
 end

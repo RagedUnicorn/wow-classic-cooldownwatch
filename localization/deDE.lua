@@ -9,6 +9,7 @@ if (GetLocale() == "deDE") then
   rgcw.L["reload"] = "|cFFFFC300reload|r - UI neu laden"
   rgcw.L["opt"] = "|cFFFFC300opt|r - zeige Optionsmenu an"
   rgcw.L["info_title"] = "|cFF00FFB0CooldownWatch:|r"
+  rgcw.L["invalid_argument"] = "Ungültiges Argument übergeben"
 
   -- about tab
   rgcw.L["author"] = "Autor: Michael Wiesendanger"
