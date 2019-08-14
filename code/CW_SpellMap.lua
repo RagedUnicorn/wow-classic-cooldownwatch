@@ -32,8 +32,8 @@ me.tag = "SpellMap"
 local spellMap
 
 --[[
-  TODO translate german classnames
   TODO Depending on what locale the client has a different implementation is used
+  Need to check if spell names in the unfiltered combat log are also depending on the client
   to normalize a spellname (this is determined once during addon load). This is done because this function is time critical
   and can be called a lot during fights with a lot of players.
 ]]--

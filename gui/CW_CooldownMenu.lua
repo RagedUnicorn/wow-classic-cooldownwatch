@@ -37,6 +37,12 @@ function me.cooldownMenuOnShow(self)
   me.BuildUiNew(self, self.value)
 end
 
+--[[
+  Create the cooldown configuration menu for enabling/disabling certain cooldowns
+
+  @param {table} frame
+  @param {number} category
+]]--
 function me.BuildUiNew(frame, category) -- TODO
   local spellListScrollFrame = CreateFrame(
     "ScrollFrame",
@@ -45,8 +51,6 @@ function me.BuildUiNew(frame, category) -- TODO
     "FauxScrollFrameTemplate"
   )
 
-  -- scrollFrame:SetWidth(parent:GetWidth())
-  -- scrollFrame:SetHeight(parent:GetHeight() - 10) TODO?
   spellListScrollFrame:SetWidth(RGCW_CONSTANTS.ELEMENT_SPELL_LIST_CONTENT_FRAME_WIDTH)
   spellListScrollFrame:SetHeight(RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT * RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS)
   spellListScrollFrame:SetPoint("TOPLEFT", 10, -50)
@@ -150,16 +154,17 @@ end
   @param {number} category
 ]]--
 function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
-  print("called")
   local cooldownList = mod.spellMap.GetAllForCategory(RGCW_CONSTANTS.CATEGORIES[category].categoryName)
   local count = 0
+  -- count entries in table
   for _ in pairs(cooldownList) do count = count + 1 end
+
   local maxValue = count or 0
-  mod.logger.LogError(me.tag, "before maxValue: " .. maxValue)
+
   if maxValue <= RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS then
-    maxValue = RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS + 1 -- 2 seems to help a bit
+    maxValue = RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS + 1
   end
-  mod.logger.LogError(me.tag, "maxValue: " .. maxValue)
+
   -- Note: maxValue needs to be at least max_rows + 1
   FauxScrollFrame_Update(scrollFrame, maxValue, RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS, RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT)
 
@@ -173,6 +178,7 @@ function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
     for spellName, cooldown in pairs(cooldownList) do
       if idx == value then
         local name, _, iconId, _, _, _, spellUid = GetSpellInfo(cooldown.spellId)
+
         row.cooldownIcon:SetTexture(iconId)
         row.cooldownStatus.text:SetText(cooldown.spellName)
 
@@ -184,7 +190,6 @@ function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
     end
 
     if not wasShown then
-      mod.logger.LogError(me.tag, "Hiding empty row")
       spellRows[index]:Hide()
     end
   end

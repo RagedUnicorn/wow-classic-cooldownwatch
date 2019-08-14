@@ -31,7 +31,7 @@ mod.targetCooldownBar = me
 me.tag = "TargetCooldownBar"
 
 --[[
-  Local references to heavily accessed targetcastbar ui elements
+  Local references to ui elements
 ]]--
 local targetCooldownBarFrame
 
@@ -43,7 +43,7 @@ function me.BuildUi()
   targetCooldownBarFrame:SetWidth(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_WIDTH)
   targetCooldownBarFrame:SetHeight(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_HEIGHT)
   targetCooldownBarFrame:SetBackdrop({
-    bgFile = [[Interface\DialogFrame\UI-DialogBox-Background]]
+    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background"
   })
   targetCooldownBarFrame:SetBackdropColor(0, 0, 0, .5)
   targetCooldownBarFrame:SetBackdropBorderColor(0, 0, 0, .8)
@@ -96,8 +96,8 @@ function me.CreateCooldownSlot(frame, position)
   )
 
   local backdrop = {
-    bgFile = [[Interface\AddOns\CooldownWatch\assets\ui_slot_background]],
-    edgeFile = [[Interface\AddOns\CooldownWatch\assets\ui_slot_background]],
+    bgFile = "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
+    edgeFile = "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
     -- edgeFile = nil,
     tile = false,
     tileSize = 32,
@@ -120,8 +120,8 @@ function me.CreateCooldownSlot(frame, position)
   highlightFrame:SetPoint("BOTTOMRIGHT", cooldownWatchSlot, "BOTTOMRIGHT")
 
   local innerBackdrop = {
-    bgFile = [[Interface\AddOns\CooldownWatch\assets\ui_slot_background]],
-    edgeFile = [[Interface\AddOns\CooldownWatch\assets\ui_slot_inner_glow]],
+    bgFile = "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
+    edgeFile = "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_inner_glow",
     tile = false,
     tileSize = 16,
     edgeSize = 16,
@@ -156,7 +156,7 @@ function me.CreateCooldownSlot(frame, position)
 end
 
 --[[
-  Create a cooldown overlay and attach it to the cooldownslot
+  Create an icon texture holder and attach it to the cooldownslot
 
   @param {table} frame
 
@@ -194,7 +194,6 @@ function me.CreateCooldownOverlay(frame)
   )
   cooldownOverlay:SetSize(32, 32) -- TODO use constants
   cooldownOverlay:SetAllPoints()
-  cooldownOverlay:SetCooldown(GetTime(), 10) -- TODO ?remove?
   cooldownOverlay:SetFrameLevel(cooldownOverlay:GetFrameLevel() - 1)
 
   return cooldownOverlay
@@ -210,7 +209,7 @@ end
 ]]--
 function me.CreateBigTimerCooldown(frame)
   local bigTimerFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT, "OVERLAY")
-  bigTimerFontString:SetFont("Fonts\\FRIZQT__.TTF", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_SIZE)
+  bigTimerFontString:SetFont(STANDARD_TEXT_FONT, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_SIZE)
   bigTimerFontString:SetTextColor(1, 1, 0)
   bigTimerFontString:SetJustifyH("LEFT")
 
@@ -227,7 +226,7 @@ end
 ]]--
 function me.CreateSmallTimerCooldown(frame)
   local smallTimerFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT, "OVERLAY")
-  smallTimerFontString:SetFont("Fonts\\FRIZQT__.TTF", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT_SIZE)
+  smallTimerFontString:SetFont(STANDARD_TEXT_FONT, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT_SIZE)
   smallTimerFontString:SetPoint("TOPLEFT", 5, -5)
   smallTimerFontString:SetTextColor(.01, .66, 0.95, 1)
   smallTimerFontString:SetJustifyH("LEFT")

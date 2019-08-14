@@ -38,7 +38,7 @@ function me.BuildAboutContent(frame)
   local ragedUnicornLogo  = frame:CreateTexture(RGCW_CONSTANTS.ELEMENT_ABOUT_LOGO, "ARTWORK")
   ragedUnicornLogo:SetPoint("TOP", 0, -20)
   ragedUnicornLogo:SetSize(256, 256)
-  ragedUnicornLogo:SetTexture([[Interface\AddOns\EnemyCastBar\assets\logo_ragedunicorn]])
+  ragedUnicornLogo:SetTexture("Interface\\AddOns\\EnemyCastBar\\assets\\logo_ragedunicorn")
 
   local authorFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_ABOUT_AUTHOR_FONT_STRING, "OVERLAY")
   authorFontString:SetFont(STANDARD_TEXT_FONT, 15)
