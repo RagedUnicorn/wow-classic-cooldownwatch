@@ -121,8 +121,13 @@ function me.CreateRuleRowFrame(frame, position)
   return row
 end
 
+function me.RowOnShow(self)
+  atest = self
+end
+
 --[[
   @param {table} spellFrame
+  TODO might need rework
 
   @return {table}
     The created icon texture holder
@@ -179,6 +184,8 @@ function me.CreateCooldownSpell(spellFrame)
   cooldownSpellStatusCheckBox.text:SetFont(STANDARD_TEXT_FONT, 15)
   cooldownSpellStatusCheckBox.text:SetTextColor(.95, .95, .95)
 
+  cooldownSpellStatusCheckBox:SetScript("OnClick", me.CooldownEntryOnClick)
+
   return cooldownSpellStatusCheckBox
 end
 
@@ -213,9 +220,17 @@ function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
     for spellName, cooldown in pairs(cooldownList) do
       if idx == value then
         local name, _, iconId, _, _, _, spellUid = GetSpellInfo(cooldown.spellId)
+        local enabled = mod.configuration.GetCooldownConfigurationState(category, cooldown.spellId)
 
         row.cooldownIcon:SetTexture(iconId)
         row.cooldownStatus.text:SetText(cooldown.spellName)
+        if enabled then
+          row.cooldownStatus:SetChecked(true)
+        else
+          row.cooldownStatus:SetChecked(false)
+        end
+        row.spellId = cooldown.spellId
+        row.category = category
 
         row:Show()
         wasShown = true
@@ -228,4 +243,15 @@ function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
       spellRows[index]:Hide()
     end
   end
+end
+
+--[[
+  OnClick callback for cooldown configuration checkbuttons
+
+  @param {table} self
+]]--
+function me.CooldownEntryOnClick(self)
+  local enabled = self:GetChecked()
+
+  mod.configuration.UpdateCooldownConfigurationState(enabled, self:GetParent().category, self:GetParent().spellId)
 end

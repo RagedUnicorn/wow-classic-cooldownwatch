@@ -70,3 +70,21 @@ else
     return name
   end
 end
+
+--[[
+  @param {table} obj
+    the object that should be cloned
+  @return {table}
+    a clone of the object passed
+]]--
+function me.Clone(obj)
+  if type(obj) ~= 'table' then return obj end
+
+  local res = {}
+
+  for k, v in pairs(obj) do
+    res[me.Clone(k)] = me.Clone(v)
+  end
+
+  return res
+end

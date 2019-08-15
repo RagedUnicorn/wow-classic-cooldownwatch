@@ -28,12 +28,17 @@ local me = {}
 mod.configuration = me
 
 me.tag = "Configuration"
-
+-- TODO
+-- /dump CooldownWatchConfiguration.cooldownConfiguration
 CooldownWatchConfiguration = {
   --[[
     Whether the targetCooldownBar is locked from moving or not
   ]]--
   ["lockTargetCooldownBar"] = false,
+  --[[
+    Cooldown configuration
+  ]]--
+  ["cooldownConfiguration"] = nil,
   --[[
     Initial addon version
   ]]--
@@ -54,12 +59,22 @@ CooldownWatchConfiguration = {
 }
 
 --[[
+  Saved addon variable
+]]--
+CooldownWatchProfiles = {}
+
+--[[
   Set default values if property is nil. This might happen after an addon upgrade
 ]]--
 function me.SetupConfiguration()
   if CooldownWatchConfiguration.lockTargetCooldownBar == nil then
     mod.logger.LogInfo(me.tag, "lockTargetCooldownBar has unexpected nil value")
     CooldownWatchConfiguration.lockTargetCooldownBar = false
+  end
+
+  if CooldownWatchConfiguration.cooldownConfiguration == nil then
+    mod.logger.LogInfo(me.tag, "cooldownConfiguration has unexpected nil value")
+    CooldownWatchConfiguration.cooldownConfiguration = mod.profile.GetDefaultProfile()
   end
 
   if CooldownWatchConfiguration.frames == nil then
@@ -158,4 +173,61 @@ function me.GetUserPlacedFramePosition(frameName)
   end
 
   return nil
+end
+
+--[[
+  Update the tracking state of a cooldown spell for a certain category
+
+  @param {boolean} enabled
+    Whether the configuration should be enabled or disabled
+  @param {number} category
+  @param {number} spellId
+]]--
+function me.UpdateCooldownConfigurationState(enabled, category, spellId)
+  local config = CooldownWatchConfiguration.cooldownConfiguration
+  local categoryName = RGCW_CONSTANTS.CATEGORIES[category].categoryName
+
+  if config[categoryName] == nil then
+    config[categoryName] = {}
+  end
+
+  if enabled then
+    config[categoryName][spellId] = true
+    mod.logger.LogDebug(me.tag, "Enabled cooldown: " .. categoryName .. " - " .. spellId)
+  else
+    config[categoryName][spellId] = false
+    mod.logger.LogDebug(me.tag, "Disabled cooldown: " .. categoryName .. " - " .. spellId)
+  end
+end
+
+--[[
+  Get the tracking state of a cooldown spell for a certain category
+
+  @param {number} category
+  @param {number} spellId
+
+  @return {nil | boolean}
+    nil   - If no entry at all could be found
+    true  - If cooldown is enabled
+    false - If cooldown is disabled
+]]--
+function me.GetCooldownConfigurationState(category, spellId)
+  mod.logger.LogError(me.tag, "category: " .. category)
+  local config = CooldownWatchConfiguration.cooldownConfiguration
+
+  if category == nil then
+    for index, category in pairs(config) do
+      if category[spellId] then
+        return true
+      end
+    end
+  else
+    local categoryName = RGCW_CONSTANTS.CATEGORIES[category].categoryName
+
+    if config[categoryName] == nil then
+      return nil -- no entry at all for category - abort
+    end
+
+    return config[categoryName][spellId]
+  end
 end

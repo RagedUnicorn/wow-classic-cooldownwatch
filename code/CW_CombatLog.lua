@@ -52,13 +52,15 @@ function me.ProcessUnfilteredCombatLogEvent()
     local castTime = GetTime()
     local normalizedSpellName = mod.common.NormalizeSpellname(spellName)
     local spell
+    local englishClass
+    local category
     --[[
       If the caster of the detected spell is our current target we can speed up
       the process of searching for the spell in the spellmap by figuring out the
       targets class.
     ]]--
     if caster == mod.target.GetCurrentTargetGuid() then
-      local _, englishClass = UnitClass(RGCW_CONSTANTS.UNIT_ID_TARGET)
+      _, englishClass = UnitClass(RGCW_CONSTANTS.UNIT_ID_TARGET)
       spell = mod.spellMap.FindSpell(normalizedSpellName, englishClass)
     else
       spell = mod.spellMap.FindSpell(normalizedSpellName)
@@ -68,6 +70,20 @@ function me.ProcessUnfilteredCombatLogEvent()
       mod.logger.LogDebug(me.tag, "Spell is non-essential")
       return
     else
+      for i = 1, table.getn(RGCW_CONSTANTS.CATEGORIES) do
+        if string.lower(englishClass) == RGCW_CONSTANTS.CATEGORIES[i].categoryName then
+          category = i
+          break;
+        end
+      end
+
+      if not mod.configuration.GetCooldownConfigurationState(category, spell.spellId) then
+        mod.logger.LogError(me.tag, "Spell is not enabled - aborting...")
+        return
+      end
+
+
+
       local name, _, iconId, _, _, _, spellUid = GetSpellInfo(spell.spellId)
 
       me.TrackCooldown(caster, casterName, spell, spell.spellId, castTime, iconId)
@@ -86,6 +102,7 @@ end
   @param {number} iconId
 ]]--
 function me.TrackCooldown(caster, casterName, spell, spellId, castTime, iconId)
+  btest = spell
   spell.castTime = castTime -- add time when spell was detected
   spell.spellId = spellId
   spell.iconId = iconId

@@ -26,6 +26,7 @@ code/CW_Target.lua
 code/CW_Ticker.lua
 code/CW_Tooltip.lua
 code/CW_Configuration.lua
+code/CW_Profile.lua
 
 # debug
 code/CW_Debug.lua
