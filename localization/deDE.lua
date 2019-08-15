@@ -19,6 +19,9 @@ if (GetLocale() == "deDE") then
 
   -- general
   rgcw.L["general_category_name"] = "Allgemein"
+  rgcw.L["general_title"] = "Allgemeine Konfiguration"
+  rgcw.L["window_lock_target_cooldow_bar"] = "Sperre Zielabklingzeitenbalken"
+  rgcw.L["window_lock_target_cooldow_bar_tooltip"] = "Verhindert das bewegen des Zielabklingzeitenbalken"
 
   -- cooldown menu TODO translate
   rgcw.L["category_priest"] = "Priester"

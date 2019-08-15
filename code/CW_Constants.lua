@@ -80,6 +80,11 @@ RGCW_CONSTANTS = {
     GeneralMenu
   ]]--
   ELEMENT_GENERAL_SUB_OPTION_FRAME = "CW_GeneralMenuOptionsFrame",
+  ELEMENT_GENERAL_CHECK_OPTION_SIZE = 32,
+  ELEMENT_GENERAL_OPT = "CW_Opt",
+  ELEMENT_GENERAL_FRAME = "CW_GeneralFrame",
+  ELEMENT_GENERAL_TITLE = "CW_GeneralTitle",
+  ELEMENT_GENERAL_OPT_WINDOW_LOCK_TARGET_COOLDOWN_BAR = "CW_OptWindowLockTargetCooldownBar",
   --[[
     CooldownMenu
   ]]

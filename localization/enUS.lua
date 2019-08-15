@@ -18,6 +18,9 @@ rgcw.L["issues"] = "Issues: https://github.com/RagedUnicorn/wow-classic-cooldown
 
 -- general
 rgcw.L["general_category_name"] = "General"
+rgcw.L["general_title"] = "Allgemeine Konfiguration"
+rgcw.L["window_lock_target_cooldow_bar"] = "Lock Targetcooldownbar"
+rgcw.L["window_lock_target_cooldow_bar_tooltip"] = "Prevents Targetcooldownbar frame from being moved"
 
 -- cooldown menu
 rgcw.L["category_priest"] = "Priest"

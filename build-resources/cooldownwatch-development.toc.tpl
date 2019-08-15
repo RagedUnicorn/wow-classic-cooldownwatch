@@ -24,6 +24,7 @@ code/CW_SpellMap.lua
 code/CW_CooldownQueue.lua
 code/CW_Target.lua
 code/CW_Ticker.lua
+code/CW_Tooltip.lua
 code/CW_Configuration.lua
 
 # debug

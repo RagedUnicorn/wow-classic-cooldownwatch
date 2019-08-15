@@ -28,6 +28,14 @@ mod.generalMenu = me
 
 me.tag = "GeneralMenu"
 
+--[[
+  Option texts for checkbutton options
+]]--
+local options = {
+  {"WindowLockTargetCooldownBar", rgcw.L["window_lock_target_cooldow_bar"], rgcw.L["window_lock_target_cooldow_bar_tooltip"]}
+}
+
+
 -- track whether the menu was already built
 local builtMenu = false
 
@@ -40,7 +48,125 @@ local builtMenu = false
 function me.BuildUi(frame)
   if builtMenu then return end
 
-  mod.logger.LogInfo(me.tag, "GeneralMenu called")
+  local titleFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_GENERAL_TITLE, "OVERLAY")
+  titleFontString:SetFont(STANDARD_TEXT_FONT, 20)
+  titleFontString:SetPoint("TOP", 0, -20)
+  titleFontString:SetSize(frame:GetWidth(), 20)
+  titleFontString:SetText(rgcw.L["general_title"])
+
+  me.BuildCheckButtonOption(
+    frame,
+    RGCW_CONSTANTS.ELEMENT_GENERAL_OPT_WINDOW_LOCK_TARGET_COOLDOWN_BAR,
+    20,
+    -80,
+    me.LockWindowTargetCooldownBarOnShow,
+    me.LockWindowTargetCooldownBarOnClick
+  )
 
   builtMenu = true
+end
+
+--[[
+  Build a checkbutton option
+
+  @param {table} parentFrame
+  @param {string} optionFrameName
+  @param {number} posX
+  @param {number} posY
+  @param {function} onShowCallback
+  @param {function} onClickCallback
+]]--
+function me.BuildCheckButtonOption(parentFrame, optionFrameName, posX, posY, onShowCallback, onClickCallback)
+  local checkButtonOptionFrame = CreateFrame("CheckButton", optionFrameName, parentFrame, "UICheckButtonTemplate")
+  checkButtonOptionFrame:SetSize(RGCW_CONSTANTS.ELEMENT_GENERAL_CHECK_OPTION_SIZE, RGCW_CONSTANTS.ELEMENT_GENERAL_CHECK_OPTION_SIZE)
+  checkButtonOptionFrame:SetPoint("TOPLEFT", posX, posY)
+
+  for _, region in ipairs({checkButtonOptionFrame:GetRegions()}) do
+    if string.find(region:GetName() or "", "Text$") and region:IsObjectType("FontString") then
+      region:SetFont(STANDARD_TEXT_FONT, 15)
+      region:SetTextColor(.95, .95, .95)
+      region:SetText(me.GetLabelText(checkButtonOptionFrame))
+      break
+    end
+  end
+
+  checkButtonOptionFrame:SetScript("OnEnter", me.OptTooltipOnEnter)
+  checkButtonOptionFrame:SetScript("OnLeave", me.OptTooltipOnLeave)
+  checkButtonOptionFrame:SetScript("OnShow", onShowCallback)
+  checkButtonOptionFrame:SetScript("OnClick", onClickCallback)
+  -- load initial state
+  onShowCallback(checkButtonOptionFrame)
+end
+
+--[[
+  Get the label text for the checkbutton
+
+  @param {table} frame
+
+  @return {string}
+    The text for the label
+]]--
+function me.GetLabelText(frame)
+  local name = frame:GetName()
+
+  if not name then return end
+
+  for i = 1, table.getn(options) do
+    if name == RGCW_CONSTANTS.ELEMENT_GENERAL_OPT .. options[i][1] then
+      return options[i][2]
+    end
+  end
+end
+
+--[[
+  OnEnter callback for checkbuttons - show tooltip
+
+  @param {table} self
+]]--
+function me.OptTooltipOnEnter(self)
+  local name = self:GetName()
+
+  if not name then return end
+
+  for i = 1, table.getn(options) do
+    if name == RGCW_CONSTANTS.ELEMENT_GENERAL_OPT .. options[i][1] then
+      mod.tooltip.BuildTooltipForOption(options[i][2], options[i][3])
+      break
+    end
+  end
+end
+
+--[[
+  OnEnter callback for checkbuttons - hide tooltip
+]]--
+function me.OptTooltipOnLeave()
+  _G[RGCW_CONSTANTS.ELEMENT_TOOLTIP]:Hide()
+end
+
+--[[
+  OnShow callback for checkbuttons - window lock gearBar
+
+  @param {table} self
+]]--
+function me.LockWindowTargetCooldownBarOnShow(self)
+  if mod.configuration.IsTargetCooldownBarLocked() then
+    self:SetChecked(true)
+  else
+    self:SetChecked(false)
+  end
+end
+
+--[[
+  OnClick callback for checkbuttons - window lock gearBar
+
+  @param {table} self
+]]--
+function me.LockWindowTargetCooldownBarOnClick(self)
+  local enabled = self:GetChecked()
+
+  if enabled then
+    mod.configuration.LockTargetCooldownBar()
+  else
+    mod.configuration.UnlockTargetCooldownBar()
+  end
 end
