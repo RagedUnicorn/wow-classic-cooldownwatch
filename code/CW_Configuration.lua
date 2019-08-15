@@ -212,7 +212,6 @@ end
     false - If cooldown is disabled
 ]]--
 function me.GetCooldownConfigurationState(category, spellId)
-  mod.logger.LogError(me.tag, "category: " .. category)
   local config = CooldownWatchConfiguration.cooldownConfiguration
 
   if category == nil then

@@ -53,7 +53,6 @@ function me.ProcessUnfilteredCombatLogEvent()
     local normalizedSpellName = mod.common.NormalizeSpellname(spellName)
     local spell
     local englishClass
-    local category
     --[[
       If the caster of the detected spell is our current target we can speed up
       the process of searching for the spell in the spellmap by figuring out the
@@ -67,28 +66,48 @@ function me.ProcessUnfilteredCombatLogEvent()
     end
 
     if spell == nil then
-      mod.logger.LogDebug(me.tag, "Spell is non-essential")
+      mod.logger.LogDebug(me.tag, "Spell is non-essential - aborting...")
       return
-    else
-      for i = 1, table.getn(RGCW_CONSTANTS.CATEGORIES) do
-        if string.lower(englishClass) == RGCW_CONSTANTS.CATEGORIES[i].categoryName then
-          category = i
-          break;
-        end
-      end
+    end
 
-      if not mod.configuration.GetCooldownConfigurationState(category, spell.spellId) then
-        mod.logger.LogError(me.tag, "Spell is not enabled - aborting...")
-        return
-      end
-
-
-
+    if me.IsCooldownTracked(spell.spellId, englishClass) then
       local name, _, iconId, _, _, _, spellUid = GetSpellInfo(spell.spellId)
 
       me.TrackCooldown(caster, casterName, spell, spell.spellId, castTime, iconId)
+    else
+      mod.logger.LogError(me.tag, "Spell is not enabled - aborting...")
+      return
     end
   end
+end
+
+--[[
+  @param {number} spellId
+  @param {string} englishClass
+    Optional class name - speeds up the searching process
+
+  @return {boolean}
+    true  - If the cooldown is enabled
+    false - If the cooldown is disabled
+]]--
+function me.IsCooldownTracked(spellId, englishClass)
+  assert(type(spellId) == "number",
+    string.format("bad argument #1 to `IsCooldownTracked` (expected number got %s)", type(spellId)))
+
+  if englishClass ~= nil then
+    local category
+
+    for i = 1, table.getn(RGCW_CONSTANTS.CATEGORIES) do
+      if string.lower(englishClass) == RGCW_CONSTANTS.CATEGORIES[i].categoryName then
+        category = i
+        break
+      end
+    end
+
+    return mod.configuration.GetCooldownConfigurationState(category, spellId)
+  end
+
+  return mod.configuration.GetCooldownConfigurationState(nil, spellId)
 end
 
 --[[
