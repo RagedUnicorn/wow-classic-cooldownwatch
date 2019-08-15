@@ -42,9 +42,12 @@ function me.BuildUi()
   targetCooldownBarFrame = CreateFrame("Frame", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME, UIParent)
   targetCooldownBarFrame:SetWidth(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_WIDTH)
   targetCooldownBarFrame:SetHeight(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_HEIGHT)
-  targetCooldownBarFrame:SetBackdrop({
-    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background"
-  })
+
+  if not mod.configuration.IsTargetCooldownBarLocked() then
+    targetCooldownBarFrame:SetBackdrop({
+      bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background"
+    })
+  end
   targetCooldownBarFrame:SetBackdropColor(0, 0, 0, .5)
   targetCooldownBarFrame:SetBackdropBorderColor(0, 0, 0, .8)
   targetCooldownBarFrame:SetPoint("CENTER", 0, 0)
@@ -260,6 +263,7 @@ end
   @param {table} cooldown
 ]]--
 function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
+  atest = cooldown
   local timePassed = (GetTime() - cooldown.spell.castTime)
   local timeLeftBig = cooldown.spell.cooldown - timePassed
   local timeLeftSmall
@@ -298,6 +302,7 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   end
 
   local _, _, iconTexture = GetSpellInfo(cooldown.spell.spellId)
+
   cooldownWatchSlot.iconHolderTexture:SetTexture(iconTexture)
 
   if not cooldownWatchSlot.targetCooldownOverlay.cooldownStarted then

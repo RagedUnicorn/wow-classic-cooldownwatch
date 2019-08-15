@@ -30,11 +30,21 @@ me.tag = "CooldownMenu"
 
 local spellRows = {}
 
+-- track whether the menu was already built
+local builtMenu = false
+
 --[[
   @param {table} self
 ]]--
 function me.cooldownMenuOnShow(self)
-  me.BuildUiNew(self, self.value)
+  mod.logger.LogError(me.tag, "Woot called")
+
+  if builtMenu then
+    _G[RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SCROLL_FRAME]:SetParent(self)
+    me.SpellListScrollFrameOnUpdate(_G[RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SCROLL_FRAME], self.value)
+  else
+    me.BuildUi(self, self.value)
+  end
 end
 
 --[[
@@ -43,7 +53,7 @@ end
   @param {table} frame
   @param {number} category
 ]]--
-function me.BuildUiNew(frame, category) -- TODO
+function me.BuildUi(frame, category)
   local spellListScrollFrame = CreateFrame(
     "ScrollFrame",
     RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SCROLL_FRAME,
@@ -67,7 +77,7 @@ function me.BuildUiNew(frame, category) -- TODO
 
   me.SpellListScrollFrameOnUpdate(spellListScrollFrame, category)
 
-  return spellListScrollFrame
+  builtMenu = true
 end
 
 --[[

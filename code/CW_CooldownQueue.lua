@@ -103,7 +103,7 @@ function me.RemoveCooldown(caster, spellId)
   for i = 1, table.getn(cooldownQueue) do
     if cooldownQueue[i].caster == caster and cooldownQueue[i].spell.spellId == spellId then
       tremove(cooldownQueue, i)
-      mod.logger.LogDebug(me.tag, "Removed cooldown - '" .. spellId .. "' for player: " .. caster)
+      mod.logger.LogDebug(me.tag, "Removed cooldown - '" .. spellId .. "' for player: " .. caster) -- TODO
       return
     end
   end

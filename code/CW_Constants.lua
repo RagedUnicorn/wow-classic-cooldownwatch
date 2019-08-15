@@ -140,8 +140,8 @@ RGCW_CONSTANTS = {
       ["name"] = "CW_RacialsOptionsFrame"
     },
     [11] = {
-      ["categoryName"] = "items",
-      ["localizationKey"] = "category_items",
+      ["categoryName"] = "misc",
+      ["localizationKey"] = "category_misc",
       ["name"] = "CW_ItemsOptionsFrame"
     }
   },

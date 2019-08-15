@@ -34,5 +34,5 @@ if (GetLocale() == "deDE") then
   rgcw.L["category_shaman"] = "Shamane"
   rgcw.L["category_warrior"] = "Krieger"
   rgcw.L["category_racials"] = "Rassenfähigkeiten"
-  rgcw.L["category_items"] = "Items"
+  rgcw.L["category_misc"] = "Misc"
 end

@@ -68,9 +68,9 @@ function me.ProcessUnfilteredCombatLogEvent()
       mod.logger.LogDebug(me.tag, "Spell is non-essential")
       return
     else
-      local name, _, iconId, _, _, _, spellUid = GetSpellInfo(spellId)
+      local name, _, iconId, _, _, _, spellUid = GetSpellInfo(spell.spellId)
 
-      me.TrackCooldown(caster, casterName, spell, spellId, castTime, iconId)
+      me.TrackCooldown(caster, casterName, spell, spell.spellId, castTime, iconId)
     end
   end
 end
