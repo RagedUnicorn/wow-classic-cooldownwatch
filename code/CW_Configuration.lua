@@ -28,8 +28,7 @@ local me = {}
 mod.configuration = me
 
 me.tag = "Configuration"
--- TODO
--- /dump CooldownWatchConfiguration.cooldownConfiguration
+
 CooldownWatchConfiguration = {
   --[[
     Whether the targetCooldownBar is locked from moving or not
@@ -38,7 +37,18 @@ CooldownWatchConfiguration = {
   --[[
     Cooldown configuration
   ]]--
-  ["cooldownConfiguration"] = nil,
+  ["cooldownConfiguration"] = {
+    ["rogue"] = {},
+    ["warrior"] = {},
+    ["mage"] = {},
+    ["warlock"] = {},
+    ["hunter"] = {},
+    ["paladin"] = {},
+    ["priest"] = {},
+    ["druid"] = {},
+    ["shaman"] = {},
+    ["misc"] = {}
+  },
   --[[
     Initial addon version
   ]]--

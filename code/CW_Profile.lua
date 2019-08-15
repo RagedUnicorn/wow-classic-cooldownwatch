@@ -28,17 +28,12 @@ mod.profile = me
 
 me.tag = "Profile"
 
--- allow for a maximum of 10 profiles
-local maxProfiles = 10
-local maxProfileNameLength = 25
-
 --[[
-  ["type"] = {
+  [{string}] = {
     -- e.g. paladin, racials etc
-    ["spellName"] = {
-      -- e.g. lay_on_hands as found in SpellMap
-      ["spellActive"] = false
-    }
+    [{number}] = {boolean}
+    -- true if the cooldown is enabled
+    -- false if the cooldown is disabled
   }
 ]]--
 local defaultProfile = {
@@ -56,83 +51,4 @@ local defaultProfile = {
 
 function me.GetDefaultProfile()
   return mod.common.Clone(defaultProfile)
-end
-
-function me.GetMaxProfileNameLength()
-  return maxProfileNameLength
-end
-
---[[
-  Add a new profile to the list of profiles
-
-  @param {string} profileName
-  @param {table} spellConfiguration
-  @param {table} selfAvoidSpellConfiguration
-  @param {table} spellEnemyAvoidList
-]]--
-function me.AddNewProfile(profileName, spellConfiguration, selfAvoidSpellConfiguration, enemyAvoidSpellConfiguration)
-  if table.getn(CooldownWatchProfiles) >= maxProfiles then
-    mod.logger.PrintUserError(
-      string.format(pvpw.L["user_message_add_new_profile_max_reached"], maxProfiles) -- TODO
-    )
-    return
-  end
-
-  for i = 1, table.getn(CooldownWatchProfiles) do
-    if CooldownWatchProfiles[i].name == profileName then
-      mod.logger.PrintUserError(pvpw.L["user_message_select_profile_already_exists"])
-      return
-    end
-  end
-
-  local profile = {
-    name = profileName,
-    ["spellConfiguration"] = mod.common.Clone(spellConfiguration),
-    ["selfAvoidSpellConfiguration"] = mod.common.Clone(selfAvoidSpellConfiguration),
-    ["enemyAvoidSpellConfiguration"] = mod.common.Clone(enemyAvoidSpellConfiguration)
-  }
-
-  table.insert(CooldownWatchProfiles, profile)
-  mod.logger.LogDebug(me.tag, "Created new profile with name - " .. profileName)
-end
-
---[[
-  Delete the profile on the passed index
-
-  @param {number} index
-]]--
-function me.DeleteProfile(index)
-  table.remove(CooldownWatchProfiles, index)
-  mod.logger.LogDebug(me.tag, "Removed profile on index " .. index)
-end
-
---[[
-  Activate the profile found at the passed index
-  Important! Values have to be cloned because lua does not copy by value on tables
-
-  @param {number} index
-]]--
-function me.ActivateProfile(index)
-  PVPWarnOptions.spellList = nil
-  PVPWarnOptions.spellList = mod.common.Clone(CooldownWatchProfiles[index].spellConfiguration)
-  PVPWarnOptions.spellSelfAvoidList = nil
-  PVPWarnOptions.spellSelfAvoidList = mod.common.Clone(CooldownWatchProfiles[index].selfAvoidSpellConfiguration)
-  PVPWarnOptions.spellEnemyAvoidList = nil
-  PVPWarnOptions.spellEnemyAvoidList = mod.common.Clone(CooldownWatchProfiles[index].enemyAvoidSpellConfiguration)
-end
-
---[[
-  Activate the profile found at the passed index
-  Important! Values have to be cloned because lua does not copy by value on tables
-
-  @param {number} index
-]]--
-function me.ActivateDefaultProfile()
-  PVPWarnOptions.spellList = nil
-  -- get the default configuration based on the current class
-  PVPWarnOptions.spellList = mod.common.Clone(me.GetDefaultProfile())
-  PVPWarnOptions.spellSelfAvoidList = nil
-  PVPWarnOptions.spellSelfAvoidList = mod.common.Clone(defaultProfileSelfAvoidSpells)
-  PVPWarnOptions.spellEnemyAvoidList = nil
-  PVPWarnOptions.spellEnemyAvoidList = mod.common.Clone(defaultProfileEnemyAvoidSpells)
 end

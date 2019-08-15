@@ -75,7 +75,7 @@ function me.ProcessUnfilteredCombatLogEvent()
 
       me.TrackCooldown(caster, casterName, spell, spell.spellId, castTime, iconId)
     else
-      mod.logger.LogError(me.tag, "Spell is not enabled - aborting...")
+      mod.logger.LogDebug(me.tag, "Spell is not enabled - aborting...")
       return
     end
   end

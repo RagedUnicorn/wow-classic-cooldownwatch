@@ -3,7 +3,7 @@
 ## Author: Michael Wiesendanger <michael.wiesendanger@gmail.com>
 ## Notes: Addon that tracks cooldowns of enemy players
 ## Version: v1.0.0
-## SavedVariablesPerCharacter: CooldownWatchConfiguration, CooldownWatchProfiles
+## SavedVariablesPerCharacter: CooldownWatchConfiguration
 
 # constant values
 code/CW_Constants.lua
