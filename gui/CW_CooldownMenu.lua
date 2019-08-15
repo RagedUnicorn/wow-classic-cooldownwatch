@@ -34,11 +34,11 @@ local spellRows = {}
 local builtMenu = false
 
 --[[
+  Builds the menu for the first time. After that the menu is reused for all categories
+
   @param {table} self
 ]]--
 function me.cooldownMenuOnShow(self)
-  mod.logger.LogError(me.tag, "Woot called")
-
   if builtMenu then
     _G[RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SCROLL_FRAME]:SetParent(self)
     me.SpellListScrollFrameOnUpdate(_G[RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SCROLL_FRAME], self.value)
@@ -128,13 +128,38 @@ end
     The created icon texture holder
 ]]--
 function me.CreateCooldownSpellIcon(spellFrame)
-  local cooldownIcon = spellFrame:CreateTexture(RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON, "ARTWORK")
+  local iconHolder = CreateFrame("Frame", nil, spellFrame)
+  iconHolder:SetSize(
+    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON_SIZE + 5,
+    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON_SIZE + 5
+  )
+  iconHolder:SetPoint("LEFT", 10, 0)
+
+  local cooldownIcon = iconHolder:CreateTexture(RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON, "ARTWORK")
   cooldownIcon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-  cooldownIcon:SetPoint("CENTER", 10, 0)
+  cooldownIcon:SetPoint("CENTER", 0, 0)
   cooldownIcon:SetSize(
     RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON_SIZE,
     RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON_SIZE
   )
+
+  local backdrop = {
+    bgFile = "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
+    edgeFile = "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
+    tile = false,
+    tileSize = 32,
+    edgeSize = 20,
+    insets = {
+      left = 12,
+      right = 12,
+      top = 12,
+      bottom = 12
+    }
+  }
+
+  iconHolder:SetBackdrop(backdrop)
+  iconHolder:SetBackdropColor(0.15, 0.15, 0.15, 1)
+  iconHolder:SetBackdropBorderColor(0.47, 0.21, 0.74, 1)
 
   return cooldownIcon
 end
@@ -148,7 +173,7 @@ end
 function me.CreateCooldownSpell(spellFrame)
   local cooldownSpellStatusCheckBox = CreateFrame("CheckButton", RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS, spellFrame, "UICheckButtonTemplate")
   cooldownSpellStatusCheckBox:SetSize(RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS_SIZE, RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS_SIZE)
-  cooldownSpellStatusCheckBox:SetPoint("LEFT", 0, 0)
+  cooldownSpellStatusCheckBox:SetPoint("LEFT", RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON_SIZE + 20, 0)
 
   cooldownSpellStatusCheckBox.text = _G[cooldownSpellStatusCheckBox:GetName() .. 'Text']
   cooldownSpellStatusCheckBox.text:SetFont(STANDARD_TEXT_FONT, 15)
