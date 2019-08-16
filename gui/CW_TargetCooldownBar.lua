@@ -23,6 +23,8 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
+-- luacheck: globals CreateFrame UIParent STANDARD_TEXT_FONT GetTime GetSpellInfo
+
 local mod = rgcw
 local me = {}
 
@@ -54,7 +56,8 @@ function me.BuildUi()
   targetCooldownBarFrame:SetMovable(true)
   targetCooldownBarFrame:SetClampedToScreen(true)
 
-  local framePosition = mod.configuration.GetUserPlacedFramePosition(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME)
+  local framePosition =
+    mod.configuration.GetUserPlacedFramePosition(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME)
   --[[
     Set user frame position if there is one saved
   ]]--
@@ -86,15 +89,23 @@ end
   @param {number} position
 ]]--
 function me.CreateCooldownSlot(frame, position)
-  local cooldownWatchSlot = CreateFrame("FRAME", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT .. position, frame)
+  local cooldownWatchSlot = CreateFrame(
+    "FRAME",
+    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT .. position,
+    frame
+  )
 
   cooldownWatchSlot:SetFrameLevel(1)
-  cooldownWatchSlot:SetSize(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE)
+  cooldownWatchSlot:SetSize(
+    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE,
+    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE
+  )
   cooldownWatchSlot:SetPoint(
     "LEFT",
     frame,
     "LEFT",
-    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_X + (position -1) * RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE,
+    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_X
+      + (position -1) * RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE,
     RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_Y
   )
 
@@ -147,7 +158,9 @@ function me.CreateCooldownSlot(frame, position)
   cooldownWatchSlot.targetSpellTimeSmall = me.CreateSmallTimerCooldown(cooldownWatchSlot)
 
   -- prepare animationgroup
-  local animationGroup = cooldownWatchSlot:CreateAnimationGroup(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_ANIMATION)
+  local animationGroup = cooldownWatchSlot:CreateAnimationGroup(
+    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_ANIMATION
+  )
   local animation = animationGroup:CreateAnimation("Alpha")
   animation:SetDuration(2)
   animation:SetFromAlpha(1)
@@ -228,7 +241,10 @@ end
     The created fontString
 ]]--
 function me.CreateSmallTimerCooldown(frame)
-  local smallTimerFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT, "OVERLAY")
+  local smallTimerFontString = frame:CreateFontString(
+    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT,
+    "OVERLAY"
+  )
   smallTimerFontString:SetFont(STANDARD_TEXT_FONT, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT_SIZE)
   smallTimerFontString:SetPoint("TOPLEFT", 5, -5)
   smallTimerFontString:SetTextColor(.01, .66, 0.95, 1)
@@ -263,7 +279,6 @@ end
   @param {table} cooldown
 ]]--
 function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
-  atest = cooldown
   local timePassed = (GetTime() - cooldown.spell.castTime)
   local timeLeftBig = cooldown.spell.cooldown - timePassed
   local timeLeftSmall
@@ -289,9 +304,17 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
 
   -- position text based on its cooldown duration
   if timeLeftBig > 9 then
-    cooldownWatchSlot.targetSpellTimeBig:SetPoint("LEFT", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_HIGH, 0)
+    cooldownWatchSlot.targetSpellTimeBig:SetPoint(
+      "LEFT",
+      RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_HIGH,
+      0
+    )
   else
-    cooldownWatchSlot.targetSpellTimeBig:SetPoint("LEFT", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_LOW, 0)
+    cooldownWatchSlot.targetSpellTimeBig:SetPoint(
+      "LEFT",
+      RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_LOW,
+      0
+    )
   end
 
   cooldownWatchSlot.targetSpellTimeBig:SetText(string.format("%.1f", timeLeftBig))

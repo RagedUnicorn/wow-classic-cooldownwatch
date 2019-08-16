@@ -23,6 +23,8 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
+-- luacheck: globals CreateFrame UIParent InterfaceOptions_AddCategory InterfaceOptionsFrame_OpenToCategory
+
 local mod = rgcw
 local me = {}
 mod.addonConfiguration = me
@@ -35,9 +37,14 @@ me.tag = "AddonConfiguration"
 function me.SetupAddonConfiguration()
   local panel = {}
   panel.main = me.BuildCategory(RGCW_CONSTANTS.ELEMENT_ADDON_PANEL, nil, rgcw.L["addon_name"])
-  me.BuildCategory(RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME, panel.main, rgcw.L["general_category_name"], function(self)
-    mod.generalMenu.BuildUi(self, self.value)
-  end)
+  me.BuildCategory(
+    RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME,
+    panel.main,
+    rgcw.L["general_category_name"],
+    function(self)
+      mod.generalMenu.BuildUi(self, self.value)
+    end
+  )
 
   me.BuildCooldownCategories(panel.main)
   --[[

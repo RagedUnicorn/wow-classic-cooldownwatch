@@ -22,6 +22,8 @@
   SOFTWARE.
 ]]--
 
+-- luacheck: globals STANDARD_TEXT_FONT CreateFrame
+
 local mod = rgcw
 local me = {}
 mod.generalMenu = me
@@ -32,7 +34,11 @@ me.tag = "GeneralMenu"
   Option texts for checkbutton options
 ]]--
 local options = {
-  {"WindowLockTargetCooldownBar", rgcw.L["window_lock_target_cooldow_bar"], rgcw.L["window_lock_target_cooldow_bar_tooltip"]}
+  {
+    "WindowLockTargetCooldownBar",
+    rgcw.L["window_lock_target_cooldow_bar"],
+    rgcw.L["window_lock_target_cooldow_bar_tooltip"]
+  }
 }
 
 
@@ -78,7 +84,10 @@ end
 ]]--
 function me.BuildCheckButtonOption(parentFrame, optionFrameName, posX, posY, onShowCallback, onClickCallback)
   local checkButtonOptionFrame = CreateFrame("CheckButton", optionFrameName, parentFrame, "UICheckButtonTemplate")
-  checkButtonOptionFrame:SetSize(RGCW_CONSTANTS.ELEMENT_GENERAL_CHECK_OPTION_SIZE, RGCW_CONSTANTS.ELEMENT_GENERAL_CHECK_OPTION_SIZE)
+  checkButtonOptionFrame:SetSize(
+    RGCW_CONSTANTS.ELEMENT_GENERAL_CHECK_OPTION_SIZE,
+    RGCW_CONSTANTS.ELEMENT_GENERAL_CHECK_OPTION_SIZE
+  )
   checkButtonOptionFrame:SetPoint("TOPLEFT", posX, posY)
 
   for _, region in ipairs({checkButtonOptionFrame:GetRegions()}) do

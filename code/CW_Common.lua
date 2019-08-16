@@ -18,6 +18,8 @@
   SOFTWARE.
 ]]--
 
+-- luacheck: globals GetLocale
+
 local mod = rgcw
 local me = {}
 mod.common = me
@@ -26,8 +28,8 @@ me.tag = "Common"
 
 --[[
   Depending on what locale the client has a different implementation is used
-  to normalize a spellname (this is determined once during addon load). This is done because this function is time critical
-  and can be called a lot during fights with a lot of players.
+  to normalize a spellname (this is determined once during addon load). This is done
+  because this function is time critical and can be called a lot during fights with a lot of players.
 ]]--
 if (GetLocale() == "deDE") then
   --[[

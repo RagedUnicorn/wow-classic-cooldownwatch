@@ -23,6 +23,8 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
+-- luacheck: globals GetAddOnMetadata
+
 local mod = rgcw
 local me = {}
 mod.configuration = me
@@ -67,11 +69,6 @@ CooldownWatchConfiguration = {
   ]]--
   ["frames"] = {}
 }
-
---[[
-  Saved addon variable
-]]--
-CooldownWatchProfiles = {}
 
 --[[
   Set default values if property is nil. This might happen after an addon upgrade
@@ -225,8 +222,8 @@ function me.GetCooldownConfigurationState(category, spellId)
   local config = CooldownWatchConfiguration.cooldownConfiguration
 
   if category == nil then
-    for index, category in pairs(config) do
-      if category[spellId] then
+    for _, configCategory in pairs(config) do
+      if configCategory[spellId] then
         return true
       end
     end

@@ -22,6 +22,8 @@
   SOFTWARE.
 ]]--
 
+-- luacheck: globals DEFAULT_CHAT_FRAME SLASH_COOLDOWNWATCH1 SLASH_COOLDOWNWATCH2 SlashCmdList ReloadUI
+
 local mod = rgcw
 local me = {}
 mod.cmd = me

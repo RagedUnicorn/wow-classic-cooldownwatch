@@ -48,7 +48,8 @@ me.tag = "CooldownQueue"
       ["cooldown"] cooldown,
         - {number} Cooldown of the spell
       ["cooldownWorstCase"] = cooldownWorstCase,
-        - {number} Worst case cooldown for the cooldown. Assuming the enemy player has its spell fully reduces with either a talent or an item.
+        - {number} Worst case cooldown for the cooldown.
+        Assuming the enemy player has its spell fully reduced with either a talent or an item.
         Note: If an item is unlikely to be worn by players it might get omitted here
       ["active"] = boolean
         - {boolean} Whether the spell is active and tracked or not
@@ -88,7 +89,7 @@ function me.AddCooldown(caster, casterName, spell)
     ["spell"] = spell
   }
 
-  tinsert(cooldownQueue, cooldownEvent)
+  table.insert(cooldownQueue, cooldownEvent)
   mod.logger.LogDebug(me.tag, "Added new cooldown - '" .. spell.spellName .. "' for player: " .. caster)
 end
 
@@ -102,7 +103,7 @@ end
 function me.RemoveCooldown(caster, spellId)
   for i = 1, table.getn(cooldownQueue) do
     if cooldownQueue[i].caster == caster and cooldownQueue[i].spell.spellId == spellId then
-      tremove(cooldownQueue, i)
+      table.remove(cooldownQueue, i)
       mod.logger.LogDebug(me.tag, "Removed cooldown - '" .. spellId .. "' for player: " .. caster) -- TODO
       return
     end
@@ -131,7 +132,7 @@ function me.GetCooldownsByTarget(caster)
 
   for i = 1, table.getn(cooldownQueue) do
     if cooldownQueue[i].caster == caster then
-      tinsert(cooldowns, cooldownQueue[i])
+      table.insert(cooldowns, cooldownQueue[i])
     end
   end
 

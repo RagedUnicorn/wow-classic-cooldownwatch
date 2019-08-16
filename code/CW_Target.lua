@@ -23,6 +23,8 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
+-- luacheck: globals UnitIsEnemy UnitGUID UnitName
+
 local mod = rgcw
 local me = {}
 mod.target = me
@@ -62,7 +64,7 @@ function me.UpdateCurrentTarget()
   ]]--
   if UnitIsEnemy(RGCW_CONSTANTS.UNIT_ID_PLAYER, RGCW_CONSTANTS.UNIT_ID_TARGET) or RGCW_ENVIRONMENT.DEBUG then
     targetId = UnitGUID(RGCW_CONSTANTS.UNIT_ID_TARGET)
-    targetName, _ = UnitName(RGCW_CONSTANTS.UNIT_ID_TARGET)
+    targetName = UnitName(RGCW_CONSTANTS.UNIT_ID_TARGET)
   end
 
   if targetId == nil then

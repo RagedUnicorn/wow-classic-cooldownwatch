@@ -23,6 +23,9 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
+-- luacheck: globals CombatLogGetCurrentEventInfo CombatLog_Object_IsA COMBATLOG_FILTER_HOSTILE_PLAYERS
+-- luacheck: globals COMBATLOG_OBJECT_CONTROL_PLAYER GetTime UnitClass GetSpellInfo
+
 local mod = rgcw
 local me = {}
 mod.combatLog = me
@@ -71,7 +74,7 @@ function me.ProcessUnfilteredCombatLogEvent()
     end
 
     if me.IsCooldownTracked(spell.spellId, englishClass) then
-      local name, _, iconId, _, _, _, spellUid = GetSpellInfo(spell.spellId)
+      local _, _, iconId, _, _, _, _ = GetSpellInfo(spell.spellId)
 
       me.TrackCooldown(caster, casterName, spell, spell.spellId, castTime, iconId)
     else
@@ -121,7 +124,6 @@ end
   @param {number} iconId
 ]]--
 function me.TrackCooldown(caster, casterName, spell, spellId, castTime, iconId)
-  btest = spell
   spell.castTime = castTime -- add time when spell was detected
   spell.spellId = spellId
   spell.iconId = iconId

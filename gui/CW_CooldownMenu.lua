@@ -22,6 +22,8 @@
   SOFTWARE.
 ]]--
 
+-- luacheck: globals CreateFrame STANDARD_TEXT_FONT FauxScrollFrame_Update FauxScrollFrame_GetOffset GetSpellInfo
+
 local mod = rgcw
 local me = {}
 mod.cooldownMenu = me
@@ -62,7 +64,9 @@ function me.BuildUi(frame, category)
   )
 
   spellListScrollFrame:SetWidth(RGCW_CONSTANTS.ELEMENT_SPELL_LIST_CONTENT_FRAME_WIDTH)
-  spellListScrollFrame:SetHeight(RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT * RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS)
+  spellListScrollFrame:SetHeight(
+    RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT * RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS
+  )
   spellListScrollFrame:SetPoint("TOPLEFT", 10, -50)
   spellListScrollFrame:EnableMouseWheel(true)
   spellListScrollFrame:SetBackdrop({
@@ -121,10 +125,6 @@ function me.CreateRuleRowFrame(frame, position)
   return row
 end
 
-function me.RowOnShow(self)
-  atest = self
-end
-
 --[[
   @param {table} spellFrame
   TODO might need rework
@@ -176,8 +176,16 @@ end
     The created checkbox
 ]]--
 function me.CreateCooldownSpell(spellFrame)
-  local cooldownSpellStatusCheckBox = CreateFrame("CheckButton", RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS, spellFrame, "UICheckButtonTemplate")
-  cooldownSpellStatusCheckBox:SetSize(RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS_SIZE, RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS_SIZE)
+  local cooldownSpellStatusCheckBox = CreateFrame(
+    "CheckButton",
+    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS,
+    spellFrame,
+    "UICheckButtonTemplate"
+  )
+  cooldownSpellStatusCheckBox:SetSize(
+    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS_SIZE,
+    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS_SIZE
+  )
   cooldownSpellStatusCheckBox:SetPoint("LEFT", RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON_SIZE + 20, 0)
 
   cooldownSpellStatusCheckBox.text = _G[cooldownSpellStatusCheckBox:GetName() .. 'Text']
@@ -208,7 +216,12 @@ function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
   end
 
   -- Note: maxValue needs to be at least max_rows + 1
-  FauxScrollFrame_Update(scrollFrame, maxValue, RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS, RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT)
+  FauxScrollFrame_Update(
+    scrollFrame,
+    maxValue,
+    RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS,
+    RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT
+  )
 
   local offset = FauxScrollFrame_GetOffset(scrollFrame)
   for index = 1, RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS do
@@ -217,9 +230,9 @@ function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
     local row = spellRows[index]
     local wasShown = false
 
-    for spellName, cooldown in pairs(cooldownList) do
+    for _, cooldown in pairs(cooldownList) do
       if idx == value then
-        local name, _, iconId, _, _, _, spellUid = GetSpellInfo(cooldown.spellId)
+        local _, _, iconId = GetSpellInfo(cooldown.spellId)
         local enabled = mod.configuration.GetCooldownConfigurationState(category, cooldown.spellId)
 
         row.cooldownIcon:SetTexture(iconId)

@@ -23,6 +23,8 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
+-- luacheck: globals GetLocale
+
 local mod = rgcw
 local me = {}
 mod.spellMap = me
@@ -34,8 +36,8 @@ local spellMap
 --[[
   TODO Depending on what locale the client has a different implementation is used
   Need to check if spell names in the unfiltered combat log are also depending on the client
-  to normalize a spellname (this is determined once during addon load). This is done because this function is time critical
-  and can be called a lot during fights with a lot of players.
+  to normalize a spellname (this is determined once during addon load).
+  This is done because this function is time critical and can be called a lot during fights with a lot of players.
 ]]--
 if (GetLocale() == "deDE") then
   spellMap = {
@@ -687,7 +689,8 @@ else
         ["cooldown"] = cooldown,
           - {number} Cooldown of the spell in seconds without any modifiers such as talent or items
         ["cooldownWorstCase"] = cooldownWorstCase,
-          - {number} Optional worst case cooldown for the cooldown. Assuming the enemy player has its spell fully reduced with either a talent or an item.
+          - {number} Optional worst case cooldown for the cooldown.
+          Assuming the enemy player has its spell fully reduced with either a talent or an item.
           Note: if an item is unlikely to be worn by players it might get omitted here
         ["active"] = true
           - {boolean} Whether the spell is active and tracked or not
@@ -1359,12 +1362,12 @@ function me.FindSpell(normalizedSpellName, className)
     string.format("bad argument #1 to `FindSpell` (expected string got %s)", type(normalizedSpellName)))
 
   if className ~= nil then
-    local className = strlower(className)
+    className = string.lower(className)
     if spellMap[className][normalizedSpellName] ~= nil and spellMap[className][normalizedSpellName].active then
       return spellMap[className][normalizedSpellName]
     end
   else
-    for index, value in pairs(spellMap) do
+    for index, _ in pairs(spellMap) do
         if spellMap[index][normalizedSpellName] ~= nil and spellMap[index][normalizedSpellName].active then
           return spellMap[index][normalizedSpellName]
         end

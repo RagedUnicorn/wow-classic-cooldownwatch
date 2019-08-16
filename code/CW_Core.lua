@@ -23,6 +23,8 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
+-- luacheck: globals GetAddOnMetadata
+
 rgcw = rgcw or {}
 local me = rgcw
 
@@ -60,9 +62,8 @@ end
   MainFrame OnEvent handler
 
   @param {string} event
-  @param {table} vararg
 ]]--
-function me.OnEvent(event, ...)
+function me.OnEvent(event)
   if event == "PLAYER_LOGIN" then
     me.logger.LogEvent(me.tag, "PLAYER_LOGIN")
     me.Initialize()
