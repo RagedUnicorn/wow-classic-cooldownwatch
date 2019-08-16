@@ -1,3 +1,6 @@
+
+-- luacheck: globals GetAddOnMetadata
+
 rgcw = rgcw or {}
 rgcw.L = {}
 
