@@ -116,9 +116,7 @@ end
 ]]--
 function me.UnlockTargetCooldownBar()
   CooldownWatchConfiguration.lockTargetCooldownBar = false
-  _G[RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME]:SetBackdrop({
-    bgFile = [[Interface\DialogFrame\UI-DialogBox-Background]]
-  })
+  mod.targetCooldownBar.TargetCooldownBarUiUpdate()
 end
 
 --[[
@@ -126,7 +124,7 @@ end
 ]]--
 function me.LockTargetCooldownBar()
   CooldownWatchConfiguration.lockTargetCooldownBar = true
-  _G[RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME]:SetBackdrop(nil)
+  mod.targetCooldownBar.TargetCooldownBarUiUpdate()
 end
 
 --[[

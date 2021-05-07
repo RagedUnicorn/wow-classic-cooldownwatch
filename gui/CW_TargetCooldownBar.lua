@@ -44,36 +44,11 @@ function me.BuildUi()
   targetCooldownBarFrame = CreateFrame("Frame", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME, UIParent)
   targetCooldownBarFrame:SetWidth(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_WIDTH)
   targetCooldownBarFrame:SetHeight(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_HEIGHT)
-
-  if not mod.configuration.IsTargetCooldownBarLocked() then
-    targetCooldownBarFrame:SetBackdrop({
-      bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background"
-    })
-  end
   targetCooldownBarFrame:SetBackdropColor(0, 0, 0, .5)
   targetCooldownBarFrame:SetBackdropBorderColor(0, 0, 0, .8)
   targetCooldownBarFrame:SetPoint("CENTER", 0, 0)
   targetCooldownBarFrame:SetMovable(true)
   targetCooldownBarFrame:SetClampedToScreen(true)
-
-  local framePosition =
-    mod.configuration.GetUserPlacedFramePosition(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME)
-  --[[
-    Set user frame position if there is one saved
-  ]]--
-  if framePosition ~= nil then
-    targetCooldownBarFrame:ClearAllPoints() -- very important to clear all points first
-    targetCooldownBarFrame:SetPoint(
-      framePosition.point,
-      framePosition.relativeTo,
-      framePosition.relativePoint,
-      framePosition.posX,
-      framePosition.posY
-    )
-  else
-    -- initial position for first time use
-    targetCooldownBarFrame:SetPoint("CENTER", 0, 0)
-  end
 
   me.SetupDragFrame(targetCooldownBarFrame)
 
@@ -251,6 +226,53 @@ function me.CreateSmallTimerCooldown(frame)
   smallTimerFontString:SetJustifyH("LEFT")
 
   return smallTimerFontString
+end
+
+--[[
+  Callback that should be invoked if anything related to the ui has to be updated. Should not be invoked
+  for regular ui updates instead only use this function to update single time changes to the ui. Usually
+  mostly related to changes in the configuration
+]]--
+function me.TargetCooldownBarUiUpdate()
+  me.UpdateTargetBarFramePosition()
+  me.UpdateTargetBarLockedState()
+end
+
+--[[
+  Update the locked/unlocked state of the targetBar
+]]--
+function me.UpdateTargetBarLockedState()
+  if mod.configuration.IsTargetCooldownBarLocked() then
+    targetCooldownBarFrame:SetBackdrop(nil)
+  else
+    targetCooldownBarFrame:SetBackdrop({
+      bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background"
+    })
+  end
+end
+
+--[[
+  Update the targetBars frame position
+]]--
+function me.UpdateTargetBarFramePosition()
+  local framePosition =
+    mod.configuration.GetUserPlacedFramePosition(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME)
+  --[[
+    Set user frame position if there is one saved
+  ]]--
+  if framePosition ~= nil then
+    targetCooldownBarFrame:ClearAllPoints() -- very important to clear all points first
+    targetCooldownBarFrame:SetPoint(
+      framePosition.point,
+      framePosition.relativeTo,
+      framePosition.relativePoint,
+      framePosition.posX,
+      framePosition.posY
+    )
+  else
+    -- initial position for first time use
+    targetCooldownBarFrame:SetPoint("CENTER", 0, 0)
+  end
 end
 
 --[[

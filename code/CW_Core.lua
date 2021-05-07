@@ -30,6 +30,8 @@ local me = rgcw
 
 me.tag = "Core"
 
+local initializationDone = false
+
 --[[
   Addon load
 
@@ -69,7 +71,10 @@ function me.OnEvent(event)
     me.Initialize()
   elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
     me.logger.LogEvent(me.tag, "COMBAT_LOG_EVENT_UNFILTERED")
-    me.combatLog.ProcessUnfilteredCombatLogEvent()
+
+    if initializationDone then
+      me.combatLog.ProcessUnfilteredCombatLogEvent()
+    end
   elseif event == "PLAYER_TARGET_CHANGED" then
     me.logger.LogEvent(me.tag, "PLAYER_TARGET_CHANGED")
     me.target.UpdateCurrentTarget()
@@ -91,6 +96,10 @@ function me.Initialize()
   me.configuration.SetupConfiguration()
   -- setup tickers
   me.ticker.StartTickerTargetCooldownBar()
+  -- update initial view of gearBars after addon initialization
+  me.targetCooldownBar.TargetCooldownBarUiUpdate()
+  -- initialization is done
+  initializationDone = true
 
   me.ShowWelcomeMessage()
 end
