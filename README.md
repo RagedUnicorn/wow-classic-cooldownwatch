@@ -81,7 +81,7 @@ For this to work an oauth token for GitHub is required and has to be configured 
 
 MIT License
 
-Copyright (c) 2019 Michael Wiesendanger
+Copyright (c) 2021 Michael Wiesendanger
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
