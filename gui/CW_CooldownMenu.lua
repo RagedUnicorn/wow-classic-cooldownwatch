@@ -69,9 +69,6 @@ function me.BuildUi(frame, category)
   )
   spellListScrollFrame:SetPoint("TOPLEFT", 10, -50)
   spellListScrollFrame:EnableMouseWheel(true)
-  spellListScrollFrame:SetBackdrop({
-    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background"
-  })
 
   spellListScrollFrame:SetScript("OnVerticalScroll", me.RuleListOnVerticalScroll)
 
