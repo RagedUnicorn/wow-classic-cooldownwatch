@@ -22,7 +22,8 @@
   SOFTWARE.
 ]]--
 
--- luacheck: globals CreateFrame STANDARD_TEXT_FONT FauxScrollFrame_Update FauxScrollFrame_GetOffset GetSpellInfo
+-- luacheck: globals CreateFrame STANDARD_TEXT_FONT FauxScrollFrame_Update FauxScrollFrame_GetOffset
+-- luacheck: globals GetSpellInfo GetItemIcon
 
 local mod = rgcw
 local me = {}
@@ -229,8 +230,18 @@ function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
 
     for _, cooldown in pairs(cooldownList) do
       if idx == value then
-        local _, _, iconId = GetSpellInfo(cooldown.spellId)
+        local iconId
         local enabled = mod.configuration.GetCooldownConfigurationState(category, cooldown.spellId)
+
+        --[[
+          For most items we have to track the actual spelleffect in the combat log. However for
+          people to recognize the item it is much better to use items icon itself.
+        ]]--
+        if cooldown.itemId ~= nil then
+          iconId = GetItemIcon(cooldown.itemId)
+        else
+          _, _, iconId = GetSpellInfo(cooldown.spellId)
+        end
 
         row.cooldownIcon:SetTexture(iconId)
         row.cooldownStatus.text:SetText(cooldown.spellName)

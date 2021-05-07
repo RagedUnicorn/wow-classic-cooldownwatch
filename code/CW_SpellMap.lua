@@ -1283,10 +1283,6 @@ else
         ["active"] = true
       }
     },
-    --[[
-      TODO might need an additonal property here for the item icon because the spell
-      itself might not give it away which item was used
-    ]]--
     ["misc"] = {
       ["shadow_reflector"] = {
         ["spellName"] = "Ultra-Flash Shadow Reflector",
