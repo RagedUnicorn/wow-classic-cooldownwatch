@@ -41,9 +41,9 @@ local targetCooldownBarFrame
   Build initial targetCooldownBarFrame ui
 ]]--
 function me.BuildUi()
-  targetCooldownBarFrame = CreateFrame("Frame", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME, UIParent)
-  targetCooldownBarFrame:SetWidth(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_WIDTH)
-  targetCooldownBarFrame:SetHeight(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_HEIGHT)
+  targetCooldownBarFrame = CreateFrame("Frame", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_FRAME, UIParent)
+  targetCooldownBarFrame:SetWidth(RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_WIDTH)
+  targetCooldownBarFrame:SetHeight(RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_HEIGHT)
   targetCooldownBarFrame:SetBackdropColor(0, 0, 0, .5)
   targetCooldownBarFrame:SetBackdropBorderColor(0, 0, 0, .8)
   targetCooldownBarFrame:SetPoint("CENTER", 0, 0)
@@ -52,7 +52,7 @@ function me.BuildUi()
 
   me.SetupDragFrame(targetCooldownBarFrame)
 
-  for i = 1, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_AMOUNT do
+  for i = 1, RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_AMOUNT do
     me.CreateCooldownSlot(targetCooldownBarFrame, i)
   end
 end
@@ -66,22 +66,22 @@ end
 function me.CreateCooldownSlot(frame, position)
   local cooldownWatchSlot = CreateFrame(
     "FRAME",
-    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT .. position,
+    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_SLOT .. position,
     frame
   )
 
   cooldownWatchSlot:SetFrameLevel(1)
   cooldownWatchSlot:SetSize(
-    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE,
-    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE
+    RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_DEFAULT_SIZE,
+    RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_DEFAULT_SIZE
   )
   cooldownWatchSlot:SetPoint(
     "LEFT",
     frame,
     "LEFT",
-    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_X
-      + (position -1) * RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_SIZE,
-    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_Y
+    RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_X
+      + (position -1) * RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_DEFAULT_SIZE,
+    RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_Y
   )
 
   local backdrop = {
@@ -134,7 +134,7 @@ function me.CreateCooldownSlot(frame, position)
 
   -- prepare animationgroup
   local animationGroup = cooldownWatchSlot:CreateAnimationGroup(
-    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_ANIMATION
+    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_SLOT_ANIMATION
   )
   local animation = animationGroup:CreateAnimation("Alpha")
   animation:SetDuration(2)
@@ -156,7 +156,7 @@ end
 ]]--
 function me.CreateIconHolder(frame)
   local iconHolderTexture = frame:CreateTexture(
-    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_ICON_TEXTURE_NAME,
+    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_SLOT_ICON_TEXTURE_NAME,
     "LOW",
     nil,
     -8
@@ -179,11 +179,11 @@ end
 function me.CreateCooldownOverlay(frame)
   local cooldownOverlay = CreateFrame(
     "Cooldown",
-    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_COOLDOWN_FRAME,
+    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_SLOT_COOLDOWN_FRAME,
     frame,
     "CooldownFrameTemplate"
   )
-  cooldownOverlay:SetSize(32, 32) -- TODO use constants
+  cooldownOverlay:SetSize(RGCW_CONSTANTS.COOLDOWN_SPELL_DEFAULT_SIZE, RGCW_CONSTANTS.COOLDOWN_SPELL_DEFAULT_SIZE)
   cooldownOverlay:SetAllPoints()
   cooldownOverlay:SetFrameLevel(cooldownOverlay:GetFrameLevel() - 1)
 
@@ -200,7 +200,7 @@ end
 ]]--
 function me.CreateBigTimerCooldown(frame)
   local bigTimerFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT, "OVERLAY")
-  bigTimerFontString:SetFont(STANDARD_TEXT_FONT, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_SIZE)
+  bigTimerFontString:SetFont(STANDARD_TEXT_FONT, RGCW_CONSTANTS.TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_SIZE)
   bigTimerFontString:SetTextColor(1, 1, 0)
   bigTimerFontString:SetJustifyH("LEFT")
 
@@ -220,7 +220,7 @@ function me.CreateSmallTimerCooldown(frame)
     RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT,
     "OVERLAY"
   )
-  smallTimerFontString:SetFont(STANDARD_TEXT_FONT, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT_SIZE)
+  smallTimerFontString:SetFont(STANDARD_TEXT_FONT, RGCW_CONSTANTS.TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT_SIZE)
   smallTimerFontString:SetPoint("TOPLEFT", 5, -5)
   smallTimerFontString:SetTextColor(.01, .66, 0.95, 1)
   smallTimerFontString:SetJustifyH("LEFT")
@@ -256,7 +256,7 @@ end
 ]]--
 function me.UpdateTargetBarFramePosition()
   local framePosition =
-    mod.configuration.GetUserPlacedFramePosition(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME)
+    mod.configuration.GetUserPlacedFramePosition(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_FRAME)
   --[[
     Set user frame position if there is one saved
   ]]--
@@ -288,7 +288,7 @@ function me.TargetCooldownBarOnUpdate()
 
   local cooldownSlots = {targetCooldownBarFrame:GetChildren()}
 
-  for i = 1, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_AMOUNT do
+  for i = 1, RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_AMOUNT do
     if cooldowns[i] ~= nil then
       me.UpdateCooldownWatchSlot(cooldownSlots[i], cooldowns[i])
     else
@@ -312,6 +312,7 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
 
   if timeLeftBig <= 0 then
     me.ClearCooldownSlotAnimated(cooldownWatchSlot, cooldown)
+
     return
   end
 
@@ -329,18 +330,19 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   if timeLeftBig > 9 then
     cooldownWatchSlot.targetSpellTimeBig:SetPoint(
       "LEFT",
-      RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_HIGH,
+      RGCW_CONSTANTS.TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_HIGH,
       0
     )
   else
     cooldownWatchSlot.targetSpellTimeBig:SetPoint(
       "LEFT",
-      RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_LOW,
+      RGCW_CONSTANTS.TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_LOW,
       0
     )
   end
 
   cooldownWatchSlot.targetSpellTimeBig:SetText(string.format("%.1f", timeLeftBig))
+
   if timeLeftSmall ~= nil and timeLeftSmall >= 0 then
     cooldownWatchSlot.targetSpellTimeSmall:SetText(string.format("%.1f", timeLeftSmall))
   else
@@ -353,6 +355,7 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
 
   if not cooldownWatchSlot.targetCooldownOverlay.cooldownStarted then
     cooldownWatchSlot.targetCooldownOverlay:SetCooldown(cooldown.spell.castTime, cooldown.spell.cooldown)
+    cooldownWatchSlot.targetCooldownOverlay:SetHideCountdownNumbers(true) -- hide default blizzard frames cooldown
     cooldownWatchSlot.targetCooldownOverlay.cooldownStarted = true
   end
 
@@ -368,7 +371,7 @@ end
     false - if the treshold was not breached
 ]]--
 function me.IsWarningTresholdBreached(cooldown, timeLeft)
-  return me.IsTresholdBreached(cooldown, timeLeft, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WARN_TRESHOLD)
+  return me.IsTresholdBreached(cooldown, timeLeft, RGCW_CONSTANTS.TARGET_COOLDOWN_WARN_TRESHOLD)
 end
 
 --[[
@@ -380,7 +383,7 @@ end
     false - if the treshold was not breached
 ]]--
 function me.IsAlertTresholdBreached(cooldown, timeLeft)
-  return me.IsTresholdBreached(cooldown, timeLeft, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_ALERT_TRESHOLD)
+  return me.IsTresholdBreached(cooldown, timeLeft, RGCW_CONSTANTS.TARGET_COOLDOWN_ALERT_TRESHOLD)
 end
 
 --[[
@@ -450,7 +453,7 @@ function me.ShowExampleTargetCooldownBar()
   local cooldownSlots = {targetCooldownBarFrame:GetChildren()}
   local cooldowns = {}
 
-  for i = 1, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_AMOUNT do
+  for i = 1, RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_AMOUNT do
     cooldowns[i] = {
       ["caster"] = "dummytarget",
       ["casterName"] = "casterName",
@@ -476,7 +479,7 @@ end
 function me.HideExampleTargetCooldownBar()
   local cooldownSlots = {targetCooldownBarFrame:GetChildren()}
 
-  for i = 1, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_AMOUNT do
+  for i = 1, RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_AMOUNT do
     cooldownSlots[i]:Hide()
   end
 
@@ -518,7 +521,7 @@ function me.StopDragFrame(self)
   local point, relativeTo, relativePoint, posX, posY = self:GetPoint()
 
   mod.configuration.SaveUserPlacedFramePosition(
-    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_FRAME,
+    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_FRAME,
     point,
     relativeTo,
     relativePoint,

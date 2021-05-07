@@ -63,16 +63,16 @@ function me.BuildUi(frame, category)
     "FauxScrollFrameTemplate"
   )
 
-  spellListScrollFrame:SetWidth(RGCW_CONSTANTS.ELEMENT_SPELL_LIST_CONTENT_FRAME_WIDTH)
+  spellListScrollFrame:SetWidth(RGCW_CONSTANTS.SPELL_LIST_CONTENT_FRAME_WIDTH)
   spellListScrollFrame:SetHeight(
-    RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT * RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS
+    RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT * RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS
   )
   spellListScrollFrame:SetPoint("TOPLEFT", 10, -50)
   spellListScrollFrame:EnableMouseWheel(true)
 
   spellListScrollFrame:SetScript("OnVerticalScroll", me.RuleListOnVerticalScroll)
 
-  for i = 1, RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS do
+  for i = 1, RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS do
     table.insert(spellRows, me.CreateRuleRowFrame(spellListScrollFrame, i))
   end
 
@@ -89,7 +89,7 @@ end
 ]]--
 function me.RuleListOnVerticalScroll(self, offset)
   self.ScrollBar:SetValue(offset)
-  self.offset = math.floor(offset / RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT + 0.5)
+  self.offset = math.floor(offset / RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT + 0.5)
   me.SpellListScrollFrameOnUpdate(self, self:GetParent().value)
 end
 
@@ -102,8 +102,8 @@ end
 ]]--
 function me.CreateRuleRowFrame(frame, position)
   local row = CreateFrame("Button", RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SPELL_ROW .. position, frame)
-  row:SetSize(frame:GetWidth() -5, RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT)
-  row:SetPoint("TOPLEFT", frame, 0, (position -1) * RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT * -1)
+  row:SetSize(frame:GetWidth() -5, RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT)
+  row:SetPoint("TOPLEFT", frame, 0, (position -1) * RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT * -1)
 
   row:SetBackdrop({
     bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
@@ -132,8 +132,8 @@ end
 function me.CreateCooldownSpellIcon(spellFrame)
   local iconHolder = CreateFrame("Frame", nil, spellFrame)
   iconHolder:SetSize(
-    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON_SIZE + 5,
-    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON_SIZE + 5
+    RGCW_CONSTANTS.CATEGORY_COOLDOWN_SPELL_ICON_SIZE + 5,
+    RGCW_CONSTANTS.CATEGORY_COOLDOWN_SPELL_ICON_SIZE + 5
   )
   iconHolder:SetPoint("LEFT", 10, 0)
 
@@ -141,8 +141,8 @@ function me.CreateCooldownSpellIcon(spellFrame)
   cooldownIcon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
   cooldownIcon:SetPoint("CENTER", 0, 0)
   cooldownIcon:SetSize(
-    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON_SIZE,
-    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON_SIZE
+    RGCW_CONSTANTS.CATEGORY_COOLDOWN_SPELL_ICON_SIZE,
+    RGCW_CONSTANTS.CATEGORY_COOLDOWN_SPELL_ICON_SIZE
   )
 
   local backdrop = {
@@ -180,10 +180,10 @@ function me.CreateCooldownSpell(spellFrame)
     "UICheckButtonTemplate"
   )
   cooldownSpellStatusCheckBox:SetSize(
-    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS_SIZE,
-    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS_SIZE
+    RGCW_CONSTANTS.COOLDOWN_SPELL_DEFAULT_SIZE,
+    RGCW_CONSTANTS.COOLDOWN_SPELL_DEFAULT_SIZE
   )
-  cooldownSpellStatusCheckBox:SetPoint("LEFT", RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON_SIZE + 20, 0)
+  cooldownSpellStatusCheckBox:SetPoint("LEFT", RGCW_CONSTANTS.CATEGORY_COOLDOWN_SPELL_ICON_SIZE + 20, 0)
 
   cooldownSpellStatusCheckBox.text = _G[cooldownSpellStatusCheckBox:GetName() .. 'Text']
   cooldownSpellStatusCheckBox.text:SetFont(STANDARD_TEXT_FONT, 15)
@@ -208,20 +208,20 @@ function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
 
   local maxValue = count or 0
 
-  if maxValue <= RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS then
-    maxValue = RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS + 1
+  if maxValue <= RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS then
+    maxValue = RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS + 1
   end
 
   -- Note: maxValue needs to be at least max_rows + 1
   FauxScrollFrame_Update(
     scrollFrame,
     maxValue,
-    RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS,
-    RGCW_CONSTANTS.ELEMENT_SPELL_LIST_ROW_HEIGHT
+    RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS,
+    RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT
   )
 
   local offset = FauxScrollFrame_GetOffset(scrollFrame)
-  for index = 1, RGCW_CONSTANTS.ELEMENT_SPELL_LIST_MAX_ROWS do
+  for index = 1, RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS do
     local value = index + offset
     local idx = 1
     local row = spellRows[index]
