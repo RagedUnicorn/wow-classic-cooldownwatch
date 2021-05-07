@@ -283,9 +283,10 @@ end
 ]]--
 function me.TargetCooldownBarOnUpdate()
   local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(mod.target.GetCurrentTargetGuid())
-  local cooldownSlots = {targetCooldownBarFrame:GetChildren()}
 
   if cooldowns == nil then return end
+
+  local cooldownSlots = {targetCooldownBarFrame:GetChildren()}
 
   for i = 1, RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_WATCH_BAR_SLOT_AMOUNT do
     if cooldowns[i] ~= nil then
