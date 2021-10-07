@@ -102,7 +102,7 @@ end
     The created row
 ]]--
 function me.CreateRuleRowFrame(frame, position)
-  local row = CreateFrame("Button", RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SPELL_ROW .. position, frame)
+  local row = CreateFrame("Button", RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SPELL_ROW .. position, frame, "BackdropTemplate")
   row:SetSize(frame:GetWidth() -5, RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT)
   row:SetPoint("TOPLEFT", frame, 0, (position -1) * RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT * -1)
 
@@ -131,7 +131,7 @@ end
     The created icon texture holder
 ]]--
 function me.CreateCooldownSpellIcon(spellFrame)
-  local iconHolder = CreateFrame("Frame", nil, spellFrame)
+  local iconHolder = CreateFrame("Frame", nil, spellFrame, "BackdropTemplate")
   iconHolder:SetSize(
     RGCW_CONSTANTS.CATEGORY_COOLDOWN_SPELL_ICON_SIZE + 5,
     RGCW_CONSTANTS.CATEGORY_COOLDOWN_SPELL_ICON_SIZE + 5

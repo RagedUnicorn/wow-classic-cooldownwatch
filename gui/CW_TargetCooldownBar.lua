@@ -41,7 +41,8 @@ local targetCooldownBarFrame
   Build initial targetCooldownBarFrame ui
 ]]--
 function me.BuildUi()
-  targetCooldownBarFrame = CreateFrame("Frame", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_FRAME, UIParent)
+  targetCooldownBarFrame = CreateFrame(
+    "Frame", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_FRAME, UIParent, "BackdropTemplate")
   targetCooldownBarFrame:SetWidth(RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_WIDTH)
   targetCooldownBarFrame:SetHeight(RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_HEIGHT)
   targetCooldownBarFrame:SetBackdropColor(0, 0, 0, .5)
@@ -67,7 +68,8 @@ function me.CreateCooldownSlot(frame, position)
   local cooldownWatchSlot = CreateFrame(
     "FRAME",
     RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_SLOT .. position,
-    frame
+    frame,
+    "BackdropTemplate"
   )
 
   cooldownWatchSlot:SetFrameLevel(1)
@@ -103,7 +105,7 @@ function me.CreateCooldownSlot(frame, position)
   cooldownWatchSlot:SetBackdropColor(0.15, 0.15, 0.15, 1)
   cooldownWatchSlot:SetBackdropBorderColor(0, 0, 0, 1)
 
-  local highlightFrame = CreateFrame("FRAME", nil, cooldownWatchSlot)
+  local highlightFrame = CreateFrame("FRAME", nil, cooldownWatchSlot, "BackdropTemplate")
   highlightFrame:SetFrameLevel(2)
   highlightFrame:SetPoint("TOPLEFT", cooldownWatchSlot, "TOPLEFT")
   highlightFrame:SetPoint("BOTTOMRIGHT", cooldownWatchSlot, "BOTTOMRIGHT")
