@@ -14,7 +14,7 @@
     <addon.name>CooldownWatch</addon.name>
     <addon.name.short>CW</addon.name.short>
     <addon.tag.version>v${project.version}</addon.tag.version>
-    <addon.interface>11302</addon.interface>
+    <addon.interface>11400</addon.interface>
     <addon.identifier>${project.groupId}.${project.artifactId}</addon.identifier>
   </properties>
 
