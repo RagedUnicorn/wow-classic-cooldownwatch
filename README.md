@@ -100,6 +100,10 @@ mvn package -P deploy
 
 For this to work an oauth token for GitHub is required and has to be configured in your `.m2` settings file.
 
+### GitHub Action Profiles
+
+Both `deploy-github-action` and `deploy-curseforge-action` should not be deployed manually. They are solely intended for being used by GitHub actions
+
 ## License
 
 MIT License
