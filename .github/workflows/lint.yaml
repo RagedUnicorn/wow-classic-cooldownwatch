@@ -1,0 +1,12 @@
+name: "Lint Project"
+on: [push]
+
+jobs:
+  lint-luacheck:
+    runs-on: ubuntu-latest
+    name: Luacheck linting
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Luacheck for lua codebases
+        uses: RagedUnicorn/action-luacheck@v1.0.0
