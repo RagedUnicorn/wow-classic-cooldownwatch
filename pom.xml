@@ -51,7 +51,7 @@
       </properties>
     </profile>
     <profile>
-      <id>deploy</id>
+      <id>deploy-github</id>
       <properties>
         <profile.id.value>deploy</profile.id.value>
         <package.descriptor>${basedir}/build-resources/assembly-release.xml</package.descriptor>
@@ -65,7 +65,7 @@
           <plugin>
             <groupId>com.ragedunicorn.tools.maven</groupId>
             <artifactId>github-release-maven-plugin</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.3</version>
             <executions>
               <execution>
                 <id>default-cli</id>
