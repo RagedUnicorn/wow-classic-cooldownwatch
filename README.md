@@ -24,7 +24,7 @@ Proximity probably not needed there should always be a caster
 Switching between development and release can be achieved with maven.
 
 ```
-mvn generate-resources -Dgenerate.sources.overwrite=true -P development
+mvn generate-resources -D generate.sources.overwrite=true -P development
 ```
 
 This generates and overwrites `CW_Environment.lua` and `CooldownWatch.toc`. You need to specifically specify that you want to overwrite to files to prevent data loss. It is also possible to omit the profile because development is the default profile that will be used.
@@ -32,7 +32,7 @@ This generates and overwrites `CW_Environment.lua` and `CooldownWatch.toc`. You 
 Switching to release can be done as such:
 
 ```
-mvn generate-resources -Dgenerate.sources.overwrite=true -P release
+mvn generate-resources -D generate.sources.overwrite=true -P release
 ```
 
 In this case it is mandatory to add the release profile.
@@ -46,20 +46,20 @@ As to not change those files all the time the repository should always stay in t
 To package the addon use the `package` phase.
 
 ```
-mvn package -Dgenerate.sources.overwrite=true -P development
+mvn package -D generate.sources.overwrite=true -P development
 ```
 
 This generates an addon package for development. For generating a release package the release profile can be used.
 
 ```
-mvn package -Dgenerate.sources.overwrite=true -P release
+mvn package -D generate.sources.overwrite=true -P release
 ```
 
 **Note:** This packaging and switching resources can also be done one after another.
 
 ```
 # switch environment to release
-mvn generate-resources -Dgenerate.sources.overwrite=true -P release
+mvn generate-resources -D generate.sources.overwrite=true -P release
 # package release
 mvn package -P release
 ```
@@ -70,7 +70,7 @@ Before creating a new release update `addon.tag.version` in `pom.xml`. Afterward
 
 ```
 # switch environment to release
-mvn generate-resources -Dgenerate.sources.overwrite=true -P release
+mvn generate-resources -D generate.sources.overwrite=true -P release
 # deploy release to GitHub
 mvn package -P deploy
 ```
