@@ -1,11 +1,34 @@
 # CooldownWatch
 
-![](/docs/cw_ragedunicorn_love_classic.png)
+![](docs/cw_ragedunicorn_love_classic.png)
 
 > CooldownWatch aims to track your enemies cooldowns and making them visible to the player
 
+![](docs/wow_badge.svg)
+![](docs/license_mit.svg)
+[![](docs/curseforge.svg)](https://curseforge.overwolf.com/?addonId=TODO&fileId=TODO)
+![Lint](https://github.com/RagedUnicorn/wow-classic-cooldownwatch/actions/workflows/lint.yaml/badge.svg?branch=master)
 
-## Cooldowns vs Proximity Cooldowns
+## Installation
+
+WoW-Addons are installed directly in your WoW directory:
+
+`[WoW-installation-directory]\Interface\AddOns`
+
+Make sure to get the newest version of the Addon from the releases tab:
+
+[CooldownWatch-Releases](https://github.com/RagedUnicorn/wow-classic-cooldownwatch/releases)
+
+
+## What is CooldownWatch?
+
+TODO
+
+## Features of CooldownWatch
+
+TODO
+
+### Cooldowns vs Proximity Cooldowns
 TODO
 Proximity cooldowns are cooldowns that where detected within a certain proximity
 but could not be matched to a caster. This means that we know that a certain spell
