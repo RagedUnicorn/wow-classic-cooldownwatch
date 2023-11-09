@@ -159,7 +159,7 @@ end
 function me.CreateIconHolder(frame)
   local iconHolderTexture = frame:CreateTexture(
     RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_SLOT_ICON_TEXTURE_NAME,
-    "LOW",
+    "BACKGROUND",
     nil,
     -8
   )
