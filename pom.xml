@@ -12,9 +12,10 @@
     <addon.author>Michael Wiesendanger &lt;michael.wiesendanger@gmail.com&gt;</addon.author>
     <addon.description>Addon that tracks cooldowns of enemy players</addon.description>
     <addon.name>CooldownWatch</addon.name>
-    <addon.curseforge.displayName>cooldownwatch</addon.curseforge.displayName>
-    <!-- TODO addon not yet uploaded to curseforge -->
-    <addon.curseforge.projectid>TODO</addon.curseforge.projectid>
+    <addon.displayName>cooldownwatch</addon.displayName>
+    <addon.curseforge.projectId>TODO</addon.curseforge.projectId>
+    <addon.curseforge.gameVersion>9895</addon.curseforge.gameVersion>
+    <addon.wago.projectId>TODO</addon.wago.projectId>
     <addon.name.short>CW</addon.name.short>
     <addon.tag.version>v${project.version}</addon.tag.version>
     <addon.interface>11404</addon.interface>
@@ -81,46 +82,6 @@
                 <configuration>
                   <owner>ragedunicorn</owner>
                   <repository>wow-classic-cooldownwatch</repository>
-                  <server>github-oauth</server>
-                  <tagName>${addon.tag.version}</tagName>
-                  <name>${addon.tag.version}</name>
-                  <releaseNotes>${basedir}/build-resources/release-notes.md</releaseNotes>
-                  <assets>
-                    <asset>${basedir}/target/${addon.name}.zip</asset>
-                  </assets>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>deploy-github-action</id>
-      <properties>
-        <profile.id.value>deploy</profile.id.value>
-        <package.descriptor>${basedir}/build-resources/assembly-release.xml</package.descriptor>
-        <package.filter>${basedir}/build-resources/addon-release.properties</package.filter>
-        <package.finalName>${addon.name}</package.finalName>
-        <package.appendAssemblyId>false</package.appendAssemblyId>
-        <generate.sources.skip>true</generate.sources.skip>
-      </properties>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.ragedunicorn.tools.maven</groupId>
-            <artifactId>github-release-maven-plugin</artifactId>
-            <version>1.0.6</version>
-            <executions>
-              <execution>
-                <id>default-cli</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>github-release</goal>
-                </goals>
-                <configuration>
-                  <owner>ragedunicorn</owner>
-                  <repository>wow-classic-cooldownwatch</repository>
                   <!--suppress UnresolvedMavenProperty -->
                   <authToken>${github.auth-token}</authToken>
                   <tagName>${addon.tag.version}</tagName>
@@ -162,16 +123,17 @@
                 </goals>
                 <configuration>
                   <game>wow</game>
-                  <projectId>${addon.curseforge.projectid}</projectId>
-                  <displayName>${addon.curseforge.displayName}-${addon.tag.version}-classic.zip</displayName>
+                  <projectId>${addon.curseforge.projectId}</projectId>
+                  <displayName>${addon.displayName}-${addon.tag.version}-classic.zip</displayName>
                   <changelogFile>${basedir}/build-resources/release-notes.md</changelogFile>
                   <changelogType>markdown</changelogType>
                   <gameVersions>
-                    <gameVersion>8722</gameVersion>
+                    <gameVersion>${addon.curseforge.gameVersion}</gameVersion>
                   </gameVersions>
                   <releaseType>release</releaseType>
                   <file>${basedir}/target/${addon.name}.zip</file>
-                  <server>curseforge-token</server>
+                  <!--suppress UnresolvedMavenProperty -->
+                  <authToken>${curseforge.auth-token}</authToken>
                 </configuration>
               </execution>
             </executions>
@@ -180,7 +142,7 @@
       </build>
     </profile>
     <profile>
-      <id>deploy-curseforge-action</id>
+      <id>deploy-wago</id>
       <properties>
         <profile.id.value>deploy</profile.id.value>
         <package.descriptor>${basedir}/build-resources/assembly-release.xml</package.descriptor>
@@ -194,28 +156,24 @@
         <plugins>
           <plugin>
             <groupId>com.ragedunicorn.tools.maven</groupId>
-            <artifactId>curseforge-release-maven-plugin</artifactId>
-            <version>1.1.2</version>
+            <artifactId>wago-release-maven-plugin</artifactId>
+            <version>1.0.1</version>
             <executions>
               <execution>
                 <id>default-cli</id>
                 <phase>package</phase>
                 <goals>
-                  <goal>curseforge-release</goal>
+                  <goal>wago-release</goal>
                 </goals>
                 <configuration>
-                  <game>wow</game>
-                  <projectId>${addon.curseforge.projectid}</projectId>
-                  <displayName>${addon.curseforge.displayName}-${addon.tag.version}-classic.zip</displayName>
+                  <projectId>${addon.wago.projectId}</projectId>
+                  <label>${addon.displayName}-${addon.tag.version}-classic.zip</label>
                   <changelogFile>${basedir}/build-resources/release-notes.md</changelogFile>
-                  <changelogType>markdown</changelogType>
-                  <gameVersions>
-                    <gameVersion>8722</gameVersion>
-                  </gameVersions>
-                  <releaseType>release</releaseType>
+                  <supportedClassicPatch>${addon.supported.patch}</supportedClassicPatch>
+                  <stability>stable</stability>
                   <file>${basedir}/target/${addon.name}.zip</file>
                   <!--suppress UnresolvedMavenProperty -->
-                  <authToken>${curseforge.auth-token}</authToken>
+                  <authToken>${wago.auth-token}</authToken>
                 </configuration>
               </execution>
             </executions>
@@ -224,7 +182,6 @@
       </build>
     </profile>
   </profiles>
-
   <build>
     <plugins>
       <plugin>
