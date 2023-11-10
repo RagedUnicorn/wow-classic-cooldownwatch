@@ -34,6 +34,7 @@ code/CW_Debug.lua
 # gui
 gui/CW_Frame.xml
 gui/CW_TargetCooldownBar.lua
+gui/CW_CategoryMenu.lua
 gui/CW_AddonConfiguration.lua
 gui/CW_AboutContent.lua
 gui/CW_GeneralMenu.lua

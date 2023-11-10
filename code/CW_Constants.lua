@@ -53,10 +53,10 @@ RGCW_CONSTANTS = {
   ELEMENT_TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT = "$parent_SmallText",
   TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT_SIZE = 15,
   --[[
-    Threshold in percent of the total cooldowntime to trigger warning glow for the cooldownslot
+    Threshold in percent of the total cooldown time to trigger warning glow for the cooldown slot
   ]]--
-  TARGET_COOLDOWN_WARN_TRESHOLD = 50,
-  TARGET_COOLDOWN_ALERT_TRESHOLD = 20,
+  TARGET_COOLDOWN_WARN_THRESHOLD = 50,
+  TARGET_COOLDOWN_ALERT_THRESHOLD = 20,
   --[[
     Positions
   ]]--
@@ -146,17 +146,24 @@ RGCW_CONSTANTS = {
       ["name"] = "CW_ItemsOptionsFrame"
     }
   },
+  --[[
+    Cooldown spellList frame
+  ]]--
+  ELEMENT_SPELL_LIST_CONTENT_FRAME = "$parent_CW_SpellListContentFrame",
+  SPELL_LIST_CONTENT_FRAME_WIDTH = 580,
+  SPELL_LIST_CONTENT_FRAME_HEIGHT = 552,
+  SPELL_LIST_MAX_ROWS = 9,
+  SPELL_LIST_ROW_HEIGHT = 50,
+  --[[
+    Cooldown spellList scroll frame
+  ]]--
+  ELEMENT_SPELL_LIST_SCROLL_FRAME = "CW_SpellListScrollFrame",
+  ELEMENT_SPELL_LIST_SPELL_ROW = "$parentRow",
+  --[[
+    Cooldown spellList row
+  ]]--
   ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON = "$parentIcon",
   ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS = "$parentStatus",
   CATEGORY_COOLDOWN_SPELL_ICON_SIZE = 32,
   COOLDOWN_SPELL_DEFAULT_SIZE = 32,
-  --[[
-    QuickChange spellList frame
-  ]]--
-  ELEMENT_SPELL_LIST_SCROLL_FRAME = "CW_SpellListScrollFrame",
-  SPELL_LIST_CONTENT_FRAME_WIDTH = 570,
-  ELEMENT_SPELL_LIST_SPELL_ROW = "$parentRow",
-  SPELL_LIST_MAX_ROWS = 9,
-  SPELL_LIST_ROW_HEIGHT = 50,
-
 }

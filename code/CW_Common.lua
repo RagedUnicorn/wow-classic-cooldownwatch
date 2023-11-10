@@ -90,3 +90,21 @@ function me.Clone(obj)
 
   return res
 end
+
+--[[
+  Calculate the length of a table
+
+  @param {table} t
+
+  return {number}
+    the length of the table
+]]--
+function me.TableLength(t)
+  local count = 0
+
+  for _ in pairs(t) do
+    count = count + 1
+  end
+
+  return count
+end

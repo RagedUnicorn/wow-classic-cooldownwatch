@@ -185,12 +185,11 @@ end
 
   @param {boolean} enabled
     Whether the configuration should be enabled or disabled
-  @param {number} category
+  @param {number} categoryName
   @param {number} spellId
 ]]--
-function me.UpdateCooldownConfigurationState(enabled, category, spellId)
+function me.UpdateCooldownConfigurationState(enabled, categoryName, spellId)
   local config = CooldownWatchConfiguration.cooldownConfiguration
-  local categoryName = RGCW_CONSTANTS.CATEGORIES[category].categoryName
 
   if config[categoryName] == nil then
     config[categoryName] = {}
@@ -208,7 +207,7 @@ end
 --[[
   Get the tracking state of a cooldown spell for a certain category
 
-  @param {number} category
+  @param {string} categoryName
   @param {number} spellId
 
   @return {nil | boolean}
@@ -216,18 +215,16 @@ end
     true  - If cooldown is enabled
     false - If cooldown is disabled
 ]]--
-function me.GetCooldownConfigurationState(category, spellId)
+function me.GetCooldownConfigurationState(categoryName, spellId)
   local config = CooldownWatchConfiguration.cooldownConfiguration
 
-  if category == nil then
+  if categoryName == nil then
     for _, configCategory in pairs(config) do
       if configCategory[spellId] then
         return true
       end
     end
   else
-    local categoryName = RGCW_CONSTANTS.CATEGORIES[category].categoryName
-
     if config[categoryName] == nil then
       return nil -- no entry at all for category - abort
     end

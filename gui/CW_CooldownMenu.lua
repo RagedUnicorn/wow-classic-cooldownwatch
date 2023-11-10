@@ -23,7 +23,7 @@
 ]]--
 
 -- luacheck: globals CreateFrame STANDARD_TEXT_FONT FauxScrollFrame_Update FauxScrollFrame_GetOffset
--- luacheck: globals GetSpellInfo GetItemIcon
+-- luacheck: globals GetSpellInfo GetItemIcon CloseMenus
 
 local mod = rgcw
 local me = {}
@@ -31,36 +31,48 @@ mod.cooldownMenu = me
 
 me.tag = "CooldownMenu"
 
-local spellRows = {}
+local uiState = {
+  spellListScrollFrame = nil,
+  spellRows = {},
+}
 
 -- track whether the menu was already built
 local builtMenu = false
+--[[
+  Cached spellList for reusing while the player scrolls through the spellList. Wiped
+  when the category changes
+]]--
+local cachedCategoryData
 
 --[[
-  Builds the menu for the first time. After that the menu is reused for all categories
-
-  @param {table} self
+  @param {table} frame
+  @param {string} categoryName
 ]]--
-function me.cooldownMenuOnShow(self)
+function me.InitCooldownMenu(frame, categoryName)
+  frame.categoryName = categoryName
+
   if builtMenu then
-    _G[RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SCROLL_FRAME]:SetParent(self)
-    me.SpellListScrollFrameOnUpdate(_G[RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SCROLL_FRAME], self.value)
+    cachedCategoryData = nil
+    mod.logger.LogInfo(me.tag, "Wiped cached spellList after category switch")
+
+    me.UpdateCategoryMenu(frame)
+    -- update the scrolllist with new category data
+    me.SpellListScrollFrameOnUpdate(uiState.spellListScrollFrame, categoryName)
   else
-    me.BuildUi(self, self.value)
+    me.BuildUi(frame, categoryName)
+    builtMenu = true
   end
 end
 
 --[[
-  Create the cooldown configuration menu for enabling/disabling certain cooldowns
-
-  @param {table} frame
-  @param {number} category
+  @param {table} parentFrame
+  @param {string} categoryName
 ]]--
-function me.BuildUi(frame, category)
+function me.BuildUi(parentFrame, categoryName)
   local spellListScrollFrame = CreateFrame(
     "ScrollFrame",
     RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SCROLL_FRAME,
-    frame,
+    parentFrame,
     "FauxScrollFrameTemplate"
   )
 
@@ -68,30 +80,37 @@ function me.BuildUi(frame, category)
   spellListScrollFrame:SetHeight(
     RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT * RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS
   )
-  spellListScrollFrame:SetPoint("TOPLEFT", 10, -50)
   spellListScrollFrame:EnableMouseWheel(true)
 
-  spellListScrollFrame:SetScript("OnVerticalScroll", me.RuleListOnVerticalScroll)
+  spellListScrollFrame:SetScript("OnVerticalScroll", function(self, offset)
+    CloseMenus()
+    self.ScrollBar:SetValue(offset)
+    self.offset = math.floor(offset / RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT + 0.5)
+    me.SpellListScrollFrameOnUpdate(self, self:GetParent().categoryName)
+  end)
 
   for i = 1, RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS do
-    table.insert(spellRows, me.CreateRuleRowFrame(spellListScrollFrame, i))
+    table.insert(uiState.spellRows, me.CreateRuleRowFrame(spellListScrollFrame, i))
   end
 
-  me.SpellListScrollFrameOnUpdate(spellListScrollFrame, category)
+  spellListScrollFrame:ClearAllPoints()
+  spellListScrollFrame:SetPoint("TOPLEFT", parentFrame)
 
-  builtMenu = true
+  me.SpellListScrollFrameOnUpdate(spellListScrollFrame, categoryName)
+  uiState.spellListScrollFrame = spellListScrollFrame
 end
 
 --[[
-  OnVerticalScroll callback for scrollable rule list
+  Update the category menu spells tab to its new parent category
 
-  @param {table} self
-  @param {number} offset
+  @param {table} parentFrame
 ]]--
-function me.RuleListOnVerticalScroll(self, offset)
-  self.ScrollBar:SetValue(offset)
-  self.offset = math.floor(offset / RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT + 0.5)
-  me.SpellListScrollFrameOnUpdate(self, self:GetParent().value)
+function me.UpdateCategoryMenu(parentFrame)
+  local scrollFrame = uiState.spellListScrollFrame
+  scrollFrame:ClearAllPoints()
+  scrollFrame:SetPoint("TOPLEFT", parentFrame)
+  scrollFrame:SetParent(parentFrame)
+  scrollFrame:SetVerticalScroll(0) -- reset scroll position to top
 end
 
 --[[
@@ -102,13 +121,17 @@ end
     The created row
 ]]--
 function me.CreateRuleRowFrame(frame, position)
-  local row = CreateFrame("Button", RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SPELL_ROW .. position, frame, "BackdropTemplate")
-  row:SetSize(frame:GetWidth() -5, RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT)
-  row:SetPoint("TOPLEFT", frame, 0, (position -1) * RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT * -1)
-
+  local row = CreateFrame(
+    "Button",
+    RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SPELL_ROW .. position,
+    frame,
+    "BackdropTemplate"
+  )
+  row:SetSize(frame:GetWidth() - 5, RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT)
+  row:SetPoint("TOPLEFT", frame, 0, (position - 1) * RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT * -1)
   row:SetBackdrop({
     bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-    insets = {left = 0, right = 0, top = 0, bottom = 0},
+    insets = { left = 0, right = 0, top = 0, bottom = 0 },
   })
 
   if math.fmod(position, 2) == 0 then
@@ -125,7 +148,6 @@ end
 
 --[[
   @param {table} spellFrame
-  TODO might need rework
 
   @return {table}
     The created icon texture holder
@@ -196,18 +218,18 @@ function me.CreateCooldownSpell(spellFrame)
 end
 
 --[[
-  Update the quickchange rules list
+  Update the spell list
 
   @param {table} scrollFrame
-  @param {number} category
+  @param {string} categoryName
 ]]--
-function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
-  local cooldownList = mod.spellMap.GetAllForCategory(RGCW_CONSTANTS.CATEGORIES[category].categoryName)
-  local count = 0
-  -- count entries in table
-  for _ in pairs(cooldownList) do count = count + 1 end
+function me.SpellListScrollFrameOnUpdate(scrollFrame, categoryName)
+  if cachedCategoryData == nil then
+    mod.logger.LogInfo(me.tag, string.format("Warmed up cached spellList for category '%s'", categoryName))
+    cachedCategoryData = mod.spellMap.GetAllForCategory(categoryName)
+  end
 
-  local maxValue = count or 0
+  local maxValue = mod.common.TableLength(cachedCategoryData) or 0
 
   if maxValue <= RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS then
     maxValue = RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS + 1
@@ -221,39 +243,15 @@ function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
     RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT
   )
 
-  local offset = FauxScrollFrame_GetOffset(scrollFrame)
   for index = 1, RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS do
-    local value = index + offset
+    local value = index + FauxScrollFrame_GetOffset(scrollFrame)
     local idx = 1
-    local row = spellRows[index]
+    local row = uiState.spellRows[index]
     local wasShown = false
 
-    for _, cooldown in pairs(cooldownList) do
+    for _, cooldown in pairs(cachedCategoryData) do
       if idx == value then
-        local iconId
-        local enabled = mod.configuration.GetCooldownConfigurationState(category, cooldown.spellId)
-
-        --[[
-          For most items we have to track the actual spelleffect in the combat log. However for
-          people to recognize the item it is much better to use items icon itself.
-        ]]--
-        if cooldown.itemId ~= nil then
-          iconId = GetItemIcon(cooldown.itemId)
-        else
-          _, _, iconId = GetSpellInfo(cooldown.spellId)
-        end
-
-        row.cooldownIcon:SetTexture(iconId)
-        row.cooldownStatus.text:SetText(cooldown.spellName)
-        if enabled then
-          row.cooldownStatus:SetChecked(true)
-        else
-          row.cooldownStatus:SetChecked(false)
-        end
-        row.spellId = cooldown.spellId
-        row.category = category
-
-        row:Show()
+        me.UpdateCooldownUiState(row, cooldown, categoryName)
         wasShown = true
       end
 
@@ -261,13 +259,56 @@ function me.SpellListScrollFrameOnUpdate(scrollFrame, category)
     end
 
     if not wasShown then
-      spellRows[index]:Hide()
+      row:Hide()
     end
   end
 end
 
 --[[
-  OnClick callback for cooldown configuration checkbuttons
+  @param {table} cooldown
+
+  @return {number}
+    The iconId for the cooldown
+]]--
+function me.GetIconId(cooldown)
+  local _, iconId
+  --[[
+    For most items we have to track the actual spell-effect in the combat log. However for
+    people to recognize the item it is much better to use items icon itself.
+  ]]--
+  if cooldown.itemId ~= nil then
+    iconId = GetItemIcon(cooldown.itemId)
+  else
+    _, _, iconId = GetSpellInfo(cooldown.spellId)
+  end
+
+  return iconId
+end
+
+--[[
+  @param {table} row
+  @param {table} cooldown
+  @param {string} categoryName
+]]--
+function me.UpdateCooldownUiState(row, cooldown, categoryName)
+  local enabled = mod.configuration.GetCooldownConfigurationState(categoryName, cooldown.spellId)
+
+  row.cooldownIcon:SetTexture(me.GetIconId(cooldown))
+  row.cooldownStatus.text:SetText(cooldown.spellName)
+
+  if enabled then
+    row.cooldownStatus:SetChecked(true)
+  else
+    row.cooldownStatus:SetChecked(false)
+  end
+
+  row.spellId = cooldown.spellId
+  row.category = categoryName
+  row:Show()
+end
+
+--[[
+  OnClick callback for cooldown configuration check buttons
 
   @param {table} self
 ]]--
