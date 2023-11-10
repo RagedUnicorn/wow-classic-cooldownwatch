@@ -27,6 +27,7 @@
 
 local mod = rgcw
 local me = {}
+
 mod.ticker = me
 
 me.tag = "Ticker"
@@ -37,7 +38,7 @@ local targetCooldownBarTicker
   Start the repeating update ticker for targetCastBar
 ]]--
 function me.StartTickerTargetCooldownBar()
-  if targetCooldownBarTicker == nil or targetCooldownBarTicker._cancelled then
+  if targetCooldownBarTicker == nil or targetCooldownBarTicker.IsCancelled() then
     targetCooldownBarTicker = C_Timer.NewTicker(
       RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_UPDATE_INTERVAL, mod.targetCooldownBar.TargetCooldownBarOnUpdate)
       mod.logger.LogInfo(me.tag, "Started 'TargetCooldownBarTicker'")
@@ -50,6 +51,7 @@ end
 function me.StopTickerTargetCooldownBar()
   if targetCooldownBarTicker then
     targetCooldownBarTicker:Cancel()
+    targetCooldownBarTicker = nil
     mod.logger.LogInfo(me.tag, "Stopped 'TargetCooldownBarTicker'")
   end
 end
