@@ -27,6 +27,7 @@
 
 local mod = rgcw
 local me = {}
+
 mod.tooltip = me
 
 me.tag = "Tooltip"

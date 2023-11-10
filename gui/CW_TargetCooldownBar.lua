@@ -41,25 +41,44 @@ local targetCooldownBarFrame
   Build initial targetCooldownBarFrame ui
 ]]--
 function me.BuildUi()
-  targetCooldownBarFrame = CreateFrame(
-    "Frame", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_FRAME, UIParent, "BackdropTemplate")
-  targetCooldownBarFrame:SetWidth(RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_WIDTH)
-  targetCooldownBarFrame:SetHeight(RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_HEIGHT)
-  targetCooldownBarFrame:SetBackdropColor(0, 0, 0, .5)
-  targetCooldownBarFrame:SetBackdropBorderColor(0, 0, 0, .8)
-  targetCooldownBarFrame:SetPoint("CENTER", 0, 0)
-  targetCooldownBarFrame:SetMovable(true)
-  targetCooldownBarFrame:SetClampedToScreen(true)
-
+  targetCooldownBarFrame = me.CreateTargetCooldownBarFrame()
   me.SetupDragFrame(targetCooldownBarFrame)
+  me.CreateCooldownSlots(targetCooldownBarFrame)
+end
 
+--[[
+  Create the targetCooldownBarFrame
+
+  @return {table}
+    The created frame
+]]--
+function me.CreateTargetCooldownBarFrame()
+  local frame = CreateFrame(
+    "Frame", RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_FRAME, UIParent, "BackdropTemplate")
+  frame:SetWidth(RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_WIDTH)
+  frame:SetHeight(RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_HEIGHT)
+  frame:SetBackdropColor(0, 0, 0, .5)
+  frame:SetBackdropBorderColor(0, 0, 0, .8)
+  frame:SetPoint("CENTER", 0, 0)
+  frame:SetMovable(true)
+  frame:SetClampedToScreen(true)
+
+  return frame
+end
+
+--[[
+  Create all cooldown slots and attach them to the targetCooldownBarFrame
+
+  @param {table} frame
+]]--
+function me.CreateCooldownSlots(frame)
   for i = 1, RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_AMOUNT do
-    me.CreateCooldownSlot(targetCooldownBarFrame, i)
+    me.CreateCooldownSlot(frame, i)
   end
 end
 
 --[[
-  Create a cooldownslot and attach it to the cooldownframe
+  Create a cooldown slot and attach it to the cooldown frame
 
   @param {table} frame
   @param {number} position
@@ -89,7 +108,6 @@ function me.CreateCooldownSlot(frame, position)
   local backdrop = {
     bgFile = "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
     edgeFile = "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
-    -- edgeFile = nil,
     tile = false,
     tileSize = 32,
     edgeSize = 20,
@@ -105,6 +123,43 @@ function me.CreateCooldownSlot(frame, position)
   cooldownWatchSlot:SetBackdropColor(0.15, 0.15, 0.15, 1)
   cooldownWatchSlot:SetBackdropBorderColor(0, 0, 0, 1)
 
+  cooldownWatchSlot.highlightFrame = me.CreateHighlightFrame(cooldownWatchSlot)
+  cooldownWatchSlot.iconHolderTexture = me.CreateIconHolder(cooldownWatchSlot)
+  cooldownWatchSlot.targetCooldownOverlay = me.CreateCooldownOverlay(cooldownWatchSlot)
+  cooldownWatchSlot.targetSpellTimeBig = me.CreateBigTimerCooldown(cooldownWatchSlot)
+  cooldownWatchSlot.targetSpellTimeSmall = me.CreateSmallTimerCooldown(cooldownWatchSlot)
+
+  me.CreateAnimation(cooldownWatchSlot)
+  -- initially hide slots
+  cooldownWatchSlot:Hide()
+end
+
+--[[
+  Create an animation for a cooldownWatchSlot
+
+  @param {table} cooldownWatchSlot
+]]--
+function me.CreateAnimation(cooldownWatchSlot)
+  local animationGroup = cooldownWatchSlot:CreateAnimationGroup(
+    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_SLOT_ANIMATION
+  )
+
+  local animation = animationGroup:CreateAnimation("Alpha")
+  animation:SetDuration(2)
+  animation:SetFromAlpha(1)
+  animation:SetToAlpha(0)
+  animation:SetSmoothing("OUT")
+end
+
+--[[
+  Create a highlight frame
+
+  @param {table} cooldownWatchSlot
+
+  @return {table}
+    The created highlightFrame
+]]--
+function me.CreateHighlightFrame(cooldownWatchSlot)
   local highlightFrame = CreateFrame("FRAME", nil, cooldownWatchSlot, "BackdropTemplate")
   highlightFrame:SetFrameLevel(2)
   highlightFrame:SetPoint("TOPLEFT", cooldownWatchSlot, "TOPLEFT")
@@ -128,28 +183,11 @@ function me.CreateCooldownSlot(frame, position)
   highlightFrame:SetBackdropColor(1, 1, 1, 0)
   highlightFrame:Hide()
 
-  cooldownWatchSlot.highlightFrame = highlightFrame
-  cooldownWatchSlot.iconHolderTexture = me.CreateIconHolder(cooldownWatchSlot)
-  cooldownWatchSlot.targetCooldownOverlay = me.CreateCooldownOverlay(cooldownWatchSlot)
-  cooldownWatchSlot.targetSpellTimeBig = me.CreateBigTimerCooldown(cooldownWatchSlot)
-  cooldownWatchSlot.targetSpellTimeSmall = me.CreateSmallTimerCooldown(cooldownWatchSlot)
-
-  -- prepare animationgroup
-  local animationGroup = cooldownWatchSlot:CreateAnimationGroup(
-    RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_SLOT_ANIMATION
-  )
-  local animation = animationGroup:CreateAnimation("Alpha")
-  animation:SetDuration(2)
-  animation:SetFromAlpha(1)
-  animation:SetToAlpha(0)
-  animation:SetSmoothing("OUT")
-
-  -- initially hide slots
-  cooldownWatchSlot:Hide()
+  return highlightFrame
 end
 
 --[[
-  Create an icon texture holder and attach it to the cooldownslot
+  Create an icon texture holder and attach it to the cooldown slot
 
   @param {table} frame
 
@@ -159,7 +197,7 @@ end
 function me.CreateIconHolder(frame)
   local iconHolderTexture = frame:CreateTexture(
     RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_SLOT_ICON_TEXTURE_NAME,
-    "BACKGROUND",
+    "ARTWORK",
     nil,
     -8
   )
@@ -171,7 +209,7 @@ function me.CreateIconHolder(frame)
 end
 
 --[[
-  Create a cooldown overlay and attach it to the cooldownslot
+  Create a cooldown overlay and attach it to the cooldown slot
 
   @param {table} frame
 
@@ -185,7 +223,10 @@ function me.CreateCooldownOverlay(frame)
     frame,
     "CooldownFrameTemplate"
   )
-  cooldownOverlay:SetSize(RGCW_CONSTANTS.COOLDOWN_SPELL_DEFAULT_SIZE, RGCW_CONSTANTS.COOLDOWN_SPELL_DEFAULT_SIZE)
+  cooldownOverlay:SetSize(
+    RGCW_CONSTANTS.COOLDOWN_SPELL_DEFAULT_SIZE,
+    RGCW_CONSTANTS.COOLDOWN_SPELL_DEFAULT_SIZE
+  )
   cooldownOverlay:SetAllPoints()
   cooldownOverlay:SetFrameLevel(cooldownOverlay:GetFrameLevel() - 1)
 
@@ -193,7 +234,7 @@ function me.CreateCooldownOverlay(frame)
 end
 
 --[[
-  Create a big timer cooldown and attach it to the cooldownslot
+  Create a big timer cooldown and attach it to the cooldown slot
 
   @param {table} frame
 
@@ -210,7 +251,7 @@ function me.CreateBigTimerCooldown(frame)
 end
 
 --[[
-  Create a small timer cooldown and attach it to the cooldownslot
+  Create a small timer cooldown and attach it to the cooldown slot
 
   @param {table} frame
 
@@ -314,66 +355,114 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
 
   if timeLeftBig <= 0 then
     me.ClearCooldownSlotAnimated(cooldownWatchSlot, cooldown)
-
     return
   end
 
-  if me.IsWarningTresholdBreached(cooldown.spell.cooldown, timeLeftBig) then
-    cooldownWatchSlot.highlightFrame:SetBackdropBorderColor(0.8, 1, 0, 1)
-    cooldownWatchSlot.highlightFrame:Show()
-  end
-
-  if me.IsAlertTresholdBreached(cooldown.spell.cooldown, timeLeftBig) then
-    cooldownWatchSlot.highlightFrame:SetBackdropBorderColor(1, 0.2, 0, 1)
-    cooldownWatchSlot.highlightFrame:Show()
-  end
-
-  -- position text based on its cooldown duration
-  if timeLeftBig > 9 then
-    cooldownWatchSlot.targetSpellTimeBig:SetPoint(
-      "LEFT",
-      RGCW_CONSTANTS.TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_HIGH,
-      0
-    )
-  else
-    cooldownWatchSlot.targetSpellTimeBig:SetPoint(
-      "LEFT",
-      RGCW_CONSTANTS.TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_LOW,
-      0
-    )
-  end
-
-  cooldownWatchSlot.targetSpellTimeBig:SetText(string.format("%.1f", timeLeftBig))
-
-  if timeLeftSmall ~= nil and timeLeftSmall >= 0 then
-    cooldownWatchSlot.targetSpellTimeSmall:SetText(string.format("%.1f", timeLeftSmall))
-  else
-    cooldownWatchSlot.targetSpellTimeSmall:SetText("")
-  end
-
-  local _, _, iconTexture = GetSpellInfo(cooldown.spell.spellId)
-
-  cooldownWatchSlot.iconHolderTexture:SetTexture(iconTexture)
+  me.UpdateCooldownSlotHighlightFrame(cooldownWatchSlot, cooldown.spell.cooldown, timeLeftBig)
+  me.UpdateCooldownSlotBigCooldownTextPosition(cooldownWatchSlot, timeLeftBig)
+  me.UpdateCooldownSlotCooldownText(cooldownWatchSlot, timeLeftBig, timeLeftSmall)
+  me.UpdateCooldownSlotTexture(cooldownWatchSlot, cooldown.spell.spellId)
 
   if not cooldownWatchSlot.targetCooldownOverlay.cooldownStarted then
-    cooldownWatchSlot.targetCooldownOverlay:SetCooldown(cooldown.spell.castTime, cooldown.spell.cooldown)
-    cooldownWatchSlot.targetCooldownOverlay:SetHideCountdownNumbers(true) -- hide default blizzard frames cooldown
-    cooldownWatchSlot.targetCooldownOverlay.cooldownStarted = true
+    me.InitCooldownSlotCooldownOverlay(cooldownWatchSlot, cooldown)
   end
 
   cooldownWatchSlot:Show()
 end
 
 --[[
-  @param {number} cooldown
-  @param {number} timeLeft
+  Update the highlight frame of a cooldownWatchSlot with is current state
+  e.g. warn, alert or normal
 
-  @return {boolean}
-    true - if the treshold was breached
-    false - if the treshold was not breached
+  @param {table} cooldownWatchSlot
+  @param {number} cooldown
 ]]--
-function me.IsWarningTresholdBreached(cooldown, timeLeft)
-  return me.IsTresholdBreached(cooldown, timeLeft, RGCW_CONSTANTS.TARGET_COOLDOWN_WARN_TRESHOLD)
+function me.UpdateCooldownSlotHighlightFrame(cooldownWatchSlot, cooldown, timeLeftBig)
+  local highlightFrame = cooldownWatchSlot.highlightFrame
+
+  if me.IsAlertThresholdBreached(cooldown, timeLeftBig) then
+    highlightFrame:SetBackdropBorderColor(1, 0.2, 0, 1)
+    highlightFrame:Show()
+
+    return
+  end
+
+  if me.IsWarningThresholdBreached(cooldown, timeLeftBig) then
+    highlightFrame:SetBackdropBorderColor(0.8, 1, 0, 1)
+    highlightFrame:Show()
+
+    return
+  end
+
+  highlightFrame:SetBackdropColor(1, 1, 1, 0)
+  highlightFrame:Hide()
+end
+
+--[[
+  Update the cooldown text position of a cooldownWatchSlot. Position text based on its cooldown duration
+
+  @param {table} cooldownWatchSlot
+  @param {number} timeLeftBig
+]]--
+function me.UpdateCooldownSlotBigCooldownTextPosition(cooldownWatchSlot, timeLeftBig)
+  local position
+
+  if timeLeftBig >= 10 then
+    position = RGCW_CONSTANTS.TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_HIGH
+  else
+    position = RGCW_CONSTANTS.TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_LOW
+  end
+
+  cooldownWatchSlot.targetSpellTimeBig:SetPoint(
+    "LEFT",
+    position,
+    0
+  )
+end
+
+--[[
+  Update the cooldown text of a cooldownWatchSlot
+
+  @param {table} cooldownWatchSlot
+  @param {number} timeLeftBig
+  @param {number} timeLeftSmall
+]]--
+function me.UpdateCooldownSlotCooldownText(cooldownWatchSlot, timeLeftBig, timeLeftSmall)
+  if timeLeftBig > 0 then
+    cooldownWatchSlot.targetSpellTimeBig:SetText(string.format("%.1f", timeLeftBig))
+  else
+    cooldownWatchSlot.targetSpellTimeBig:SetText("")
+  end
+
+  if timeLeftSmall ~= nil and timeLeftSmall >= 0 then
+    cooldownWatchSlot.targetSpellTimeSmall:SetText(string.format("%.1f", timeLeftSmall))
+  else
+    cooldownWatchSlot.targetSpellTimeSmall:SetText("")
+  end
+end
+
+--[[
+  Update the texture of a cooldownWatchSlot
+
+  @param {table} cooldownWatchSlot
+  @param {number} spellId
+]]--
+function me.UpdateCooldownSlotTexture(cooldownWatchSlot, spellId)
+  local _, _, iconTexture = GetSpellInfo(spellId)
+  cooldownWatchSlot.iconHolderTexture:SetTexture(iconTexture)
+end
+
+--[[
+  Initialize a cooldownWatchSlot with a cooldownOverlay
+
+  @param {table} cooldownWatchSlot
+  @param {table} cooldown
+]]--
+function me.InitCooldownSlotCooldownOverlay(cooldownWatchSlot, cooldown)
+  cooldownWatchSlot.targetCooldownOverlay:SetCooldown(cooldown.spell.castTime, cooldown.spell.cooldown)
+  -- hide default blizzard frames cooldown numbers
+  cooldownWatchSlot.targetCooldownOverlay:SetHideCountdownNumbers(true)
+  cooldownWatchSlot.targetCooldownOverlay.cooldownStarted = true
 end
 
 --[[
@@ -381,35 +470,47 @@ end
   @param {number} timeLeft
 
   @return {boolean}
-    true - if the treshold was breached
-    false - if the treshold was not breached
+    true - if the threshold was breached
+    false - if the threshold was not breached
 ]]--
-function me.IsAlertTresholdBreached(cooldown, timeLeft)
-  return me.IsTresholdBreached(cooldown, timeLeft, RGCW_CONSTANTS.TARGET_COOLDOWN_ALERT_TRESHOLD)
+function me.IsWarningThresholdBreached(cooldown, timeLeft)
+  return me.IsThresholdBreached(cooldown, timeLeft, RGCW_CONSTANTS.TARGET_COOLDOWN_WARN_THRESHOLD)
 end
 
 --[[
   @param {number} cooldown
   @param {number} timeLeft
-  @param {number} treshold
 
   @return {boolean}
-    true - if the treshold was breached
-    false - if the treshold was not breached
+    true - if the threshold was breached
+    false - if the threshold was not breached
 ]]--
-function me.IsTresholdBreached(cooldown, timeLeft, treshold)
-  return 100 / cooldown * timeLeft <= treshold
+function me.IsAlertThresholdBreached(cooldown, timeLeft)
+  return me.IsThresholdBreached(cooldown, timeLeft, RGCW_CONSTANTS.TARGET_COOLDOWN_ALERT_THRESHOLD)
+end
+
+--[[
+  @param {number} cooldown
+  @param {number} timeLeft
+  @param {number} threshold
+
+  @return {boolean}
+    true - if the threshold was breached
+    false - if the threshold was not breached
+]]--
+function me.IsThresholdBreached(cooldown, timeLeft, threshold)
+  return 100 / cooldown * timeLeft <= threshold
 end
 
 --[[
   Delayed removal of an expired cooldown. Remove a cooldown step by step.
 
-  Step 1 - Hide cooldowntexts
+  Step 1 - Hide cooldown texts
   Step 2 - Start animating fade alpha
   Step 3 - Execute cleanup script once animation is done
 
   @param {table} cooldownWatchSlot
-  @param {table} cooldow
+  @param {table} cooldown
 ]]--
 function me.ClearCooldownSlotAnimated(cooldownWatchSlot, cooldown)
   cooldownWatchSlot.targetSpellTimeBig:SetText("")
@@ -417,6 +518,7 @@ function me.ClearCooldownSlotAnimated(cooldownWatchSlot, cooldown)
   cooldownWatchSlot.targetCooldownOverlay.cooldownStarted = false
 
   local animationGroup = cooldownWatchSlot:GetAnimationGroups()
+
   animationGroup:SetScript("OnFinished", function()
     mod.cooldownQueue.RemoveCooldown(cooldown.caster, cooldown.spell.spellId)
     cooldownWatchSlot.iconHolderTexture:SetTexture(nil)

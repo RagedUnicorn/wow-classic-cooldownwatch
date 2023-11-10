@@ -124,7 +124,7 @@ end
     A unique identification for a caster
 
   @return {table}
-    The castEvents that were found for the caste
+    The castEvents that were found for the caster
     Note: May be an empty table
 ]]--
 function me.GetCooldownsByTarget(caster)

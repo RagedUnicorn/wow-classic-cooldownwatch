@@ -24,6 +24,7 @@
 
 local mod = rgcw
 local me = {}
+
 mod.profile = me
 
 me.tag = "Profile"

@@ -27,6 +27,7 @@
 
 local mod = rgcw
 local me = {}
+
 mod.target = me
 
 me.tag = "Target"

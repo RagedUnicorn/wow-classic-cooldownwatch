@@ -26,6 +26,7 @@
 
 local mod = rgcw
 local me = {}
+
 mod.generalMenu = me
 
 me.tag = "GeneralMenu"
