@@ -17,7 +17,8 @@
     <addon.curseforge.projectid>TODO</addon.curseforge.projectid>
     <addon.name.short>CW</addon.name.short>
     <addon.tag.version>v${project.version}</addon.tag.version>
-    <addon.interface>11403</addon.interface>
+    <addon.interface>11404</addon.interface>
+    <addon.supported.patch>1.14.4</addon.supported.patch>
     <addon.identifier>${project.groupId}.${project.artifactId}</addon.identifier>
     <addon.project.categories>PvP Combat</addon.project.categories>
   </properties>
@@ -69,7 +70,7 @@
           <plugin>
             <groupId>com.ragedunicorn.tools.maven</groupId>
             <artifactId>github-release-maven-plugin</artifactId>
-            <version>1.0.3</version>
+            <version>1.0.6</version>
             <executions>
               <execution>
                 <id>default-cli</id>
@@ -109,7 +110,7 @@
           <plugin>
             <groupId>com.ragedunicorn.tools.maven</groupId>
             <artifactId>github-release-maven-plugin</artifactId>
-            <version>1.0.3</version>
+            <version>1.0.6</version>
             <executions>
               <execution>
                 <id>default-cli</id>
@@ -151,7 +152,7 @@
           <plugin>
             <groupId>com.ragedunicorn.tools.maven</groupId>
             <artifactId>curseforge-release-maven-plugin</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.2</version>
             <executions>
               <execution>
                 <id>default-cli</id>
@@ -194,7 +195,7 @@
           <plugin>
             <groupId>com.ragedunicorn.tools.maven</groupId>
             <artifactId>curseforge-release-maven-plugin</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.2</version>
             <executions>
               <execution>
                 <id>default-cli</id>
