@@ -43,7 +43,7 @@ function me.ProcessUnfilteredCombatLogEvent()
     considered for processing.
   ]]--
   if not RGCW_ENVIRONMENT.DEBUG and not CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS)
-    and not (bit.band(sourceFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0) then
+    and bit.band(sourceFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) <= 0 then
 
     mod.logger.LogDebug(me.tag, "Ignored non-hostile combatlog")
 
