@@ -68,6 +68,20 @@ RGCW_CONSTANTS = {
   ELEMENT_ADDON_PANEL = "CW_AddonPanel",
   ELEMENT_TOOLTIP = "GameTooltip",
   --[[
+    Test UI Elements
+  ]]--
+  ELEMENT_TEST_LOG_WINDOW = "CooldownWatch_TestLogWindow",
+  ELEMENT_TEST_LOG_WINDOW_TITLE = "CooldownWatch_TestLogWindowTitle",
+  ELEMENT_TEST_LOG_WINDOW_SCROLL_FRAME = "CooldownWatch_TestLogWindowScrollFrame",
+  ELEMENT_TEST_LOG_WINDOW_SCROLL_CHILD = "CooldownWatch_TestLogWindowScrollChild",
+  ELEMENT_TEST_LOG_WINDOW_AUTO_SCROLL = "CooldownWatch_TestLogWindowAutoScrollCheckBox",
+  ELEMENT_TEST_LOG_WINDOW_CLOSE_BUTTON = "CooldownWatch_TestLogWindowCloseButton",
+  ELEMENT_TEST_LOG_WINDOW_CLEAR_BUTTON = "CooldownWatch_TestLogWindowClearButton",
+  --[[
+    SavedVariables
+  ]]--
+  SAVED_VARIABLE_TEST_LOG = "CooldownWatchTestLog",
+  --[[
     Addon Configuration General Elements
   ]]--
   CHECK_OPTION_SIZE = 32,

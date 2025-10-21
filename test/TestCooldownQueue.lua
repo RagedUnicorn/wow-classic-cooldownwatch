@@ -35,14 +35,14 @@ me.tag = "TestCooldownQueue"
   Test adding a cooldown to the queue
 ]]--
 function me.TestAddCooldown()
-  print("|cFFFFFF00Testing: Add cooldown to queue|r")
+  mod.testLogger.LogInfo("TestAddCooldown", "Testing: Add cooldown to queue")
 
   -- Show targeting hint
   mod.testHelper.ShowTargetingHint()
 
   local casterData = mod.testHelper.GetTestCasterData()
   if not casterData then
-    print("|cFFFF0000Failed to get player data|r")
+    mod.testLogger.LogError("TestAddCooldown", "Failed to get player data")
     return
   end
 
@@ -58,16 +58,17 @@ function me.TestAddCooldown()
   for _, cooldown in pairs(cooldowns) do
     if cooldown.spell.spellId == spell.spellId then
       found = true
-      print("|cFF00FF00  [PASS] Cooldown added successfully|r")
-      print("    Caster: " .. cooldown.casterName)
-      print("    Spell: " .. cooldown.spell.spellName)
-      print("    Cooldown: " .. cooldown.spell.cooldown .. "s")
+      mod.testLogger.LogSuccess("TestAddCooldown", "Cooldown added successfully", {
+        caster = cooldown.casterName,
+        spell = cooldown.spell.spellName,
+        cooldown = cooldown.spell.cooldown .. "s"
+      })
       break
     end
   end
 
   if not found then
-    print("|cFFFF0000  [FAIL] Failed to add cooldown|r")
+    mod.testLogger.LogFail("TestAddCooldown", "Failed to add cooldown")
   end
 end
 
@@ -247,25 +248,16 @@ end
   Run all cooldown queue tests
 ]]--
 function me.RunAllTests()
-  print("|cFF00FF00=== Running CooldownQueue Tests ===|r")
+  mod.testLogger.LogInfo("CooldownQueue", "=== Running CooldownQueue Tests ===")
 
   -- Show targeting hint
   mod.testHelper.ShowTargetingHint()
-  print("")
 
   me.TestAddCooldown()
-  print("")
-
   me.TestAddMultipleCooldowns()
-  print("")
-
   me.TestDuplicateCooldown()
-  print("")
-
   me.TestRemoveCooldown()
-  print("")
-
   me.ClearTestCooldowns()
 
-  print("|cFF00FF00=== CooldownQueue Tests Complete ===|r")
+  mod.testLogger.LogInfo("CooldownQueue", "=== CooldownQueue Tests Complete ===")
 end

@@ -67,8 +67,11 @@ end
 ]]--
 ShowTestHelp = function()
   print("|cFF00FFFFTest Commands:|r")
+  print("|cFF00FFFF/rgcw test all|r - Run all tests")
   print("|cFF00FFFF/rgcw test cooldownqueue|r - Run all cooldown queue tests")
   print("|cFF00FFFF/rgcw test cooldownqueue <test>|r - Run specific test")
+  print("|cFF00FFFF/rgcw test log|r - Toggle test log window")
+  print("|cFF00FFFF/rgcw test clear-logs|r - Clear test logs")
   print("")
   print("Available cooldown queue tests:")
   print("  AddCooldown, AddMultipleCooldowns, DuplicateCooldown, RemoveCooldown")
@@ -83,7 +86,13 @@ end
   @param {table} args - All command arguments
 ]]--
 HandleTestCommand = function(testCommand, args)
-  if testCommand == "cooldownqueue" then
+  if testCommand == "all" then
+    if mod.testRunner then
+      mod.testRunner.RunAllTests()
+    else
+      mod.logger.LogError(me.tag, "Test runner not available")
+    end
+  elseif testCommand == "cooldownqueue" then
     if not mod.testCooldownQueue then
       mod.logger.LogError(me.tag, "CooldownQueue test module not loaded")
       return
@@ -101,8 +110,24 @@ HandleTestCommand = function(testCommand, args)
         print("Available tests: AddCooldown, AddMultipleCooldowns, DuplicateCooldown, RemoveCooldown")
       end
     else
-      -- Run all tests
-      mod.testCooldownQueue.RunAllTests()
+      -- Run all tests using the test runner
+      if mod.testRunner then
+        mod.testRunner.TestCooldownQueue()
+      else
+        mod.testCooldownQueue.RunAllTests()
+      end
+    end
+  elseif testCommand == "log" or testCommand == "logs" then
+    if mod.testLogWindow then
+      mod.testLogWindow.Toggle()
+    else
+      mod.logger.LogError(me.tag, "Test log window not available")
+    end
+  elseif testCommand == "clear-logs" then
+    if mod.testLogger then
+      mod.testLogger.ClearLogs()
+    else
+      mod.logger.LogError(me.tag, "Test logger not available")
     end
   else
     ShowTestHelp()

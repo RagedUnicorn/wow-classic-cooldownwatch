@@ -31,6 +31,8 @@ local me = rgcw
 me.tag = "Core"
 
 local initializationDone = false
+-- Forward declarations for local functions
+local InitializeTestFramework
 
 --[[
   Addon load
@@ -98,14 +100,12 @@ function me.Initialize()
   me.ticker.StartTickerTargetCooldownBar()
   -- update initial view of gearBars after addon initialization
   me.targetCooldownBar.TargetCooldownBarUiUpdate()
-  -- initialize test commands (debug mode only)
-  if RGCW_ENVIRONMENT.DEBUG and me.testCmd then
-    me.testCmd.Initialize()
-  end
+  -- initialize test commands and logger (debug mode only)
+
+  InitializeTestFramework()
+  me.ShowWelcomeMessage()
   -- initialization is done
   initializationDone = true
-
-  me.ShowWelcomeMessage()
 end
 
 --[[
@@ -116,4 +116,23 @@ function me.ShowWelcomeMessage()
     string.format("|cFF00FFB0" .. RGCW_CONSTANTS.ADDON_NAME .. rgcw.L["help"],
     GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version"))
   )
+end
+
+--[[
+  Initialize test framework modules if in development mode
+]]--
+InitializeTestFramework = function()
+  if not RGCW_ENVIRONMENT.DEBUG then
+    return
+  end
+
+  if me.testLogWindow then
+    me.testLogWindow.Initialize()
+  end
+
+  if me.testCmd then
+    me.testCmd.Initialize()
+  end
+
+  me.logger.LogDebug(me.tag, "Test framework modules initialized")
 end

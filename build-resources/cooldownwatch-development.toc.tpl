@@ -4,6 +4,7 @@
 ## Notes: ${addon.description}
 ## Version: ${addon.tag.version}
 ## SavedVariablesPerCharacter: ${addon.savedVariablesPerCharacter}
+## SavedVariables: CooldownWatchTestLog
 
 # constant values
 code/Constants.lua
@@ -31,9 +32,13 @@ code/Profile.lua
 # debug
 code/Debug.lua
 
-# test
-test/TestHelper.lua
-test/TestCmd.lua
+# Test Framework (Development Only)
+test/framework/TestCmd.lua
+test/framework/TestLogger.lua
+test/framework/TestHelper.lua
+test/framework/TestLogWindow.lua
+test/framework/TestLogWindow.xml
+test/RunTests.lua
 test/TestCooldownQueue.lua
 
 # gui
