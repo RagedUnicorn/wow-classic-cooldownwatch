@@ -35,6 +35,14 @@ mod.testLogWindow = me
 
 me.tag = "TestLogWindow"
 
+-- Forward declarations for local functions
+local CreateTimestamp
+local CreateLevelText
+local CreateTestNameText
+local GetMessageColor
+local CreateMessageText
+local AddDataTooltip
+
 -- UI elements
 me.logMessages = {}
 me.maxMessages = 1000
@@ -176,11 +184,150 @@ function me.AddLogMessage(level, testName, message, data)
   if autoScrollCheckBox and autoScrollCheckBox:GetChecked() then
     C_Timer.After(0.01, function()
       local scrollRange = scrollFrame:GetVerticalScrollRange()
+
       if scrollRange > 0 then
         scrollFrame:SetVerticalScroll(scrollRange)
       end
     end)
   end
+end
+
+--[[
+  Create timestamp font string
+
+  @param {Frame} parent - Parent frame
+
+  @return {FontString} - Created timestamp
+]]--
+CreateTimestamp = function(parent)
+  local timestamp = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+  timestamp:SetPoint("LEFT", parent, "LEFT", 0, 0)
+  timestamp:SetText(date("%H:%M:%S"))
+  timestamp:SetTextColor(0.6, 0.6, 0.6)
+  timestamp:SetWidth(60)
+  timestamp:SetJustifyH("LEFT")
+
+  return timestamp
+end
+
+--[[
+  Create level indicator font string
+
+  @param {Frame} parent - Parent frame
+  @param {FontString} anchor - Anchor element
+  @param {string} level - Log level
+
+  @return {FontString} - Created level text
+]]--
+CreateLevelText = function(parent, anchor, level)
+  local levelText = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+  levelText:SetPoint("LEFT", anchor, "RIGHT", 5, 0)
+  levelText:SetText(string.format("[%s]", level))
+
+  local color = me.levelColors[level] or {1, 1, 1}
+  levelText:SetTextColor(unpack(color))
+  levelText:SetWidth(60)
+  levelText:SetJustifyH("LEFT")
+
+  return levelText
+end
+
+--[[
+  Create test name font string
+
+  @param {Frame} parent - Parent frame
+  @param {FontString} anchor - Anchor element
+  @param {string} testName - Test name
+
+  @return {FontString} - Created test name text
+]]--
+CreateTestNameText = function(parent, anchor, testName)
+  local testNameText = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+  testNameText:SetPoint("LEFT", anchor, "RIGHT", 5, 0)
+  testNameText:SetText(testName .. ":")
+  testNameText:SetTextColor(0.8, 0.8, 1)
+  testNameText:SetWidth(120)
+  testNameText:SetJustifyH("LEFT")
+
+  return testNameText
+end
+
+--[[
+  Get message text color based on content
+
+  @param {string} testName - Test name
+  @param {string} message - Log message
+  @param {table} defaultColor - Default color to use
+
+  @return {number, number, number} - RGB color values
+]]--
+GetMessageColor = function(testName, message, defaultColor)
+  if testName == "TestSummary" then
+    if message:find("===") then
+      return 0, 1, 1  -- Cyan for headers
+    elseif message:find("Passed:") then
+      return 0, 1, 0  -- Green for passed
+    elseif message:find("Failed:") then
+      return 1, 0, 0  -- Red for failed
+    elseif message:find("Errors:") then
+      return 1, 0, 1  -- Magenta for errors
+    end
+  end
+
+  return unpack(defaultColor)
+end
+
+--[[
+  Create message text font string
+
+  @param {Frame} parent - Parent frame
+  @param {FontString} anchor - Anchor element
+  @param {string} testName - Test name
+  @param {string} message - Log message
+  @param {table} defaultColor - Default color
+
+  @return {FontString} - Created message text
+]]--
+CreateMessageText = function(parent, anchor, testName, message, defaultColor)
+  local messageText = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+  messageText:SetPoint("LEFT", anchor, "RIGHT", 5, 0)
+  messageText:SetPoint("RIGHT", parent, "RIGHT", -5, 0)
+  messageText:SetText(message)
+  messageText:SetTextColor(GetMessageColor(testName, message, defaultColor))
+  messageText:SetJustifyH("LEFT")
+
+  return messageText
+end
+
+--[[
+  Add tooltip to frame for displaying data
+
+  @param {Frame} frame - Frame to add tooltip to
+  @param {table} data - Data to display in tooltip
+]]--
+AddDataTooltip = function(frame, data)
+  frame:EnableMouse(true)
+  frame:SetScript("OnEnter", function(self)
+    local tooltip = _G["GameTooltip"]
+    tooltip:SetOwner(self, "ANCHOR_CURSOR")
+    tooltip:AddLine("Test Data", 1, 1, 1)
+    tooltip:AddLine(" ")
+
+    for key, value in pairs(data) do
+      local valueStr = tostring(value)
+
+      if type(value) == "table" then
+        valueStr = "{table}"
+      end
+      tooltip:AddDoubleLine(key .. ":", valueStr, 0.8, 0.8, 0.8, 1, 1, 1)
+    end
+
+    tooltip:Show()
+  end)
+
+  frame:SetScript("OnLeave", function()
+    _G["GameTooltip"]:Hide()
+  end)
 end
 
 --[[
@@ -191,6 +338,7 @@ end
   @param {string} testName - Test name
   @param {string} message - Log message
   @param {table} data - Optional data
+
   @return {Frame} - Created message frame
 ]]--
 function me.CreateMessageFrame(parent, level, testName, message, data)
@@ -198,81 +346,15 @@ function me.CreateMessageFrame(parent, level, testName, message, data)
   frame:SetHeight(me.messageHeight)
   frame:SetWidth(parent:GetWidth())
 
-  -- Timestamp
-  local timestamp = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-  timestamp:SetPoint("LEFT", frame, "LEFT", 0, 0)
-  timestamp:SetText(date("%H:%M:%S"))
-  timestamp:SetTextColor(0.6, 0.6, 0.6)
-  timestamp:SetWidth(60)
-  timestamp:SetJustifyH("LEFT")
-
-  -- Level
-  local levelText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-  levelText:SetPoint("LEFT", timestamp, "RIGHT", 5, 0)
-  levelText:SetText(string.format("[%s]", level))
+  local timestamp = CreateTimestamp(frame)
+  local levelText = CreateLevelText(frame, timestamp, level)
+  local testNameText = CreateTestNameText(frame, levelText, testName)
 
   local color = me.levelColors[level] or {1, 1, 1}
-  levelText:SetTextColor(unpack(color))
-  levelText:SetWidth(60)
-  levelText:SetJustifyH("LEFT")
+  CreateMessageText(frame, testNameText, testName, message, color)
 
-  -- Test name
-  local testNameText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-  testNameText:SetPoint("LEFT", levelText, "RIGHT", 5, 0)
-  testNameText:SetText(testName .. ":")
-  testNameText:SetTextColor(0.8, 0.8, 1)
-  testNameText:SetWidth(120)
-  testNameText:SetJustifyH("LEFT")
-
-  -- Message
-  local messageText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-  messageText:SetPoint("LEFT", testNameText, "RIGHT", 5, 0)
-  messageText:SetPoint("RIGHT", frame, "RIGHT", -5, 0)
-  messageText:SetText(message)
-
-  -- Special formatting for summary messages
-  if testName == "TestSummary" then
-    if message:find("===") then
-      messageText:SetTextColor(0, 1, 1)  -- Cyan for headers
-    elseif message:find("Passed:") then
-      messageText:SetTextColor(0, 1, 0)  -- Green for passed
-    elseif message:find("Failed:") then
-      messageText:SetTextColor(1, 0, 0)  -- Red for failed
-    elseif message:find("Errors:") then
-      messageText:SetTextColor(1, 0, 1)  -- Magenta for errors
-    else
-      messageText:SetTextColor(unpack(color))
-    end
-  else
-    messageText:SetTextColor(unpack(color))
-  end
-
-  messageText:SetJustifyH("LEFT")
-
-  -- Tooltip for data
   if data then
-    frame:EnableMouse(true)
-    frame:SetScript("OnEnter", function(self)
-      local tooltip = _G["GameTooltip"]
-      tooltip:SetOwner(self, "ANCHOR_CURSOR")
-      tooltip:AddLine("Test Data", 1, 1, 1)
-      tooltip:AddLine(" ")
-
-      for key, value in pairs(data) do
-        local valueStr = tostring(value)
-
-        if type(value) == "table" then
-          valueStr = "{table}"
-        end
-        tooltip:AddDoubleLine(key .. ":", valueStr, 0.8, 0.8, 0.8, 1, 1, 1)
-      end
-
-      tooltip:Show()
-    end)
-
-    frame:SetScript("OnLeave", function()
-      _G["GameTooltip"]:Hide()
-    end)
+    AddDataTooltip(frame, data)
   end
 
   return frame
@@ -298,7 +380,7 @@ function me.ClearLog()
   end
 
   me.logMessages = {}
-  me.currentSessionId = nil  -- Reset session tracking
+  me.currentSessionId = nil -- Reset session tracking
 
   local scrollChild = _G[RGCW_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_SCROLL_CHILD]
   if scrollChild then
