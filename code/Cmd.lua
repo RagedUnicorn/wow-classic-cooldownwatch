@@ -30,6 +30,12 @@ mod.cmd = me
 
 me.tag = "Cmd"
 
+-- forward declaration
+local ParseSlashCommand
+
+-- registered subcommands
+me.registeredCommands = {}
+
 --[[
   Print cmd options for addon
 ]]--
@@ -38,6 +44,10 @@ local function ShowInfoMessage()
   DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["reload"])
   DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["opt"])
   DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["conf"])
+
+  if RGCW_ENVIRONMENT.DEBUG then
+    DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["test_cooldownqueue"])
+  end
 end
 
 --[[
@@ -47,32 +57,61 @@ function me.SetupSlashCmdList()
   SLASH_COOLDOWNWATCH1 = "/rgcw"
   SLASH_COOLDOWNWATCH2 = "/cooldownwatch"
 
-  SlashCmdList["COOLDOWNWATCH"] = function(msg)
-    local args = {}
+  SlashCmdList["COOLDOWNWATCH"] = ParseSlashCommand
+end
 
-    mod.logger.LogDebug(me.tag, "/rgcw passed argument: " .. msg)
+--[[
+  Parse and handle slash command arguments
+  @param {string} msg - The message/arguments passed to the slash command
+]]--
+ParseSlashCommand = function(msg)
+  local args = {}
 
-    -- parse arguments by whitespace
-    for arg in string.gmatch(msg, "%S+") do
-      table.insert(args, arg)
+  mod.logger.LogDebug(me.tag, "/rgcw passed argument: " .. msg)
+
+  -- parse arguments by whitespace
+  for arg in string.gmatch(msg, "%S+") do
+    table.insert(args, arg)
+  end
+
+  if args[1] == "" or args[1] == "help" or table.getn(args) == 0 then
+    ShowInfoMessage()
+  elseif args[1] == "rl" or args[1] == "reload" then
+    ReloadUI()
+  elseif args[1] == "opt" then
+    mod.addonConfiguration.OpenAddonPanel()
+  elseif args[1] == "conf" or args[1] == "configure" then
+    if args[2] == "enable" then
+      mod.targetCooldownBar.ShowExampleTargetCooldownBar()
+    elseif args[2] == "disable" then
+      mod.targetCooldownBar.HideExampleTargetCooldownBar()
+    else
+      mod.logger.PrintUserError(rgcw.L["invalid_argument"])
     end
-
-    if args[1] == "" or args[1] == "help" or table.getn(args) == 0 then
-      ShowInfoMessage()
-    elseif args[1] == "rl" or args[1] == "reload" then
-      ReloadUI()
-    elseif args[1] == "opt" then
-      mod.addonConfiguration.OpenAddonPanel()
-    elseif args[1] == "conf" or "configure" then
-      if args[2] == "enable" then
-        mod.targetCooldownBar.ShowExampleTargetCooldownBar()
-      elseif args[2] == "disable" then
-        mod.targetCooldownBar.HideExampleTargetCooldownBar()
-      else
-        mod.logger.PrintUserError(rgcw.L["invalid_argument"])
-      end
+  else
+    -- Check for registered commands
+    if me.registeredCommands[args[1]] then
+      local commandName = args[1]
+      table.remove(args, 1)
+      me.registeredCommands[commandName](args)
     else
       mod.logger.PrintUserError(rgcw.L["invalid_argument"])
     end
   end
+end
+
+--[[
+  Register a subcommand handler
+
+  @param {string} command - The subcommand name
+  @param {function} handler - The function to handle the subcommand
+]]--
+function me.RegisterCommand(command, handler)
+  if type(command) ~= "string" or type(handler) ~= "function" then
+    mod.logger.LogError(me.tag, "Invalid command registration - command must be string and handler must be function")
+    return
+  end
+
+  me.registeredCommands[command] = handler
+  mod.logger.LogDebug(me.tag, "Registered command: " .. command)
 end

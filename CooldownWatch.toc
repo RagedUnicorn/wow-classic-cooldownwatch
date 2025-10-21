@@ -31,6 +31,11 @@ code/Profile.lua
 # debug
 code/Debug.lua
 
+# test
+test/TestHelper.lua
+test/TestCmd.lua
+test/TestCooldownQueue.lua
+
 # gui
 gui/Frame.xml
 gui/TargetCooldownBar.lua

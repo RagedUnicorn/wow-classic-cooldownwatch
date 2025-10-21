@@ -98,6 +98,10 @@ function me.Initialize()
   me.ticker.StartTickerTargetCooldownBar()
   -- update initial view of gearBars after addon initialization
   me.targetCooldownBar.TargetCooldownBarUiUpdate()
+  -- initialize test commands (debug mode only)
+  if RGCW_ENVIRONMENT.DEBUG and me.testCmd then
+    me.testCmd.Initialize()
+  end
   -- initialization is done
   initializationDone = true
 
