@@ -6,36 +6,36 @@
 ## SavedVariablesPerCharacter: ${addon.savedVariablesPerCharacter}
 
 # constant values
-code/CW_Constants.lua
+code/Constants.lua
 # environment variables
-code/CW_Environment.lua
+code/Environment.lua
 
 # localization
 localization/enUS.lua
 localization/deDE.lua
 
-code/CW_Core.lua
-code/CW_Logger.lua
-code/CW_Cmd.lua
-code/CW_Filter.lua
-code/CW_CombatLog.lua
-code/CW_Common.lua
-code/CW_SpellMap.lua
-code/CW_CooldownQueue.lua
-code/CW_Target.lua
-code/CW_Ticker.lua
-code/CW_Tooltip.lua
-code/CW_Configuration.lua
-code/CW_Profile.lua
+code/Core.lua
+code/Logger.lua
+code/Cmd.lua
+code/Filter.lua
+code/CombatLog.lua
+code/Common.lua
+code/SpellMap.lua
+code/CooldownQueue.lua
+code/Target.lua
+code/Ticker.lua
+code/Tooltip.lua
+code/Configuration.lua
+code/Profile.lua
 
 # debug
-code/CW_Debug.lua
+code/Debug.lua
 
 # gui
-gui/CW_Frame.xml
-gui/CW_TargetCooldownBar.lua
-gui/CW_CategoryMenu.lua
-gui/CW_AddonConfiguration.lua
-gui/CW_AboutContent.lua
-gui/CW_GeneralMenu.lua
-gui/CW_CooldownMenu.lua
+gui/Frame.xml
+gui/TargetCooldownBar.lua
+gui/CategoryMenu.lua
+gui/AddonConfiguration.lua
+gui/AboutContent.lua
+gui/GeneralMenu.lua
+gui/CooldownMenu.lua

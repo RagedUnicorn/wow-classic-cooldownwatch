@@ -71,7 +71,7 @@
           <plugin>
             <groupId>com.ragedunicorn.tools.maven</groupId>
             <artifactId>github-release-maven-plugin</artifactId>
-            <version>1.0.6</version>
+            <version>1.0.7</version>
             <executions>
               <execution>
                 <id>default-cli</id>
@@ -187,7 +187,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.7.1</version>
         <executions>
           <execution>
             <id>default-cli</id>
@@ -229,7 +229,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.3.1</version>
         <executions>
           <execution>
             <id>default-cli</id>
@@ -255,7 +255,7 @@
                   <targetPath>${project.basedir}/code</targetPath>
                   <filtering>false</filtering>
                   <includes>
-                    <include>CW_Environment.lua</include>
+                    <include>Environment.lua</include>
                   </includes>
                 </resource>
               </resources>

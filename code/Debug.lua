@@ -32,16 +32,16 @@ mod.debug = me
 
 me.tag = "Debug"
 
-_G["__CW__DEBUG__ADDEXAMPLECOOLDOWN"] = function()
-  local caster = "dummytarget"
-  local casterName = "casterName"
+_G["__CW__DEBUG__ADD_EXAMPLE_COOLDOWN"] = function()
+  local caster = "Player-5827-027101BB"
+  local casterName = "Pvpbankl"
   local spell = {
     ["spellId"] = 2094,
     ["spellName"] = "spellname",
     ["rank"] = nil,
     ["castTime"] = GetTime(),
-    ["cooldown"] = 10,
-    ["cooldownWorstCase"] = 5,
+    ["cooldown"] = 40,
+    ["cooldownWorstCase"] = 30,
     ["active"] = true
   }
 
