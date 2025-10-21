@@ -35,6 +35,7 @@ me.tag = "TestCooldownQueue"
   Test adding a cooldown to the queue
 ]]--
 function me.TestAddCooldown()
+  mod.testLogger.StartTest("TestAddCooldown")
   mod.testLogger.LogInfo("TestAddCooldown", "Testing: Add cooldown to queue")
 
   -- Show targeting hint
@@ -43,6 +44,7 @@ function me.TestAddCooldown()
   local casterData = mod.testHelper.GetTestCasterData()
   if not casterData then
     mod.testLogger.LogError("TestAddCooldown", "Failed to get player data")
+    mod.testLogger.EndTest("TestAddCooldown", false, "Failed to get player data")
     return
   end
 
@@ -58,7 +60,7 @@ function me.TestAddCooldown()
   for _, cooldown in pairs(cooldowns) do
     if cooldown.spell.spellId == spell.spellId then
       found = true
-      mod.testLogger.LogSuccess("TestAddCooldown", "Cooldown added successfully", {
+      mod.testLogger.LogInfo("TestAddCooldown", "Cooldown found in queue", {
         caster = cooldown.casterName,
         spell = cooldown.spell.spellName,
         cooldown = cooldown.spell.cooldown .. "s"
@@ -67,8 +69,10 @@ function me.TestAddCooldown()
     end
   end
 
-  if not found then
-    mod.testLogger.LogFail("TestAddCooldown", "Failed to add cooldown")
+  if found then
+    mod.testLogger.EndTest("TestAddCooldown", true, "Cooldown added successfully")
+  else
+    mod.testLogger.EndTest("TestAddCooldown", false, "Failed to add cooldown")
   end
 end
 
@@ -76,14 +80,17 @@ end
   Test adding multiple cooldowns
 ]]--
 function me.TestAddMultipleCooldowns()
-  print("|cFFFFFF00Testing: Add multiple cooldowns|r")
+  mod.testLogger.StartTest("TestAddMultipleCooldowns")
+  mod.testLogger.LogInfo("TestAddMultipleCooldowns", "Testing: Add multiple cooldowns")
 
   -- Show targeting hint
   mod.testHelper.ShowTargetingHint()
 
   local casterData = mod.testHelper.GetTestCasterData()
+
   if not casterData then
-    print("|cFFFF0000Failed to get player data|r")
+    mod.testLogger.LogError("TestAddMultipleCooldowns", "Failed to get player data")
+    mod.testLogger.EndTest("TestAddMultipleCooldowns", false, "Failed to get player data")
     return
   end
 
@@ -106,16 +113,15 @@ function me.TestAddMultipleCooldowns()
     for _, cooldown in pairs(cooldowns) do
       if cooldown.spell.spellId == spell.spellId then
         foundCount = foundCount + 1
-        print("|cFF00FF00  [PASS] Found: " .. cooldown.casterName .. " - " .. cooldown.spell.spellName .. "|r")
         break
       end
     end
   end
 
   if foundCount == #testSpells then
-    print("|cFF00FF00  All " .. foundCount .. " cooldowns added successfully|r")
+    mod.testLogger.EndTest("TestAddMultipleCooldowns", true, "All " .. foundCount .. " cooldowns added successfully")
   else
-    print("|cFFFF0000  [FAIL] Only " .. foundCount .. "/" .. #testSpells .. " cooldowns were added|r")
+    mod.testLogger.EndTest("TestAddMultipleCooldowns", false, "Only " .. foundCount .. "/" .. #testSpells .. " cooldowns were added")
   end
 end
 
@@ -124,14 +130,16 @@ end
 ]]--
 -- TODO This is not yet implemented in CooldownQueue could be the next step to go for
 function me.TestDuplicateCooldown()
-  print("|cFFFFFF00Testing: Duplicate cooldown handling|r")
+  mod.testLogger.StartTest("TestDuplicateCooldown")
+  mod.testLogger.LogInfo("TestDuplicateCooldown", "Testing: Duplicate cooldown handling")
 
   -- Show targeting hint
   mod.testHelper.ShowTargetingHint()
 
   local casterData = mod.testHelper.GetTestCasterData()
   if not casterData then
-    print("|cFFFF0000Failed to get player data|r")
+    mod.testLogger.LogError("TestDuplicateCooldown", "Failed to get player data")
+    mod.testLogger.EndTest("TestDuplicateCooldown", false, "Failed to get player data")
     return
   end
 
@@ -157,12 +165,13 @@ function me.TestDuplicateCooldown()
   end
 
   if count == 1 then
-    print("|cFF00FF00  [PASS] Duplicate prevented - only 1 instance exists|r")
+    mod.testLogger.LogInfo("TestDuplicateCooldown", "Duplicate prevented - only 1 instance exists")
     if lastCastTime == updatedSpell.castTime then
-      print("|cFF00FF00  [PASS] Cooldown was updated with new cast time|r")
+      mod.testLogger.LogInfo("TestDuplicateCooldown", "Cooldown was updated with new cast time")
     end
+    mod.testLogger.EndTest("TestDuplicateCooldown", true, "Duplicate cooldown handling working correctly")
   else
-    print("|cFFFF0000  [FAIL] Found " .. count .. " instances (expected 1)|r")
+    mod.testLogger.EndTest("TestDuplicateCooldown", false, "Found " .. count .. " instances (expected 1)")
   end
 end
 
@@ -170,14 +179,16 @@ end
   Test removing specific cooldowns
 ]]--
 function me.TestRemoveCooldown()
-  print("|cFFFFFF00Testing: Remove specific cooldown|r")
+  mod.testLogger.StartTest("TestRemoveCooldown")
+  mod.testLogger.LogInfo("TestRemoveCooldown", "Testing: Remove specific cooldown")
 
   -- Show targeting hint
   mod.testHelper.ShowTargetingHint()
 
   local casterData = mod.testHelper.GetTestCasterData()
   if not casterData then
-    print("|cFFFF0000Failed to get player data|r")
+    mod.testLogger.LogError("TestRemoveCooldown", "Failed to get player data")
+    mod.testLogger.EndTest("TestRemoveCooldown", false, "Failed to get player data")
     return
   end
 
@@ -198,8 +209,6 @@ function me.TestRemoveCooldown()
   end
 
   if foundBefore then
-    print("  Added cooldown to queue")
-
     -- Remove the cooldown
     mod.cooldownQueue.RemoveCooldown(casterData.guid, spell.spellId)
 
@@ -215,12 +224,12 @@ function me.TestRemoveCooldown()
     end
 
     if not foundAfter then
-      print("|cFF00FF00  [PASS] Cooldown removed successfully|r")
+      mod.testLogger.EndTest("TestRemoveCooldown", true, "Cooldown removed successfully")
     else
-      print("|cFFFF0000  [FAIL] Failed to remove cooldown|r")
+      mod.testLogger.EndTest("TestRemoveCooldown", false, "Failed to remove cooldown")
     end
   else
-    print("|cFFFF0000  [FAIL] Failed to add test cooldown|r")
+    mod.testLogger.EndTest("TestRemoveCooldown", false, "Failed to add test cooldown")
   end
 end
 
@@ -228,7 +237,7 @@ end
   Clear all test cooldowns from the queue
 ]]--
 function me.ClearTestCooldowns()
-  print("|cFFFFFF00Clearing all cooldowns|r")
+  mod.logger.LogDebug(me.tag, "Clearing all cooldowns from the queue")
 
   local cooldownsBefore = mod.cooldownQueue.GetCooldownsByTarget(mod.testHelper.GetPlayerGUID() or "unknown")
   local initialCount = #cooldownsBefore
@@ -240,8 +249,7 @@ function me.ClearTestCooldowns()
   local cooldownsAfter = mod.cooldownQueue.GetCooldownsByTarget(mod.testHelper.GetPlayerGUID() or "unknown")
   local remainingCount = #cooldownsAfter
 
-  print("  Cooldowns before: " .. initialCount)
-  print("  Cooldowns after: " .. remainingCount)
+  mod.logger.LogDebug(me.tag, "Cooldowns before: " .. initialCount .. ", after: " .. remainingCount)
 end
 
 --[[
