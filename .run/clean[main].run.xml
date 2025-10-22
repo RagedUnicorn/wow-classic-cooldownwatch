@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="deploy[curseforge]" type="MavenRunConfiguration" factoryName="Maven">
+  <configuration default="false" name="clean[main]" type="MavenRunConfiguration" factoryName="Maven">
     <MavenSettings>
       <option name="myGeneralSettings" />
       <option name="myRunnerSettings" />
@@ -10,9 +10,7 @@
           </option>
           <option name="goals">
             <list>
-              <option value="package" />
-              <option value="-P" />
-              <option value="deploy-curseforge" />
+              <option value="clean" />
             </list>
           </option>
           <option name="pomFileName" />
