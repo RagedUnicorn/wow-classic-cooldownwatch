@@ -101,7 +101,7 @@ end
   @param {number} spellId
 ]]--
 function me.RemoveCooldown(caster, spellId)
-  for i = 1, table.getn(cooldownQueue) do
+  for i = 1, #cooldownQueue do
     if cooldownQueue[i].caster == caster and cooldownQueue[i].spell.spellId == spellId then
       table.remove(cooldownQueue, i)
       mod.logger.LogDebug(me.tag, "Removed cooldown - '" .. spellId .. "' for player: " .. caster) -- TODO
@@ -130,7 +130,7 @@ end
 function me.GetCooldownsByTarget(caster)
   local cooldowns = {}
 
-  for i = 1, table.getn(cooldownQueue) do
+  for i = 1, #cooldownQueue do
     if cooldownQueue[i].caster == caster then
       table.insert(cooldowns, cooldownQueue[i])
     end

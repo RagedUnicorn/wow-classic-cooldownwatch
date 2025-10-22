@@ -102,7 +102,6 @@ HandleTestCommand = function(testCommand, args)
       -- Run specific test
       local testName = args[2]
       local testFunction = "Test" .. testName
-      
       if mod.testCooldownQueue[testFunction] then
         mod.testCooldownQueue[testFunction]()
       else

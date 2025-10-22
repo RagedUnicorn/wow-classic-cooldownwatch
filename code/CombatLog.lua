@@ -24,7 +24,7 @@
 ]]--
 
 -- luacheck: globals CombatLogGetCurrentEventInfo CombatLog_Object_IsA COMBATLOG_FILTER_HOSTILE_PLAYERS
--- luacheck: globals COMBATLOG_OBJECT_CONTROL_PLAYER GetTime UnitClass GetSpellInfo
+-- luacheck: globals COMBATLOG_OBJECT_CONTROL_PLAYER GetTime UnitClass GetSpellInfo bit
 
 local mod = rgcw
 local me = {}
@@ -101,7 +101,7 @@ function me.IsCooldownTracked(spellId, englishClass)
   if englishClass ~= nil then
     local category
 
-    for i = 1, table.getn(RGCW_CONSTANTS.CATEGORIES) do
+    for i = 1, #RGCW_CONSTANTS.CATEGORIES do
       if string.lower(englishClass) == RGCW_CONSTANTS.CATEGORIES[i].categoryName then
         category = i
         break

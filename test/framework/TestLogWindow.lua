@@ -23,8 +23,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals C_Timer GameTooltip SLASH_COOLDOWNWATCH_TESTLOG1 SLASH_COOLDOWNWATCH_TESTLOG2
--- luacheck: globals SlashCmdList date CreateFrame CooldownWatchTestLog
+-- luacheck: globals C_Timer date CreateFrame CooldownWatchTestLog
 
 -- Test log window UI for CooldownWatch addon
 -- Displays test logs in a scrollable window
@@ -88,9 +87,11 @@ function me.Initialize()
     -- Update window title with new session info
     local windowTitle = _G[RGCW_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_TITLE]
 
-    if windowTitle and _G[RGCW_CONSTANTS.SAVED_VARIABLE_TEST_LOG] and _G[RGCW_CONSTANTS.SAVED_VARIABLE_TEST_LOG].currentSession then
+    local testLog = _G[RGCW_CONSTANTS.SAVED_VARIABLE_TEST_LOG]
+
+    if windowTitle and testLog and testLog.currentSession then
       windowTitle:SetText(string.format("CooldownWatch Test Log - Session: %s",
-        _G[RGCW_CONSTANTS.SAVED_VARIABLE_TEST_LOG].currentSession))
+        testLog.currentSession))
     end
   end
 

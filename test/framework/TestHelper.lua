@@ -22,7 +22,7 @@
   SOFTWARE.
 ]]--
 
--- luacheck: globals UnitGUID UnitName UnitExists
+-- luacheck: globals UnitGUID UnitName UnitExists GetTime
 
 local mod = rgcw
 local me = {}
@@ -135,7 +135,7 @@ end
 function me.IsTargetingSelf()
   local playerGUID = me.GetPlayerGUID()
   local targetGUID = me.GetTargetGUID()
-  
+
   return playerGUID ~= nil and targetGUID ~= nil and playerGUID == targetGUID
 end
 

@@ -22,8 +22,6 @@
   SOFTWARE.
 ]]--
 
--- luacheck: globals GetTime
-
 local mod = rgcw
 local me = {}
 
@@ -38,10 +36,10 @@ function me.TestAddCooldown()
   mod.testLogger.StartTest("TestAddCooldown")
   mod.testLogger.LogInfo("TestAddCooldown", "Testing: Add cooldown to queue")
 
-  -- Show targeting hint
   mod.testHelper.ShowTargetingHint()
 
   local casterData = mod.testHelper.GetTestCasterData()
+
   if not casterData then
     mod.testLogger.LogError("TestAddCooldown", "Failed to get player data")
     mod.testLogger.EndTest("TestAddCooldown", false, "Failed to get player data")
@@ -50,10 +48,8 @@ function me.TestAddCooldown()
 
   local spell = mod.testHelper.CreateTestSpell(2094, "Blind", 120, 90)
 
-  -- Add the cooldown
   mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, spell)
 
-  -- Verify it was added
   local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)
   local found = false
 
@@ -83,7 +79,7 @@ function me.TestAddMultipleCooldowns()
   mod.testLogger.StartTest("TestAddMultipleCooldowns")
   mod.testLogger.LogInfo("TestAddMultipleCooldowns", "Testing: Add multiple cooldowns")
 
-  -- Show targeting hint
+
   mod.testHelper.ShowTargetingHint()
 
   local casterData = mod.testHelper.GetTestCasterData()
@@ -95,9 +91,26 @@ function me.TestAddMultipleCooldowns()
   end
 
   local testSpells = {
-    mod.testHelper.CreateTestSpell(122, "Frost Nova", 25, 21, 0),
-    mod.testHelper.CreateTestSpell(6789, "Death Coil", 120, 120, 1),
-    mod.testHelper.CreateTestSpell(8122, "Psychic Scream", 30, 26, 2)
+    mod.testHelper.CreateTestSpell(
+      122,
+      "Frost Nova",
+      25,
+      21,
+      0
+    ),
+    mod.testHelper.CreateTestSpell(
+      6789,
+      "Death Coil",
+      120,
+      120,
+      1
+    ),
+    mod.testHelper.CreateTestSpell(8122,
+      "Psychic Scream",
+      30,
+      26,
+      2
+    )
   }
 
   -- Add all cooldowns using player's GUID
@@ -105,7 +118,6 @@ function me.TestAddMultipleCooldowns()
     mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, spell)
   end
 
-  -- Verify they were added
   local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)
   local foundCount = 0
 
@@ -119,9 +131,11 @@ function me.TestAddMultipleCooldowns()
   end
 
   if foundCount == #testSpells then
-    mod.testLogger.EndTest("TestAddMultipleCooldowns", true, "All " .. foundCount .. " cooldowns added successfully")
+    mod.testLogger.EndTest("TestAddMultipleCooldowns", true,
+      "All " .. foundCount .. " cooldowns added successfully")
   else
-    mod.testLogger.EndTest("TestAddMultipleCooldowns", false, "Only " .. foundCount .. "/" .. #testSpells .. " cooldowns were added")
+    mod.testLogger.EndTest("TestAddMultipleCooldowns", false,
+      "Only " .. foundCount .. "/" .. #testSpells .. " cooldowns were added")
   end
 end
 
@@ -133,7 +147,6 @@ function me.TestDuplicateCooldown()
   mod.testLogger.StartTest("TestDuplicateCooldown")
   mod.testLogger.LogInfo("TestDuplicateCooldown", "Testing: Duplicate cooldown handling")
 
-  -- Show targeting hint
   mod.testHelper.ShowTargetingHint()
 
   local casterData = mod.testHelper.GetTestCasterData()
@@ -143,13 +156,22 @@ function me.TestDuplicateCooldown()
     return
   end
 
-  local spell = mod.testHelper.CreateTestSpell(5484, "Howl of Terror", 40, 40)
+  local spell = mod.testHelper.CreateTestSpell(
+    5484,
+    "Howl of Terror",
+    40,
+    40
+  )
 
-  -- Add the cooldown
   mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, spell)
 
-  -- Add same cooldown again with updated time
-  local updatedSpell = mod.testHelper.CreateTestSpell(5484, "Howl of Terror", 40, 40, 5)
+  local updatedSpell = mod.testHelper.CreateTestSpell(
+    5484,
+    "Howl of Terror",
+    40,
+    40,
+    5
+  )
   mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, updatedSpell)
 
   -- Check how many instances exist
@@ -165,13 +187,29 @@ function me.TestDuplicateCooldown()
   end
 
   if count == 1 then
-    mod.testLogger.LogInfo("TestDuplicateCooldown", "Duplicate prevented - only 1 instance exists")
+    mod.testLogger.LogInfo(
+      "TestDuplicateCooldown",
+      "Duplicate prevented - only 1 instance exists"
+    )
+
     if lastCastTime == updatedSpell.castTime then
-      mod.testLogger.LogInfo("TestDuplicateCooldown", "Cooldown was updated with new cast time")
+      mod.testLogger.LogInfo(
+        "TestDuplicateCooldown",
+        "Cooldown was updated with new cast time"
+      )
     end
-    mod.testLogger.EndTest("TestDuplicateCooldown", true, "Duplicate cooldown handling working correctly")
+
+    mod.testLogger.EndTest(
+      "TestDuplicateCooldown",
+      true,
+      "Duplicate cooldown handling working correctly"
+    )
   else
-    mod.testLogger.EndTest("TestDuplicateCooldown", false, "Found " .. count .. " instances (expected 1)")
+    mod.testLogger.EndTest(
+      "TestDuplicateCooldown",
+      false,
+      "Found " .. count .. " instances (expected 1)"
+    )
   end
 end
 
@@ -182,10 +220,10 @@ function me.TestRemoveCooldown()
   mod.testLogger.StartTest("TestRemoveCooldown")
   mod.testLogger.LogInfo("TestRemoveCooldown", "Testing: Remove specific cooldown")
 
-  -- Show targeting hint
   mod.testHelper.ShowTargetingHint()
 
   local casterData = mod.testHelper.GetTestCasterData()
+
   if not casterData then
     mod.testLogger.LogError("TestRemoveCooldown", "Failed to get player data")
     mod.testLogger.EndTest("TestRemoveCooldown", false, "Failed to get player data")
@@ -194,10 +232,8 @@ function me.TestRemoveCooldown()
 
   local spell = mod.testHelper.CreateTestSpell(1766, "Kick", 10, 10)
 
-  -- Add the cooldown
   mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, spell)
 
-  -- Verify it was added
   local cooldownsBefore = mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)
   local foundBefore = false
 
@@ -209,10 +245,8 @@ function me.TestRemoveCooldown()
   end
 
   if foundBefore then
-    -- Remove the cooldown
     mod.cooldownQueue.RemoveCooldown(casterData.guid, spell.spellId)
 
-    -- Check if it was removed
     local cooldownsAfter = mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)
     local foundAfter = false
 
@@ -242,10 +276,8 @@ function me.ClearTestCooldowns()
   local cooldownsBefore = mod.cooldownQueue.GetCooldownsByTarget(mod.testHelper.GetPlayerGUID() or "unknown")
   local initialCount = #cooldownsBefore
 
-  -- Clear the entire queue
   mod.cooldownQueue.ClearCooldownQueue()
 
-  -- Count remaining
   local cooldownsAfter = mod.cooldownQueue.GetCooldownsByTarget(mod.testHelper.GetPlayerGUID() or "unknown")
   local remainingCount = #cooldownsAfter
 
@@ -258,7 +290,6 @@ end
 function me.RunAllTests()
   mod.testLogger.LogInfo("CooldownQueue", "=== Running CooldownQueue Tests ===")
 
-  -- Show targeting hint
   mod.testHelper.ShowTargetingHint()
 
   me.TestAddCooldown()
