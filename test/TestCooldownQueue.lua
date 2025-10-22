@@ -31,12 +31,16 @@ me.tag = "TestCooldownQueue"
 
 --[[
   Test adding a cooldown to the queue
+
+  @param {boolean} skipHint - Optional flag to skip showing targeting hint
 ]]--
-function me.TestAddCooldown()
+function me.TestAddCooldown(skipHint)
   mod.testLogger.StartTest("TestAddCooldown")
   mod.testLogger.LogInfo("TestAddCooldown", "Testing: Add cooldown to queue")
 
-  mod.testHelper.ShowTargetingHint()
+  if not skipHint then
+    mod.testHelper.ShowTargetingHint()
+  end
 
   local casterData = mod.testHelper.GetTestCasterData()
 
@@ -74,13 +78,16 @@ end
 
 --[[
   Test adding multiple cooldowns
+
+  @param {boolean} skipHint - Optional flag to skip showing targeting hint
 ]]--
-function me.TestAddMultipleCooldowns()
+function me.TestAddMultipleCooldowns(skipHint)
   mod.testLogger.StartTest("TestAddMultipleCooldowns")
   mod.testLogger.LogInfo("TestAddMultipleCooldowns", "Testing: Add multiple cooldowns")
 
-
-  mod.testHelper.ShowTargetingHint()
+  if not skipHint then
+    mod.testHelper.ShowTargetingHint()
+  end
 
   local casterData = mod.testHelper.GetTestCasterData()
 
@@ -141,13 +148,17 @@ end
 
 --[[
   Test duplicate cooldown handling
+
+  @param {boolean} skipHint - Optional flag to skip showing targeting hint
 ]]--
 -- TODO This is not yet implemented in CooldownQueue could be the next step to go for
-function me.TestDuplicateCooldown()
+function me.TestDuplicateCooldown(skipHint)
   mod.testLogger.StartTest("TestDuplicateCooldown")
   mod.testLogger.LogInfo("TestDuplicateCooldown", "Testing: Duplicate cooldown handling")
 
-  mod.testHelper.ShowTargetingHint()
+  if not skipHint then
+    mod.testHelper.ShowTargetingHint()
+  end
 
   local casterData = mod.testHelper.GetTestCasterData()
   if not casterData then
@@ -174,7 +185,6 @@ function me.TestDuplicateCooldown()
   )
   mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, updatedSpell)
 
-  -- Check how many instances exist
   local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)
   local count = 0
   local lastCastTime = nil
@@ -215,12 +225,16 @@ end
 
 --[[
   Test removing specific cooldowns
+
+  @param {boolean} skipHint - Optional flag to skip showing targeting hint
 ]]--
-function me.TestRemoveCooldown()
+function me.TestRemoveCooldown(skipHint)
   mod.testLogger.StartTest("TestRemoveCooldown")
   mod.testLogger.LogInfo("TestRemoveCooldown", "Testing: Remove specific cooldown")
 
-  mod.testHelper.ShowTargetingHint()
+  if not skipHint then
+    mod.testHelper.ShowTargetingHint()
+  end
 
   local casterData = mod.testHelper.GetTestCasterData()
 
@@ -292,10 +306,10 @@ function me.RunAllTests()
 
   mod.testHelper.ShowTargetingHint()
 
-  me.TestAddCooldown()
-  me.TestAddMultipleCooldowns()
-  me.TestDuplicateCooldown()
-  me.TestRemoveCooldown()
+  me.TestAddCooldown(true)
+  me.TestAddMultipleCooldowns(true)
+  me.TestDuplicateCooldown(true)
+  me.TestRemoveCooldown(true)
   me.ClearTestCooldowns()
 
   mod.testLogger.LogInfo("CooldownQueue", "=== CooldownQueue Tests Complete ===")
