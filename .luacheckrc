@@ -2,7 +2,8 @@ globals = {
   "rgcw",
   "CooldownWatchConfiguration",
   "RGCW_CONSTANTS",
-  "RGCW_ENVIRONMENT"
+  "RGCW_ENVIRONMENT",
+  "CooldownWatchLogTracker"
 }
 
 files = {
