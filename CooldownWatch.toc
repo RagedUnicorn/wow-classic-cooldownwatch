@@ -3,7 +3,7 @@
 ## Author: Michael Wiesendanger <michael.wiesendanger@gmail.com>
 ## Notes: Addon that tracks cooldowns of enemy players
 ## Version: v1.0.0
-## SavedVariablesPerCharacter: CooldownWatchConfiguration CooldownWatchTestLog
+## SavedVariablesPerCharacter: CooldownWatchConfiguration CooldownWatchTestLog CooldownWatchLogTracker
 ## SavedVariables: CooldownWatchTestLog
 
 # constant values
@@ -28,6 +28,10 @@ code/Ticker.lua
 code/Tooltip.lua
 code/Configuration.lua
 code/Profile.lua
+code/Season.lua
+
+# debug
+code/Debug.lua
 
 # Test Framework (Development Only)
 test/framework/TestCmd.lua

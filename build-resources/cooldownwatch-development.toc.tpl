@@ -29,6 +29,9 @@ code/Tooltip.lua
 code/Configuration.lua
 code/Profile.lua
 
+# debug
+code/Debug.lua
+
 # Test Framework (Development Only)
 test/framework/TestCmd.lua
 test/framework/TestLogger.lua

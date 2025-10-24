@@ -19,6 +19,9 @@
         <include>assets/*.tga</include>
         <include>localization/*.lua</include>
       </includes>
+      <excludes>
+        <exclude>code/Debug.lua</exclude>
+      </excludes>
     </fileSet>
   </fileSets>
   <files>
