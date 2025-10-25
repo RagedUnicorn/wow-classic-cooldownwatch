@@ -345,12 +345,12 @@ end
   @param {table} cooldown
 ]]--
 function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
-  local timePassed = (GetTime() - cooldown.spell.castTime)
-  local timeLeftBig = cooldown.spell.cooldown - timePassed
+  local timePassed = (GetTime() - cooldown.spellData.castTime)
+  local timeLeftBig = cooldown.spellData.cooldown - timePassed
   local timeLeftSmall
 
-  if cooldown.spell.cooldownWorstCase ~= nil then
-    timeLeftSmall = cooldown.spell.cooldownWorstCase - timePassed
+  if cooldown.spellData.cooldownWorstCase ~= nil then
+    timeLeftSmall = cooldown.spellData.cooldownWorstCase - timePassed
   end
 
   if timeLeftBig <= 0 then
@@ -358,10 +358,10 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
     return
   end
 
-  me.UpdateCooldownSlotHighlightFrame(cooldownWatchSlot, cooldown.spell.cooldown, timeLeftBig)
+  me.UpdateCooldownSlotHighlightFrame(cooldownWatchSlot, cooldown.spellData.cooldown, timeLeftBig)
   me.UpdateCooldownSlotBigCooldownTextPosition(cooldownWatchSlot, timeLeftBig)
   me.UpdateCooldownSlotCooldownText(cooldownWatchSlot, timeLeftBig, timeLeftSmall)
-  me.UpdateCooldownSlotTexture(cooldownWatchSlot, cooldown.spell.spellId)
+  me.UpdateCooldownSlotTexture(cooldownWatchSlot, cooldown.spellData.spellId)
 
   if not cooldownWatchSlot.targetCooldownOverlay.cooldownStarted then
     me.InitCooldownSlotCooldownOverlay(cooldownWatchSlot, cooldown)
@@ -459,7 +459,7 @@ end
   @param {table} cooldown
 ]]--
 function me.InitCooldownSlotCooldownOverlay(cooldownWatchSlot, cooldown)
-  cooldownWatchSlot.targetCooldownOverlay:SetCooldown(cooldown.spell.castTime, cooldown.spell.cooldown)
+  cooldownWatchSlot.targetCooldownOverlay:SetCooldown(cooldown.spellData.castTime, cooldown.spellData.cooldown)
   -- hide default blizzard frames cooldown numbers
   cooldownWatchSlot.targetCooldownOverlay:SetHideCountdownNumbers(true)
   cooldownWatchSlot.targetCooldownOverlay.cooldownStarted = true
@@ -520,7 +520,7 @@ function me.ClearCooldownSlotAnimated(cooldownWatchSlot, cooldown)
   local animationGroup = cooldownWatchSlot:GetAnimationGroups()
 
   animationGroup:SetScript("OnFinished", function()
-    mod.cooldownQueue.RemoveCooldown(cooldown.caster, cooldown.spell.spellId)
+    mod.cooldownQueue.RemoveCooldown(cooldown.sourceGuid, cooldown.spellData.spellId)
     cooldownWatchSlot.iconHolderTexture:SetTexture(nil)
     cooldownWatchSlot.highlightFrame:Hide()
     cooldownWatchSlot:SetAlpha(1)

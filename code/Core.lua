@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals GetAddOnMetadata
+-- luacheck: globals GetAddOnMetadata CombatLogGetCurrentEventInfo
 
 rgcw = rgcw or {}
 local me = rgcw
@@ -31,7 +31,10 @@ local me = rgcw
 me.tag = "Core"
 
 local initializationDone = false
--- Forward declarations for local functions
+-- Forward declarations
+local RegisterEvents
+local Initialize
+local ShowWelcomeMessage
 local InitializeTestFramework
 
 --[[
@@ -40,7 +43,7 @@ local InitializeTestFramework
   @param {table} self
 ]]--
 function me.OnLoad(self)
-  me.RegisterEvents(self)
+  RegisterEvents(self)
 end
 
 --[[
@@ -48,7 +51,7 @@ end
 
   @param {table} self
 ]]--
-function me.RegisterEvents(self)
+RegisterEvents = function(self)
   -- Register to player login event also fires on /reload
   self:RegisterEvent("PLAYER_LOGIN")
   --[[
@@ -70,12 +73,12 @@ end
 function me.OnEvent(event)
   if event == "PLAYER_LOGIN" then
     me.logger.LogEvent(me.tag, "PLAYER_LOGIN")
-    me.Initialize()
+    Initialize()
   elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
     me.logger.LogEvent(me.tag, "COMBAT_LOG_EVENT_UNFILTERED")
 
     if initializationDone then
-      me.combatLog.ProcessUnfilteredCombatLogEvent()
+      me.combatLog.ProcessUnfilteredCombatLogEvent(nil, CombatLogGetCurrentEventInfo())
     end
   elseif event == "PLAYER_TARGET_CHANGED" then
     me.logger.LogEvent(me.tag, "PLAYER_TARGET_CHANGED")
@@ -86,7 +89,7 @@ end
 --[[
   Initialize addon
 ]]--
-function me.Initialize()
+Initialize = function()
   me.logger.LogDebug(me.tag, "Initialize addon")
   -- setup slash commands
   me.cmd.SetupSlashCmdList()
@@ -103,7 +106,7 @@ function me.Initialize()
   -- initialize test commands and logger (debug mode only)
 
   InitializeTestFramework()
-  me.ShowWelcomeMessage()
+  ShowWelcomeMessage()
   -- initialization is done
   initializationDone = true
 end
@@ -111,10 +114,10 @@ end
 --[[
   Show welcome message to user
 ]]--
-function me.ShowWelcomeMessage()
+ShowWelcomeMessage = function()
   print(
     string.format("|cFF00FFB0" .. RGCW_CONSTANTS.ADDON_NAME .. rgcw.L["help"],
-    GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version"))
+      GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version"))
   )
 end
 

@@ -61,50 +61,60 @@ local cooldownQueue = {}
 --[[
   Add a cooldown to the queue
 
-  @param {string} caster
+  @param {string} sourceGuid
     A unique identification for a caster (player or npc).
-  @param {string} casterName
+  @param {string} sourceName
     Actual name of the caster
-  @param {table} spell
-    A spell with all its relevant information
+  @param {string} category
+    The category the spell belongs to
+  @param {table} spellData
+    A spellData with all its relevant information
 ]]--
-function me.AddCooldown(caster, casterName, spell)
-  assert(type(caster) == "string",
-    string.format("bad argument #1 to `AddCooldown` (expected string got %s)", type(caster)))
+function me.AddCooldown(sourceGuid, sourceName, category, spellData)
+  assert(type(sourceGuid) == "string",
+    string.format("bad argument #1 to `AddCooldown` (expected string got %s)", type(sourceGuid)))
 
-  assert(type(casterName) == "string",
-    string.format("bad argument #2 to `AddCooldown` (expected string got %s)", type(casterName)))
+  assert(type(sourceName) == "string",
+    string.format("bad argument #2 to `AddCooldown` (expected string got %s)", type(sourceName)))
 
-  assert(type(spell) == "table",
-    string.format("bad argument #3 to `AddCooldown` (expected table got %s)", type(spell)))
+  assert(type(category) == "string",
+    string.format("bad argument #3 to `AddCooldown` (expected string got %s)", type(category)))
 
-  if not spell.active then
-    mod.logger.LogWarn(me.tag, "Ignored inactive spell: " .. spell.spellName)
+  assert(type(spellData) == "table",
+    string.format("bad argument #4 to `AddCooldown` (expected table got %s)", type(spellData)))
+
+  if not spellData.active then
+    mod.logger.LogWarn(me.tag, "Ignored inactive spell: " .. spellData.name)
     return -- abort
   end
 
   local cooldownEvent = {
-    ["caster"] = caster,
-    ["casterName"] = casterName,
-    ["spell"] = spell
+    ["sourceGuid"] = sourceGuid,
+    ["sourceName"] = sourceName,
+    ["category"] = category,
+    ["spellData"] = spellData
   }
 
   table.insert(cooldownQueue, cooldownEvent)
-  mod.logger.LogDebug(me.tag, "Added new cooldown - '" .. spell.spellName .. "' for player: " .. caster)
+  mod.logger.LogDebug(
+    me.tag,
+    "Added new cooldown - '" .. spellData.name .. "' for player (" .. category .. "): "
+      .. sourceName .. " (" .. sourceGuid .. ") "
+  )
 end
 
 --[[
   Remove a cooldown for a specific caster from the queue
 
-  @param {string} caster
-    A unique identification for a caster
+  @param {string} sourceGuid
+    A unique identification for a sourceGuid
   @param {number} spellId
 ]]--
-function me.RemoveCooldown(caster, spellId)
+function me.RemoveCooldown(sourceGuid, spellId)
   for i = 1, #cooldownQueue do
-    if cooldownQueue[i].caster == caster and cooldownQueue[i].spell.spellId == spellId then
+    if cooldownQueue[i].sourceGuid == sourceGuid and cooldownQueue[i].spellData.spellId == spellId then
       table.remove(cooldownQueue, i)
-      mod.logger.LogDebug(me.tag, "Removed cooldown - '" .. spellId .. "' for player: " .. caster) -- TODO
+      mod.logger.LogDebug(me.tag, "Removed cooldown - '" .. spellId .. "' for player: " .. sourceGuid)
       return
     end
   end
@@ -120,18 +130,18 @@ end
 --[[
   Retrieve cooldowns for a specific caster
 
-  @param {string} caster
+  @param {string} sourceGuid
     A unique identification for a caster
 
   @return {table}
     The castEvents that were found for the caster
     Note: May be an empty table
 ]]--
-function me.GetCooldownsByTarget(caster)
+function me.GetCooldownsByTarget(sourceGuid)
   local cooldowns = {}
 
   for i = 1, #cooldownQueue do
-    if cooldownQueue[i].caster == caster then
+    if cooldownQueue[i].sourceGuid == sourceGuid then
       table.insert(cooldowns, cooldownQueue[i])
     end
   end

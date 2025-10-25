@@ -226,10 +226,10 @@ end
 function me.SpellListScrollFrameOnUpdate(scrollFrame, categoryName)
   if cachedCategoryData == nil then
     mod.logger.LogInfo(me.tag, string.format("Warmed up cached spellList for category '%s'", categoryName))
-    cachedCategoryData = mod.spellMap.GetAllForCategory(categoryName)
+    cachedCategoryData = mod.spellMapHelper.GetAllForCategory(categoryName)
   end
 
-  local maxValue = mod.common.TableLength(cachedCategoryData) or 0
+  local maxValue = #cachedCategoryData or 0
 
   if maxValue <= RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS then
     maxValue = RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS + 1
@@ -294,7 +294,7 @@ function me.UpdateCooldownUiState(row, cooldown, categoryName)
   local enabled = mod.configuration.GetCooldownConfigurationState(categoryName, cooldown.spellId)
 
   row.cooldownIcon:SetTexture(me.GetIconId(cooldown))
-  row.cooldownStatus.text:SetText(cooldown.spellName)
+  row.cooldownStatus.text:SetText(cooldown.name)
 
   if enabled then
     row.cooldownStatus:SetChecked(true)
