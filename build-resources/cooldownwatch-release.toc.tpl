@@ -20,6 +20,7 @@ code/Cmd.lua
 code/Filter.lua
 code/CombatLog.lua
 code/Common.lua
+code/SpellMapHelper.lua
 code/SpellMap.lua
 code/CooldownQueue.lua
 code/Target.lua
@@ -27,6 +28,7 @@ code/Ticker.lua
 code/Tooltip.lua
 code/Configuration.lua
 code/Profile.lua
+code/Season.lua
 
 # gui
 gui/Frame.xml

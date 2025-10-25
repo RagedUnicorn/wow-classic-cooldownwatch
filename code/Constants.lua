@@ -31,6 +31,13 @@ RGCW_CONSTANTS = {
   UNIT_ID_TARGET = "target",
   UNIT_ID_PLAYER = "player",
   --[[
+    Spell types
+  ]]--
+  -- base game spell types
+  SPELL_TYPE_BASE = "SPELL_TYPE_BASE",
+  -- season of discovery spell types
+  SPELL_TYPE_SOD = "SPELL_TYPE_SOD",
+  --[[
     Update Intervals for tickers
   ]]--
   TARGET_COOLDOWN_BAR_UPDATE_INTERVAL = 0.05,

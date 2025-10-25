@@ -23,8 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals CombatLogGetCurrentEventInfo CombatLog_Object_IsA COMBATLOG_FILTER_HOSTILE_PLAYERS
--- luacheck: globals COMBATLOG_OBJECT_CONTROL_PLAYER GetTime UnitClass GetSpellInfo bit
+-- luacheck: globals CombatLog_Object_IsA COMBATLOG_FILTER_HOSTILE_PLAYERS GetTime GetSpellInfo
 
 local mod = rgcw
 local me = {}
@@ -34,99 +33,101 @@ me.tag = "CombatLog"
 
 --[[
   Processing the details of the current combat log event. Invoked when 'COMBAT_LOG_EVENT_UNFILTERED' is fired
+
+  @param {function} callback
+    Optional function that is invoked with status infos. Currently only used for testing
+  @param {vararg} ...
 ]]--
-function me.ProcessUnfilteredCombatLogEvent()
-  local _, event, _, caster, casterName, sourceFlags, _, _, _, _, _, _, spellName = CombatLogGetCurrentEventInfo()
+function me.ProcessUnfilteredCombatLogEvent(callback, ...)
+  local event, sourceFlags = mod.common.SelectMultiple({2, 6}, ...)
+
+  -- TODO [FEATURE]: Might want to filter events in specific zones
 
   --[[
-    While debug mode is active we also allow friendly events to be processed. Otherwise only hostile player events are
-    considered for processing.
+    Filter for hostile player events only
   ]]--
-  if not RGCW_ENVIRONMENT.DEBUG and not CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS)
-    and bit.band(sourceFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) <= 0 then
-
-    mod.logger.LogDebug(me.tag, "Ignored non-hostile combatlog")
-
-    return
+  if CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS) then
+    me.ProcessEventHostilePlayers(event, callback, ...)
   end
+  -- TODO [FEATURE]: We could track friendly cooldowns as well and put it behind a configuration flag
+end
 
+--[[
+  @param {string} event
+  @param {function} callback
+    Optional function that is invoked with status infos. Currently only used for testing
+
+  @param {vararg} ...
+]]--
+function me.ProcessEventHostilePlayers(event, callback, ...)
   if event == "SPELL_CAST_SUCCESS" then
-    mod.logger.LogEvent(me.tag, "SPELL_CAST_SUCCESS")
+    me.ProcessNormal(event, callback, ...)
+  else
+    mod.logger.LogDebug(me.tag, "Ignore unsupported event: " .. event)
 
-    local castTime = GetTime()
-    local normalizedSpellName = mod.common.NormalizeSpellname(spellName)
-    local spell
-    local englishClass
-    --[[
-      If the caster of the detected spell is our current target we can speed up
-      the process of searching for the spell in the spellmap by figuring out the
-      targets class.
-    ]]--
-    if caster == mod.target.GetCurrentTargetGuid() then
-      _, englishClass = UnitClass(RGCW_CONSTANTS.UNIT_ID_TARGET)
-      spell = mod.spellMap.FindSpell(normalizedSpellName, englishClass)
-    else
-      spell = mod.spellMap.FindSpell(normalizedSpellName)
-    end
-
-    if spell == nil then
-      mod.logger.LogDebug(me.tag, "Spell is non-essential - aborting...")
-      return
-    end
-
-    if me.IsCooldownTracked(spell.spellId, englishClass) then
-      local _, _, iconId, _, _, _, _ = GetSpellInfo(spell.spellId)
-
-      me.TrackCooldown(caster, casterName, spell, spell.spellId, castTime, iconId)
-    else
-      mod.logger.LogDebug(me.tag, "Spell is not enabled - aborting...")
-      return
+    if callback then
+      callback()
     end
   end
 end
 
 --[[
+  @param {string} event
+  @param {function} callback
+  @param {vararg} ...
+]]--
+function me.ProcessNormal(event, callback, ...)
+  if RGCW_ENVIRONMENT.DEBUG then
+    mod.debug.TrackLogNormalEvent(...)
+  end
+
+  local castTime = GetTime()
+  local sourceGuid, sourceName, spellId = mod.common.SelectMultiple({4, 5, 12}, ...)
+  local category, _, spell = mod.spellMapHelper.SearchBySpellId(spellId, event)
+
+  if not spell then
+    mod.logger.LogDebug(me.tag, "SpellId " .. spellId .. " not found in spellMap - aborting...")
+    return
+  end
+
+  if not me.IsCooldownTracked(category, spellId) then
+    mod.logger.LogDebug(me.tag, "Spell is not enabled - aborting...")
+    return
+  end
+
+  local _, _, iconId = GetSpellInfo(spell.spellId)
+  me.TrackCooldown(sourceGuid, sourceName, spell, castTime, category, iconId)
+end
+
+--[[
+  @param {string} category
   @param {number} spellId
-  @param {string} englishClass
-    Optional class name - speeds up the searching process
 
   @return {boolean}
     true  - If the cooldown is enabled
     false - If the cooldown is disabled
 ]]--
-function me.IsCooldownTracked(spellId, englishClass)
+function me.IsCooldownTracked(category, spellId)
+  assert(type(category) == "string",
+    string.format("bad argument #1 to `IsCooldownTracked` (expected string got %s)", type(category)))
+
   assert(type(spellId) == "number",
     string.format("bad argument #1 to `IsCooldownTracked` (expected number got %s)", type(spellId)))
 
-  if englishClass ~= nil then
-    local category
-
-    for i = 1, #RGCW_CONSTANTS.CATEGORIES do
-      if string.lower(englishClass) == RGCW_CONSTANTS.CATEGORIES[i].categoryName then
-        category = i
-        break
-      end
-    end
-
-    return mod.configuration.GetCooldownConfigurationState(category, spellId)
-  end
-
-  return mod.configuration.GetCooldownConfigurationState(nil, spellId)
+  return mod.configuration.GetCooldownConfigurationState(category, spellId)
 end
 
 --[[
   Add a cooldown to the cooldownqueue
 
-  @param {string} caster
-  @param {string} casterName
+  @param {string} sourceGuid
+  @param {string} sourceName
   @param {table} spell
-  @param {number} spellId
   @param {number} castTime
   @param {number} iconId
 ]]--
-function me.TrackCooldown(caster, casterName, spell, spellId, castTime, iconId)
+function me.TrackCooldown(sourceGuid, sourceName, spell, castTime, category, iconId)
   spell.castTime = castTime -- add time when spell was detected
-  spell.spellId = spellId
-  spell.iconId = iconId
-  mod.cooldownQueue.AddCooldown(caster, casterName, spell)
+  spell.iconId = iconId -- TODO icon is probably not needed all the relevant data for the icon is in the spell
+  mod.cooldownQueue.AddCooldown(sourceGuid, sourceName, category, spell)
 end

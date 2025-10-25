@@ -52,18 +52,18 @@ function me.TestAddCooldown(skipHint)
 
   local spell = mod.testHelper.CreateTestSpell(2094, "Blind", 120, 90)
 
-  mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, spell)
+  mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, "priest", spell)
 
   local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)
   local found = false
 
   for _, cooldown in pairs(cooldowns) do
-    if cooldown.spell.spellId == spell.spellId then
+    if cooldown.spellData.spellId == spell.spellId then
       found = true
       mod.testLogger.LogInfo("TestAddCooldown", "Cooldown found in queue", {
         caster = cooldown.casterName,
-        spell = cooldown.spell.spellName,
-        cooldown = cooldown.spell.cooldown .. "s"
+        spell = cooldown.spellData.name,
+        cooldown = cooldown.spellData.cooldown .. "s"
       })
       break
     end
@@ -122,7 +122,7 @@ function me.TestAddMultipleCooldowns(skipHint)
 
   -- Add all cooldowns using player's GUID
   for _, spell in ipairs(testSpells) do
-    mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, spell)
+    mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, "mage", spell)
   end
 
   local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)
@@ -130,7 +130,7 @@ function me.TestAddMultipleCooldowns(skipHint)
 
   for _, spell in ipairs(testSpells) do
     for _, cooldown in pairs(cooldowns) do
-      if cooldown.spell.spellId == spell.spellId then
+      if cooldown.spellData.spellId == spell.spellId then
         foundCount = foundCount + 1
         break
       end
@@ -174,7 +174,7 @@ function me.TestDuplicateCooldown(skipHint)
     40
   )
 
-  mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, spell)
+  mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, "warlock", spell)
 
   local updatedSpell = mod.testHelper.CreateTestSpell(
     5484,
@@ -183,16 +183,16 @@ function me.TestDuplicateCooldown(skipHint)
     40,
     5
   )
-  mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, updatedSpell)
+  mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, "warlock", updatedSpell)
 
   local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)
   local count = 0
   local lastCastTime = nil
 
   for _, cooldown in pairs(cooldowns) do
-    if cooldown.spell.spellId == spell.spellId then
+    if cooldown.spellData.spellId == spell.spellId then
       count = count + 1
-      lastCastTime = cooldown.spell.castTime
+      lastCastTime = cooldown.spellData.castTime
     end
   end
 
@@ -246,13 +246,13 @@ function me.TestRemoveCooldown(skipHint)
 
   local spell = mod.testHelper.CreateTestSpell(1766, "Kick", 10, 10)
 
-  mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, spell)
+  mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, "rogue", spell)
 
   local cooldownsBefore = mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)
   local foundBefore = false
 
   for _, cooldown in pairs(cooldownsBefore) do
-    if cooldown.spell.spellId == spell.spellId then
+    if cooldown.spellData.spellId == spell.spellId then
       foundBefore = true
       break
     end
@@ -265,7 +265,7 @@ function me.TestRemoveCooldown(skipHint)
     local foundAfter = false
 
     for _, cooldown in pairs(cooldownsAfter) do
-      if cooldown.spell.spellId == spell.spellId then
+      if cooldown.spellData.spellId == spell.spellId then
         foundAfter = true
         break
       end
