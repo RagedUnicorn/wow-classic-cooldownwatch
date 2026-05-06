@@ -151,7 +151,6 @@ end
 
   @param {boolean} skipHint - Optional flag to skip showing targeting hint
 ]]--
--- TODO This is not yet implemented in CooldownQueue could be the next step to go for
 function me.TestDuplicateCooldown(skipHint)
   mod.testLogger.StartTest("TestDuplicateCooldown")
   mod.testLogger.LogInfo("TestDuplicateCooldown", "Testing: Duplicate cooldown handling")
