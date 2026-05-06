@@ -118,16 +118,54 @@ function me.IsCooldownTracked(category, spellId)
 end
 
 --[[
-  Add a cooldown to the cooldownqueue
+  Add a cooldown to the cooldownqueue. If the spell belongs to a shared-cooldown
+  group every sibling in that group is queued with the same castTime so the UI
+  reflects the in-game shared cooldown.
 
   @param {string} sourceGuid
   @param {string} sourceName
   @param {table} spell
   @param {number} castTime
+  @param {string} category
   @param {number} iconId
 ]]--
 function me.TrackCooldown(sourceGuid, sourceName, spell, castTime, category, iconId)
   spell.castTime = castTime -- add time when spell was detected
   spell.iconId = iconId -- TODO icon is probably not needed all the relevant data for the icon is in the spell
   mod.cooldownQueue.AddCooldown(sourceGuid, sourceName, category, spell)
+
+  if spell.sharedCooldownGroup then
+    me.TrackSharedCooldownSiblings(sourceGuid, sourceName, spell, castTime, category)
+  end
+end
+
+--[[
+  Queue every sibling of a shared-cooldown group with the same castTime as the
+  spell that actually fired. Each sibling still respects its own per-spell
+  enabled flag in the user's configuration.
+
+  @param {string} sourceGuid
+  @param {string} sourceName
+  @param {table} originalSpell
+  @param {number} castTime
+  @param {string} category
+]]--
+function me.TrackSharedCooldownSiblings(sourceGuid, sourceName, originalSpell, castTime, category)
+  local siblingIds = mod.spellMap.GetSharedCooldownGroup(originalSpell.sharedCooldownGroup)
+
+  if not siblingIds then return end
+
+  for _, siblingSpellId in ipairs(siblingIds) do
+    if siblingSpellId ~= originalSpell.spellId then
+      local _, _, siblingSpell = mod.spellMapHelper.GetSpellById(siblingSpellId)
+
+      if siblingSpell and me.IsCooldownTracked(category, siblingSpellId) then
+        siblingSpell.castTime = castTime
+        local _, _, siblingIconId = GetSpellInfo(siblingSpell.spellId)
+
+        siblingSpell.iconId = siblingIconId
+        mod.cooldownQueue.AddCooldown(sourceGuid, sourceName, category, siblingSpell)
+      end
+    end
+  end
 end

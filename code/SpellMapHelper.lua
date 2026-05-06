@@ -104,7 +104,7 @@ end
 function me.SearchBySpellId(spellId, event)
   if not spellId then return nil end
 
-  local baseSpellMap = me.GetSpellMap()
+  local baseSpellMap = GetFilteredSpellMap()
 
   mod.logger.LogDebug(me.tag, string.format("Searching for spellId %s in spellMap", spellId))
 
@@ -138,6 +138,48 @@ function me.SearchBySpellId(spellId, event)
       end
 
       return nil
+    end
+  end
+
+  return nil
+end
+
+--[[
+  Resolve a spellId to its base spell (following refId chains) without checking trackedEvents.
+  Used by the shared-cooldown handler to look up siblings whose own events have not fired.
+
+  @param {number} spellId
+
+  @return ({string} {number} {table}) | {nil}
+    category, realSpellId (primary), clonedSpell (with spellId and normalizedSpellName populated)
+]]--
+function me.GetSpellById(spellId)
+  if not spellId then return nil end
+
+  local baseSpellMap = GetFilteredSpellMap()
+
+  for category, spells in pairs(baseSpellMap) do
+    local entry = spells[spellId]
+    local baseSpell
+    local realSpellId
+
+    if entry then
+      if type(entry.name) == "string" then
+        baseSpell = entry
+        realSpellId = spellId
+      elseif type(entry.refId) == "number" then
+        baseSpell = spells[entry.refId]
+        realSpellId = entry.refId
+      end
+    end
+
+    if baseSpell then
+      local clonedSpell = mod.common.Clone(baseSpell)
+
+      clonedSpell.spellId = realSpellId
+      clonedSpell.normalizedSpellName = mod.common.NormalizeSpellName(baseSpell.name)
+
+      return category, realSpellId, clonedSpell
     end
   end
 
