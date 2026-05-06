@@ -88,6 +88,20 @@ function me.AddCooldown(sourceGuid, sourceName, category, spellData)
     return -- abort
   end
 
+  for i = 1, #cooldownQueue do
+    local existing = cooldownQueue[i]
+
+    if existing.sourceGuid == sourceGuid and existing.spellData.spellId == spellData.spellId then
+      existing.spellData = spellData
+      mod.logger.LogDebug(
+        me.tag,
+        "Refreshed cooldown - '" .. spellData.name .. "' for player (" .. category .. "): "
+          .. sourceName .. " (" .. sourceGuid .. ") "
+      )
+      return
+    end
+  end
+
   local cooldownEvent = {
     ["sourceGuid"] = sourceGuid,
     ["sourceName"] = sourceName,
