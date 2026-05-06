@@ -14,11 +14,14 @@
     <addon.name>CooldownWatch</addon.name>
     <addon.displayName>cooldownwatch</addon.displayName>
     <addon.curseforge.projectId>TODO</addon.curseforge.projectId>
-     <addon.curseforge.gameVersion>10341</addon.curseforge.gameVersion>
+    <!-- renovate: datasource=custom.wow-game-versions depName=wow-gameversion versioning=loose -->
+    <addon.curseforge.gameVersion>10341</addon.curseforge.gameVersion>
     <addon.wago.projectId>TODO</addon.wago.projectId>
     <addon.name.short>CW</addon.name.short>
     <addon.tag.version>v${project.version}</addon.tag.version>
+    <!-- renovate: datasource=custom.wow-versions depName=wow-interface versioning=loose -->
     <addon.interface>11500</addon.interface>
+    <!-- renovate: datasource=custom.wow-patch-versions depName=wow-patch versioning=loose -->
     <addon.supported.patch>1.15.0</addon.supported.patch>
     <addon.identifier>${project.groupId}.${project.artifactId}</addon.identifier>
     <addon.project.categories>PvP Combat</addon.project.categories>
