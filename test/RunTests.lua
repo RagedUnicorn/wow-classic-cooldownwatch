@@ -57,6 +57,7 @@ function me.RunAllTests()
 
   -- Run individual test suites
   me.TestCooldownQueue()
+  me.TestSpellMap()
 
   -- Cleanup - clear any test cooldowns from the queue
   if mod.cooldownQueue then
@@ -75,5 +76,16 @@ function me.TestCooldownQueue()
     mod.testCooldownQueue.RunAllTests()
   else
     mod.testLogger.LogError("TestRunner", "TestCooldownQueue module not loaded")
+  end
+end
+
+--[[
+  Test spellMap data integrity
+]]--
+function me.TestSpellMap()
+  if mod.testSpellMap then
+    mod.testSpellMap.RunAllTests()
+  else
+    mod.testLogger.LogError("TestRunner", "TestSpellMap module not loaded")
   end
 end

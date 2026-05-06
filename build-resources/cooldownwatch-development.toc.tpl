@@ -42,6 +42,7 @@ test/framework/TestLogWindow.lua
 test/framework/TestLogWindow.xml
 test/RunTests.lua
 test/TestCooldownQueue.lua
+test/TestSpellMap.lua
 
 # gui
 gui/Frame.xml
