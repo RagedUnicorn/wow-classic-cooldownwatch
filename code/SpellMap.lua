@@ -214,3 +214,13 @@ function me.GetSharedCooldownGroup(groupName)
 
   return mod.common.Clone(group)
 end
+
+--[[
+  Get all shared-cooldown groups keyed by group name.
+
+  @return {table}
+    Cloned table of groupName -> list of primary spellIds
+]]--
+function me.GetAllSharedCooldownGroups()
+  return mod.common.Clone(sharedCooldownGroups)
+end
