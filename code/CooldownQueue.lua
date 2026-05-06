@@ -31,21 +31,23 @@ mod.cooldownQueue = me
 me.tag = "CooldownQueue"
 
 --[[
-  {
-    ["caster"] = caster,
-      - {string} A unique identification for a caster
-    ["casterName"] = casterName,
+  Internal storage keyed by caster, then by spellId, for O(1) per-target lookups.
+
+  cooldownQueue[sourceGuid][spellId] = {
+    ["sourceGuid"] = sourceGuid,
+      - {string} A unique identification for a caster (player or npc)
+    ["sourceName"] = sourceName,
       - {string} Actual name of the caster
-    ["spell"] = {
+    ["category"] = category,
+      - {string} The category the spell belongs to (e.g. "priest")
+    ["spellData"] = {
       ["spellId"] = spellId,
         - {number} SpellId of the spell
-      ["iconId"] = iconId,
-        - {number} Icon id of the spell
-      ["spellName"] = spellName,
+      ["name"] = name,
         - {string} Name of the spell
       ["castTime"] = castTime,
         - {number} Time at which the spell was detected
-      ["cooldown"] cooldown,
+      ["cooldown"] = cooldown,
         - {number} Cooldown of the spell
       ["cooldownWorstCase"] = cooldownWorstCase,
         - {number} Worst case cooldown for the cooldown.
@@ -59,7 +61,8 @@ me.tag = "CooldownQueue"
 local cooldownQueue = {}
 
 --[[
-  Add a cooldown to the queue
+  Add a cooldown to the queue. If a cooldown for the same (sourceGuid, spellId)
+  already exists it is refreshed in place rather than duplicated.
 
   @param {string} sourceGuid
     A unique identification for a caster (player or npc).
@@ -88,28 +91,30 @@ function me.AddCooldown(sourceGuid, sourceName, category, spellData)
     return -- abort
   end
 
-  for i = 1, #cooldownQueue do
-    local existing = cooldownQueue[i]
+  local casterBucket = cooldownQueue[sourceGuid]
 
-    if existing.sourceGuid == sourceGuid and existing.spellData.spellId == spellData.spellId then
-      existing.spellData = spellData
-      mod.logger.LogDebug(
-        me.tag,
-        "Refreshed cooldown - '" .. spellData.name .. "' for player (" .. category .. "): "
-          .. sourceName .. " (" .. sourceGuid .. ") "
-      )
-      return
-    end
+  if casterBucket and casterBucket[spellData.spellId] then
+    casterBucket[spellData.spellId].spellData = spellData
+    mod.logger.LogDebug(
+      me.tag,
+      "Refreshed cooldown - '" .. spellData.name .. "' for player (" .. category .. "): "
+        .. sourceName .. " (" .. sourceGuid .. ") "
+    )
+    return
   end
 
-  local cooldownEvent = {
+  if not casterBucket then
+    casterBucket = {}
+    cooldownQueue[sourceGuid] = casterBucket
+  end
+
+  casterBucket[spellData.spellId] = {
     ["sourceGuid"] = sourceGuid,
     ["sourceName"] = sourceName,
     ["category"] = category,
     ["spellData"] = spellData
   }
 
-  table.insert(cooldownQueue, cooldownEvent)
   mod.logger.LogDebug(
     me.tag,
     "Added new cooldown - '" .. spellData.name .. "' for player (" .. category .. "): "
@@ -125,13 +130,16 @@ end
   @param {number} spellId
 ]]--
 function me.RemoveCooldown(sourceGuid, spellId)
-  for i = 1, #cooldownQueue do
-    if cooldownQueue[i].sourceGuid == sourceGuid and cooldownQueue[i].spellData.spellId == spellId then
-      table.remove(cooldownQueue, i)
-      mod.logger.LogDebug(me.tag, "Removed cooldown - '" .. spellId .. "' for player: " .. sourceGuid)
-      return
-    end
+  local casterBucket = cooldownQueue[sourceGuid]
+  if not casterBucket or not casterBucket[spellId] then return end
+
+  casterBucket[spellId] = nil
+
+  if next(casterBucket) == nil then
+    cooldownQueue[sourceGuid] = nil
   end
+
+  mod.logger.LogDebug(me.tag, "Removed cooldown - '" .. spellId .. "' for player: " .. sourceGuid)
 end
 
 --[[
@@ -153,11 +161,11 @@ end
 ]]--
 function me.GetCooldownsByTarget(sourceGuid)
   local cooldowns = {}
+  local casterBucket = cooldownQueue[sourceGuid]
+  if not casterBucket then return cooldowns end
 
-  for i = 1, #cooldownQueue do
-    if cooldownQueue[i].sourceGuid == sourceGuid then
-      table.insert(cooldowns, cooldownQueue[i])
-    end
+  for _, cooldownEvent in pairs(casterBucket) do
+    table.insert(cooldowns, cooldownEvent)
   end
 
   return cooldowns
