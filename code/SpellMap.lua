@@ -31,6 +31,12 @@ mod.spellMap = me
 
 me.tag = "SpellMap"
 
+--[[
+  Each primary entry can declare an optional `sharedCooldownGroup = "<name>"`
+  field. Spells in the same group trigger one another's cooldowns (e.g. Shaman
+  shocks). Group membership is enumerated in `sharedCooldownGroups` below so the
+  combat-log handler can find sibling spellIds in O(1).
+]]--
 local spellMap = {
   ["priest"] = {
     [10890] = {
@@ -174,6 +180,15 @@ local spellMap = {
 }
 
 --[[
+  Lookup table of shared-cooldown groups. Each value is a list of primary
+  spellIds that share their cooldown.
+
+  Example (for future Shaman use):
+    ["shaman_shocks"] = { 25464, 25457, 25530 } -- Frost / Earth / Flame Shock
+]]--
+local sharedCooldownGroups = {}
+
+--[[
   Get the spellMap
 
   @return {table}
@@ -181,4 +196,21 @@ local spellMap = {
 ]]--
 function me.GetSpellMap()
   return mod.common.Clone(spellMap)
+end
+
+--[[
+  Get the list of primary spellIds belonging to a shared-cooldown group.
+
+  @param {string} groupName
+
+  @return {table|nil}
+    Cloned list of primary spellIds, or nil if the group is unknown
+]]--
+function me.GetSharedCooldownGroup(groupName)
+  if not groupName then return nil end
+
+  local group = sharedCooldownGroups[groupName]
+  if not group then return nil end
+
+  return mod.common.Clone(group)
 end
