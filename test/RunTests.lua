@@ -58,6 +58,7 @@ function me.RunAllTests()
   -- Run individual test suites
   me.TestCooldownQueue()
   me.TestSpellMap()
+  me.TestPriestSpells()
 
   -- Cleanup - clear any test cooldowns from the queue
   if mod.cooldownQueue then
@@ -87,5 +88,16 @@ function me.TestSpellMap()
     mod.testSpellMap.RunAllTests()
   else
     mod.testLogger.LogError("TestRunner", "TestSpellMap module not loaded")
+  end
+end
+
+--[[
+  Test priest spell tracking end-to-end
+]]--
+function me.TestPriestSpells()
+  if mod.testPriestSpells then
+    mod.testPriestSpells.RunAllTests()
+  else
+    mod.testLogger.LogError("TestRunner", "TestPriestSpells module not loaded")
   end
 end

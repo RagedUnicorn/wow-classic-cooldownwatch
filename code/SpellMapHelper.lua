@@ -33,9 +33,34 @@ me.tag = "SpellMapHelper"
 local GetFilteredSpellMap
 
 --[[
+  Whether a primary spell is allowed in the active WoW season. Base spells are
+  always allowed; SOD-only spells require Season of Discovery to be active (or
+  the TEST environment flag).
+
+  @param {table} primarySpell
+
+  @return {boolean}
+]]--
+local function IsPrimaryAllowedInCurrentSeason(primarySpell)
+  if primarySpell.type == RGCW_CONSTANTS.SPELL_TYPE_BASE then
+    return true
+  end
+
+  if primarySpell.type == RGCW_CONSTANTS.SPELL_TYPE_SOD then
+    return mod.season.IsSodActive() or RGCW_ENVIRONMENT.TEST
+  end
+
+  return false
+end
+
+--[[
   Retrieve the spellMap filtered to the version of WoW running. There are base spells present
   in all versions marked with RGPVPW_CONSTANTS.SPELL_TYPE_BASE. Spells that are only available
   in Season of Discovery are marked with RGPVPW_CONSTANTS.SPELL_TYPE_SOD
+
+  Note: refId entries are intentionally excluded - this view is for UI listings
+  that only care about primary spells. Combat-log lookups go through the
+  unfiltered spellMap (see SearchBySpellId / GetSpellById).
 
   @return {table}
     The filtered spellMap
@@ -104,7 +129,7 @@ end
 function me.SearchBySpellId(spellId, event)
   if not spellId then return nil end
 
-  local baseSpellMap = GetFilteredSpellMap()
+  local baseSpellMap = mod.spellMap.GetSpellMap()
 
   mod.logger.LogDebug(me.tag, string.format("Searching for spellId %s in spellMap", spellId))
 
@@ -124,6 +149,10 @@ function me.SearchBySpellId(spellId, event)
     end
 
     if baseSpell then
+      if not IsPrimaryAllowedInCurrentSeason(baseSpell) then
+        return nil
+      end
+
       for _, trackedEvent in pairs(baseSpell.trackedEvents) do
         if trackedEvent == event then
           mod.logger.LogDebug(me.tag, string.format(
@@ -156,7 +185,7 @@ end
 function me.GetSpellById(spellId)
   if not spellId then return nil end
 
-  local baseSpellMap = GetFilteredSpellMap()
+  local baseSpellMap = mod.spellMap.GetSpellMap()
 
   for category, spells in pairs(baseSpellMap) do
     local entry = spells[spellId]
@@ -174,6 +203,10 @@ function me.GetSpellById(spellId)
     end
 
     if baseSpell then
+      if not IsPrimaryAllowedInCurrentSeason(baseSpell) then
+        return nil
+      end
+
       local clonedSpell = mod.common.Clone(baseSpell)
 
       clonedSpell.spellId = realSpellId
