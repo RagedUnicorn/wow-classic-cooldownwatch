@@ -46,7 +46,7 @@ local function ShowInfoMessage()
   DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["conf"])
 
   if RGCW_ENVIRONMENT.DEBUG then
-    DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["test_cooldownqueue"])
+    DEFAULT_CHAT_FRAME:AddMessage(rgcw.L["test"])
   end
 end
 

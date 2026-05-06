@@ -19,6 +19,8 @@
         <include>assets/*.blp</include>
         <include>assets/*.tga</include>
         <include>localization/*.lua</include>
+        <include>docs/TEST.md</include>
+        <include>docs/DEVELOPMENT.md</include>
       </includes>
     </fileSet>
   </fileSets>

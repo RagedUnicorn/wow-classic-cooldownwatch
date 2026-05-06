@@ -11,7 +11,7 @@ rgcw.L["help"] = "|cFFFFC300(%s)|r: Use |cFFFFC300/rgcw|r or |cFFFFC300/cooldown
 rgcw.L["reload"] = "|cFFFFC300reload|r - Reload UI"
 rgcw.L["opt"] = "|cFFFFC300opt|r - Display Optionsmenu"
 rgcw.L["conf"] = "|cFFFFC300conf|r - Configure target cooldown bar position"
-rgcw.L["test_cooldownqueue"] = "|cFFFFFF00test cooldownqueue|r - Run cooldown queue tests"
+rgcw.L["test"] = "|cFFFFFF00test|r - Test commands (use |cFFFFC300/rgcw test|r for the full menu)"
 rgcw.L["info_title"] = "|cFF00FFB0CooldownWatch:|r"
 rgcw.L["invalid_argument"] = "Invalid argument passed"
 

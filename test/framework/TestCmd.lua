@@ -67,9 +67,11 @@ end
 ]]--
 ShowTestHelp = function()
   print("|cFF00FFFFTest Commands:|r")
-  print("|cFF00FFFF/rgcw test all|r - Run all tests")
-  print("|cFF00FFFF/rgcw test cooldownqueue|r - Run all cooldown queue tests")
-  print("|cFF00FFFF/rgcw test cooldownqueue <test>|r - Run specific test")
+  print("|cFF00FFFF/rgcw test all|r - Run all test suites")
+  print("|cFF00FFFF/rgcw test cooldownqueue|r - Run cooldown queue suite")
+  print("|cFF00FFFF/rgcw test cooldownqueue <test>|r - Run a specific cooldown queue test")
+  print("|cFF00FFFF/rgcw test spellmap|r - Run spellMap data-integrity suite")
+  print("|cFF00FFFF/rgcw test priestspells|r - Run priest spell tracking suite")
   print("|cFF00FFFF/rgcw test log|r - Toggle test log window")
   print("|cFF00FFFF/rgcw test clear-logs|r - Clear test logs")
   print("")
@@ -115,6 +117,22 @@ HandleTestCommand = function(testCommand, args)
       else
         mod.testCooldownQueue.RunAllTests()
       end
+    end
+  elseif testCommand == "spellmap" then
+    if mod.testRunner then
+      mod.testRunner.TestSpellMap()
+    elseif mod.testSpellMap then
+      mod.testSpellMap.RunAllTests()
+    else
+      mod.logger.LogError(me.tag, "SpellMap test module not loaded")
+    end
+  elseif testCommand == "priestspells" then
+    if mod.testRunner then
+      mod.testRunner.TestPriestSpells()
+    elseif mod.testPriestSpells then
+      mod.testPriestSpells.RunAllTests()
+    else
+      mod.logger.LogError(me.tag, "PriestSpells test module not loaded")
     end
   elseif testCommand == "log" or testCommand == "logs" then
     if mod.testLogWindow then

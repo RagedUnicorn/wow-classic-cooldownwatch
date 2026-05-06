@@ -13,7 +13,7 @@ if (GetLocale() == "deDE") then
   rgcw.L["reload"] = "|cFFFFC300reload|r - UI neu laden"
   rgcw.L["opt"] = "|cFFFFC300opt|r - Zeige Optionsmenu an"
   rgcw.L["conf"] = "|cFFFFC300conf|r - Konfiguriere die Position der Ziel-Cooldown-Leiste"
-  rgcw.L["test_cooldownqueue"] = "|cFFFFFF00test cooldownqueue|r - Cooldown-Queue-Tests ausführen"
+  rgcw.L["test"] = "|cFFFFFF00test|r - Test-Befehle (nutze |cFFFFC300/rgcw test|r für das vollständige Menü)"
   rgcw.L["info_title"] = "|cFF00FFB0CooldownWatch:|r"
   rgcw.L["invalid_argument"] = "Ungültiges Argument übergeben"
 
