@@ -72,6 +72,7 @@ ShowTestHelp = function()
   print("|cFF00FFFF/rgcw test cooldownqueue <test>|r - Run a specific cooldown queue test")
   print("|cFF00FFFF/rgcw test spellmap|r - Run spellMap data-integrity suite")
   print("|cFF00FFFF/rgcw test priestspells|r - Run priest spell tracking suite")
+  print("|cFF00FFFF/rgcw test shamanspells|r - Run shaman spell tracking suite")
   print("|cFF00FFFF/rgcw test log|r - Toggle test log window")
   print("|cFF00FFFF/rgcw test clear-logs|r - Clear test logs")
   print("")
@@ -133,6 +134,14 @@ HandleTestCommand = function(testCommand, args)
       mod.testPriestSpells.RunAllTests()
     else
       mod.logger.LogError(me.tag, "PriestSpells test module not loaded")
+    end
+  elseif testCommand == "shamanspells" then
+    if mod.testRunner then
+      mod.testRunner.TestShamanSpells()
+    elseif mod.testShamanSpells then
+      mod.testShamanSpells.RunAllTests()
+    else
+      mod.logger.LogError(me.tag, "ShamanSpells test module not loaded")
     end
   elseif testCommand == "log" or testCommand == "logs" then
     if mod.testLogWindow then

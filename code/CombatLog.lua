@@ -141,8 +141,11 @@ end
 
 --[[
   Queue every sibling of a shared-cooldown group with the same castTime as the
-  spell that actually fired. Each sibling still respects its own per-spell
-  enabled flag in the user's configuration.
+  spell that actually fired. Fan-out is unconditional: shared cooldowns are a
+  game-mechanics fact, so once the originating spell is tracked, every sibling
+  is on cooldown too and must surface in the queue regardless of the user's
+  per-sibling enabled flag — otherwise the UI would falsely show a sibling as
+  available.
 
   @param {string} sourceGuid
   @param {string} sourceName
@@ -159,7 +162,7 @@ function me.TrackSharedCooldownSiblings(sourceGuid, sourceName, originalSpell, c
     if siblingSpellId ~= originalSpell.spellId then
       local _, _, siblingSpell = mod.spellMapHelper.GetSpellById(siblingSpellId)
 
-      if siblingSpell and me.IsCooldownTracked(category, siblingSpellId) then
+      if siblingSpell then
         siblingSpell.castTime = castTime
         local _, _, siblingIconId = GetSpellInfo(siblingSpell.spellId)
 
