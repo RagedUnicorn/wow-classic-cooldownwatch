@@ -44,6 +44,7 @@ test/RunTests.lua
 test/TestCooldownQueue.lua
 test/TestSpellMap.lua
 test/category/TestPriestSpells.lua
+test/category/TestShamanSpells.lua
 
 # gui
 gui/Frame.xml

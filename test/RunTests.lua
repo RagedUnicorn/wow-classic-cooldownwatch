@@ -59,6 +59,7 @@ function me.RunAllTests()
   me.TestCooldownQueue()
   me.TestSpellMap()
   me.TestPriestSpells()
+  me.TestShamanSpells()
 
   -- Cleanup - clear any test cooldowns from the queue
   if mod.cooldownQueue then
@@ -99,5 +100,16 @@ function me.TestPriestSpells()
     mod.testPriestSpells.RunAllTests()
   else
     mod.testLogger.LogError("TestRunner", "TestPriestSpells module not loaded")
+  end
+end
+
+--[[
+  Test shaman spell tracking end-to-end
+]]--
+function me.TestShamanSpells()
+  if mod.testShamanSpells then
+    mod.testShamanSpells.RunAllTests()
+  else
+    mod.testLogger.LogError("TestRunner", "TestShamanSpells module not loaded")
   end
 end

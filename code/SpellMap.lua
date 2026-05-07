@@ -176,17 +176,138 @@ local spellMap = {
         15487
       }
     }
+  },
+  ["shaman"] = {
+    [10414] = {
+      name = "Earth Shock",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 6,
+      cooldownWorstCase = 5,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      sharedCooldownGroup = "shaman_shocks",
+      allRanks = {
+        10414, 8042, 8044, 8045, 8046, 10412, 10413
+      }
+    },
+    [8042] = { refId = 10414 },
+    [8044] = { refId = 10414 },
+    [8045] = { refId = 10414 },
+    [8046] = { refId = 10414 },
+    [10412] = { refId = 10414 },
+    [10413] = { refId = 10414 },
+    [10473] = {
+      name = "Frost Shock",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 6,
+      cooldownWorstCase = 5,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      sharedCooldownGroup = "shaman_shocks",
+      allRanks = {
+        10473, 8056, 8058, 10472
+      }
+    },
+    [8056] = { refId = 10473 },
+    [8058] = { refId = 10473 },
+    [10472] = { refId = 10473 },
+    [29228] = {
+      name = "Flame Shock",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 6,
+      cooldownWorstCase = 5,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      sharedCooldownGroup = "shaman_shocks",
+      allRanks = {
+        29228, 8050, 8052, 8053, 10447, 10448
+      }
+    },
+    [8050] = { refId = 29228 },
+    [8052] = { refId = 29228 },
+    [8053] = { refId = 29228 },
+    [10447] = { refId = 29228 },
+    [10448] = { refId = 29228 },
+    [16166] = {
+      name = "Elemental Mastery",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 180,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        16166
+      }
+    },
+    [11315] = {
+      name = "Fire Nova Totem",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 15,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        11315, 1535, 8498, 8499, 11314
+      }
+    },
+    [1535] = { refId = 11315 },
+    [8498] = { refId = 11315 },
+    [8499] = { refId = 11315 },
+    [11314] = { refId = 11315 },
+    [8177] = {
+      name = "Grounding Totem",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 15,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        8177
+      }
+    },
+    [2484] = {
+      name = "Earthbind Totem",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 15,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        2484
+      }
+    },
+    [16188] = {
+      name = "Nature's Swiftness",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 180,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        16188
+      }
+    }
   }
 }
 
 --[[
   Lookup table of shared-cooldown groups. Each value is a list of primary
   spellIds that share their cooldown.
-
-  Example (for future Shaman use):
-    ["shaman_shocks"] = { 25464, 25457, 25530 } -- Frost / Earth / Flame Shock
 ]]--
-local sharedCooldownGroups = {}
+local sharedCooldownGroups = {
+  ["shaman_shocks"] = { 10414, 10473, 29228 } -- Earth Shock / Frost Shock / Flame Shock
+}
 
 --[[
   Get the spellMap
