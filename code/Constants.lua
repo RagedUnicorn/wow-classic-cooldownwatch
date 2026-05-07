@@ -85,6 +85,13 @@ RGCW_CONSTANTS = {
   ELEMENT_TEST_LOG_WINDOW_CLOSE_BUTTON = "CooldownWatch_TestLogWindowCloseButton",
   ELEMENT_TEST_LOG_WINDOW_CLEAR_BUTTON = "CooldownWatch_TestLogWindowClearButton",
   --[[
+    Debug Spell Injector Window (development only)
+  ]]--
+  ELEMENT_DEBUG_INJECTOR_WINDOW = "CooldownWatch_DebugInjectorWindow",
+  ELEMENT_DEBUG_INJECTOR_WINDOW_CATEGORY_COLUMN = "CooldownWatch_DebugInjectorWindowCategoryColumn",
+  ELEMENT_DEBUG_INJECTOR_WINDOW_SPELL_SCROLL_FRAME = "CooldownWatch_DebugInjectorWindowSpellScrollFrame",
+  ELEMENT_DEBUG_INJECTOR_WINDOW_SPELL_SCROLL_CHILD = "CooldownWatch_DebugInjectorWindowSpellScrollChild",
+  --[[
     SavedVariables
   ]]--
   SAVED_VARIABLE_TEST_LOG = "CooldownWatchTestLog",
