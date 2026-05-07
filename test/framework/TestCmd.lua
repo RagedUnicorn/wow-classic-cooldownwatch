@@ -73,6 +73,7 @@ ShowTestHelp = function()
   print("|cFF00FFFF/rgcw test spellmap|r - Run spellMap data-integrity suite")
   print("|cFF00FFFF/rgcw test priestspells|r - Run priest spell tracking suite")
   print("|cFF00FFFF/rgcw test shamanspells|r - Run shaman spell tracking suite")
+  print("|cFF00FFFF/rgcw test inject|r - Toggle debug spell injector window")
   print("|cFF00FFFF/rgcw test log|r - Toggle test log window")
   print("|cFF00FFFF/rgcw test clear-logs|r - Clear test logs")
   print("")
@@ -105,6 +106,7 @@ HandleTestCommand = function(testCommand, args)
       -- Run specific test
       local testName = args[2]
       local testFunction = "Test" .. testName
+
       if mod.testCooldownQueue[testFunction] then
         mod.testCooldownQueue[testFunction]()
       else
@@ -142,6 +144,12 @@ HandleTestCommand = function(testCommand, args)
       mod.testShamanSpells.RunAllTests()
     else
       mod.logger.LogError(me.tag, "ShamanSpells test module not loaded")
+    end
+  elseif testCommand == "inject" then
+    if mod.debugInjectorWindow then
+      mod.debugInjectorWindow.Toggle()
+    else
+      mod.logger.LogError(me.tag, "Debug injector window not available")
     end
   elseif testCommand == "log" or testCommand == "logs" then
     if mod.testLogWindow then

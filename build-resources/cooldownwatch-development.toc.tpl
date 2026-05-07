@@ -46,6 +46,10 @@ test/TestSpellMap.lua
 test/category/TestPriestSpells.lua
 test/category/TestShamanSpells.lua
 
+# Debug Tools (Development Only)
+test/debug/DebugInjectorWindow.lua
+test/debug/DebugInjectorWindow.xml
+
 # gui
 gui/Frame.xml
 gui/TargetCooldownBar.lua

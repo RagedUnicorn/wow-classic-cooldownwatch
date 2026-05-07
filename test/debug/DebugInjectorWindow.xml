@@ -1,0 +1,109 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
+
+  <!-- Debug Spell Injector Window (development only) -->
+  <Frame name="CooldownWatch_DebugInjectorWindow" inherits="BackdropTemplate" toplevel="true" frameStrata="DIALOG" movable="true" enableMouse="true" hidden="true" parent="UIParent">
+    <Size>
+      <AbsDimension x="600" y="500"/>
+    </Size>
+    <Anchors>
+      <Anchor point="CENTER"/>
+    </Anchors>
+
+    <Layers>
+      <Layer level="ARTWORK">
+        <FontString name="$parentTitle" inherits="GameFontNormal" text="CooldownWatch Spell Injector">
+          <Anchors>
+            <Anchor point="TOP">
+              <Offset>
+                <AbsDimension x="0" y="-9"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+        <FontString name="$parentHint" inherits="GameFontNormalSmall" text="Target yourself (/target &lt;name&gt;) to see injected cooldowns on the bar.">
+          <Anchors>
+            <Anchor point="TOP">
+              <Offset>
+                <AbsDimension x="0" y="-30"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+          <Color r="1" g="0.82" b="0"/>
+        </FontString>
+      </Layer>
+    </Layers>
+
+    <Frames>
+      <!-- Close button -->
+      <Button name="$parentCloseButton" inherits="UIPanelCloseButton">
+        <Anchors>
+          <Anchor point="TOPRIGHT">
+            <Offset>
+              <AbsDimension x="-5" y="-5"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+      </Button>
+
+      <!-- Category column (left): vertical stack of class buttons populated in Lua -->
+      <Frame name="CooldownWatch_DebugInjectorWindowCategoryColumn">
+        <Size>
+          <AbsDimension x="120" y="420"/>
+        </Size>
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="15" y="-50"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+      </Frame>
+
+      <!-- Spell list scroll frame (right) -->
+      <ScrollFrame name="CooldownWatch_DebugInjectorWindowSpellScrollFrame" inherits="UIPanelScrollFrameTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="145" y="-50"/>
+            </Offset>
+          </Anchor>
+          <Anchor point="BOTTOMRIGHT">
+            <Offset>
+              <AbsDimension x="-30" y="20"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <ScrollChild>
+          <Frame name="CooldownWatch_DebugInjectorWindowSpellScrollChild">
+            <Size>
+              <AbsDimension x="420" y="1"/>
+            </Size>
+          </Frame>
+        </ScrollChild>
+      </ScrollFrame>
+    </Frames>
+
+    <Scripts>
+      <OnLoad>
+        tinsert(UISpecialFrames, self:GetName())
+        self:RegisterForDrag("LeftButton")
+        self:SetBackdrop({
+          bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+          edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+          tile = true,
+          tileSize = 32,
+          edgeSize = 32,
+          insets = { left = 11, right = 12, top = 12, bottom = 11 }
+        })
+      </OnLoad>
+      <OnDragStart>
+        self:StartMoving()
+      </OnDragStart>
+      <OnDragStop>
+        self:StopMovingOrSizing()
+      </OnDragStop>
+    </Scripts>
+  </Frame>
+
+</Ui>

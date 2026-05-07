@@ -137,5 +137,9 @@ InitializeTestFramework = function()
     me.testCmd.Initialize()
   end
 
+  if me.debugInjectorWindow then
+    me.debugInjectorWindow.Initialize()
+  end
+
   me.logger.LogDebug(me.tag, "Test framework modules initialized")
 end
