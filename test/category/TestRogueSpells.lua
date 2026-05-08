@@ -32,21 +32,6 @@ mod.testRogueSpells = me
 me.tag = "TestRogueSpells"
 
 local CATEGORY = "rogue"
-local TRACKED_EVENT = "SPELL_CAST_SUCCESS"
-
-local ROGUE_BASE_SPELLS = {
-  { spellId = 13750, name = "Adrenaline Rush" },
-  { spellId = 13877, name = "Blade Flurry" },
-  { spellId = 2094,  name = "Blind" },
-  { spellId = 14177, name = "Cold Blood" },
-  { spellId = 5277,  name = "Evasion" },
-  { spellId = 11286, name = "Gouge" },
-  { spellId = 1769,  name = "Kick" },
-  { spellId = 8643,  name = "Kidney Shot" },
-  { spellId = 14251, name = "Riposte" },
-  { spellId = 11305, name = "Sprint" },
-  { spellId = 1857,  name = "Vanish" },
-}
 
 --[[
   Build a stable test name from a spell name (strips spaces and punctuation).
@@ -67,25 +52,29 @@ end
   Clears the cooldown queue first so each spell's test is isolated.
 
   @param {table} testSpell
-    { spellId = number, name = string }
+    { spellId = number, name = string, trackedEvents = table }
+  @param {string} trackedEvent
+    One of the events declared on the spell entry in SpellMap.
 ]]--
-local function VerifySpellTracking(testSpell)
-  local testName = TestNameFor(testSpell.name)
+local function VerifySpellTracking(testSpell, trackedEvent)
+  local testName = TestNameFor(testSpell.name) .. "_" .. trackedEvent
   mod.testLogger.StartTest(testName)
 
   mod.cooldownQueue.ClearCooldownQueue()
 
   local casterData = mod.testHelper.GetTestCasterData()
+
   if not casterData then
     mod.testLogger.EndTest(testName, false, "Failed to get player data")
     return
   end
 
-  local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(testSpell.spellId, TRACKED_EVENT)
+  local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(testSpell.spellId, trackedEvent)
 
   if not spell then
     mod.testLogger.EndTest(testName, false,
-      string.format("SearchBySpellId returned nil for spellId %d", testSpell.spellId))
+      string.format("SearchBySpellId returned nil for spellId %d (event %s)",
+        testSpell.spellId, trackedEvent))
     return
   end
 
@@ -111,11 +100,12 @@ local function VerifySpellTracking(testSpell)
   mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, category, spell)
 
   local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)
+
   for _, cd in pairs(cooldowns) do
     if cd.spellData.spellId == testSpell.spellId then
       mod.testLogger.EndTest(testName, true,
-        string.format("Tracked '%s' (id %d, cooldown %ss)",
-          testSpell.name, testSpell.spellId, tostring(cd.spellData.cooldown)))
+        string.format("Tracked '%s' (id %d, event %s, cooldown %ss)",
+          testSpell.name, testSpell.spellId, trackedEvent, tostring(cd.spellData.cooldown)))
       return
     end
   end
@@ -129,41 +119,35 @@ end
   Wowhead-verified rank chain among the rogue multi-rank spells.
 ]]--
 function me.TestKickRankResolution()
-  local testName = "TestRogue_KickRankResolution"
-  mod.testLogger.StartTest(testName)
-
   local rankSpellId = 1766
   local expectedPrimary = 1769
+  local primary = mod.spellMap.GetSpellMap()[CATEGORY][expectedPrimary]
 
-  local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(rankSpellId, TRACKED_EVENT)
+  for _, trackedEvent in ipairs(primary.trackedEvents) do
+    local testName = "TestRogue_KickRankResolution_" .. trackedEvent
+    mod.testLogger.StartTest(testName)
 
-  if not spell then
-    mod.testLogger.EndTest(testName, false,
-      string.format("SearchBySpellId returned nil for rank spellId %d", rankSpellId))
-    return
+    local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(rankSpellId, trackedEvent)
+
+    if not spell then
+      mod.testLogger.EndTest(testName, false,
+        string.format("SearchBySpellId returned nil for rank spellId %d (event %s)",
+          rankSpellId, trackedEvent))
+    elseif category ~= CATEGORY then
+      mod.testLogger.EndTest(testName, false,
+        string.format("category '%s' (expected '%s')", tostring(category), CATEGORY))
+    elseif realSpellId ~= expectedPrimary then
+      mod.testLogger.EndTest(testName, false,
+        string.format("realSpellId %s (expected %d)", tostring(realSpellId), expectedPrimary))
+    elseif spell.name ~= "Kick" then
+      mod.testLogger.EndTest(testName, false,
+        string.format("spell.name '%s' (expected 'Kick')", tostring(spell.name)))
+    else
+      mod.testLogger.EndTest(testName, true,
+        string.format("Rank spellId %d resolved to primary %d ('%s') via event %s",
+          rankSpellId, realSpellId, spell.name, trackedEvent))
+    end
   end
-
-  if category ~= CATEGORY then
-    mod.testLogger.EndTest(testName, false,
-      string.format("category '%s' (expected '%s')", tostring(category), CATEGORY))
-    return
-  end
-
-  if realSpellId ~= expectedPrimary then
-    mod.testLogger.EndTest(testName, false,
-      string.format("realSpellId %s (expected %d)", tostring(realSpellId), expectedPrimary))
-    return
-  end
-
-  if spell.name ~= "Kick" then
-    mod.testLogger.EndTest(testName, false,
-      string.format("spell.name '%s' (expected 'Kick')", tostring(spell.name)))
-    return
-  end
-
-  mod.testLogger.EndTest(testName, true,
-    string.format("Rank spellId %d resolved to primary %d ('%s')",
-      rankSpellId, realSpellId, spell.name))
 end
 
 --[[
@@ -172,8 +156,10 @@ end
 function me.RunAllTests()
   mod.testLogger.LogInfo("RogueSpells", "=== Running Rogue Spell Tests ===")
 
-  for _, testSpell in ipairs(ROGUE_BASE_SPELLS) do
-    VerifySpellTracking(testSpell)
+  for _, testSpell in ipairs(mod.testHelper.GetSpellsForCategory(CATEGORY)) do
+    for _, trackedEvent in ipairs(testSpell.trackedEvents) do
+      VerifySpellTracking(testSpell, trackedEvent)
+    end
   end
 
   me.TestKickRankResolution()

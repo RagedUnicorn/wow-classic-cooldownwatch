@@ -150,3 +150,35 @@ function me.ShowTargetingHint()
     print("|cFF00FF00[INFO]|r Targeting self - cooldowns will be visible in UI")
   end
 end
+
+--[[
+  Collect every primary spell entry for a category from the SpellMap. Primary
+  entries carry a `name`; alias entries only carry `refId`. Output is sorted by
+  spellId for deterministic test order.
+
+  @param {string} category - e.g. "priest", "rogue", "shaman"
+
+  @return {table} - Array of { spellId = number, name = string, trackedEvents = table }
+]]--
+function me.GetSpellsForCategory(category)
+  local categoryMap = mod.spellMap.GetSpellMap()[category]
+  local result = {}
+
+  if not categoryMap then
+    return result
+  end
+
+  for spellId, entry in pairs(categoryMap) do
+    if entry.name then
+      table.insert(result, {
+        spellId = spellId,
+        name = entry.name,
+        trackedEvents = entry.trackedEvents
+      })
+    end
+  end
+
+  table.sort(result, function(a, b) return a.spellId < b.spellId end)
+
+  return result
+end

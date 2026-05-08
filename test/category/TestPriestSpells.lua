@@ -32,19 +32,6 @@ mod.testPriestSpells = me
 me.tag = "TestPriestSpells"
 
 local CATEGORY = "priest"
-local TRACKED_EVENT = "SPELL_CAST_SUCCESS"
-
-local PRIEST_BASE_SPELLS = {
-  { spellId = 10890, name = "Psychic Scream" },
-  { spellId = 19280, name = "Devouring Plague" },
-  { spellId = 19293, name = "Elune's Grace" },
-  { spellId = 6346,  name = "Fear Ward" },
-  { spellId = 14751, name = "Inner Focus" },
-  { spellId = 10947, name = "Mind Blast" },
-  { spellId = 10060, name = "Power Infusion" },
-  { spellId = 10901, name = "Power Word: Shield" },
-  { spellId = 15487, name = "Silence" },
-}
 
 --[[
   Build a stable test name from a spell name (strips spaces and punctuation).
@@ -65,25 +52,29 @@ end
   Clears the cooldown queue first so each spell's test is isolated.
 
   @param {table} testSpell
-    { spellId = number, name = string }
+    { spellId = number, name = string, trackedEvents = table }
+  @param {string} trackedEvent
+    One of the events declared on the spell entry in SpellMap.
 ]]--
-local function VerifySpellTracking(testSpell)
-  local testName = TestNameFor(testSpell.name)
+local function VerifySpellTracking(testSpell, trackedEvent)
+  local testName = TestNameFor(testSpell.name) .. "_" .. trackedEvent
   mod.testLogger.StartTest(testName)
 
   mod.cooldownQueue.ClearCooldownQueue()
 
   local casterData = mod.testHelper.GetTestCasterData()
+
   if not casterData then
     mod.testLogger.EndTest(testName, false, "Failed to get player data")
     return
   end
 
-  local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(testSpell.spellId, TRACKED_EVENT)
+  local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(testSpell.spellId, trackedEvent)
 
   if not spell then
     mod.testLogger.EndTest(testName, false,
-      string.format("SearchBySpellId returned nil for spellId %d", testSpell.spellId))
+      string.format("SearchBySpellId returned nil for spellId %d (event %s)",
+        testSpell.spellId, trackedEvent))
     return
   end
 
@@ -109,11 +100,12 @@ local function VerifySpellTracking(testSpell)
   mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, category, spell)
 
   local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)
+
   for _, cd in pairs(cooldowns) do
     if cd.spellData.spellId == testSpell.spellId then
       mod.testLogger.EndTest(testName, true,
-        string.format("Tracked '%s' (id %d, cooldown %ss)",
-          testSpell.name, testSpell.spellId, tostring(cd.spellData.cooldown)))
+        string.format("Tracked '%s' (id %d, event %s, cooldown %ss)",
+          testSpell.name, testSpell.spellId, trackedEvent, tostring(cd.spellData.cooldown)))
       return
     end
   end
@@ -126,41 +118,35 @@ end
   the refId chain to the primary spellId (10947) when SearchBySpellId is called.
 ]]--
 function me.TestMindBlastRankResolution()
-  local testName = "TestPriest_MindBlastRankResolution"
-  mod.testLogger.StartTest(testName)
-
   local rankSpellId = 585
   local expectedPrimary = 10947
+  local primary = mod.spellMap.GetSpellMap()[CATEGORY][expectedPrimary]
 
-  local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(rankSpellId, TRACKED_EVENT)
+  for _, trackedEvent in ipairs(primary.trackedEvents) do
+    local testName = "TestPriest_MindBlastRankResolution_" .. trackedEvent
+    mod.testLogger.StartTest(testName)
 
-  if not spell then
-    mod.testLogger.EndTest(testName, false,
-      string.format("SearchBySpellId returned nil for rank spellId %d", rankSpellId))
-    return
+    local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(rankSpellId, trackedEvent)
+
+    if not spell then
+      mod.testLogger.EndTest(testName, false,
+        string.format("SearchBySpellId returned nil for rank spellId %d (event %s)",
+          rankSpellId, trackedEvent))
+    elseif category ~= CATEGORY then
+      mod.testLogger.EndTest(testName, false,
+        string.format("category '%s' (expected '%s')", tostring(category), CATEGORY))
+    elseif realSpellId ~= expectedPrimary then
+      mod.testLogger.EndTest(testName, false,
+        string.format("realSpellId %s (expected %d)", tostring(realSpellId), expectedPrimary))
+    elseif spell.name ~= "Mind Blast" then
+      mod.testLogger.EndTest(testName, false,
+        string.format("spell.name '%s' (expected 'Mind Blast')", tostring(spell.name)))
+    else
+      mod.testLogger.EndTest(testName, true,
+        string.format("Rank spellId %d resolved to primary %d ('%s') via event %s",
+          rankSpellId, realSpellId, spell.name, trackedEvent))
+    end
   end
-
-  if category ~= CATEGORY then
-    mod.testLogger.EndTest(testName, false,
-      string.format("category '%s' (expected '%s')", tostring(category), CATEGORY))
-    return
-  end
-
-  if realSpellId ~= expectedPrimary then
-    mod.testLogger.EndTest(testName, false,
-      string.format("realSpellId %s (expected %d)", tostring(realSpellId), expectedPrimary))
-    return
-  end
-
-  if spell.name ~= "Mind Blast" then
-    mod.testLogger.EndTest(testName, false,
-      string.format("spell.name '%s' (expected 'Mind Blast')", tostring(spell.name)))
-    return
-  end
-
-  mod.testLogger.EndTest(testName, true,
-    string.format("Rank spellId %d resolved to primary %d ('%s')",
-      rankSpellId, realSpellId, spell.name))
 end
 
 --[[
@@ -169,8 +155,10 @@ end
 function me.RunAllTests()
   mod.testLogger.LogInfo("PriestSpells", "=== Running Priest Spell Tests ===")
 
-  for _, testSpell in ipairs(PRIEST_BASE_SPELLS) do
-    VerifySpellTracking(testSpell)
+  for _, testSpell in ipairs(mod.testHelper.GetSpellsForCategory(CATEGORY)) do
+    for _, trackedEvent in ipairs(testSpell.trackedEvents) do
+      VerifySpellTracking(testSpell, trackedEvent)
+    end
   end
 
   me.TestMindBlastRankResolution()
