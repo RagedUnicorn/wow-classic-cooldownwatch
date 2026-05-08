@@ -32,18 +32,6 @@ mod.testShamanSpells = me
 me.tag = "TestShamanSpells"
 
 local CATEGORY = "shaman"
-local TRACKED_EVENT = "SPELL_CAST_SUCCESS"
-
-local SHAMAN_BASE_SPELLS = {
-  { spellId = 10414, name = "Earth Shock" },
-  { spellId = 10473, name = "Frost Shock" },
-  { spellId = 29228, name = "Flame Shock" },
-  { spellId = 16166, name = "Elemental Mastery" },
-  { spellId = 11315, name = "Fire Nova Totem" },
-  { spellId = 8177,  name = "Grounding Totem" },
-  { spellId = 2484,  name = "Earthbind Totem" },
-  { spellId = 16188, name = "Nature's Swiftness" },
-}
 
 --[[
   Build a stable test name from a spell name (strips spaces and punctuation).
@@ -64,25 +52,29 @@ end
   Clears the cooldown queue first so each spell's test is isolated.
 
   @param {table} testSpell
-    { spellId = number, name = string }
+    { spellId = number, name = string, trackedEvents = table }
+  @param {string} trackedEvent
+    One of the events declared on the spell entry in SpellMap.
 ]]--
-local function VerifySpellTracking(testSpell)
-  local testName = TestNameFor(testSpell.name)
+local function VerifySpellTracking(testSpell, trackedEvent)
+  local testName = TestNameFor(testSpell.name) .. "_" .. trackedEvent
   mod.testLogger.StartTest(testName)
 
   mod.cooldownQueue.ClearCooldownQueue()
 
   local casterData = mod.testHelper.GetTestCasterData()
+
   if not casterData then
     mod.testLogger.EndTest(testName, false, "Failed to get player data")
     return
   end
 
-  local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(testSpell.spellId, TRACKED_EVENT)
+  local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(testSpell.spellId, trackedEvent)
 
   if not spell then
     mod.testLogger.EndTest(testName, false,
-      string.format("SearchBySpellId returned nil for spellId %d", testSpell.spellId))
+      string.format("SearchBySpellId returned nil for spellId %d (event %s)",
+        testSpell.spellId, trackedEvent))
     return
   end
 
@@ -108,11 +100,12 @@ local function VerifySpellTracking(testSpell)
   mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, category, spell)
 
   local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)
+
   for _, cd in pairs(cooldowns) do
     if cd.spellData.spellId == testSpell.spellId then
       mod.testLogger.EndTest(testName, true,
-        string.format("Tracked '%s' (id %d, cooldown %ss)",
-          testSpell.name, testSpell.spellId, tostring(cd.spellData.cooldown)))
+        string.format("Tracked '%s' (id %d, event %s, cooldown %ss)",
+          testSpell.name, testSpell.spellId, trackedEvent, tostring(cd.spellData.cooldown)))
       return
     end
   end
@@ -125,41 +118,35 @@ end
   through the refId chain to the primary spellId (10414).
 ]]--
 function me.TestEarthShockRankResolution()
-  local testName = "TestShaman_EarthShockRankResolution"
-  mod.testLogger.StartTest(testName)
-
   local rankSpellId = 8042
   local expectedPrimary = 10414
+  local primary = mod.spellMap.GetSpellMap()[CATEGORY][expectedPrimary]
 
-  local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(rankSpellId, TRACKED_EVENT)
+  for _, trackedEvent in ipairs(primary.trackedEvents) do
+    local testName = "TestShaman_EarthShockRankResolution_" .. trackedEvent
+    mod.testLogger.StartTest(testName)
 
-  if not spell then
-    mod.testLogger.EndTest(testName, false,
-      string.format("SearchBySpellId returned nil for rank spellId %d", rankSpellId))
-    return
+    local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(rankSpellId, trackedEvent)
+
+    if not spell then
+      mod.testLogger.EndTest(testName, false,
+        string.format("SearchBySpellId returned nil for rank spellId %d (event %s)",
+          rankSpellId, trackedEvent))
+    elseif category ~= CATEGORY then
+      mod.testLogger.EndTest(testName, false,
+        string.format("category '%s' (expected '%s')", tostring(category), CATEGORY))
+    elseif realSpellId ~= expectedPrimary then
+      mod.testLogger.EndTest(testName, false,
+        string.format("realSpellId %s (expected %d)", tostring(realSpellId), expectedPrimary))
+    elseif spell.name ~= "Earth Shock" then
+      mod.testLogger.EndTest(testName, false,
+        string.format("spell.name '%s' (expected 'Earth Shock')", tostring(spell.name)))
+    else
+      mod.testLogger.EndTest(testName, true,
+        string.format("Rank spellId %d resolved to primary %d ('%s') via event %s",
+          rankSpellId, realSpellId, spell.name, trackedEvent))
+    end
   end
-
-  if category ~= CATEGORY then
-    mod.testLogger.EndTest(testName, false,
-      string.format("category '%s' (expected '%s')", tostring(category), CATEGORY))
-    return
-  end
-
-  if realSpellId ~= expectedPrimary then
-    mod.testLogger.EndTest(testName, false,
-      string.format("realSpellId %s (expected %d)", tostring(realSpellId), expectedPrimary))
-    return
-  end
-
-  if spell.name ~= "Earth Shock" then
-    mod.testLogger.EndTest(testName, false,
-      string.format("spell.name '%s' (expected 'Earth Shock')", tostring(spell.name)))
-    return
-  end
-
-  mod.testLogger.EndTest(testName, true,
-    string.format("Rank spellId %d resolved to primary %d ('%s')",
-      rankSpellId, realSpellId, spell.name))
 end
 
 --[[
@@ -167,34 +154,56 @@ end
   group. Drives CombatLog.TrackCooldown to exercise the production fan-out path.
 ]]--
 function me.TestShockSharedCooldown()
+  local groupName = "shaman_shocks"
   local testName = "TestShaman_ShockSharedCooldown"
   mod.testLogger.StartTest(testName)
 
   mod.cooldownQueue.ClearCooldownQueue()
 
   local casterData = mod.testHelper.GetTestCasterData()
+
   if not casterData then
     mod.testLogger.EndTest(testName, false, "Failed to get player data")
     return
   end
 
-  local _, _, frostShock = mod.spellMapHelper.SearchBySpellId(10473, TRACKED_EVENT)
-  if not frostShock then
-    mod.testLogger.EndTest(testName, false, "Frost Shock not found in spellMap")
+  local expected = mod.spellMap.GetSharedCooldownGroup(groupName)
+
+  if not expected or #expected == 0 then
+    mod.testLogger.EndTest(testName, false,
+      string.format("Shared cooldown group '%s' missing or empty in spellMap", groupName))
+    return
+  end
+
+  local triggerSpellId = expected[1]
+  local triggerPrimary = mod.spellMap.GetSpellMap()[CATEGORY][triggerSpellId]
+
+  if not triggerPrimary or not triggerPrimary.trackedEvents[1] then
+    mod.testLogger.EndTest(testName, false,
+      string.format("Trigger spellId %d primary entry missing in spellMap", triggerSpellId))
+    return
+  end
+
+  local _, _, triggerSpell = mod.spellMapHelper.SearchBySpellId(triggerSpellId, triggerPrimary.trackedEvents[1])
+
+  if not triggerSpell then
+    mod.testLogger.EndTest(testName, false,
+      string.format("Trigger spellId %d not found in spellMap", triggerSpellId))
     return
   end
 
   local castTime = GetTime()
-  mod.combatLog.TrackCooldown(casterData.guid, casterData.name, frostShock, castTime, CATEGORY, nil)
+  mod.combatLog.TrackCooldown(casterData.guid, casterData.name, triggerSpell, castTime, CATEGORY, nil)
 
   local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)
   local seen = {}
+
   for _, cd in pairs(cooldowns) do
     seen[cd.spellData.spellId] = true
   end
 
-  local expected = { 10414, 10473, 29228 }
   local missing = {}
+
   for _, spellId in ipairs(expected) do
     if not seen[spellId] then
       table.insert(missing, tostring(spellId))
@@ -203,10 +212,11 @@ function me.TestShockSharedCooldown()
 
   if #missing == 0 then
     mod.testLogger.EndTest(testName, true,
-      "Frost Shock fan-out queued all three shocks (10414, 10473, 29228)")
+      string.format("'%s' trigger %d fan-out queued all %d group members (%s)",
+        groupName, triggerSpellId, #expected, table.concat(expected, ", ")))
   else
     mod.testLogger.EndTest(testName, false,
-      "Missing shock(s) after fan-out: " .. table.concat(missing, ", "))
+      string.format("'%s' missing member(s) after fan-out: %s", groupName, table.concat(missing, ", ")))
   end
 end
 
@@ -216,8 +226,10 @@ end
 function me.RunAllTests()
   mod.testLogger.LogInfo("ShamanSpells", "=== Running Shaman Spell Tests ===")
 
-  for _, testSpell in ipairs(SHAMAN_BASE_SPELLS) do
-    VerifySpellTracking(testSpell)
+  for _, testSpell in ipairs(mod.testHelper.GetSpellsForCategory(CATEGORY)) do
+    for _, trackedEvent in ipairs(testSpell.trackedEvents) do
+      VerifySpellTracking(testSpell, trackedEvent)
+    end
   end
 
   me.TestEarthShockRankResolution()
