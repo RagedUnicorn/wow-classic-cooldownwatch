@@ -73,6 +73,7 @@ ShowTestHelp = function()
   print("|cFF00FFFF/rgcw test spellmap|r - Run spellMap data-integrity suite")
   print("|cFF00FFFF/rgcw test priestspells|r - Run priest spell tracking suite")
   print("|cFF00FFFF/rgcw test shamanspells|r - Run shaman spell tracking suite")
+  print("|cFF00FFFF/rgcw test roguespells|r - Run rogue spell tracking suite")
   print("|cFF00FFFF/rgcw test inject|r - Toggle debug spell injector window")
   print("|cFF00FFFF/rgcw test log|r - Toggle test log window")
   print("|cFF00FFFF/rgcw test clear-logs|r - Clear test logs")
@@ -144,6 +145,14 @@ HandleTestCommand = function(testCommand, args)
       mod.testShamanSpells.RunAllTests()
     else
       mod.logger.LogError(me.tag, "ShamanSpells test module not loaded")
+    end
+  elseif testCommand == "roguespells" then
+    if mod.testRunner then
+      mod.testRunner.TestRogueSpells()
+    elseif mod.testRogueSpells then
+      mod.testRogueSpells.RunAllTests()
+    else
+      mod.logger.LogError(me.tag, "RogueSpells test module not loaded")
     end
   elseif testCommand == "inject" then
     if mod.debugInjectorWindow then
