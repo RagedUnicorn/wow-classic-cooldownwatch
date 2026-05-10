@@ -59,4 +59,18 @@ describe("SpellMap data integrity", function()
     assert.same({},
       rgcw.spellMapValidation.ValidateSharedCooldownGroupsConsistent(spellMap, groups, getSpellById))
   end)
+
+  it("SearchBySpellId returns nil for an unknown spellId", function()
+    assert.same({}, rgcw.spellMapValidation.ValidateUnknownSpellIdReturnsNil(rgcw.spellMapHelper))
+  end)
+
+  it("alias entries return nil for an event not in their primary's trackedEvents", function()
+    assert.same({},
+      rgcw.spellMapValidation.ValidateAliasRejectsMismatchedEvent(spellMap, rgcw.spellMapHelper))
+  end)
+
+  it("GetSharedCooldownGroup returns nil for an unknown group name", function()
+    assert.same({},
+      rgcw.spellMapValidation.ValidateUnknownSharedCooldownGroupReturnsNil(rgcw.spellMap.GetSharedCooldownGroup))
+  end)
 end)
