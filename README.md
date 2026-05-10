@@ -8,6 +8,7 @@
 ![](docs/license_mit.svg)
 [![](docs/curseforge.svg)](https://curseforge.overwolf.com/?addonId=TODO&fileId=TODO)
 ![Lint](https://github.com/RagedUnicorn/wow-classic-cooldownwatch/actions/workflows/lint.yaml/badge.svg?branch=master)
+![Headless Tests](https://github.com/RagedUnicorn/wow-classic-cooldownwatch/actions/workflows/test.yaml/badge.svg?branch=master)
 
 ## Installation
 

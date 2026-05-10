@@ -1,8 +1,11 @@
 # Testing
 
-CooldownWatch ships a small in-game test framework that runs against the addon's real modules under WoW. Tests are only loaded in development builds (the release TOC excludes the entire `test/` tree).
+CooldownWatch ships two test layers:
 
-## Running the tests
+- An **in-game test framework** that runs against the addon's real modules under WoW (loaded in development builds only — the release TOC excludes the entire `test/` tree).
+- A **headless busted harness** that runs the SpellMap data-integrity validators outside WoW, used by CI on every push and pull request.
+
+## Running the in-game tests
 
 Reload your UI and run the full suite:
 
@@ -44,13 +47,27 @@ For tests that exercise the cooldown bar UI (currently the `TestCooldownQueue` s
 /target <yourname>
 ```
 
+## Running the headless data-integrity tests
+
+The pure-data SpellMap validators run under [busted](https://lunarmodules.github.io/busted/) — no WoW client required. The busted image is defined as a service in `docker-compose.yml`; configuration lives in `.busted`.
+
+```
+docker compose run --rm busted
+```
+
+This loads `test/headless/Bootstrap.lua`, which stubs the WoW globals the production files reach for at load time, then `dofile`s `code/Constants.lua`, `code/Common.lua`, `code/SpellMap.lua`, `code/SpellMapHelper.lua`, and `test/SpellMapValidation.lua`. Specs in `test/headless/spec/` are then discovered by busted's `Spec` pattern.
+
+CI runs the same command on every push and pull request via `.github/workflows/test.yaml`. A matching IntelliJ run configuration lives in `.run/busted[run].run.xml`.
+
 ## Suite layout
 
 | File | What it covers |
 | --- | --- |
-| `test/TestCooldownQueue.lua` | Queue mechanics — add, multiple, duplicate-prevention, remove. |
-| `test/TestSpellMap.lua` | Data integrity of `code/SpellMap.lua` — refIds resolve, `allRanks` lists are consistent, no spellId is a primary in two categories, shared-cooldown groups are coherent. No targeting required. |
-| `test/category/TestPriestSpells.lua` | End-to-end per-spell tracking: drives `SearchBySpellId` → `AddCooldown` → `GetCooldownsByTarget` for every priest spell and asserts a non-primary rank resolves to its primary via the refId chain. |
+| `test/SpellMapValidation.lua` | Pure-data validators for `code/SpellMap.lua` (no WoW APIs, no logging). Source of truth for both the in-game `TestSpellMap` suite and the busted spec. |
+| `test/TestSpellMap.lua` | In-game wrapper — runs the validators and reports through `testLogger`. No targeting required. |
+| `test/headless/spec/SpellMapSpec.lua` | Busted spec — one `it` block per validator. Runs headlessly under busted (locally and in CI). |
+| `test/TestCooldownQueue.lua` | Queue mechanics — add, multiple, duplicate-prevention, remove. In-game only. |
+| `test/category/TestPriestSpells.lua` | End-to-end per-spell tracking: drives `SearchBySpellId` → `AddCooldown` → `GetCooldownsByTarget` for every priest spell and asserts a non-primary rank resolves to its primary via the refId chain. In-game only. |
 | `test/framework/` | Shared helpers (`testLogger`, `testHelper`, log window, `/rgcw test ...` slash commands). |
 
 ## Adding a test for another class
@@ -75,15 +92,29 @@ Each per-class suite lives under `test/category/` and follows the priest pattern
 
 The data-integrity suite (`TestSpellMap`) automatically picks up new classes — no changes needed there.
 
+## Adding a new SpellMap validator
+
+All SpellMap data-integrity checks live in `test/SpellMapValidation.lua` so they run identically in-game and headless.
+
+1. Add a `Validate*` function to `test/SpellMapValidation.lua` that takes the spellMap (and any extra accessors it needs) and returns a list of failure description strings. An empty list means the check passed. Do **not** call `mod.testLogger`, `mod.logger`, or any WoW API — these run under busted too.
+2. Add a wrapper in `test/TestSpellMap.lua` using the existing `RunValidator(testName, getFailures, successMsg, failurePrefix)` helper, and call it from `RunAllTests`.
+3. Add an `it("...", function() assert.same({}, ...) end)` block to `test/headless/spec/SpellMapSpec.lua`.
+
 ## Linting
 
-The project lints with [`ragedunicorn/luacheck`](https://github.com/RagedUnicorn/docker-luacheck):
+The project lints with [`ragedunicorn/luacheck`](https://github.com/RagedUnicorn/docker-luacheck), wired up as a service in `docker-compose.yml`:
 
 ```
-docker run --rm -v "${PWD}:/workspace" ragedunicorn/luacheck:latest .
+docker compose run --rm luacheck
 ```
 
-Linting is required before opening a PR.
+A JUnit report variant is also available:
+
+```
+docker compose run --rm luacheck-report
+```
+
+This writes `target/luacheck-junit.xml`. Linting must be clean before opening a PR.
 
 ## Test environment flag
 
