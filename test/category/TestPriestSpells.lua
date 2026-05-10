@@ -60,8 +60,6 @@ local function VerifySpellTracking(testSpell, trackedEvent)
   local testName = TestNameFor(testSpell.name) .. "_" .. trackedEvent
   mod.testLogger.StartTest(testName)
 
-  mod.cooldownQueue.ClearCooldownQueue()
-
   local casterData = mod.testHelper.GetTestCasterData()
 
   if not mod.testAssert.NotNil(testName, casterData, "Failed to get player data") then return end
