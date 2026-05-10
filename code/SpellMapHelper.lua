@@ -115,16 +115,20 @@ function me.GetAllForCategory(category)
 end
 
 --[[
-  Retrieve a spell from the spellMap by spellId. Follows refIds if present to retrieve the correct spell.
+  Event-aware spellMap lookup for the combat-log path. Resolves spellId to its
+  primary entry (following refId chains and season-gating), then returns the
+  spell only if `event` is in the primary's `trackedEvents`. Returns nil for
+  unknown spellIds, SOD spells outside Season of Discovery, and event mismatches.
+
+  Use this when a combat-log event is firing. For event-free lookups (sibling
+  fan-out, debug injection, data validation), use GetSpellById instead.
 
   @param {number} spellId
   @param {string} event
 
   @return ({string} {number} {table}) | {nil}
-    category, spellId, spell
-    category is the category where the spell was found
-    spellId is the real spellId of the spell, in cases where refIds are used this is the spellId of the base spell
-    spell is the spell data
+    category, realSpellId, clonedSpell. realSpellId is the primary's spellId
+    (which differs from the input when the input is a non-primary rank's id).
 ]]--
 function me.SearchBySpellId(spellId, event)
   if not spellId then return nil end
@@ -174,13 +178,27 @@ function me.SearchBySpellId(spellId, event)
 end
 
 --[[
-  Resolve a spellId to its base spell (following refId chains) without checking trackedEvents.
-  Used by the shared-cooldown handler to look up siblings whose own events have not fired.
+  Event-free spellMap lookup. Resolves spellId to its primary entry (following
+  refId chains and season-gating) and returns it whenever the id matches a
+  season-allowed primary. No `trackedEvents` filter — the counterpart to
+  SearchBySpellId for paths where no combat-log event is in flight.
+
+  Use cases:
+   - shared-cooldown sibling fan-out (CombatLog.TrackSharedCooldownSiblings):
+     siblings go on cooldown by virtue of the trigger spell, so their own
+     events have not fired and there is nothing to filter against.
+   - debug spell injection (DebugInjectorWindow): caller picks a spellId
+     directly from the UI.
+   - data validation walks (ValidateSharedCooldownGroupsConsistent and similar):
+     iterates spellMap entries by id, no combat-log context.
+
+  For the event-aware combat-log lookup, use SearchBySpellId.
 
   @param {number} spellId
 
   @return ({string} {number} {table}) | {nil}
-    category, realSpellId (primary), clonedSpell (with spellId and normalizedSpellName populated)
+    category, realSpellId (primary), clonedSpell (with spellId and
+    normalizedSpellName populated).
 ]]--
 function me.GetSpellById(spellId)
   if not spellId then return nil end
