@@ -86,6 +86,8 @@ Each per-class suite lives under `test/category/` and follows the priest pattern
 
 The data-integrity suite (`TestSpellMap`) automatically picks up new classes — no changes needed there.
 
+Tests get cooldown-queue isolation for free: `mod.testLogger.StartTest` fires a setUp hook (registered in `test/RunTests.lua`) that calls `mod.cooldownQueue.ClearCooldownQueue()` before every test. Don't re-add manual clears at the top of test bodies — they'd be redundant and reintroduce the "negotiated" pattern the framework was built to replace.
+
 ## Adding a new SpellMap validator
 
 All SpellMap data-integrity checks live in `test/SpellMapValidation.lua` so they run identically in-game and headless.

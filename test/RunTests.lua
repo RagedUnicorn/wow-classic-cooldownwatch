@@ -90,7 +90,14 @@ function me.RunAllTests()
     suite.run()
   end
 
-  mod.cooldownQueue.ClearCooldownQueue()
-
   mod.testLogger.Finalize()
 end
+
+--[[
+  Per-test isolation: clear the cooldown queue before every test so suites
+  don't have to manage state inside their bodies. Registered once at file
+  load time. The closure defers `mod.cooldownQueue` lookup to call time.
+]]--
+mod.testLogger.RegisterSetup(function()
+  mod.cooldownQueue.ClearCooldownQueue()
+end)

@@ -44,6 +44,22 @@ me.LOG_LEVEL = {
 }
 
 --[[
+  Functions to run before every test, in registration order. The orchestrator
+  registers the cooldown-queue clear at file-load time so per-test isolation is
+  enforced by the framework rather than negotiated by individual test bodies.
+]]--
+local setUpHooks = {}
+
+--[[
+  Register a function to run before every test. Hook receives the test name.
+
+  @param {function} fn
+]]--
+function me.RegisterSetup(fn)
+  table.insert(setUpHooks, fn)
+end
+
+--[[
   Initialize test logger
 ]]--
 function me.Initialize()
@@ -100,6 +116,7 @@ end
 ]]--
 function me.Log(level, testName, message, data)
   local session = me.GetCurrentSession()
+
   if not session then
     -- Initialize if not already done
     me.Initialize()
@@ -121,6 +138,7 @@ function me.Log(level, testName, message, data)
 
   -- Also print to chat for immediate feedback
   local colorCode = "|cFFFFFFFF"
+
   if level == me.LOG_LEVEL.SUCCESS then
     colorCode = "|cFF00FF00"
   elseif level == me.LOG_LEVEL.FAIL then
@@ -133,6 +151,7 @@ function me.Log(level, testName, message, data)
 
   -- Special color formatting for summary messages
   local formattedMessage = message
+
   if testName == "TestSummary" then
     if message:find("===") then
       formattedMessage = "|cFF00FFFF" .. message .. "|r"
@@ -183,6 +202,7 @@ end
 ]]--
 function me.LogSuccess(testName, message, data)
   local session = me.GetCurrentSession()
+
   if session then
     session.summary.passed = session.summary.passed + 1
   end
@@ -199,6 +219,7 @@ end
 ]]--
 function me.LogFail(testName, message, data)
   local session = me.GetCurrentSession()
+
   if session then
     session.summary.failed = session.summary.failed + 1
   end
@@ -215,6 +236,7 @@ end
 ]]--
 function me.LogError(testName, message, data)
   local session = me.GetCurrentSession()
+
   if session then
     session.summary.errors = session.summary.errors + 1
   end
@@ -229,10 +251,15 @@ end
 ]]--
 function me.StartTest(testName)
   local session = me.GetCurrentSession()
+
   if session then
     session.summary.totalTests = session.summary.totalTests + 1
   end
   me.LogInfo(testName, "Test started")
+
+  for _, fn in ipairs(setUpHooks) do
+    fn(testName)
+  end
 end
 
 --[[
@@ -255,6 +282,7 @@ end
 ]]--
 function me.Finalize()
   local session = me.GetCurrentSession()
+
   if session then
     session.endTime = date("%Y-%m-%d %H:%M:%S")
 
@@ -287,5 +315,6 @@ end
 ]]--
 function me.GetSummary()
   local session = me.GetCurrentSession()
+
   return session and session.summary or nil
 end
