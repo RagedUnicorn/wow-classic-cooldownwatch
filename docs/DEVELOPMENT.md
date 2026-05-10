@@ -121,6 +121,7 @@ The configuration lives in `.luacheckrc`. The `luacheck` service is defined in `
 - Maven plugins (groups `com.ragedunicorn.tools.maven.*`).
 - GitHub Actions in `.github/workflows/`.
 - WoW interface, patch, and CurseForge game versions via custom datasources backed by `RagedUnicorn/wow-renovate-data`. The three `<!-- renovate: ... -->` marker comments in `pom.xml` tell Renovate which properties to update.
+- Alpine base bumps for the `ragedunicorn/luacheck` and `ragedunicorn/busted` images in `docker-compose.yml`. Renovate's built-in `docker-compose` manager treats compound tags like `1.2.0-alpine3.22.1-1` as exact-match compatibility filters and won't bump them, so a `customManagers` regex extracts just the alpine `x.y.z` slice as the comparable version. The leading app-version (`1.2.0-`, `2.3.0-`) and trailing `-<rev>` are preserved verbatim on update — bumps to those parts still need a manual edit.
 
 Renovate runs on Mondays UTC, max 2 concurrent PRs, prefix `chore(deps):`. Validate config changes locally:
 
