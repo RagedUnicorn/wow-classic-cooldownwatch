@@ -294,6 +294,16 @@ function me.Finalize()
     me.LogInfo("TestSummary", string.format("Errors: %d", session.summary.errors))
     me.LogInfo("TestSummary", "Test log saved to CooldownWatchTestLog")
     me.LogInfo("TestSummary", "Access after /reload or logout")
+
+    -- Guard against the Initialize-failure path in RunAllTests, which calls
+    -- Finalize() before any StartTest fires
+    if session.summary.totalTests > 0 then
+      if me.HasFailures() then
+        print("|cFFFF0000=== TESTS FAILED ===|r")
+      else
+        print("|cFF00FF00=== ALL TESTS PASSED ===|r")
+      end
+    end
   end
 end
 
@@ -306,6 +316,24 @@ function me.ClearLogs()
     sessions = {}
   }
   print("|cFF00FFFFTest logs cleared|r")
+end
+
+--[[
+  Whether the current session has accumulated any test failures or errors.
+  Returns false if there is no current session. Errors are treated as failures
+  for this signal - LogError is the catch-path for tests that threw, and a run
+  where every test crashed should not return false.
+
+  @return {boolean}
+]]--
+function me.HasFailures()
+  local session = me.GetCurrentSession()
+
+  if not session then
+    return false
+  end
+
+  return session.summary.failed > 0 or session.summary.errors > 0
 end
 
 --[[
