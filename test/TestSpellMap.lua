@@ -101,6 +101,45 @@ function me.TestSharedCooldownGroupsConsistent()
     "shared-cooldown inconsistency(ies)")
 end
 
+function me.TestUnknownSpellIdReturnsNil()
+  RunValidator("TestUnknownSpellIdReturnsNil",
+    function()
+      return mod.spellMapValidation.ValidateUnknownSpellIdReturnsNil(mod.spellMapHelper)
+    end,
+    "SearchBySpellId returns nil for an unknown spellId",
+    "negative-lookup failure(s)")
+end
+
+function me.TestAliasRejectsMismatchedEvent()
+  RunValidator("TestAliasRejectsMismatchedEvent",
+    function()
+      return mod.spellMapValidation.ValidateAliasRejectsMismatchedEvent(
+        mod.spellMap.GetSpellMap(), mod.spellMapHelper)
+    end,
+    "Every alias entry returns nil for an event not in its primary's trackedEvents",
+    "alias mismatched-event failure(s)")
+end
+
+function me.TestUnknownSharedCooldownGroupReturnsNil()
+  RunValidator("TestUnknownSharedCooldownGroupReturnsNil",
+    function()
+      return mod.spellMapValidation.ValidateUnknownSharedCooldownGroupReturnsNil(
+        mod.spellMap.GetSharedCooldownGroup)
+    end,
+    "GetSharedCooldownGroup returns nil for an unknown group name",
+    "unknown-group failure(s)")
+end
+
+function me.TestUnknownCategoryReturnsEmpty()
+  RunValidator("TestUnknownCategoryReturnsEmpty",
+    function()
+      return mod.spellMapValidation.ValidateUnknownCategoryReturnsEmpty(
+        mod.testHelper.GetSpellsForCategory)
+    end,
+    "GetSpellsForCategory returns an empty array for an unknown category",
+    "unknown-category failure(s)")
+end
+
 --[[
   Run all spellMap data-integrity tests.
 ]]--
@@ -112,6 +151,10 @@ function me.RunAllTests()
   me.TestAllRanksConsistent()
   me.TestNoDuplicatePrimaryAcrossCategories()
   me.TestSharedCooldownGroupsConsistent()
+  me.TestUnknownSpellIdReturnsNil()
+  me.TestAliasRejectsMismatchedEvent()
+  me.TestUnknownSharedCooldownGroupReturnsNil()
+  me.TestUnknownCategoryReturnsEmpty()
 
   mod.testLogger.LogInfo("SpellMap", "=== SpellMap Tests Complete ===")
 end

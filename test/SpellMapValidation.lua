@@ -176,6 +176,109 @@ function me.ValidateNoDuplicatePrimaryAcrossCategories(spellMap)
 end
 
 --[[
+  Verify SearchBySpellId returns nil for a spellId that is not in any category.
+
+  @param {table} spellMapHelper - The mod.spellMapHelper module
+
+  @return {table}
+]]--
+function me.ValidateUnknownSpellIdReturnsNil(spellMapHelper)
+  local failures = {}
+  local unknownSpellId = 99999
+  local event = "SPELL_CAST_SUCCESS"
+  local result = spellMapHelper.SearchBySpellId(unknownSpellId, event)
+
+  if result ~= nil then
+    table.insert(failures,
+      string.format("SearchBySpellId(%d, '%s') should return nil but returned non-nil",
+        unknownSpellId, event))
+  end
+
+  return failures
+end
+
+--[[
+  Verify every alias entry returns nil from SearchBySpellId when called with an
+  event that is not in its primary's trackedEvents. Uses a synthetic event name
+  guaranteed not to appear anywhere in the spellMap.
+
+  @param {table} spellMap
+  @param {table} spellMapHelper - The mod.spellMapHelper module
+
+  @return {table}
+]]--
+function me.ValidateAliasRejectsMismatchedEvent(spellMap, spellMapHelper)
+  local failures = {}
+  local fakeEvent = "SPELL_NEVER_TRACKED_BY_TEST"
+
+  for category, spells in pairs(spellMap) do
+    for spellId, entry in pairs(spells) do
+      if type(entry) == "table" and type(entry.refId) == "number" then
+        local result = spellMapHelper.SearchBySpellId(spellId, fakeEvent)
+
+        if result ~= nil then
+          table.insert(failures,
+            string.format("%s/%s (alias of %s) returned non-nil for fake event '%s'",
+              category, tostring(spellId), tostring(entry.refId), fakeEvent))
+        end
+      end
+    end
+  end
+
+  return failures
+end
+
+--[[
+  Verify GetSharedCooldownGroup returns nil for a group name that is not
+  registered.
+
+  @param {function} getSharedCooldownGroup - mod.spellMap.GetSharedCooldownGroup
+
+  @return {table}
+]]--
+function me.ValidateUnknownSharedCooldownGroupReturnsNil(getSharedCooldownGroup)
+  local failures = {}
+  local unknown = "this_group_should_not_exist"
+  local result = getSharedCooldownGroup(unknown)
+
+  if result ~= nil then
+    table.insert(failures,
+      string.format("GetSharedCooldownGroup('%s') should return nil but returned non-nil",
+        unknown))
+  end
+
+  return failures
+end
+
+--[[
+  Verify GetSpellsForCategory returns an empty array for a category name that
+  is not present in the spellMap. The function lives on mod.testHelper rather
+  than the production data layer, so this validator is exercised only by the
+  in-game wrapper (Bootstrap.lua does not load TestHelper).
+
+  @param {function} getSpellsForCategory - mod.testHelper.GetSpellsForCategory
+
+  @return {table}
+]]--
+function me.ValidateUnknownCategoryReturnsEmpty(getSpellsForCategory)
+  local failures = {}
+  local unknown = "this_category_should_not_exist"
+  local result = getSpellsForCategory(unknown)
+
+  if type(result) ~= "table" then
+    table.insert(failures,
+      string.format("GetSpellsForCategory('%s') should return a table but returned %s",
+        unknown, type(result)))
+  elseif #result ~= 0 then
+    table.insert(failures,
+      string.format("GetSpellsForCategory('%s') should return empty but returned %d entries",
+        unknown, #result))
+  end
+
+  return failures
+end
+
+--[[
   Verify every member of every shared-cooldown group resolves to a primary,
   shares the same cooldown value within the group, and carries the matching
   sharedCooldownGroup field on its primary entry.
