@@ -96,14 +96,6 @@ function me.GetTestCasterData()
 end
 
 --[[
-  Print targeting instruction for tests
-]]--
-function me.PrintTargetingInstruction()
-  print("|cFFFFFF00NOTE:|r For cooldown tests to be visible, you must target yourself first!")
-  print("Use |cFFFFC300/target " .. (me.GetPlayerName() or "YourName") .. "|r or click on your character")
-end
-
---[[
   Create a test spell data structure
 
   @param {number} spellId - The spell ID

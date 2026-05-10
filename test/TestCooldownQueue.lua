@@ -31,16 +31,10 @@ me.tag = "TestCooldownQueue"
 
 --[[
   Test adding a cooldown to the queue
-
-  @param {boolean} skipHint - Optional flag to skip showing targeting hint
 ]]--
-function me.TestAddCooldown(skipHint)
+function me.TestAddCooldown()
   mod.testLogger.StartTest("TestAddCooldown")
   mod.testLogger.LogInfo("TestAddCooldown", "Testing: Add cooldown to queue")
-
-  if not skipHint then
-    mod.testHelper.ShowTargetingHint()
-  end
 
   local casterData = mod.testHelper.GetTestCasterData()
 
@@ -78,16 +72,10 @@ end
 
 --[[
   Test adding multiple cooldowns
-
-  @param {boolean} skipHint - Optional flag to skip showing targeting hint
 ]]--
-function me.TestAddMultipleCooldowns(skipHint)
+function me.TestAddMultipleCooldowns()
   mod.testLogger.StartTest("TestAddMultipleCooldowns")
   mod.testLogger.LogInfo("TestAddMultipleCooldowns", "Testing: Add multiple cooldowns")
-
-  if not skipHint then
-    mod.testHelper.ShowTargetingHint()
-  end
 
   local casterData = mod.testHelper.GetTestCasterData()
 
@@ -149,16 +137,10 @@ end
 
 --[[
   Test duplicate cooldown handling
-
-  @param {boolean} skipHint - Optional flag to skip showing targeting hint
 ]]--
-function me.TestDuplicateCooldown(skipHint)
+function me.TestDuplicateCooldown()
   mod.testLogger.StartTest("TestDuplicateCooldown")
   mod.testLogger.LogInfo("TestDuplicateCooldown", "Testing: Duplicate cooldown handling")
-
-  if not skipHint then
-    mod.testHelper.ShowTargetingHint()
-  end
 
   local casterData = mod.testHelper.GetTestCasterData()
   if not casterData then
@@ -225,16 +207,10 @@ end
 
 --[[
   Test removing specific cooldowns
-
-  @param {boolean} skipHint - Optional flag to skip showing targeting hint
 ]]--
-function me.TestRemoveCooldown(skipHint)
+function me.TestRemoveCooldown()
   mod.testLogger.StartTest("TestRemoveCooldown")
   mod.testLogger.LogInfo("TestRemoveCooldown", "Testing: Remove specific cooldown")
-
-  if not skipHint then
-    mod.testHelper.ShowTargetingHint()
-  end
 
   local casterData = mod.testHelper.GetTestCasterData()
 
@@ -304,12 +280,10 @@ end
 function me.RunAllTests()
   mod.testLogger.LogInfo("CooldownQueue", "=== Running CooldownQueue Tests ===")
 
-  mod.testHelper.ShowTargetingHint()
-
-  me.TestAddCooldown(true)
-  me.TestAddMultipleCooldowns(true)
-  me.TestDuplicateCooldown(true)
-  me.TestRemoveCooldown(true)
+  me.TestAddCooldown()
+  me.TestAddMultipleCooldowns()
+  me.TestDuplicateCooldown()
+  me.TestRemoveCooldown()
   me.ClearTestCooldowns()
 
   mod.testLogger.LogInfo("CooldownQueue", "=== CooldownQueue Tests Complete ===")
