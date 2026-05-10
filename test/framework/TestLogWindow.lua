@@ -38,7 +38,6 @@ me.tag = "TestLogWindow"
 local CreateTimestamp
 local CreateLevelText
 local CreateTestNameText
-local GetMessageColor
 local CreateMessageText
 local AddDataTooltip
 
@@ -54,7 +53,8 @@ me.levelColors = {
   INFO = {1, 1, 1},            -- White
   SUCCESS = {0, 1, 0},         -- Green
   FAIL = {1, 0, 0},            -- Red
-  ERROR = {1, 0, 1}            -- Magenta
+  ERROR = {1, 0, 1},           -- Magenta
+  HEADER = {0, 1, 1}           -- Cyan
 }
 
 --[[
@@ -254,47 +254,21 @@ CreateTestNameText = function(parent, anchor, testName)
 end
 
 --[[
-  Get message text color based on content
-
-  @param {string} testName - Test name
-  @param {string} message - Log message
-  @param {table} defaultColor - Default color to use
-
-  @return {number, number, number} - RGB color values
-]]--
-GetMessageColor = function(testName, message, defaultColor)
-  if testName == "TestSummary" then
-    if message:find("===") then
-      return 0, 1, 1  -- Cyan for headers
-    elseif message:find("Passed:") then
-      return 0, 1, 0  -- Green for passed
-    elseif message:find("Failed:") then
-      return 1, 0, 0  -- Red for failed
-    elseif message:find("Errors:") then
-      return 1, 0, 1  -- Magenta for errors
-    end
-  end
-
-  return unpack(defaultColor)
-end
-
---[[
   Create message text font string
 
   @param {Frame} parent - Parent frame
   @param {FontString} anchor - Anchor element
-  @param {string} testName - Test name
   @param {string} message - Log message
-  @param {table} defaultColor - Default color
+  @param {table} defaultColor - Color from me.levelColors[level]
 
   @return {FontString} - Created message text
 ]]--
-CreateMessageText = function(parent, anchor, testName, message, defaultColor)
+CreateMessageText = function(parent, anchor, message, defaultColor)
   local messageText = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
   messageText:SetPoint("LEFT", anchor, "RIGHT", 5, 0)
   messageText:SetPoint("RIGHT", parent, "RIGHT", -5, 0)
   messageText:SetText(message)
-  messageText:SetTextColor(GetMessageColor(testName, message, defaultColor))
+  messageText:SetTextColor(unpack(defaultColor))
   messageText:SetJustifyH("LEFT")
 
   return messageText
@@ -352,7 +326,7 @@ function me.CreateMessageFrame(parent, level, testName, message, data)
   local testNameText = CreateTestNameText(frame, levelText, testName)
 
   local color = me.levelColors[level] or {1, 1, 1}
-  CreateMessageText(frame, testNameText, testName, message, color)
+  CreateMessageText(frame, testNameText, message, color)
 
   if data then
     AddDataTooltip(frame, data)
