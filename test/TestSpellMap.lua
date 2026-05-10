@@ -115,3 +115,5 @@ function me.RunAllTests()
 
   mod.testLogger.LogInfo("SpellMap", "=== SpellMap Tests Complete ===")
 end
+
+mod.testRunner.Register("spellmap", "spellMap data-integrity suite", me.RunAllTests)

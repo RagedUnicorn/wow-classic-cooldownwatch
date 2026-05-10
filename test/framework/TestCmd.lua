@@ -41,39 +41,36 @@ local ToggleDebugMode
   Initialize test command module
 ]]--
 function me.Initialize()
-  if mod.cmd and mod.cmd.RegisterCommand then
-    mod.cmd.RegisterCommand("test", function(args)
-      if #args > 0 then
-        HandleTestCommand(args[1], args)
-      else
-        ShowTestHelp()
-      end
-    end)
+  mod.cmd.RegisterCommand("test", function(args)
+    if #args > 0 then
+      HandleTestCommand(args[1], args)
+    else
+      ShowTestHelp()
+    end
+  end)
 
-    mod.cmd.RegisterCommand("debug", function()
-      ToggleDebugMode()
-    end)
+  mod.cmd.RegisterCommand("debug", function()
+    ToggleDebugMode()
+  end)
 
-    mod.logger.LogDebug(me.tag, "Test commands registered")
-  else
-    mod.logger.LogError(me.tag, "Failed to register test commands - command module not available")
-  end
+  mod.logger.LogDebug(me.tag, "Test commands registered")
 end
 
 --[[
-  Show test command help
+  Show test command help. Per-suite lines come from the testRunner registry;
+  static lines (utility commands, sub-test invocation) are hand-written.
 
   Note: Will not be translated as this is a development-only feature
 ]]--
 ShowTestHelp = function()
   print("|cFF00FFFFTest Commands:|r")
   print("|cFF00FFFF/rgcw test all|r - Run all test suites")
-  print("|cFF00FFFF/rgcw test cooldownqueue|r - Run cooldown queue suite")
+
+  for _, suite in ipairs(mod.testRunner.GetSuites()) do
+    print("|cFF00FFFF/rgcw test " .. suite.slug .. "|r - Run " .. suite.displayName)
+  end
+
   print("|cFF00FFFF/rgcw test cooldownqueue <test>|r - Run a specific cooldown queue test")
-  print("|cFF00FFFF/rgcw test spellmap|r - Run spellMap data-integrity suite")
-  print("|cFF00FFFF/rgcw test priestspells|r - Run priest spell tracking suite")
-  print("|cFF00FFFF/rgcw test shamanspells|r - Run shaman spell tracking suite")
-  print("|cFF00FFFF/rgcw test roguespells|r - Run rogue spell tracking suite")
   print("|cFF00FFFF/rgcw test inject|r - Toggle debug spell injector window")
   print("|cFF00FFFF/rgcw test log|r - Toggle test log window")
   print("|cFF00FFFF/rgcw test clear-logs|r - Clear test logs")
@@ -85,93 +82,46 @@ ShowTestHelp = function()
 end
 
 --[[
-  Handle test commands
+  Handle test commands. Suite invocations dispatch through the testRunner
+  registry; the cooldownqueue sub-test arg and the utility commands are the
+  only special cases.
 
   @param {string} testCommand - The test command to execute
   @param {table} args - All command arguments
 ]]--
 HandleTestCommand = function(testCommand, args)
   if testCommand == "all" then
-    if mod.testRunner then
-      mod.testRunner.RunAllTests()
+    mod.testRunner.RunAllTests()
+    return
+  end
+
+  if testCommand == "cooldownqueue" and #args > 1 then
+    local testName = args[2]
+    local fn = mod.testCooldownQueue["Test" .. testName]
+
+    if fn then
+      fn()
     else
-      mod.logger.LogError(me.tag, "Test runner not available")
-    end
-  elseif testCommand == "cooldownqueue" then
-    if not mod.testCooldownQueue then
-      mod.logger.LogError(me.tag, "CooldownQueue test module not loaded")
-      return
+      print("|cFFFF0000Unknown test: " .. testName .. "|r")
+      print("Available tests: AddCooldown, AddMultipleCooldowns, DuplicateCooldown, RemoveCooldown")
     end
 
-    if #args > 1 then
-      -- Run specific test
-      local testName = args[2]
-      local testFunction = "Test" .. testName
+    return
+  end
 
-      if mod.testCooldownQueue[testFunction] then
-        mod.testCooldownQueue[testFunction]()
-      else
-        print("|cFFFF0000Unknown test: " .. testName .. "|r")
-        print("Available tests: AddCooldown, AddMultipleCooldowns, DuplicateCooldown, RemoveCooldown")
-      end
-    else
-      -- Run all tests using the test runner
-      if mod.testRunner then
-        mod.testRunner.TestCooldownQueue()
-      else
-        mod.testCooldownQueue.RunAllTests()
-      end
-    end
-  elseif testCommand == "spellmap" then
-    if mod.testRunner then
-      mod.testRunner.TestSpellMap()
-    elseif mod.testSpellMap then
-      mod.testSpellMap.RunAllTests()
-    else
-      mod.logger.LogError(me.tag, "SpellMap test module not loaded")
-    end
-  elseif testCommand == "priestspells" then
-    if mod.testRunner then
-      mod.testRunner.TestPriestSpells()
-    elseif mod.testPriestSpells then
-      mod.testPriestSpells.RunAllTests()
-    else
-      mod.logger.LogError(me.tag, "PriestSpells test module not loaded")
-    end
-  elseif testCommand == "shamanspells" then
-    if mod.testRunner then
-      mod.testRunner.TestShamanSpells()
-    elseif mod.testShamanSpells then
-      mod.testShamanSpells.RunAllTests()
-    else
-      mod.logger.LogError(me.tag, "ShamanSpells test module not loaded")
-    end
-  elseif testCommand == "roguespells" then
-    if mod.testRunner then
-      mod.testRunner.TestRogueSpells()
-    elseif mod.testRogueSpells then
-      mod.testRogueSpells.RunAllTests()
-    else
-      mod.logger.LogError(me.tag, "RogueSpells test module not loaded")
-    end
-  elseif testCommand == "inject" then
-    if mod.debugInjectorWindow then
-      mod.debugInjectorWindow.Toggle()
-    else
-      mod.logger.LogError(me.tag, "Debug injector window not available")
-    end
+  local suite = mod.testRunner.GetSuite(testCommand)
+
+  if suite then
+    suite.run()
+    return
+  end
+
+  if testCommand == "inject" then
+    mod.debugInjectorWindow.Toggle()
   elseif testCommand == "log" or testCommand == "logs" then
-    if mod.testLogWindow then
-      mod.testLogWindow.Toggle()
-    else
-      mod.logger.LogError(me.tag, "Test log window not available")
-    end
+    mod.testLogWindow.Toggle()
   elseif testCommand == "clear-logs" then
-    if mod.testLogger then
-      mod.testLogger.ClearLogs()
-    else
-      mod.logger.LogError(me.tag, "Test logger not available")
-    end
+    mod.testLogger.ClearLogs()
   else
     ShowTestHelp()
   end

@@ -168,3 +168,5 @@ function me.RunAllTests()
 
   mod.testLogger.LogInfo("RogueSpells", "=== Rogue Spell Tests Complete ===")
 end
+
+mod.testRunner.Register("roguespells", "rogue spell tracking suite", me.RunAllTests)

@@ -32,20 +32,51 @@ mod.testRunner = me
 
 me.tag = "TestRunner"
 
+local registry = {}
+
+--[[
+  Register a test suite. Each suite file calls this at file-load time so the
+  runner, the cmd dispatcher, and the help text can iterate a single source.
+
+  @param {string} slug          - Command-line slug (e.g. "priestspells")
+  @param {string} displayName   - Human-readable label for help text
+  @param {function} run         - Suite entry point (runs the whole suite)
+]]--
+function me.Register(slug, displayName, run)
+  table.insert(registry, { slug = slug, displayName = displayName, run = run })
+end
+
+--[[
+  @return {table} - Ordered array of registered suites
+]]--
+function me.GetSuites()
+  return registry
+end
+
+--[[
+  @param {string} slug
+  @return {table|nil} - Registered suite entry or nil
+]]--
+function me.GetSuite(slug)
+  for _, suite in ipairs(registry) do
+    if suite.slug == slug then
+      return suite
+    end
+  end
+end
+
 --[[
   Initialize test runner
 ]]--
 function me.Initialize()
-  -- Initialize test components
   mod.logger.LogInfo(me.tag, "Test runner initialized")
   return true
 end
 
 --[[
-  Run all tests
+  Run every registered test suite in registration (TOC) order.
 ]]--
 function me.RunAllTests()
-  -- Initialize test logger
   mod.testLogger.Initialize()
   mod.testLogger.LogInfo("TestRunner", "Starting CooldownWatch Test Suite")
 
@@ -55,73 +86,11 @@ function me.RunAllTests()
     return
   end
 
-  -- Run individual test suites
-  me.TestCooldownQueue()
-  me.TestSpellMap()
-  me.TestPriestSpells()
-  me.TestShamanSpells()
-  me.TestRogueSpells()
-
-  -- Cleanup - clear any test cooldowns from the queue
-  if mod.cooldownQueue then
-    mod.cooldownQueue.ClearCooldownQueue()
+  for _, suite in ipairs(registry) do
+    suite.run()
   end
 
-  -- Finalize test logger
+  mod.cooldownQueue.ClearCooldownQueue()
+
   mod.testLogger.Finalize()
-end
-
---[[
-  Test cooldown queue functionality
-]]--
-function me.TestCooldownQueue()
-  if mod.testCooldownQueue then
-    mod.testCooldownQueue.RunAllTests()
-  else
-    mod.testLogger.LogError("TestRunner", "TestCooldownQueue module not loaded")
-  end
-end
-
---[[
-  Test spellMap data integrity
-]]--
-function me.TestSpellMap()
-  if mod.testSpellMap then
-    mod.testSpellMap.RunAllTests()
-  else
-    mod.testLogger.LogError("TestRunner", "TestSpellMap module not loaded")
-  end
-end
-
---[[
-  Test priest spell tracking end-to-end
-]]--
-function me.TestPriestSpells()
-  if mod.testPriestSpells then
-    mod.testPriestSpells.RunAllTests()
-  else
-    mod.testLogger.LogError("TestRunner", "TestPriestSpells module not loaded")
-  end
-end
-
---[[
-  Test shaman spell tracking end-to-end
-]]--
-function me.TestShamanSpells()
-  if mod.testShamanSpells then
-    mod.testShamanSpells.RunAllTests()
-  else
-    mod.testLogger.LogError("TestRunner", "TestShamanSpells module not loaded")
-  end
-end
-
---[[
-  Test rogue spell tracking end-to-end
-]]--
-function me.TestRogueSpells()
-  if mod.testRogueSpells then
-    mod.testRogueSpells.RunAllTests()
-  else
-    mod.testLogger.LogError("TestRunner", "TestRogueSpells module not loaded")
-  end
 end

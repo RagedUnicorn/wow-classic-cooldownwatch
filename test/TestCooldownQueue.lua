@@ -313,3 +313,5 @@ function me.RunAllTests()
 
   mod.testLogger.LogInfo("CooldownQueue", "=== CooldownQueue Tests Complete ===")
 end
+
+mod.testRunner.Register("cooldownqueue", "cooldown queue suite", me.RunAllTests)

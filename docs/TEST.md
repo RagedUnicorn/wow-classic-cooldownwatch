@@ -75,19 +75,13 @@ CI runs the same command on every push and pull request via `.github/workflows/t
 Each per-class suite lives under `test/category/` and follows the priest pattern verbatim. To add Mage tests:
 
 1. **Create `test/category/TestMageSpells.lua`.** Copy `TestPriestSpells.lua`, change `CATEGORY = "mage"`, and replace `PRIEST_BASE_SPELLS` with the mage spell list `{ spellId, name }` pairs. Update the rank-resolution test to reference a real mage non-primary rank.
-2. **Register it in the test runner.** In `test/RunTests.lua`, add a wrapper after `me.TestPriestSpells`:
+2. **Self-register the suite.** At the bottom of the new file (after `function me.RunAllTests`), append:
 
    ```lua
-   function me.TestMageSpells()
-     if mod.testMageSpells then
-       mod.testMageSpells.RunAllTests()
-     else
-       mod.testLogger.LogError("TestRunner", "TestMageSpells module not loaded")
-     end
-   end
+   mod.testRunner.Register("magespells", "mage spell tracking suite", me.RunAllTests)
    ```
 
-   Then call `me.TestMageSpells()` from `RunAllTests`.
+   The runner, the `/rgcw test ...` dispatcher, and the help output all iterate this registry — no edits to `test/RunTests.lua` or `test/framework/TestCmd.lua` are required.
 3. **Add the file to the TOC.** Append `test/category/TestMageSpells.lua` to `build-resources/cooldownwatch-development.toc.tpl` and to the live `CooldownWatch.toc`. The release template stays empty of tests.
 
 The data-integrity suite (`TestSpellMap`) automatically picks up new classes — no changes needed there.
