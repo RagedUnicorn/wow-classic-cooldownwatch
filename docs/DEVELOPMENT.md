@@ -78,12 +78,14 @@ local spellMap = {
 }
 ```
 
-### Required invariants (enforced by `TestSpellMap`)
+### Required invariants (enforced by `SpellMapValidation`)
 
 - Every `refId` must point at a primary entry in the same category.
 - Every primary's `allRanks` must include its own spellId.
 - Every id in `allRanks` must exist in the same category as either the primary or a `refId` pointing back to that primary.
 - A spellId cannot be primary in more than one category. (Rank aliases may repeat.)
+
+These run in-game via `TestSpellMap` and headless under busted via `test/headless/spec/SpellMapSpec.lua`. See `docs/TEST.md` for how to invoke them.
 
 ### Shared-cooldown groups
 
@@ -107,14 +109,14 @@ When any member fires, `code/CombatLog.lua` queues all siblings with the same `c
 ## Linting
 
 ```
-docker run --rm -v "${PWD}:/workspace" ragedunicorn/luacheck:latest .
+docker compose run --rm luacheck
 ```
 
-The configuration lives in `.luacheckrc`. Lint must be clean before opening a PR.
+The configuration lives in `.luacheckrc`. The `luacheck` service is defined in `docker-compose.yml`. Lint must be clean before opening a PR.
 
 ## Renovate
 
-`renovate.json` mirrors the setup from [`wow-classic-pvpwarn`](https://github.com/RagedUnicorn/wow-classic-pvpwarn). It tracks:
+`renovate.json` configures dependency updates. It tracks:
 
 - Maven plugins (groups `com.ragedunicorn.tools.maven.*`).
 - GitHub Actions in `.github/workflows/`.

@@ -3,6 +3,7 @@
 # Usage:
 #   docker compose run --rm luacheck                    # Run lua linting
 #   docker compose run --rm luacheck-report             # Generate lua lint report
+#   docker compose run --rm busted                      # Run headless tests
 
 services:
   luacheck:
@@ -21,3 +22,10 @@ services:
     working_dir: /workspace
     entrypoint: /bin/sh
     command: ["-c", "luacheck --formatter JUnit . > /reports/luacheck-junit.xml"]
+  busted:
+    image: ragedunicorn/busted:2.3.0-alpine3.23.4-1
+    container_name: cooldown-watch-busted
+    volumes:
+      - ./:/workspace:ro
+    working_dir: /workspace
+    command: ["."]

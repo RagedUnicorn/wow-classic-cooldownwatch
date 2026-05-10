@@ -42,6 +42,7 @@ test/framework/TestLogWindow.lua
 test/framework/TestLogWindow.xml
 test/RunTests.lua
 test/TestCooldownQueue.lua
+test/SpellMapValidation.lua
 test/TestSpellMap.lua
 test/category/TestPriestSpells.lua
 test/category/TestShamanSpells.lua

@@ -1,15 +1,15 @@
-name: "Lint Project"
+name: "Headless Tests"
 on:
   push:
     branches: [master]
   pull_request:
 
 jobs:
-  lint-luacheck:
+  test-spellmap:
     runs-on: ubuntu-latest
-    name: Luacheck linting
+    name: SpellMap data integrity
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Luacheck for lua codebases
-        uses: RagedUnicorn/action-luacheck@v2
+      - name: Busted for lua codebases
+        uses: RagedUnicorn/action-busted@v1
