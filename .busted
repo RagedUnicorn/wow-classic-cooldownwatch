@@ -2,6 +2,6 @@ return {
   default = {
     ROOT = { "test/headless/spec" },
     helper = "test/headless/Bootstrap.lua",
-    pattern = "Spec",
+    pattern = "Spec%.lua$",
   }
 }
