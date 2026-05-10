@@ -50,7 +50,7 @@ function me.TestAddCooldown(skipHint)
     return
   end
 
-  local spell = mod.testHelper.CreateTestSpell(2094, "Blind", 120, 90)
+  local spell = mod.testHelper.CreateTestSpell(10947, "Mind Blast", 8, 8)
 
   mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, "priest", spell)
 
@@ -106,16 +106,17 @@ function me.TestAddMultipleCooldowns(skipHint)
       0
     ),
     mod.testHelper.CreateTestSpell(
-      6789,
-      "Death Coil",
-      120,
-      120,
+      2139,
+      "Counterspell",
+      24,
+      20,
       1
     ),
-    mod.testHelper.CreateTestSpell(8122,
-      "Psychic Scream",
-      30,
-      26,
+    mod.testHelper.CreateTestSpell(
+      120,
+      "Cone of Cold",
+      10,
+      10,
       2
     )
   }
