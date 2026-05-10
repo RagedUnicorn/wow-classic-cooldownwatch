@@ -64,37 +64,16 @@ local function VerifySpellTracking(testSpell, trackedEvent)
 
   local casterData = mod.testHelper.GetTestCasterData()
 
-  if not casterData then
-    mod.testLogger.EndTest(testName, false, "Failed to get player data")
-    return
-  end
+  if not mod.testAssert.NotNil(testName, casterData, "Failed to get player data") then return end
 
   local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(testSpell.spellId, trackedEvent)
 
-  if not spell then
-    mod.testLogger.EndTest(testName, false,
-      string.format("SearchBySpellId returned nil for spellId %d (event %s)",
-        testSpell.spellId, trackedEvent))
-    return
-  end
-
-  if category ~= CATEGORY then
-    mod.testLogger.EndTest(testName, false,
-      string.format("category '%s' (expected '%s')", tostring(category), CATEGORY))
-    return
-  end
-
-  if realSpellId ~= testSpell.spellId then
-    mod.testLogger.EndTest(testName, false,
-      string.format("realSpellId %s (expected %d)", tostring(realSpellId), testSpell.spellId))
-    return
-  end
-
-  if spell.name ~= testSpell.name then
-    mod.testLogger.EndTest(testName, false,
-      string.format("spell.name '%s' (expected '%s')", tostring(spell.name), testSpell.name))
-    return
-  end
+  if not mod.testAssert.NotNil(testName, spell,
+    string.format("SearchBySpellId returned nil for spellId %d (event %s)",
+      testSpell.spellId, trackedEvent)) then return end
+  if not mod.testAssert.Equal(testName, category, CATEGORY, "category") then return end
+  if not mod.testAssert.Equal(testName, realSpellId, testSpell.spellId, "realSpellId") then return end
+  if not mod.testAssert.Equal(testName, spell.name, testSpell.name, "spell.name") then return end
 
   spell.castTime = GetTime()
   mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, category, spell)
@@ -114,6 +93,32 @@ local function VerifySpellTracking(testSpell, trackedEvent)
 end
 
 --[[
+  Verify a non-primary rank resolves through the refId chain to the expected
+  primary spellId. Pulled out as a local so the per-event loop in the public
+  test function can early-return on assertion failure.
+
+  @param {string} testName
+  @param {number} rankSpellId
+  @param {number} expectedPrimary
+  @param {string} expectedName
+  @param {string} trackedEvent
+]]--
+local function CheckRankResolution(testName, rankSpellId, expectedPrimary, expectedName, trackedEvent)
+  local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(rankSpellId, trackedEvent)
+
+  if not mod.testAssert.NotNil(testName, spell,
+    string.format("SearchBySpellId returned nil for rank spellId %d (event %s)",
+      rankSpellId, trackedEvent)) then return end
+  if not mod.testAssert.Equal(testName, category, CATEGORY, "category") then return end
+  if not mod.testAssert.Equal(testName, realSpellId, expectedPrimary, "realSpellId") then return end
+  if not mod.testAssert.Equal(testName, spell.name, expectedName, "spell.name") then return end
+
+  mod.testLogger.EndTest(testName, true,
+    string.format("Rank spellId %d resolved to primary %d ('%s') via event %s",
+      rankSpellId, realSpellId, spell.name, trackedEvent))
+end
+
+--[[
   Test that a non-primary rank (Earth Shock rank 1, spellId 8042) resolves
   through the refId chain to the primary spellId (10414).
 ]]--
@@ -125,27 +130,7 @@ function me.TestEarthShockRankResolution()
   for _, trackedEvent in ipairs(primary.trackedEvents) do
     local testName = "TestShaman_EarthShockRankResolution_" .. trackedEvent
     mod.testLogger.StartTest(testName)
-
-    local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(rankSpellId, trackedEvent)
-
-    if not spell then
-      mod.testLogger.EndTest(testName, false,
-        string.format("SearchBySpellId returned nil for rank spellId %d (event %s)",
-          rankSpellId, trackedEvent))
-    elseif category ~= CATEGORY then
-      mod.testLogger.EndTest(testName, false,
-        string.format("category '%s' (expected '%s')", tostring(category), CATEGORY))
-    elseif realSpellId ~= expectedPrimary then
-      mod.testLogger.EndTest(testName, false,
-        string.format("realSpellId %s (expected %d)", tostring(realSpellId), expectedPrimary))
-    elseif spell.name ~= "Earth Shock" then
-      mod.testLogger.EndTest(testName, false,
-        string.format("spell.name '%s' (expected 'Earth Shock')", tostring(spell.name)))
-    else
-      mod.testLogger.EndTest(testName, true,
-        string.format("Rank spellId %d resolved to primary %d ('%s') via event %s",
-          rankSpellId, realSpellId, spell.name, trackedEvent))
-    end
+    CheckRankResolution(testName, rankSpellId, expectedPrimary, "Earth Shock", trackedEvent)
   end
 end
 
@@ -162,35 +147,30 @@ function me.TestShockSharedCooldown()
 
   local casterData = mod.testHelper.GetTestCasterData()
 
-  if not casterData then
-    mod.testLogger.EndTest(testName, false, "Failed to get player data")
-    return
-  end
+  if not mod.testAssert.NotNil(testName, casterData, "Failed to get player data") then return end
 
   local expected = mod.spellMap.GetSharedCooldownGroup(groupName)
 
-  if not expected or #expected == 0 then
+  if not mod.testAssert.NotNil(testName, expected,
+    string.format("Shared cooldown group '%s' missing in spellMap", groupName)) then return end
+  if #expected == 0 then
     mod.testLogger.EndTest(testName, false,
-      string.format("Shared cooldown group '%s' missing or empty in spellMap", groupName))
+      string.format("Shared cooldown group '%s' is empty", groupName))
     return
   end
 
   local triggerSpellId = expected[1]
   local triggerPrimary = mod.spellMap.GetSpellMap()[CATEGORY][triggerSpellId]
 
-  if not triggerPrimary or not triggerPrimary.trackedEvents[1] then
-    mod.testLogger.EndTest(testName, false,
-      string.format("Trigger spellId %d primary entry missing in spellMap", triggerSpellId))
-    return
-  end
+  if not mod.testAssert.NotNil(testName, triggerPrimary,
+    string.format("Trigger spellId %d primary entry missing in spellMap", triggerSpellId)) then return end
+  if not mod.testAssert.NotNil(testName, triggerPrimary.trackedEvents[1],
+    string.format("Trigger spellId %d primary has no trackedEvents", triggerSpellId)) then return end
 
   local _, _, triggerSpell = mod.spellMapHelper.SearchBySpellId(triggerSpellId, triggerPrimary.trackedEvents[1])
 
-  if not triggerSpell then
-    mod.testLogger.EndTest(testName, false,
-      string.format("Trigger spellId %d not found in spellMap", triggerSpellId))
-    return
-  end
+  if not mod.testAssert.NotNil(testName, triggerSpell,
+    string.format("Trigger spellId %d not found in spellMap", triggerSpellId)) then return end
 
   local castTime = GetTime()
   mod.combatLog.TrackCooldown(casterData.guid, casterData.name, triggerSpell, castTime, CATEGORY, nil)

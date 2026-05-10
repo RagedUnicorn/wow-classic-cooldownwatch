@@ -37,6 +37,7 @@ code/Debug.lua
 # Test Framework (Development Only)
 test/framework/TestCmd.lua
 test/framework/TestLogger.lua
+test/framework/TestAssert.lua
 test/framework/TestHelper.lua
 test/framework/TestLogWindow.lua
 test/framework/TestLogWindow.xml
