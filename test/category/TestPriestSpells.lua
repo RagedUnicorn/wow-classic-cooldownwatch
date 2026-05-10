@@ -167,3 +167,5 @@ function me.RunAllTests()
 
   mod.testLogger.LogInfo("PriestSpells", "=== Priest Spell Tests Complete ===")
 end
+
+mod.testRunner.Register("priestspells", "priest spell tracking suite", me.RunAllTests)

@@ -239,3 +239,5 @@ function me.RunAllTests()
 
   mod.testLogger.LogInfo("ShamanSpells", "=== Shaman Spell Tests Complete ===")
 end
+
+mod.testRunner.Register("shamanspells", "shaman spell tracking suite", me.RunAllTests)
