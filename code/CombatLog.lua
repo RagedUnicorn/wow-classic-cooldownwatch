@@ -34,11 +34,9 @@ me.tag = "CombatLog"
 --[[
   Processing the details of the current combat log event. Invoked when 'COMBAT_LOG_EVENT_UNFILTERED' is fired
 
-  @param {function} callback
-    Optional function that is invoked with status infos. Currently only used for testing
   @param {vararg} ...
 ]]--
-function me.ProcessUnfilteredCombatLogEvent(callback, ...)
+function me.ProcessUnfilteredCombatLogEvent(...)
   local event, sourceFlags = mod.common.SelectMultiple({2, 6}, ...)
 
   -- TODO [FEATURE]: Might want to filter events in specific zones
@@ -47,36 +45,29 @@ function me.ProcessUnfilteredCombatLogEvent(callback, ...)
     Filter for hostile player events only
   ]]--
   if CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS) then
-    me.ProcessEventHostilePlayers(event, callback, ...)
+    me.ProcessEventHostilePlayers(event, ...)
   end
   -- TODO [FEATURE]: We could track friendly cooldowns as well and put it behind a configuration flag
 end
 
 --[[
   @param {string} event
-  @param {function} callback
-    Optional function that is invoked with status infos. Currently only used for testing
-
   @param {vararg} ...
 ]]--
-function me.ProcessEventHostilePlayers(event, callback, ...)
-  if event == "SPELL_CAST_SUCCESS" then
-    me.ProcessNormal(event, callback, ...)
-  else
+function me.ProcessEventHostilePlayers(event, ...)
+  if event ~= "SPELL_CAST_SUCCESS" then
     mod.logger.LogDebug(me.tag, "Ignore unsupported event: " .. event)
-
-    if callback then
-      callback()
-    end
+    return
   end
+
+  me.ProcessNormal(event, ...)
 end
 
 --[[
   @param {string} event
-  @param {function} callback
   @param {vararg} ...
 ]]--
-function me.ProcessNormal(event, callback, ...)
+function me.ProcessNormal(event, ...)
   if RGCW_ENVIRONMENT.DEBUG then
     mod.debug.TrackLogNormalEvent(...)
   end
