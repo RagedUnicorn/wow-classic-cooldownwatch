@@ -40,7 +40,8 @@ me.LOG_LEVEL = {
   INFO = "INFO",
   SUCCESS = "SUCCESS",
   FAIL = "FAIL",
-  ERROR = "ERROR"
+  ERROR = "ERROR",
+  HEADER = "HEADER"
 }
 
 --[[
@@ -147,28 +148,11 @@ function me.Log(level, testName, message, data)
     colorCode = "|cFFFF00FF"
   elseif level == me.LOG_LEVEL.DEBUG then
     colorCode = "|cFF888888"
+  elseif level == me.LOG_LEVEL.HEADER then
+    colorCode = "|cFF00FFFF"
   end
 
-  -- Special color formatting for summary messages
-  local formattedMessage = message
-
-  if testName == "TestSummary" then
-    if message:find("===") then
-      formattedMessage = "|cFF00FFFF" .. message .. "|r"
-    elseif message:find("Passed:") then
-      formattedMessage = "|cFF00FF00" .. message .. "|r"
-    elseif message:find("Failed:") then
-      formattedMessage = "|cFFFF0000" .. message .. "|r"
-    elseif message:find("Errors:") then
-      formattedMessage = "|cFFFF00FF" .. message .. "|r"
-    elseif message:find("Test log saved") or message:find("Access after") then
-      formattedMessage = "|cFF00FFFF" .. message .. "|r"
-    else
-      formattedMessage = message
-    end
-  end
-
-  print(string.format("%s[%s] %s: %s|r", colorCode, level, testName, formattedMessage))
+  print(string.format("%s[%s] %s: %s|r", colorCode, level, testName, message))
 end
 
 --[[
@@ -191,6 +175,18 @@ end
 ]]--
 function me.LogInfo(testName, message, data)
   me.Log(me.LOG_LEVEL.INFO, testName, message, data)
+end
+
+--[[
+  Log a section header / cyan-highlighted notice. Used for the test session
+  summary delimiters and informational footer lines that should stand out.
+
+  @param {string} testName
+  @param {string} message
+  @param {table} data
+]]--
+function me.LogHeader(testName, message, data)
+  me.Log(me.LOG_LEVEL.HEADER, testName, message, data)
 end
 
 --[[
@@ -286,14 +282,17 @@ function me.Finalize()
   if session then
     session.endTime = date("%Y-%m-%d %H:%M:%S")
 
-    -- Log summary using the Log function so it appears in both chat and window
-    me.LogInfo("TestSummary", "=== Test Session Summary ===")
+    -- Log summary so it appears in both chat and window. The SUCCESS/FAIL/ERROR
+    -- lines call Log directly rather than LogSuccess/LogFail/LogError because
+    -- those wrappers bump session.summary counters — these are recap lines, not
+    -- per-test results, so a wrapper call would double-count.
+    me.LogHeader("TestSummary", "=== Test Session Summary ===")
     me.LogInfo("TestSummary", string.format("Total Tests: %d", session.summary.totalTests))
-    me.LogInfo("TestSummary", string.format("Passed: %d", session.summary.passed))
-    me.LogInfo("TestSummary", string.format("Failed: %d", session.summary.failed))
-    me.LogInfo("TestSummary", string.format("Errors: %d", session.summary.errors))
-    me.LogInfo("TestSummary", "Test log saved to CooldownWatchTestLog")
-    me.LogInfo("TestSummary", "Access after /reload or logout")
+    me.Log(me.LOG_LEVEL.SUCCESS, "TestSummary", string.format("Passed: %d", session.summary.passed))
+    me.Log(me.LOG_LEVEL.FAIL, "TestSummary", string.format("Failed: %d", session.summary.failed))
+    me.Log(me.LOG_LEVEL.ERROR, "TestSummary", string.format("Errors: %d", session.summary.errors))
+    me.LogHeader("TestSummary", "Test log saved to CooldownWatchTestLog")
+    me.LogHeader("TestSummary", "Access after /reload or logout")
 
     -- Guard against the Initialize-failure path in RunAllTests, which calls
     -- Finalize() before any StartTest fires
