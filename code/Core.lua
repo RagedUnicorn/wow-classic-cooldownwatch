@@ -78,7 +78,7 @@ function me.OnEvent(event)
     me.logger.LogEvent(me.tag, "COMBAT_LOG_EVENT_UNFILTERED")
 
     if initializationDone then
-      me.combatLog.ProcessUnfilteredCombatLogEvent(nil, CombatLogGetCurrentEventInfo())
+      me.combatLog.ProcessUnfilteredCombatLogEvent(CombatLogGetCurrentEventInfo())
     end
   elseif event == "PLAYER_TARGET_CHANGED" then
     me.logger.LogEvent(me.tag, "PLAYER_TARGET_CHANGED")
