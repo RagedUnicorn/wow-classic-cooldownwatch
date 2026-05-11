@@ -10,6 +10,6 @@ jobs:
     name: SpellMap data integrity
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Busted for lua codebases
         uses: RagedUnicorn/action-busted@v1
