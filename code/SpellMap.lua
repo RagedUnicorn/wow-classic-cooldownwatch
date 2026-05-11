@@ -443,6 +443,162 @@ local spellMap = {
         16188
       }
     }
+  },
+  ["mage"] = {
+    [11129] = {
+      name = "Combustion",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 180,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        11129
+      }
+    },
+    [10161] = {
+      name = "Cone of Cold",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 10,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        10161, 120, 8492, 10159, 10160
+      }
+    },
+    [120] = { refId = 10161 },
+    [8492] = { refId = 10161 },
+    [10159] = { refId = 10161 },
+    [10160] = { refId = 10161 },
+    [2139] = {
+      name = "Counterspell",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 30,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        2139
+      }
+    },
+    [12043] = {
+      name = "Presence of Mind",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 180,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        12043
+      }
+    },
+    [1953] = {
+      name = "Blink",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 15,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        1953
+      }
+    },
+    [10199] = {
+      name = "Fire Blast",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 8,
+      cooldownWorstCase = 6.5,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        10199, 2136, 2137, 2138, 8412, 8413, 10197
+      }
+    },
+    [2136] = { refId = 10199 },
+    [2137] = { refId = 10199 },
+    [2138] = { refId = 10199 },
+    [8412] = { refId = 10199 },
+    [8413] = { refId = 10199 },
+    [10197] = { refId = 10199 },
+    [10225] = {
+      name = "Fire Ward",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 30,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        10225, 543, 8457, 8458, 10223
+      }
+    },
+    [543] = { refId = 10225 },
+    [8457] = { refId = 10225 },
+    [8458] = { refId = 10225 },
+    [10223] = { refId = 10225 },
+    [28609] = {
+      name = "Frost Ward",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 30,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        28609, 6143, 8461, 8462, 10177
+      }
+    },
+    [6143] = { refId = 28609 },
+    [8461] = { refId = 28609 },
+    [8462] = { refId = 28609 },
+    [10177] = { refId = 28609 },
+    [13033] = {
+      name = "Ice Barrier",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 30,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        13033, 11426, 13031, 13032
+      }
+    },
+    [11426] = { refId = 13033 },
+    [13031] = { refId = 13033 },
+    [13032] = { refId = 13033 },
+    [11958] = {
+      name = "Ice Block",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        11958
+      }
+    },
+    [12472] = {
+      name = "Cold Snap",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 600,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        12472
+      }
+    }
   }
 }
 
