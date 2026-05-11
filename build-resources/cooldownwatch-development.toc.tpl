@@ -49,6 +49,7 @@ test/category/TestPriestSpells.lua
 test/category/TestShamanSpells.lua
 test/category/TestRogueSpells.lua
 test/category/TestMageSpells.lua
+test/category/TestWarriorSpells.lua
 
 # Debug Tools (Development Only)
 test/debug/DebugInjectorWindow.lua

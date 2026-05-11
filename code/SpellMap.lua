@@ -599,6 +599,88 @@ local spellMap = {
         12472
       }
     }
+  },
+  ["warrior"] = {
+    [18499] = {
+      name = "Berserker Rage",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 30,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        18499
+      }
+    },
+    [2687] = {
+      name = "Bloodrage",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 60,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        2687
+      }
+    },
+    [23894] = {
+      name = "Bloodthirst",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 6,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        23894, 23881, 23892, 23893
+      }
+    },
+    [23881] = { refId = 23894 },
+    [23892] = { refId = 23894 },
+    [23893] = { refId = 23894 },
+    [12328] = {
+      name = "Death Wish",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 180,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        12328
+      }
+    },
+    [20617] = {
+      name = "Intercept",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 30,
+      cooldownWorstCase = 20,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        20617, 20252, 20616
+      }
+    },
+    [20252] = { refId = 20617 },
+    [20616] = { refId = 20617 },
+    [11578] = {
+      name = "Charge",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 15,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        11578, 100, 6178
+      }
+    },
+    [100] = { refId = 11578 },
+    [6178] = { refId = 11578 }
   }
 }
 
