@@ -1352,6 +1352,92 @@ local spellMap = {
         26296
       }
     }
+  },
+  ["misc"] = {
+    [23132] = {
+      name = "Shadow Reflector",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        23132
+      }
+    },
+    [23131] = {
+      name = "Frost Reflector",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        23131
+      }
+    },
+    [23097] = {
+      name = "Fire Reflector",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        23097
+      }
+    },
+    [22641] = {
+      name = "Reckless Charge",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 1200,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        22641
+      }
+    },
+    [13141] = {
+      name = "Gnomish Rocket Boots",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 1800,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        13141
+      }
+    },
+    [8892] = {
+      name = "Goblin Rocket Boots",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        8892
+      }
+    },
+    [13120] = {
+      name = "Net-o-Matic",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 600,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        13120
+      }
+    }
   }
 }
 
