@@ -1266,6 +1266,92 @@ local spellMap = {
     [16811] = { refId = 17329 },
     [16812] = { refId = 17329 },
     [16813] = { refId = 17329 }
+  },
+  ["racials"] = {
+    [20589] = {
+      name = "Escape Artist",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 60,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        20589
+      }
+    },
+    [20600] = {
+      name = "Perception",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 180,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        20600
+      }
+    },
+    [20594] = {
+      name = "Stoneform",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 180,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        20594
+      }
+    },
+    [7744] = {
+      name = "Will of the Forsaken",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 120,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        7744
+      }
+    },
+    [20549] = {
+      name = "War Stomp",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 120,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        20549
+      }
+    },
+    [20572] = {
+      name = "Blood Fury",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 120,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        20572
+      }
+    },
+    [26296] = {
+      name = "Berserking",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 180,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        26296
+      }
+    }
   }
 }
 
