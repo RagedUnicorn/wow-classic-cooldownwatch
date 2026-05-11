@@ -979,6 +979,130 @@ local spellMap = {
     [17962] = { refId = 18932 },
     [18930] = { refId = 18932 },
     [18931] = { refId = 18932 }
+  },
+  ["paladin"] = {
+    [1044] = {
+      name = "Blessing of Freedom",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 20,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        1044
+      }
+    },
+    [10278] = {
+      name = "Blessing of Protection",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      cooldownWorstCase = 180,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        10278, 1022, 5599
+      }
+    },
+    [1022] = { refId = 10278 },
+    [5599] = { refId = 10278 },
+    [1020] = {
+      name = "Divine Shield",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        1020, 642
+      }
+    },
+    [642] = { refId = 1020 },
+    [5573] = {
+      name = "Divine Protection",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        5573, 498
+      }
+    },
+    [498] = { refId = 5573 },
+    [10308] = {
+      name = "Hammer of Justice",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 60,
+      cooldownWorstCase = 45,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        10308, 853, 5588, 5589
+      }
+    },
+    [853] = { refId = 10308 },
+    [5588] = { refId = 10308 },
+    [5589] = { refId = 10308 },
+    [20066] = {
+      name = "Repentance",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 60,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        20066
+      }
+    },
+    [20216] = {
+      name = "Divine Favor",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 120,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        20216
+      }
+    },
+    [20930] = {
+      name = "Holy Shock",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 30,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        20930, 20473, 20929
+      }
+    },
+    [20473] = { refId = 20930 },
+    [20929] = { refId = 20930 },
+    [10310] = {
+      name = "Lay on Hands",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 3600,
+      cooldownWorstCase = 2400,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        10310, 633, 2800
+      }
+    },
+    [633] = { refId = 10310 },
+    [2800] = { refId = 10310 }
   }
 }
 
