@@ -1103,6 +1103,169 @@ local spellMap = {
     },
     [633] = { refId = 10310 },
     [2800] = { refId = 10310 }
+  },
+  ["druid"] = {
+    [8983] = {
+      name = "Bash",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 60,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        8983, 5211, 6798
+      }
+    },
+    [5211] = { refId = 8983 },
+    [6798] = { refId = 8983 },
+    [16979] = {
+      name = "Feral Charge",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 15,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        16979
+      }
+    },
+    [22896] = {
+      name = "Frenzied Regeneration",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 180,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        22896, 22842, 22895
+      }
+    },
+    [22842] = { refId = 22896 },
+    [22895] = { refId = 22896 },
+    [17116] = {
+      name = "Nature's Swiftness",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 180,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        17116
+      }
+    },
+    [29166] = {
+      name = "Innervate",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 360,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        29166
+      }
+    },
+    [18562] = {
+      name = "Swiftmend",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 15,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        18562
+      }
+    },
+    [22812] = {
+      name = "Barkskin",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 60,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        22812
+      }
+    },
+    [9821] = {
+      name = "Dash",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        9821, 1850
+      }
+    },
+    [1850] = { refId = 9821 },
+    [5229] = {
+      name = "Enrage",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 60,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        5229
+      }
+    },
+    [20748] = {
+      name = "Rebirth",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 1800,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        20748, 20484, 20739, 20742, 20747
+      }
+    },
+    [20484] = { refId = 20748 },
+    [20739] = { refId = 20748 },
+    [20742] = { refId = 20748 },
+    [20747] = { refId = 20748 },
+    [9863] = {
+      name = "Tranquility",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        9863, 740, 8918, 9862
+      }
+    },
+    [740] = { refId = 9863 },
+    [8918] = { refId = 9863 },
+    [9862] = { refId = 9863 },
+    [17329] = {
+      name = "Nature's Grasp",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 60,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        17329, 16689, 16810, 16811, 16812, 16813
+      }
+    },
+    [16689] = { refId = 17329 },
+    [16810] = { refId = 17329 },
+    [16811] = { refId = 17329 },
+    [16812] = { refId = 17329 },
+    [16813] = { refId = 17329 }
   }
 }
 

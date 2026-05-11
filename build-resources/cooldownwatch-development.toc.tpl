@@ -53,6 +53,7 @@ test/category/TestWarriorSpells.lua
 test/category/TestHunterSpells.lua
 test/category/TestWarlockSpells.lua
 test/category/TestPaladinSpells.lua
+test/category/TestDruidSpells.lua
 
 # Debug Tools (Development Only)
 test/debug/DebugInjectorWindow.lua
