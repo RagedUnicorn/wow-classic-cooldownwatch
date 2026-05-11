@@ -681,6 +681,191 @@ local spellMap = {
     },
     [100] = { refId = 11578 },
     [6178] = { refId = 11578 }
+  },
+  ["hunter"] = {
+    [20904] = {
+      name = "Aimed Shot",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 6,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        20904, 19434, 20900, 20901, 20902, 20903
+      }
+    },
+    [19434] = { refId = 20904 },
+    [20900] = { refId = 20904 },
+    [20901] = { refId = 20904 },
+    [20902] = { refId = 20904 },
+    [20903] = { refId = 20904 },
+    [14287] = {
+      name = "Arcane Shot",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 6,
+      cooldownWorstCase = 5,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        14287, 3044, 14281, 14282, 14283, 14284, 14285, 14286
+      }
+    },
+    [3044] = { refId = 14287 },
+    [14281] = { refId = 14287 },
+    [14282] = { refId = 14287 },
+    [14283] = { refId = 14287 },
+    [14284] = { refId = 14287 },
+    [14285] = { refId = 14287 },
+    [14286] = { refId = 14287 },
+    [19574] = {
+      name = "Bestial Wrath",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 120,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        19574
+      }
+    },
+    [5116] = {
+      name = "Concussive Shot",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 12,
+      cooldownWorstCase = 11,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        5116
+      }
+    },
+    [20910] = {
+      name = "Counterattack",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 5,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        20910, 19306, 20909
+      }
+    },
+    [19306] = { refId = 20910 },
+    [20909] = { refId = 20910 },
+    [3045] = {
+      name = "Rapid Fire",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        3045
+      }
+    },
+    [19503] = {
+      name = "Scatter Shot",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 30,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        19503
+      }
+    },
+    [19263] = {
+      name = "Deterrence",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        19263
+      }
+    },
+    [24133] = {
+      name = "Wyvern Sting",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 120,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        24133, 19386, 24132
+      }
+    },
+    [19386] = { refId = 24133 },
+    [24132] = { refId = 24133 },
+    -- Intimidation is cast by the hunter's pet, so SPELL_CAST_SUCCESS fires from
+    -- the pet's GUID, not the hunter's. The entry tracks but won't currently
+    -- credit the hunter target.
+    [19577] = {
+      name = "Intimidation",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 60,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        19577
+      }
+    },
+    [1543] = {
+      name = "Flare",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 15,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        1543
+      }
+    },
+    [25294] = {
+      name = "Multi-Shot",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 10,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        25294, 2643, 14288, 14289, 14290
+      }
+    },
+    [2643] = { refId = 25294 },
+    [14288] = { refId = 25294 },
+    [14289] = { refId = 25294 },
+    [14290] = { refId = 25294 },
+    [14295] = {
+      name = "Volley",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 60,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        14295, 1510, 14294
+      }
+    },
+    [1510] = { refId = 14295 },
+    [14294] = { refId = 14295 }
   }
 }
 
