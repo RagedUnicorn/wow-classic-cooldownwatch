@@ -51,6 +51,7 @@ test/category/TestRogueSpells.lua
 test/category/TestMageSpells.lua
 test/category/TestWarriorSpells.lua
 test/category/TestHunterSpells.lua
+test/category/TestWarlockSpells.lua
 
 # Debug Tools (Development Only)
 test/debug/DebugInjectorWindow.lua
