@@ -108,6 +108,18 @@
     },
     {
       "customType": "regex",
+      "description": "Keep CooldownWatch.toc Interface line in sync with pom.xml",
+      "managerFilePatterns": [
+        "/^CooldownWatch\\.toc$/"
+      ],
+      "matchStrings": [
+        "## Interface: (?<currentValue>\\d+)"
+      ],
+      "datasourceTemplate": "custom.wow-versions",
+      "depNameTemplate": "wow-interface"
+    },
+    {
+      "customType": "regex",
       "managerFilePatterns": [
         "/^pom\\.xml$/"
       ],
