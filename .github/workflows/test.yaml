@@ -1,4 +1,4 @@
-name: "Headless Tests"
+name: Headless Tests
 on:
   push:
     branches: [master]

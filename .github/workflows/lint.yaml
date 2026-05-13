@@ -1,4 +1,4 @@
-name: "Lint Project"
+name: Lint Project
 on:
   push:
     branches: [master]
