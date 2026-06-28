@@ -36,6 +36,12 @@ me.tag = "TargetCooldownBar"
   Local references to ui elements
 ]]--
 local targetCooldownBarFrame
+--[[
+  Cached cooldown slot frames in creation order. Populated once in CreateCooldownSlots and never mutated
+  afterwards (the slot set is fixed for the lifetime of the addon). Read from the hot OnUpdate path instead
+  of allocating a fresh {targetCooldownBarFrame:GetChildren()} table on every tick.
+]]--
+local cooldownSlots = {}
 
 --[[
   Build initial targetCooldownBarFrame ui
@@ -73,7 +79,7 @@ end
 ]]--
 function me.CreateCooldownSlots(frame)
   for i = 1, RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_AMOUNT do
-    me.CreateCooldownSlot(frame, i)
+    cooldownSlots[i] = me.CreateCooldownSlot(frame, i)
   end
 end
 
@@ -82,6 +88,9 @@ end
 
   @param {table} frame
   @param {number} position
+
+  @return {table}
+    The created cooldownWatchSlot
 ]]--
 function me.CreateCooldownSlot(frame, position)
   local cooldownWatchSlot = CreateFrame(
@@ -132,6 +141,8 @@ function me.CreateCooldownSlot(frame, position)
   me.CreateAnimation(cooldownWatchSlot)
   -- initially hide slots
   cooldownWatchSlot:Hide()
+
+  return cooldownWatchSlot
 end
 
 --[[
@@ -328,8 +339,6 @@ function me.TargetCooldownBarOnUpdate()
   local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(mod.target.GetCurrentTargetGuid())
 
   if cooldowns == nil then return end
-
-  local cooldownSlots = {targetCooldownBarFrame:GetChildren()}
 
   for i = 1, RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_AMOUNT do
     if cooldowns[i] ~= nil then
@@ -554,7 +563,6 @@ function me.ShowExampleTargetCooldownBar()
   mod.ticker.StopTickerTargetCooldownBar() -- stop regular updates
   mod.cooldownQueue.ClearCooldownQueue() -- drop all current cooldowns
 
-  local cooldownSlots = {targetCooldownBarFrame:GetChildren()}
   local cooldowns = {}
 
   for i = 1, RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_AMOUNT do
@@ -569,8 +577,6 @@ end
   Restart regular onUpdate ticks for the TargetCooldownBar
 ]]--
 function me.HideExampleTargetCooldownBar()
-  local cooldownSlots = {targetCooldownBarFrame:GetChildren()}
-
   for i = 1, RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_AMOUNT do
     cooldownSlots[i]:Hide()
   end
