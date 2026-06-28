@@ -150,6 +150,41 @@ function me.ClearCooldownQueue()
 end
 
 --[[
+  Build a single synthetic cooldown entry for the configuration preview
+  (`/rgcw conf enable` -> TargetCooldownBar.ShowExampleTargetCooldownBar).
+
+  The entry mirrors the real queue-entry shape (see the storage layout above) so
+  the preview exercises the exact contract UpdateCooldownWatchSlot reads. The
+  spell identity (spellId / name / icon) is resolved from SpellMap rather than
+  restated; only the timing is synthetic - short, demo-friendly values so the
+  preview animates both the primary and worst-case timers regardless of the
+  spell's real cooldown.
+
+  castTime is taken as a parameter (rather than calling GetTime internally) to
+  keep this function free of WoW APIs and unit-testable under the headless harness.
+
+  @param {number} castTime
+    The cast timestamp to stamp on the entry (production passes GetTime()).
+
+  @return {table}
+    A cooldown entry shaped like a real queue entry.
+]]--
+function me.BuildExampleCooldown(castTime)
+  local category, _, spellData = mod.spellMapHelper.GetSpellById(RGCW_CONSTANTS.EXAMPLE_COOLDOWN_SPELL_ID)
+
+  spellData.castTime = castTime
+  spellData.cooldown = 10
+  spellData.cooldownWorstCase = 5
+
+  return {
+    ["sourceGuid"] = "preview",
+    ["sourceName"] = "Example",
+    ["category"] = category,
+    ["spellData"] = spellData
+  }
+end
+
+--[[
   Retrieve cooldowns for a specific caster
 
   @param {string} sourceGuid

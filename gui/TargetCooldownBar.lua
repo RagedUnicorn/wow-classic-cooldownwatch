@@ -558,19 +558,7 @@ function me.ShowExampleTargetCooldownBar()
   local cooldowns = {}
 
   for i = 1, RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_AMOUNT do
-    cooldowns[i] = {
-      ["caster"] = "dummytarget",
-      ["casterName"] = "casterName",
-      ["spell"] = {
-        ["spellId"] = 2094,
-        ["spellName"] = "spellname",
-        ["rank"] = nil,
-        ["castTime"] = GetTime(),
-        ["cooldown"] = 10,
-        ["cooldownWorstCase"] = 5,
-        ["active"] = true
-      }
-    }
+    cooldowns[i] = mod.cooldownQueue.BuildExampleCooldown(GetTime())
     me.UpdateCooldownWatchSlot(cooldownSlots[i], cooldowns[i])
   end
 

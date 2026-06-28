@@ -52,6 +52,9 @@ RGCW_CONSTANTS = {
   TARGET_COOLDOWN_BAR_SLOT_X = 5,
   TARGET_COOLDOWN_BAR_SLOT_Y = 0,
   TARGET_COOLDOWN_BAR_SLOT_AMOUNT = 10,
+  -- spellId used to populate the configuration preview (`/rgcw conf enable`). A pointer into
+  -- SpellMap (rogue Blind); identity is resolved via GetSpellById, never restated here.
+  EXAMPLE_COOLDOWN_SPELL_ID = 2094,
   ELEMENT_TARGET_COOLDOWN_BAR_SLOT_ANIMATION = "CooldownWatchAnimation",
   ELEMENT_TARGET_COOLDOWN_BAR_SLOT_COOLDOWN_FRAME = "$parent_Cooldown",
   ELEMENT_TARGET_COOLDOWN_BAR_SLOT_ICON_TEXTURE_NAME = "$parent_Icon",

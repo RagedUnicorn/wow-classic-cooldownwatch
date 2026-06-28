@@ -39,6 +39,7 @@ RGCW_ENVIRONMENT = { TEST = true }
 rgcw.logger = {
   LogDebug = function() end,
   LogInfo = function() end,
+  LogWarn = function() end,
   LogError = function() end,
 }
 
@@ -50,4 +51,5 @@ dofile("code/Constants.lua")
 dofile("code/Common.lua")
 dofile("code/SpellMap.lua")
 dofile("code/SpellMapHelper.lua")
+dofile("code/CooldownQueue.lua")
 dofile("test/SpellMapValidation.lua")
