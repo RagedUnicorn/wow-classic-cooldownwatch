@@ -74,15 +74,8 @@ GetFilteredSpellMap = function()
 
     for spellId, spellData in pairs(baseSpellMap[category]) do
       -- spells that only contain a refId are not added to the filtered SpellMap
-      if spellData.refId == nil then
-        if spellData.type == RGCW_CONSTANTS.SPELL_TYPE_SOD and mod.season.IsSodActive()
-          or RGCW_ENVIRONMENT.TEST then
-          filteredSpellMap[category][spellId] = spellData
-        end
-
-        if spellData.type == RGCW_CONSTANTS.SPELL_TYPE_BASE then
-          filteredSpellMap[category][spellId] = spellData
-        end
+      if spellData.refId == nil and IsPrimaryAllowedInCurrentSeason(spellData) then
+        filteredSpellMap[category][spellId] = spellData
       end
     end
   end
