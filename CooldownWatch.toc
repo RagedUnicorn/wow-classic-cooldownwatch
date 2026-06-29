@@ -1,10 +1,10 @@
-# THIS FILE IS AUTO-GENERATED. ALL CHANGES ARE OVERWRITTEN
 ## Interface: 11508
 ## Title: CooldownWatch
 ## Author: Michael Wiesendanger <michael.wiesendanger@gmail.com>
 ## Notes: Addon that tracks cooldowns of enemy players
 ## Version: v1.0.0
 ## SavedVariablesPerCharacter: CooldownWatchConfiguration CooldownWatchTestLog CooldownWatchLogTracker
+# THIS FILE IS AUTO-GENERATED. ALL CHANGES ARE OVERWRITTEN
 
 # constant values
 code/Constants.lua
