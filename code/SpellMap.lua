@@ -1450,13 +1450,13 @@ local sharedCooldownGroups = {
 }
 
 --[[
-  Get the spellMap
+  Get the spellMap. Callers MUST treat the result as read-only and never mutate it.
 
   @return {table}
-    The spellMap
+    The spellMap (read-only — do not mutate)
 ]]--
 function me.GetSpellMap()
-  return mod.common.Clone(spellMap)
+  return spellMap
 end
 
 --[[
@@ -1465,23 +1465,22 @@ end
   @param {string} groupName
 
   @return {table|nil}
-    Cloned list of primary spellIds, or nil if the group is unknown
+    The list of primary spellIds (read-only — do not mutate), or nil if the
+    group is unknown. Called on every shared-cooldown sibling fan-out, so it
+    returns the internal list directly rather than cloning.
 ]]--
 function me.GetSharedCooldownGroup(groupName)
   if not groupName then return nil end
 
-  local group = sharedCooldownGroups[groupName]
-  if not group then return nil end
-
-  return mod.common.Clone(group)
+  return sharedCooldownGroups[groupName]
 end
 
 --[[
   Get all shared-cooldown groups keyed by group name.
 
   @return {table}
-    Cloned table of groupName -> list of primary spellIds
+    Table of groupName -> list of primary spellIds (read-only — do not mutate)
 ]]--
 function me.GetAllSharedCooldownGroups()
-  return mod.common.Clone(sharedCooldownGroups)
+  return sharedCooldownGroups
 end
