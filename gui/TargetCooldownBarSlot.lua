@@ -261,14 +261,14 @@ end
 function me.UpdateCooldownSlotHighlightFrame(cooldownWatchSlot, cooldownDuration, timeLeftBig)
   local highlightFrame = cooldownWatchSlot.highlightFrame
 
-  if me.IsAlertThresholdBreached(cooldownDuration, timeLeftBig) then
+  if me.IsThresholdBreached(cooldownDuration, timeLeftBig, RGCW_CONSTANTS.TARGET_COOLDOWN_ALERT_THRESHOLD) then
     highlightFrame:SetBackdropBorderColor(unpack(RGCW_CONSTANTS.COLORS.ALERT_BORDER))
     highlightFrame:Show()
 
     return
   end
 
-  if me.IsWarningThresholdBreached(cooldownDuration, timeLeftBig) then
+  if me.IsThresholdBreached(cooldownDuration, timeLeftBig, RGCW_CONSTANTS.TARGET_COOLDOWN_WARN_THRESHOLD) then
     highlightFrame:SetBackdropBorderColor(unpack(RGCW_CONSTANTS.COLORS.WARN_BORDER))
     highlightFrame:Show()
 
@@ -347,30 +347,6 @@ function me.InitCooldownSlotCooldownOverlay(cooldownWatchSlot, cooldown)
   -- hide default blizzard frames cooldown numbers
   cooldownWatchSlot.targetCooldownOverlay:SetHideCountdownNumbers(true)
   cooldownWatchSlot.targetCooldownOverlay.cooldownStarted = true
-end
-
---[[
-  @param {number} cooldown
-  @param {number} timeLeft
-
-  @return {boolean}
-    true - if the threshold was breached
-    false - if the threshold was not breached
-]]--
-function me.IsWarningThresholdBreached(cooldown, timeLeft)
-  return me.IsThresholdBreached(cooldown, timeLeft, RGCW_CONSTANTS.TARGET_COOLDOWN_WARN_THRESHOLD)
-end
-
---[[
-  @param {number} cooldown
-  @param {number} timeLeft
-
-  @return {boolean}
-    true - if the threshold was breached
-    false - if the threshold was not breached
-]]--
-function me.IsAlertThresholdBreached(cooldown, timeLeft)
-  return me.IsThresholdBreached(cooldown, timeLeft, RGCW_CONSTANTS.TARGET_COOLDOWN_ALERT_THRESHOLD)
 end
 
 --[[
