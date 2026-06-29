@@ -16,6 +16,11 @@
         <include>gui/*.lua</include>
         <include>gui/*.xml</include>
         <include>test/*.lua</include>
+        <include>test/framework/*.lua</include>
+        <include>test/framework/*.xml</include>
+        <include>test/category/*.lua</include>
+        <include>test/debug/*.lua</include>
+        <include>test/debug/*.xml</include>
         <include>assets/*.blp</include>
         <include>assets/*.tga</include>
         <include>localization/*.lua</include>
