@@ -82,9 +82,9 @@ ParseSlashCommand = function(msg)
     mod.addonConfiguration.OpenAddonPanel()
   elseif args[1] == "conf" or args[1] == "configure" then
     if args[2] == "enable" then
-      mod.targetCooldownBar.ShowExampleTargetCooldownBar()
+      mod.targetCooldownBarPreview.ShowExampleTargetCooldownBar()
     elseif args[2] == "disable" then
-      mod.targetCooldownBar.HideExampleTargetCooldownBar()
+      mod.targetCooldownBarPreview.HideExampleTargetCooldownBar()
     else
       mod.logger.PrintUserError(rgcw.L["invalid_argument"])
     end

@@ -67,6 +67,8 @@ test/debug/DebugInjectorWindow.xml
 gui/Frame.xml
 gui/GuiHelper.lua
 gui/TargetCooldownBar.lua
+gui/TargetCooldownBarSlot.lua
+gui/TargetCooldownBarPreview.lua
 gui/CategoryMenu.lua
 gui/AddonConfiguration.lua
 gui/AboutContent.lua
