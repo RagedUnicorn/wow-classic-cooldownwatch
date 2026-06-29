@@ -114,19 +114,11 @@ function me.CreateCooldownSlot(frame, position)
     RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_Y
   )
 
-  local backdrop = {
-    bgFile = "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
-    edgeFile = "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
-    tile = false,
-    tileSize = 32,
-    edgeSize = 20,
-    insets = {
-      left = 12,
-      right = 12,
-      top = 12,
-      bottom = 12
-    }
-  }
+  local backdrop = mod.guiHelper.MakeSlotBackdrop(
+    "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
+    "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
+    RGCW_CONSTANTS.SLOT_BACKDROP
+  )
 
   cooldownWatchSlot:SetBackdrop(backdrop)
   cooldownWatchSlot:SetBackdropColor(0.15, 0.15, 0.15, 1)
@@ -176,19 +168,11 @@ function me.CreateHighlightFrame(cooldownWatchSlot)
   highlightFrame:SetPoint("TOPLEFT", cooldownWatchSlot, "TOPLEFT")
   highlightFrame:SetPoint("BOTTOMRIGHT", cooldownWatchSlot, "BOTTOMRIGHT")
 
-  local innerBackdrop = {
-    bgFile = "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
-    edgeFile = "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_inner_glow",
-    tile = false,
-    tileSize = 16,
-    edgeSize = 16,
-    insets = {
-      left = 10,
-      right = 10,
-      top = 10,
-      bottom = 10
-    }
-  }
+  local innerBackdrop = mod.guiHelper.MakeSlotBackdrop(
+    "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
+    "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_inner_glow",
+    RGCW_CONSTANTS.HIGHLIGHT_BACKDROP
+  )
 
   highlightFrame:SetBackdrop(innerBackdrop)
   highlightFrame:SetBackdropColor(1, 1, 1, 0)

@@ -168,19 +168,11 @@ function me.CreateCooldownSpellIcon(spellFrame)
     RGCW_CONSTANTS.CATEGORY_COOLDOWN_SPELL_ICON_SIZE
   )
 
-  local backdrop = {
-    bgFile = "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
-    edgeFile = "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
-    tile = false,
-    tileSize = 32,
-    edgeSize = 20,
-    insets = {
-      left = 12,
-      right = 12,
-      top = 12,
-      bottom = 12
-    }
-  }
+  local backdrop = mod.guiHelper.MakeSlotBackdrop(
+    "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
+    "Interface\\AddOns\\CooldownWatch\\assets\\ui_slot_background",
+    RGCW_CONSTANTS.SLOT_BACKDROP
+  )
 
   iconHolder:SetBackdrop(backdrop)
   iconHolder:SetBackdropColor(0.15, 0.15, 0.15, 1)

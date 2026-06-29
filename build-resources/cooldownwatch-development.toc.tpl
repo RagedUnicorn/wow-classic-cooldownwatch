@@ -64,6 +64,7 @@ test/debug/DebugInjectorWindow.xml
 
 # gui
 gui/Frame.xml
+gui/GuiHelper.lua
 gui/TargetCooldownBar.lua
 gui/CategoryMenu.lua
 gui/AddonConfiguration.lua

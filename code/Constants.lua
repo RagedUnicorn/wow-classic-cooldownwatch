@@ -210,4 +210,21 @@ RGCW_CONSTANTS = {
     -- small worst-case timer text (cyan)
     TIMER_SMALL_TEXT = {0.01, 0.66, 0.95, 1},
   },
+  --[[
+    Shared backdrop geometry for cooldown slot widgets. Consumed by
+    mod.guiHelper.MakeSlotBackdrop, which assembles the SetBackdrop table. Texture
+    paths and backdrop colors stay at the call sites; only the geometry lives here.
+  ]]--
+  -- standard slot frame and config preview icon holder
+  SLOT_BACKDROP = {
+    TILE_SIZE = 32,
+    EDGE_SIZE = 20,
+    INSET = 12
+  },
+  -- inner glow highlight frame overlaid on a slot
+  HIGHLIGHT_BACKDROP = {
+    TILE_SIZE = 16,
+    EDGE_SIZE = 16,
+    INSET = 10
+  },
 }
