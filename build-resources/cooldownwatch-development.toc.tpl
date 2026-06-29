@@ -5,7 +5,6 @@ ${addon.comment.generated.toc}
 ## Notes: ${addon.description}
 ## Version: ${addon.tag.version}
 ## SavedVariablesPerCharacter: ${addon.savedVariablesPerCharacter}
-## SavedVariables: CooldownWatchTestLog
 
 # constant values
 code/Constants.lua

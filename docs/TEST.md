@@ -14,7 +14,7 @@ Reload your UI and run the full suite:
 /run rgcw.testRunner.RunAllTests()
 ```
 
-Results are written to chat and persisted to the `CooldownWatchTestLog` SavedVariable, which you can inspect from `WTF/Account/<account>/SavedVariables/CooldownWatch.lua` after `/reload` or logout.
+Results are written to chat and persisted to the `CooldownWatchTestLog` SavedVariable, which you can inspect from `WTF/Account/<account>/<realm>/<character>/SavedVariables/CooldownWatch.lua` after `/reload` or logout.
 
 A floating test log window is also available, but it does not open automatically. Toggle it manually:
 
