@@ -244,7 +244,13 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   me.UpdateCooldownSlotCooldownText(cooldownWatchSlot, timeLeftBig, timeLeftSmall)
   me.UpdateCooldownSlotTexture(cooldownWatchSlot, cooldown.spellData.spellId)
 
-  if not cooldownWatchSlot.targetCooldownOverlay.cooldownStarted then
+  --[[
+    Key the sweep init on the slot's currently applied spellId rather than a "once per cooldown" flag.
+    Slots are bound to cooldowns positionally over an unordered, compacting queue array, so a slot can be
+    reassigned to a different spell without passing through a Clear. Comparing the applied spellId (mirroring
+    UpdateCooldownSlotTexture) re-initializes the sweep on reassignment instead of keeping the stale timer.
+  ]]--
+  if cooldownWatchSlot.targetCooldownOverlay.spellId ~= cooldown.spellData.spellId then
     me.InitCooldownSlotCooldownOverlay(cooldownWatchSlot, cooldown)
   end
 
@@ -346,7 +352,7 @@ function me.InitCooldownSlotCooldownOverlay(cooldownWatchSlot, cooldown)
   cooldownWatchSlot.targetCooldownOverlay:SetCooldown(cooldown.spellData.castTime, cooldown.spellData.cooldown)
   -- hide default blizzard frames cooldown numbers
   cooldownWatchSlot.targetCooldownOverlay:SetHideCountdownNumbers(true)
-  cooldownWatchSlot.targetCooldownOverlay.cooldownStarted = true
+  cooldownWatchSlot.targetCooldownOverlay.spellId = cooldown.spellData.spellId
 end
 
 --[[
@@ -375,7 +381,7 @@ end
 function me.ClearCooldownSlotAnimated(cooldownWatchSlot, cooldown)
   cooldownWatchSlot.targetSpellTimeBig:SetText("")
   cooldownWatchSlot.targetSpellTimeSmall:SetText("")
-  cooldownWatchSlot.targetCooldownOverlay.cooldownStarted = false
+  cooldownWatchSlot.targetCooldownOverlay.spellId = nil
 
   local animationGroup = cooldownWatchSlot:GetAnimationGroups()
 
@@ -404,7 +410,7 @@ function me.ClearCooldownWatchSlot(cooldownWatchSlot)
   cooldownWatchSlot.iconHolderTexture:SetTexture(nil)
   cooldownWatchSlot.iconHolderTexture.spellId = nil
   cooldownWatchSlot.highlightFrame:Hide()
-  cooldownWatchSlot.targetCooldownOverlay.cooldownStarted = false
+  cooldownWatchSlot.targetCooldownOverlay.spellId = nil
 
   cooldownWatchSlot:Hide()
 end
