@@ -17,6 +17,7 @@ localization/enUS.lua
 localization/deDE.lua
 
 code/Core.lua
+code/Categories.lua
 code/Logger.lua
 code/Cmd.lua
 code/Filter.lua

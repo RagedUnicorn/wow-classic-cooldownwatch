@@ -117,7 +117,7 @@ end
   @param {table} configurationPanel
 ]]--
 function me.BuildCooldownCategories(parent)
-  for index, category in ipairs(RGCW_CONSTANTS.CATEGORIES) do
+  for index, category in ipairs(mod.categories.GetCategories()) do
     local menu = CreateFrame("Frame", category.name, nil)
     menu.parent = parent.name
     menu.value = index

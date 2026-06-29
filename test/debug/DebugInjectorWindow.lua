@@ -49,7 +49,7 @@ local function BuildCategoryButtons()
 
   if not column then return end
 
-  for i, category in ipairs(RGCW_CONSTANTS.CATEGORIES) do
+  for i, category in ipairs(mod.categories.GetCategories()) do
     local button = CreateFrame("Button", nil, column, "UIPanelButtonTemplate")
     button:SetSize(110, CATEGORY_BUTTON_HEIGHT)
     button:SetPoint("TOPLEFT", column, "TOPLEFT", 0, -((i - 1) * (CATEGORY_BUTTON_HEIGHT + 2)))
@@ -177,8 +177,10 @@ end
 function me.Initialize()
   BuildCategoryButtons()
 
-  if RGCW_CONSTANTS.CATEGORIES[1] then
-    selectedCategory = RGCW_CONSTANTS.CATEGORIES[1].categoryName
+  local categories = mod.categories.GetCategories()
+
+  if categories[1] then
+    selectedCategory = categories[1].categoryName
   end
 
   mod.logger.LogInfo(me.tag, "Debug injector window initialized")
