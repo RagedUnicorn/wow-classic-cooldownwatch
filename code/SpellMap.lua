@@ -1442,6 +1442,17 @@ local spellMap = {
 }
 
 --[[
+  Decorate every primary entry with its normalizedSpellName once, at load time.
+]]--
+for _, spells in pairs(spellMap) do
+  for _, spellData in pairs(spells) do
+    if type(spellData.name) == "string" then
+      spellData.normalizedSpellName = mod.common.NormalizeSpellName(spellData.name)
+    end
+  end
+end
+
+--[[
   Lookup table of shared-cooldown groups. Each value is a list of primary
   spellIds that share their cooldown.
 ]]--

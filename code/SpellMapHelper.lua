@@ -102,7 +102,6 @@ function me.GetAllForCategory(category)
   for spellId, spellData in pairs(filteredSpellMap[category]) do
     local clonedSpell = mod.common.Clone(spellData)
     clonedSpell.spellId = spellId
-    clonedSpell.normalizedSpellName = mod.common.NormalizeSpellName(spellData.name)
     table.insert(spellList, clonedSpell)
   end
 
@@ -185,7 +184,6 @@ function me.SearchBySpellId(spellId, event)
 
       local clonedSpell = mod.common.Clone(baseSpell)
       clonedSpell.spellId = realSpellId -- overwrite spellId with the real spellId
-      clonedSpell.normalizedSpellName = mod.common.NormalizeSpellName(baseSpell.name)
 
       return category, realSpellId, clonedSpell
     end
@@ -227,7 +225,6 @@ function me.GetSpellById(spellId)
   local clonedSpell = mod.common.Clone(baseSpell)
 
   clonedSpell.spellId = realSpellId
-  clonedSpell.normalizedSpellName = mod.common.NormalizeSpellName(baseSpell.name)
 
   return category, realSpellId, clonedSpell
 end
