@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals CombatLog_Object_IsA COMBATLOG_FILTER_HOSTILE_PLAYERS GetTime GetSpellInfo
+-- luacheck: globals CombatLog_Object_IsA COMBATLOG_FILTER_HOSTILE_PLAYERS GetTime
 
 local mod = rgcw
 local me = {}
@@ -86,8 +86,7 @@ function me.ProcessNormal(event, ...)
     return
   end
 
-  local _, _, iconId = GetSpellInfo(spell.spellId)
-  me.TrackCooldown(sourceGuid, sourceName, spell, castTime, category, iconId)
+  me.TrackCooldown(sourceGuid, sourceName, spell, castTime, category)
 end
 
 --[[
@@ -118,11 +117,9 @@ end
   @param {table} spell
   @param {number} castTime
   @param {string} category
-  @param {number} iconId
 ]]--
-function me.TrackCooldown(sourceGuid, sourceName, spell, castTime, category, iconId)
+function me.TrackCooldown(sourceGuid, sourceName, spell, castTime, category)
   spell.castTime = castTime -- add time when spell was detected
-  spell.iconId = iconId -- TODO icon is probably not needed all the relevant data for the icon is in the spell
   mod.cooldownQueue.AddCooldown(sourceGuid, sourceName, category, spell)
 
   if spell.sharedCooldownGroup then
@@ -155,9 +152,6 @@ function me.TrackSharedCooldownSiblings(sourceGuid, sourceName, originalSpell, c
 
       if siblingSpell then
         siblingSpell.castTime = castTime
-        local _, _, siblingIconId = GetSpellInfo(siblingSpell.spellId)
-
-        siblingSpell.iconId = siblingIconId
         mod.cooldownQueue.AddCooldown(sourceGuid, sourceName, category, siblingSpell)
       end
     end

@@ -133,8 +133,7 @@ function me.InjectSpell(category, spellId)
 
   if not caster then return end
 
-  local _, _, iconId = GetSpellInfo(spell.spellId)
-  mod.combatLog.TrackCooldown(caster.guid, caster.name, spell, GetTime(), category, iconId)
+  mod.combatLog.TrackCooldown(caster.guid, caster.name, spell, GetTime(), category)
 end
 
 --[[
