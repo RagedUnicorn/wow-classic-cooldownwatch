@@ -38,7 +38,7 @@ me.tag = "CooldownQueue"
       - {string} A unique identification for a caster (player or npc)
     ["sourceName"] = sourceName,
       - {string} Actual name of the caster
-    ["category"] = category,
+    ["categoryName"] = categoryName,
       - {string} The category the spell belongs to (e.g. "priest")
     ["spellData"] = {
       ["spellId"] = spellId,
@@ -113,7 +113,7 @@ function me.AddCooldown(sourceGuid, sourceName, category, spellData)
   casterBucket[spellData.spellId] = {
     ["sourceGuid"] = sourceGuid,
     ["sourceName"] = sourceName,
-    ["category"] = category,
+    ["categoryName"] = category,
     ["spellData"] = spellData
   }
 
@@ -181,7 +181,7 @@ function me.BuildExampleCooldown(castTime)
   return {
     ["sourceGuid"] = "preview",
     ["sourceName"] = "Example",
-    ["category"] = category,
+    ["categoryName"] = category,
     ["spellData"] = spellData
   }
 end

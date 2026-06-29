@@ -287,7 +287,7 @@ function me.UpdateCooldownUiState(row, cooldown, categoryName)
   end
 
   row.spellId = cooldown.spellId
-  row.category = categoryName
+  row.categoryName = categoryName
   row:Show()
 end
 
@@ -299,5 +299,5 @@ end
 function me.CooldownEntryOnClick(self)
   local enabled = self:GetChecked()
 
-  mod.configuration.UpdateCooldownConfigurationState(enabled, self:GetParent().category, self:GetParent().spellId)
+  mod.configuration.UpdateCooldownConfigurationState(enabled, self:GetParent().categoryName, self:GetParent().spellId)
 end
