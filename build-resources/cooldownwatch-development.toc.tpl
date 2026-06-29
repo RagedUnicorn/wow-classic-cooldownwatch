@@ -15,6 +15,7 @@ code/Environment.lua
 localization/enUS.lua
 localization/deDE.lua
 
+code/Event.lua
 code/Core.lua
 code/Categories.lua
 code/Filter.lua

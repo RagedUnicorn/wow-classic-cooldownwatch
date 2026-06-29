@@ -30,12 +30,37 @@ local me = rgcw
 
 me.tag = "Core"
 
-local initializationDone = false
 -- Forward declarations
-local RegisterEvents
+local OnPlayerLogin
+local OnCombatLog
+local OnTargetChanged
 local Initialize
 local ShowWelcomeMessage
 local InitializeTestFramework
+
+--[[
+  Run the bootstrap sequence on login, then open the readiness gate so gated
+  handlers (e.g. combat log) begin processing.
+]]--
+OnPlayerLogin = function()
+  Initialize()
+  me.event.SetReady()
+end
+
+--[[
+  Process the current unfiltered combat log event. Gated until initialization
+  is complete (see OnLoad).
+]]--
+OnCombatLog = function()
+  me.combatLog.ProcessUnfilteredCombatLogEvent(CombatLogGetCurrentEventInfo())
+end
+
+--[[
+  Update the tracked target when the player's target changes.
+]]--
+OnTargetChanged = function()
+  me.target.UpdateCurrentTarget()
+end
 
 --[[
   Addon load
@@ -43,47 +68,30 @@ local InitializeTestFramework
   @param {table} self
 ]]--
 function me.OnLoad(self)
-  RegisterEvents(self)
-end
-
---[[
-  Register addon events
-
-  @param {table} self
-]]--
-RegisterEvents = function(self)
   -- Register to player login event also fires on /reload
-  self:RegisterEvent("PLAYER_LOGIN")
+  me.event.Register("PLAYER_LOGIN", OnPlayerLogin)
   --[[
-    Register to combat event unfiltered
+    Register to combat event unfiltered. Gated so combat log events are ignored
+    until initialization completes.
 
     COMBAT_LOG_EVENT_UNFILTERED - show all logs independent of what the player has configured
     COMBAT_LOG_EVENT - shows only the logs that the player has configured
   ]]--
-  self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+  me.event.Register("COMBAT_LOG_EVENT_UNFILTERED", OnCombatLog, { gated = true })
   -- Register to the event that fires when the players target changes
-  self:RegisterEvent("PLAYER_TARGET_CHANGED")
+  me.event.Register("PLAYER_TARGET_CHANGED", OnTargetChanged)
+
+  me.event.Setup(self)
 end
 
 --[[
-  MainFrame OnEvent handler
+  MainFrame OnEvent handler. Delegates to the event bus for dispatch.
 
   @param {string} event
+  @param {vararg} ...
 ]]--
-function me.OnEvent(event)
-  if event == "PLAYER_LOGIN" then
-    me.logger.LogEvent(me.tag, "PLAYER_LOGIN")
-    Initialize()
-  elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
-    me.logger.LogEvent(me.tag, "COMBAT_LOG_EVENT_UNFILTERED")
-
-    if initializationDone then
-      me.combatLog.ProcessUnfilteredCombatLogEvent(CombatLogGetCurrentEventInfo())
-    end
-  elseif event == "PLAYER_TARGET_CHANGED" then
-    me.logger.LogEvent(me.tag, "PLAYER_TARGET_CHANGED")
-    me.target.UpdateCurrentTarget()
-  end
+function me.OnEvent(event, ...)
+  me.event.Dispatch(event, ...)
 end
 
 --[[
@@ -107,8 +115,6 @@ Initialize = function()
 
   InitializeTestFramework()
   ShowWelcomeMessage()
-  -- initialization is done
-  initializationDone = true
 end
 
 --[[

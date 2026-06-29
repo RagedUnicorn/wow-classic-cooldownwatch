@@ -49,6 +49,7 @@ rgcw.logger = {
   LogInfo = function() end,
   LogWarn = function() end,
   LogError = function() end,
+  LogEvent = function() end,
 }
 
 rgcw.season = {
@@ -56,6 +57,7 @@ rgcw.season = {
 }
 
 dofile("code/Constants.lua")
+dofile("code/Event.lua")
 dofile("code/Common.lua")
 dofile("code/Categories.lua")
 dofile("code/SpellMap.lua")
