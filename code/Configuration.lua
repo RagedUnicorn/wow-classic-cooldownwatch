@@ -195,25 +195,16 @@ end
   @param {string} categoryName
   @param {number} spellId
 
-  @return {nil | boolean}
-    nil   - If no entry at all could be found
-    true  - If cooldown is enabled
-    false - If cooldown is disabled
+  @return {boolean}
+    true  - If the cooldown is tracked (enabled) in the category
+    false - Otherwise (disabled, or never configured in the category)
 ]]--
 function me.GetCooldownConfigurationState(categoryName, spellId)
   local config = CooldownWatchConfiguration.cooldownConfiguration
 
-  if categoryName == nil then
-    for _, configCategory in pairs(config) do
-      if configCategory[spellId] then
-        return true
-      end
-    end
-  else
-    if config[categoryName] == nil then
-      return nil -- no entry at all for category - abort
-    end
-
-    return config[categoryName][spellId]
+  if config[categoryName] == nil then
+    return false -- no entry for this category yet
   end
+
+  return config[categoryName][spellId] == true
 end
