@@ -17,9 +17,9 @@ localization/deDE.lua
 
 code/Core.lua
 code/Categories.lua
+code/Filter.lua
 code/Logger.lua
 code/Cmd.lua
-code/Filter.lua
 code/CombatLog.lua
 code/Common.lua
 code/SpellMapHelper.lua
