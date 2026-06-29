@@ -30,7 +30,15 @@
   Expected cwd: addon repo root. Run from elsewhere and the dofile()s will fail.
 ]]--
 
--- luacheck: globals rgcw RGCW_ENVIRONMENT
+-- luacheck: globals rgcw RGCW_ENVIRONMENT unpack
+
+-- WoW Classic Era runs Lua 5.1, where `unpack` is a global. busted may run a
+-- newer Lua where it moved to `table.unpack`. Mirror the WoW global so
+-- production code that calls unpack() (e.g. Common.SelectMultiple) behaves the
+-- same headless as it does in-game.
+-- luacheck: push ignore 143
+unpack = unpack or table.unpack
+-- luacheck: pop
 
 rgcw = {}
 
