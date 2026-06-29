@@ -375,3 +375,32 @@ function me.ValidateCategoriesMatchSpellMap(categories, spellMap)
 
   return failures
 end
+
+--[[
+  Verify cooldownWorstCase, where present, never exceeds the base cooldown.
+  cooldownWorstCase represents the talent-reduced lower bound of a cooldown, so
+  logically it must be <= cooldown. A typo (e.g. cooldown = 5.5,
+  cooldownWorstCase = 8) would otherwise surface only as confusing UI behaviour
+  (a timer running past the supposed worst case).
+
+  @param {table} spellMap
+
+  @return {table}
+]]--
+function me.ValidateCooldownWorstCaseSane(spellMap)
+  local failures = {}
+
+  for category, spells in pairs(spellMap) do
+    for spellId, entry in pairs(spells) do
+      if IsPrimary(entry) and entry.cooldownWorstCase ~= nil
+        and entry.cooldownWorstCase > entry.cooldown then
+        table.insert(failures,
+          string.format("%s/%s ('%s'): cooldownWorstCase %s exceeds cooldown %s",
+            category, tostring(spellId), entry.name,
+            tostring(entry.cooldownWorstCase), tostring(entry.cooldown)))
+      end
+    end
+  end
+
+  return failures
+end

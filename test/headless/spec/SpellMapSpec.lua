@@ -78,4 +78,8 @@ describe("SpellMap data integrity", function()
     assert.same({},
       rgcw.spellMapValidation.ValidateCategoriesMatchSpellMap(rgcw.categories.GetCategories(), spellMap))
   end)
+
+  it("every cooldownWorstCase is less than or equal to its base cooldown", function()
+    assert.same({}, rgcw.spellMapValidation.ValidateCooldownWorstCaseSane(spellMap))
+  end)
 end)

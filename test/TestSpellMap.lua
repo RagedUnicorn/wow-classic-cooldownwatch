@@ -150,6 +150,15 @@ function me.TestCategoriesMatchSpellMap()
     "category/SpellMap mismatch(es)")
 end
 
+function me.TestCooldownWorstCaseSane()
+  RunValidator("TestCooldownWorstCaseSane",
+    function()
+      return mod.spellMapValidation.ValidateCooldownWorstCaseSane(mod.spellMap.GetSpellMap())
+    end,
+    "Every cooldownWorstCase is less than or equal to its base cooldown",
+    "cooldownWorstCase out-of-range failure(s)")
+end
+
 --[[
   Run all spellMap data-integrity tests.
 ]]--
@@ -166,6 +175,7 @@ function me.RunAllTests()
   me.TestUnknownSharedCooldownGroupReturnsNil()
   me.TestUnknownCategoryReturnsEmpty()
   me.TestCategoriesMatchSpellMap()
+  me.TestCooldownWorstCaseSane()
 
   mod.testLogger.LogInfo("SpellMap", "=== SpellMap Tests Complete ===")
 end
