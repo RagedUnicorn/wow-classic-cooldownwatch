@@ -31,6 +31,8 @@ me.tag = "SpellMapHelper"
 
 -- Forward declarations
 local GetFilteredSpellMap
+local IsPrimaryAllowedInCurrentSeason
+local ResolvePrimary
 
 --[[
   Whether a primary spell is allowed in the active WoW season. Base spells are
@@ -41,7 +43,7 @@ local GetFilteredSpellMap
 
   @return {boolean}
 ]]--
-local function IsPrimaryAllowedInCurrentSeason(primarySpell)
+IsPrimaryAllowedInCurrentSeason = function(primarySpell)
   if primarySpell.type == RGCW_CONSTANTS.SPELL_TYPE_BASE then
     return true
   end
@@ -108,6 +110,50 @@ function me.GetAllForCategory(category)
 end
 
 --[[
+  Resolve a spellId to its season-allowed primary entry. Walks every category,
+  follows a single refId hop for non-primary ranks, and applies season-gating.
+  Returns the primary's base entry uncloned and without any event filter - the
+  shared core of SearchBySpellId (event-aware) and GetSpellById (event-free).
+
+  @param {number} spellId
+
+  @return ({string} {number} {table}) | {nil}
+    category, realSpellId (the primary's spellId, which differs from the input
+    when the input is a non-primary rank's id), and the base primary entry.
+    Returns nil for unknown spellIds and for SOD spells outside Season of
+    Discovery.
+]]--
+ResolvePrimary = function(spellId)
+  local baseSpellMap = mod.spellMap.GetSpellMap()
+
+  for category, spells in pairs(baseSpellMap) do
+    local entry = spells[spellId]
+    local baseSpell
+    local realSpellId
+
+    if entry then
+      if type(entry.name) == "string" then
+        baseSpell = entry
+        realSpellId = spellId
+      elseif type(entry.refId) == "number" then
+        baseSpell = spells[entry.refId]
+        realSpellId = entry.refId
+      end
+    end
+
+    if baseSpell then
+      if not IsPrimaryAllowedInCurrentSeason(baseSpell) then
+        return nil
+      end
+
+      return category, realSpellId, baseSpell
+    end
+  end
+
+  return nil
+end
+
+--[[
   Event-aware spellMap lookup for the combat-log path. Resolves spellId to its
   primary entry (following refId chains and season-gating), then returns the
   spell only if `event` is in the primary's `trackedEvents`. Returns nil for
@@ -126,44 +172,22 @@ end
 function me.SearchBySpellId(spellId, event)
   if not spellId then return nil end
 
-  local baseSpellMap = mod.spellMap.GetSpellMap()
-
   mod.logger.LogDebug(me.tag, string.format("Searching for spellId %s in spellMap", spellId))
 
-  for category, spells in pairs(baseSpellMap) do
-    local spellData = spells[spellId]
-    local baseSpell
-    local realSpellId
+  local category, realSpellId, baseSpell = ResolvePrimary(spellId)
 
-    if spellData then
-      if type(spellData.name) == "string" then
-        baseSpell = spellData
-        realSpellId = spellId
-      elseif type(spellData.refId) == "number" then
-        baseSpell = spells[spellData.refId]
-        realSpellId = spellData.refId
-      end
-    end
+  if not baseSpell then return nil end
 
-    if baseSpell then
-      if not IsPrimaryAllowedInCurrentSeason(baseSpell) then
-        return nil
-      end
+  for _, trackedEvent in pairs(baseSpell.trackedEvents) do
+    if trackedEvent == event then
+      mod.logger.LogDebug(me.tag, string.format(
+        "Found matching tracked event %s for spellId %s", event, spellId))
 
-      for _, trackedEvent in pairs(baseSpell.trackedEvents) do
-        if trackedEvent == event then
-          mod.logger.LogDebug(me.tag, string.format(
-            "Found matching tracked event %s for spellId %s", event, spellId))
+      local clonedSpell = mod.common.Clone(baseSpell)
+      clonedSpell.spellId = realSpellId -- overwrite spellId with the real spellId
+      clonedSpell.normalizedSpellName = mod.common.NormalizeSpellName(baseSpell.name)
 
-          local clonedSpell = mod.common.Clone(baseSpell)
-          clonedSpell.spellId = realSpellId -- overwrite spellId with the real spellId
-          clonedSpell.normalizedSpellName = mod.common.NormalizeSpellName(baseSpell.name)
-
-          return category, realSpellId, clonedSpell
-        end
-      end
-
-      return nil
+      return category, realSpellId, clonedSpell
     end
   end
 
@@ -196,36 +220,14 @@ end
 function me.GetSpellById(spellId)
   if not spellId then return nil end
 
-  local baseSpellMap = mod.spellMap.GetSpellMap()
+  local category, realSpellId, baseSpell = ResolvePrimary(spellId)
 
-  for category, spells in pairs(baseSpellMap) do
-    local entry = spells[spellId]
-    local baseSpell
-    local realSpellId
+  if not baseSpell then return nil end
 
-    if entry then
-      if type(entry.name) == "string" then
-        baseSpell = entry
-        realSpellId = spellId
-      elseif type(entry.refId) == "number" then
-        baseSpell = spells[entry.refId]
-        realSpellId = entry.refId
-      end
-    end
+  local clonedSpell = mod.common.Clone(baseSpell)
 
-    if baseSpell then
-      if not IsPrimaryAllowedInCurrentSeason(baseSpell) then
-        return nil
-      end
+  clonedSpell.spellId = realSpellId
+  clonedSpell.normalizedSpellName = mod.common.NormalizeSpellName(baseSpell.name)
 
-      local clonedSpell = mod.common.Clone(baseSpell)
-
-      clonedSpell.spellId = realSpellId
-      clonedSpell.normalizedSpellName = mod.common.NormalizeSpellName(baseSpell.name)
-
-      return category, realSpellId, clonedSpell
-    end
-  end
-
-  return nil
+  return category, realSpellId, clonedSpell
 end
