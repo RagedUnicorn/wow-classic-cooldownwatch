@@ -338,3 +338,40 @@ function me.ValidateSharedCooldownGroupsConsistent(spellMap, groups, getSpellByI
 
   return failures
 end
+
+--[[
+  Verify the category catalog (code/Categories.lua) and the SpellMap top-level
+  keys are in one-to-one correspondence. Profile.lua and Configuration.lua both
+  derive their per-category buckets from the catalog, so a catalog entry without
+  a SpellMap section (or a SpellMap section without a catalog entry) is exactly
+  the drift this guard exists to catch.
+
+  @param {table} categories - Array of {categoryName, ...} from mod.categories.GetCategories()
+  @param {table} spellMap - The cloned spellMap keyed by category name
+
+  @return {table}
+]]--
+function me.ValidateCategoriesMatchSpellMap(categories, spellMap)
+  local failures = {}
+  local inCatalog = {}
+
+  for _, category in ipairs(categories) do
+    inCatalog[category.categoryName] = true
+
+    if spellMap[category.categoryName] == nil then
+      table.insert(failures,
+        string.format("catalog category '%s' has no SpellMap section",
+          tostring(category.categoryName)))
+    end
+  end
+
+  for categoryName in pairs(spellMap) do
+    if not inCatalog[categoryName] then
+      table.insert(failures,
+        string.format("SpellMap category '%s' is missing from the category catalog",
+          tostring(categoryName)))
+    end
+  end
+
+  return failures
+end

@@ -140,6 +140,16 @@ function me.TestUnknownCategoryReturnsEmpty()
     "unknown-category failure(s)")
 end
 
+function me.TestCategoriesMatchSpellMap()
+  RunValidator("TestCategoriesMatchSpellMap",
+    function()
+      return mod.spellMapValidation.ValidateCategoriesMatchSpellMap(
+        mod.categories.GetCategories(), mod.spellMap.GetSpellMap())
+    end,
+    "Category catalog and SpellMap categories are in one-to-one correspondence",
+    "category/SpellMap mismatch(es)")
+end
+
 --[[
   Run all spellMap data-integrity tests.
 ]]--
@@ -155,6 +165,7 @@ function me.RunAllTests()
   me.TestAliasRejectsMismatchedEvent()
   me.TestUnknownSharedCooldownGroupReturnsNil()
   me.TestUnknownCategoryReturnsEmpty()
+  me.TestCategoriesMatchSpellMap()
 
   mod.testLogger.LogInfo("SpellMap", "=== SpellMap Tests Complete ===")
 end

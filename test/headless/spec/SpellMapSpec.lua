@@ -73,4 +73,9 @@ describe("SpellMap data integrity", function()
     assert.same({},
       rgcw.spellMapValidation.ValidateUnknownSharedCooldownGroupReturnsNil(rgcw.spellMap.GetSharedCooldownGroup))
   end)
+
+  it("category catalog and SpellMap categories are in one-to-one correspondence", function()
+    assert.same({},
+      rgcw.spellMapValidation.ValidateCategoriesMatchSpellMap(rgcw.categories.GetCategories(), spellMap))
+  end)
 end)

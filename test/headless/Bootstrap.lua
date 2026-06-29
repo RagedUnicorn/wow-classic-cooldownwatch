@@ -49,6 +49,7 @@ rgcw.season = {
 
 dofile("code/Constants.lua")
 dofile("code/Common.lua")
+dofile("code/Categories.lua")
 dofile("code/SpellMap.lua")
 dofile("code/SpellMapHelper.lua")
 dofile("code/CooldownQueue.lua")

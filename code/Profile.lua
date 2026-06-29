@@ -30,6 +30,11 @@ mod.profile = me
 me.tag = "Profile"
 
 --[[
+  Default tracking profile: one empty bucket per category, keyed by categoryName.
+  Derived from the category catalog (code/Categories.lua) at load time so it can
+  never drift from the canonical list — adding a category there propagates here
+  automatically.
+
   [{string}] = {
     -- e.g. paladin, racials etc
     [{number}] = {boolean}
@@ -37,18 +42,11 @@ me.tag = "Profile"
     -- false if the cooldown is disabled
   }
 ]]--
-local defaultProfile = {
-  ["rogue"] = {},
-  ["warrior"] = {},
-  ["mage"] = {},
-  ["warlock"] = {},
-  ["hunter"] = {},
-  ["paladin"] = {},
-  ["priest"] = {},
-  ["druid"] = {},
-  ["shaman"] = {},
-  ["misc"] = {}
-}
+local defaultProfile = {}
+
+for _, category in ipairs(mod.categories.GetCategories()) do
+  defaultProfile[category.categoryName] = {}
+end
 
 function me.GetDefaultProfile()
   return mod.common.Clone(defaultProfile)

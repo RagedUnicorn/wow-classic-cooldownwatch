@@ -37,21 +37,6 @@ CooldownWatchConfiguration = {
   ]]--
   ["lockTargetCooldownBar"] = false,
   --[[
-    Cooldown configuration
-  ]]--
-  ["cooldownConfiguration"] = {
-    ["rogue"] = {},
-    ["warrior"] = {},
-    ["mage"] = {},
-    ["warlock"] = {},
-    ["hunter"] = {},
-    ["paladin"] = {},
-    ["priest"] = {},
-    ["druid"] = {},
-    ["shaman"] = {},
-    ["misc"] = {}
-  },
-  --[[
     Initial addon version
   ]]--
   ["addonVersion"] = nil,
