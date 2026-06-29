@@ -164,12 +164,19 @@ end
   to create a smooth visual representation. Make sure to abort as soon as possible.
 ]]--
 function me.TargetCooldownBarOnUpdate()
-  local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(mod.target.GetCurrentTargetGuid())
+  local targetGuid = mod.target.GetCurrentTargetGuid()
+  --[[
+    No (enemy) target: skip the queue lookup entirely. cooldowns stays nil so the
+    loop below clears every slot - this is what empties the bar when the target is lost.
+  ]]--
+  local cooldowns
 
-  if cooldowns == nil then return end
+  if targetGuid ~= "" then
+    cooldowns = mod.cooldownQueue.GetCooldownsByTarget(targetGuid)
+  end
 
   for i = 1, RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_AMOUNT do
-    if cooldowns[i] ~= nil then
+    if cooldowns and cooldowns[i] ~= nil then
       mod.targetCooldownBarSlot.UpdateCooldownWatchSlot(cooldownSlots[i], cooldowns[i])
     else
       mod.targetCooldownBarSlot.ClearCooldownWatchSlot(cooldownSlots[i])

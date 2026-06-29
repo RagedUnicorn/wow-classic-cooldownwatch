@@ -77,6 +77,8 @@ function me.AddCooldown(sourceGuid, sourceName, category, spellData)
   assert(type(sourceGuid) == "string",
     string.format("bad argument #1 to `AddCooldown` (expected string got %s)", type(sourceGuid)))
 
+  assert(#sourceGuid > 0, "bad argument #1 to `AddCooldown` (sourceGuid must not be empty)")
+
   assert(type(sourceName) == "string",
     string.format("bad argument #2 to `AddCooldown` (expected string got %s)", type(sourceName)))
 
