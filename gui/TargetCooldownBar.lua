@@ -441,8 +441,11 @@ end
   @param {number} spellId
 ]]--
 function me.UpdateCooldownSlotTexture(cooldownWatchSlot, spellId)
+  if cooldownWatchSlot.iconHolderTexture.spellId == spellId then return end
+
   local _, _, iconTexture = GetSpellInfo(spellId)
   cooldownWatchSlot.iconHolderTexture:SetTexture(iconTexture)
+  cooldownWatchSlot.iconHolderTexture.spellId = spellId
 end
 
 --[[
@@ -515,6 +518,7 @@ function me.ClearCooldownSlotAnimated(cooldownWatchSlot, cooldown)
   animationGroup:SetScript("OnFinished", function()
     mod.cooldownQueue.RemoveCooldown(cooldown.sourceGuid, cooldown.spellData.spellId)
     cooldownWatchSlot.iconHolderTexture:SetTexture(nil)
+    cooldownWatchSlot.iconHolderTexture.spellId = nil
     cooldownWatchSlot.highlightFrame:Hide()
     cooldownWatchSlot:SetAlpha(1)
     cooldownWatchSlot:Hide()
@@ -534,6 +538,7 @@ function me.ClearCooldownWatchSlot(cooldownWatchSlot)
   cooldownWatchSlot.targetSpellTimeBig:SetText("")
   cooldownWatchSlot.targetSpellTimeSmall:SetText("")
   cooldownWatchSlot.iconHolderTexture:SetTexture(nil)
+  cooldownWatchSlot.iconHolderTexture.spellId = nil
   cooldownWatchSlot.highlightFrame:Hide()
   cooldownWatchSlot.targetCooldownOverlay.cooldownStarted = false
 
