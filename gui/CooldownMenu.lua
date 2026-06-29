@@ -237,20 +237,12 @@ function me.SpellListScrollFrameOnUpdate(scrollFrame, categoryName)
 
   for index = 1, RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS do
     local value = index + FauxScrollFrame_GetOffset(scrollFrame)
-    local idx = 1
     local row = uiState.spellRows[index]
-    local wasShown = false
+    local cooldown = cachedCategoryData[value]
 
-    for _, cooldown in pairs(cachedCategoryData) do
-      if idx == value then
-        me.UpdateCooldownUiState(row, cooldown, categoryName)
-        wasShown = true
-      end
-
-      idx = idx + 1
-    end
-
-    if not wasShown then
+    if cooldown then
+      me.UpdateCooldownUiState(row, cooldown, categoryName)
+    else
       row:Hide()
     end
   end
