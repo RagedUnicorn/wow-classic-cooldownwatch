@@ -32,6 +32,9 @@
 
 -- luacheck: globals rgcw RGCW_ENVIRONMENT unpack
 
+-- allow specs to require the opt-in WoW-global stub registry as `require("WowStubs")`
+package.path = "./test/headless/?.lua;" .. package.path
+
 -- WoW Classic Era runs Lua 5.1, where `unpack` is a global. busted may run a
 -- newer Lua where it moved to `table.unpack`. Mirror the WoW global so
 -- production code that calls unpack() (e.g. Common.SelectMultiple) behaves the

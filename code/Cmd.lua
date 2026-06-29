@@ -79,7 +79,7 @@ ParseSlashCommand = function(msg)
   elseif args[1] == "rl" or args[1] == "reload" then
     ReloadUI()
   elseif args[1] == "opt" then
-    mod.addonConfiguration.OpenAddonPanel()
+    mod.addonConfiguration.OpenMainCategory()
   elseif args[1] == "conf" or args[1] == "configure" then
     if args[2] == "enable" then
       mod.targetCooldownBarPreview.ShowExampleTargetCooldownBar()
