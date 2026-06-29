@@ -2,6 +2,7 @@ globals = {
   "rgcw",
   "CooldownWatchConfiguration",
   "RGCW_CONSTANTS",
+  "RGCW_TEST_CONSTANTS",
   "RGCW_ENVIRONMENT",
   "CooldownWatchLogTracker"
 }

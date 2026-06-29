@@ -70,7 +70,7 @@ function me.Initialize()
       originalLog(level, testName, message, data)
 
       -- Update UI if window exists
-      if _G[RGCW_CONSTANTS.ELEMENT_TEST_LOG_WINDOW] then
+      if _G[RGCW_TEST_CONSTANTS.ELEMENT_TEST_LOG_WINDOW] then
         me.AddLogMessage(level, testName, message, data)
       end
     end
@@ -79,15 +79,15 @@ function me.Initialize()
   end
 
   -- Clear existing messages when starting a new session
-  local testLogWindow = _G[RGCW_CONSTANTS.ELEMENT_TEST_LOG_WINDOW]
+  local testLogWindow = _G[RGCW_TEST_CONSTANTS.ELEMENT_TEST_LOG_WINDOW]
 
   if testLogWindow then
     me.ClearLog()
 
     -- Update window title with new session info
-    local windowTitle = _G[RGCW_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_TITLE]
+    local windowTitle = _G[RGCW_TEST_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_TITLE]
 
-    local testLog = _G[RGCW_CONSTANTS.SAVED_VARIABLE_TEST_LOG]
+    local testLog = _G[RGCW_TEST_CONSTANTS.SAVED_VARIABLE_TEST_LOG]
 
     if windowTitle and testLog and testLog.currentSession then
       windowTitle:SetText(string.format("CooldownWatch Test Log - Session: %s",
@@ -102,7 +102,7 @@ end
   Show the test log window
 ]]--
 function me.Show()
-  local testLogWindow = _G[RGCW_CONSTANTS.ELEMENT_TEST_LOG_WINDOW]
+  local testLogWindow = _G[RGCW_TEST_CONSTANTS.ELEMENT_TEST_LOG_WINDOW]
 
   if not testLogWindow then
     mod.logger.LogError(me.tag, "Test log window not found")
@@ -119,7 +119,7 @@ end
   Hide the test log window
 ]]--
 function me.Hide()
-  local testLogWindow = _G[RGCW_CONSTANTS.ELEMENT_TEST_LOG_WINDOW]
+  local testLogWindow = _G[RGCW_TEST_CONSTANTS.ELEMENT_TEST_LOG_WINDOW]
 
   if testLogWindow then
     testLogWindow:Hide()
@@ -130,7 +130,7 @@ end
   Toggle the test log window
 ]]--
 function me.Toggle()
-  local testLogWindow = _G[RGCW_CONSTANTS.ELEMENT_TEST_LOG_WINDOW]
+  local testLogWindow = _G[RGCW_TEST_CONSTANTS.ELEMENT_TEST_LOG_WINDOW]
 
   if testLogWindow and testLogWindow:IsShown() then
     me.Hide()
@@ -148,7 +148,7 @@ end
   @param {table} data - Optional data
 ]]--
 function me.AddLogMessage(level, testName, message, data)
-  local scrollFrame = _G[RGCW_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_SCROLL_FRAME]
+  local scrollFrame = _G[RGCW_TEST_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_SCROLL_FRAME]
   local scrollChild = scrollFrame:GetScrollChild()
 
   if not scrollFrame or not scrollChild then
@@ -180,7 +180,7 @@ function me.AddLogMessage(level, testName, message, data)
   scrollChild:SetHeight(math.max(totalHeight, 1))
 
   -- Auto-scroll if enabled (delay to ensure proper scroll calculation)
-  local autoScrollCheckBox = _G[RGCW_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_AUTO_SCROLL]
+  local autoScrollCheckBox = _G[RGCW_TEST_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_AUTO_SCROLL]
 
   if autoScrollCheckBox and autoScrollCheckBox:GetChecked() then
     C_Timer.After(0.01, function()
@@ -357,7 +357,7 @@ function me.ClearLog()
   me.logMessages = {}
   me.currentSessionId = nil -- Reset session tracking
 
-  local scrollChild = _G[RGCW_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_SCROLL_CHILD]
+  local scrollChild = _G[RGCW_TEST_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_SCROLL_CHILD]
   if scrollChild then
     scrollChild:SetHeight(1)
   end
@@ -376,7 +376,7 @@ function me.LoadSessionLogs()
   end
 
   -- Don't reload if we're already showing current session
-  local testLog = _G[RGCW_CONSTANTS.SAVED_VARIABLE_TEST_LOG]
+  local testLog = _G[RGCW_TEST_CONSTANTS.SAVED_VARIABLE_TEST_LOG]
 
   if me.currentSessionId == testLog.currentSession then
     return
@@ -394,15 +394,15 @@ function me.LoadSessionLogs()
   end
 
   -- Update window title with session info
-  local windowTitle = _G[RGCW_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_TITLE]
+  local windowTitle = _G[RGCW_TEST_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_TITLE]
 
   if windowTitle then
     windowTitle:SetText(string.format("CooldownWatch Test Log - Session: %s", me.currentSessionId))
   end
 
   -- Ensure scroll is at bottom after loading
-  local scrollFrame = _G[RGCW_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_SCROLL_FRAME]
-  local autoScrollCheckBox = _G[RGCW_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_AUTO_SCROLL]
+  local scrollFrame = _G[RGCW_TEST_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_SCROLL_FRAME]
+  local autoScrollCheckBox = _G[RGCW_TEST_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_AUTO_SCROLL]
 
   if scrollFrame and autoScrollCheckBox and autoScrollCheckBox:GetChecked() then
     C_Timer.After(0.1, function()

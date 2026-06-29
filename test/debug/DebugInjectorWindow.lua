@@ -45,7 +45,7 @@ local selectedCategory
   Build the vertical stack of category buttons on the left column.
 ]]--
 local function BuildCategoryButtons()
-  local column = _G[RGCW_CONSTANTS.ELEMENT_DEBUG_INJECTOR_WINDOW_CATEGORY_COLUMN]
+  local column = _G[RGCW_TEST_CONSTANTS.ELEMENT_DEBUG_INJECTOR_WINDOW_CATEGORY_COLUMN]
 
   if not column then return end
 
@@ -145,7 +145,7 @@ end
 function me.SelectCategory(categoryName)
   selectedCategory = categoryName
 
-  local scrollChild = _G[RGCW_CONSTANTS.ELEMENT_DEBUG_INJECTOR_WINDOW_SPELL_SCROLL_CHILD]
+  local scrollChild = _G[RGCW_TEST_CONSTANTS.ELEMENT_DEBUG_INJECTOR_WINDOW_SPELL_SCROLL_CHILD]
 
   if not scrollChild then return end
 
@@ -164,7 +164,7 @@ function me.SelectCategory(categoryName)
   local totalHeight = math.max(#spells * (SPELL_ROW_HEIGHT + SPELL_ROW_PADDING), 1)
   scrollChild:SetHeight(totalHeight)
 
-  local scrollFrame = _G[RGCW_CONSTANTS.ELEMENT_DEBUG_INJECTOR_WINDOW_SPELL_SCROLL_FRAME]
+  local scrollFrame = _G[RGCW_TEST_CONSTANTS.ELEMENT_DEBUG_INJECTOR_WINDOW_SPELL_SCROLL_FRAME]
 
   if scrollFrame then
     scrollFrame:SetVerticalScroll(0)
@@ -191,7 +191,7 @@ end
   hint when opening so the dev knows to /target self.
 ]]--
 function me.Toggle()
-  local window = _G[RGCW_CONSTANTS.ELEMENT_DEBUG_INJECTOR_WINDOW]
+  local window = _G[RGCW_TEST_CONSTANTS.ELEMENT_DEBUG_INJECTOR_WINDOW]
 
   if not window then
     mod.logger.LogError(me.tag, "Debug injector window not found")

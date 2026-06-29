@@ -37,6 +37,7 @@ code/Season.lua
 code/Debug.lua
 
 # Test Framework (Development Only)
+test/framework/TestConstants.lua
 test/framework/TestCmd.lua
 test/framework/TestLogger.lua
 test/framework/TestAssert.lua
