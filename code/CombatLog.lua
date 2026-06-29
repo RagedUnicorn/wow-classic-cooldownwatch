@@ -103,7 +103,7 @@ function me.IsCooldownTracked(category, spellId)
     string.format("bad argument #1 to `IsCooldownTracked` (expected string got %s)", type(category)))
 
   assert(type(spellId) == "number",
-    string.format("bad argument #1 to `IsCooldownTracked` (expected number got %s)", type(spellId)))
+    string.format("bad argument #2 to `IsCooldownTracked` (expected number got %s)", type(spellId)))
 
   return mod.configuration.GetCooldownConfigurationState(category, spellId)
 end
