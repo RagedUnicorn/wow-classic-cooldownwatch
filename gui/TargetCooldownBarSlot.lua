@@ -103,7 +103,7 @@ function me.CreateAnimation(cooldownWatchSlot)
   )
 
   local animation = animationGroup:CreateAnimation("Alpha")
-  animation:SetDuration(2)
+  animation:SetDuration(RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_SLOT_FADE_DURATION)
   animation:SetFromAlpha(1)
   animation:SetToAlpha(0)
   animation:SetSmoothing("OUT")
