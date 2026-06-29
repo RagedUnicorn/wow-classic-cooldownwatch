@@ -255,7 +255,7 @@ end
 function me.CreateBigTimerCooldown(frame)
   local bigTimerFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT, "OVERLAY")
   bigTimerFontString:SetFont(STANDARD_TEXT_FONT, RGCW_CONSTANTS.TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_SIZE)
-  bigTimerFontString:SetTextColor(1, 1, 0)
+  bigTimerFontString:SetTextColor(unpack(RGCW_CONSTANTS.COLORS.TIMER_BIG_TEXT))
   bigTimerFontString:SetJustifyH("LEFT")
 
   return bigTimerFontString
@@ -276,7 +276,7 @@ function me.CreateSmallTimerCooldown(frame)
   )
   smallTimerFontString:SetFont(STANDARD_TEXT_FONT, RGCW_CONSTANTS.TARGET_COOLDOWN_SMALL_COOLDOWN_TEXT_SIZE)
   smallTimerFontString:SetPoint("TOPLEFT", 5, -5)
-  smallTimerFontString:SetTextColor(.01, .66, 0.95, 1)
+  smallTimerFontString:SetTextColor(unpack(RGCW_CONSTANTS.COLORS.TIMER_SMALL_TEXT))
   smallTimerFontString:SetJustifyH("LEFT")
 
   return smallTimerFontString
@@ -390,14 +390,14 @@ function me.UpdateCooldownSlotHighlightFrame(cooldownWatchSlot, cooldown, timeLe
   local highlightFrame = cooldownWatchSlot.highlightFrame
 
   if me.IsAlertThresholdBreached(cooldown, timeLeftBig) then
-    highlightFrame:SetBackdropBorderColor(1, 0.2, 0, 1)
+    highlightFrame:SetBackdropBorderColor(unpack(RGCW_CONSTANTS.COLORS.ALERT_BORDER))
     highlightFrame:Show()
 
     return
   end
 
   if me.IsWarningThresholdBreached(cooldown, timeLeftBig) then
-    highlightFrame:SetBackdropBorderColor(0.8, 1, 0, 1)
+    highlightFrame:SetBackdropBorderColor(unpack(RGCW_CONSTANTS.COLORS.WARN_BORDER))
     highlightFrame:Show()
 
     return

@@ -197,4 +197,17 @@ RGCW_CONSTANTS = {
   ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS = "$parentStatus",
   CATEGORY_COOLDOWN_SPELL_ICON_SIZE = 32,
   COOLDOWN_SPELL_DEFAULT_SIZE = 32,
+  --[[
+    Cooldown slot colors as {r, g, b, a} tuples for unpack() at the call sites
+  ]]--
+  COLORS = {
+    -- alert highlight border (red) when a cooldown nears ready
+    ALERT_BORDER = {1, 0.2, 0, 1},
+    -- warning highlight border (yellow-green) at the earlier threshold
+    WARN_BORDER = {0.8, 1, 0, 1},
+    -- big timer text (yellow)
+    TIMER_BIG_TEXT = {1, 1, 0},
+    -- small worst-case timer text (cyan)
+    TIMER_SMALL_TEXT = {0.01, 0.66, 0.95, 1},
+  },
 }
