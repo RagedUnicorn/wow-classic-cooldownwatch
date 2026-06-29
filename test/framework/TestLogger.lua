@@ -34,7 +34,9 @@ mod.testLogger = me
 
 me.tag = "TestLogger"
 
--- Log levels
+--[[ Test-output categories. These tag each test-result line for coloring;
+  they are not filtered by a threshold
+]]--
 me.LOG_LEVEL = {
   DEBUG = "DEBUG",
   INFO = "INFO",
