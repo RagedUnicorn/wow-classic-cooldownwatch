@@ -55,7 +55,7 @@ function me.TestAddCooldown()
     if cooldown.spellData.spellId == spell.spellId then
       found = true
       mod.testLogger.LogInfo("TestAddCooldown", "Cooldown found in queue", {
-        caster = cooldown.casterName,
+        caster = cooldown.sourceName,
         spell = cooldown.spellData.name,
         cooldown = cooldown.spellData.cooldown .. "s"
       })
