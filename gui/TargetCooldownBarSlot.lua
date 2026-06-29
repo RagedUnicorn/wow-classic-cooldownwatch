@@ -256,19 +256,19 @@ end
   e.g. warn, alert or normal
 
   @param {table} cooldownWatchSlot
-  @param {number} cooldown
+  @param {number} cooldownDuration
 ]]--
-function me.UpdateCooldownSlotHighlightFrame(cooldownWatchSlot, cooldown, timeLeftBig)
+function me.UpdateCooldownSlotHighlightFrame(cooldownWatchSlot, cooldownDuration, timeLeftBig)
   local highlightFrame = cooldownWatchSlot.highlightFrame
 
-  if me.IsAlertThresholdBreached(cooldown, timeLeftBig) then
+  if me.IsAlertThresholdBreached(cooldownDuration, timeLeftBig) then
     highlightFrame:SetBackdropBorderColor(unpack(RGCW_CONSTANTS.COLORS.ALERT_BORDER))
     highlightFrame:Show()
 
     return
   end
 
-  if me.IsWarningThresholdBreached(cooldown, timeLeftBig) then
+  if me.IsWarningThresholdBreached(cooldownDuration, timeLeftBig) then
     highlightFrame:SetBackdropBorderColor(unpack(RGCW_CONSTANTS.COLORS.WARN_BORDER))
     highlightFrame:Show()
 
