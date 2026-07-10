@@ -5,9 +5,9 @@ on:
   pull_request:
 
 jobs:
-  test-spellmap:
+  test-headless:
     runs-on: ubuntu-latest
-    name: SpellMap data integrity
+    name: Headless busted specs
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
