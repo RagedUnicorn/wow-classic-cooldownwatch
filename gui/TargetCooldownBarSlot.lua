@@ -86,7 +86,8 @@ function me.CreateCooldownSlot(frame, position)
   cooldownWatchSlot.targetSpellTimeSmall = me.CreateSmallTimerCooldown(cooldownWatchSlot)
 
   me.CreateAnimation(cooldownWatchSlot)
-  -- initially hide slots
+  -- initially hide slots; a fresh slot matches the cleared state ClearCooldownWatchSlot produces
+  cooldownWatchSlot.isCleared = true
   cooldownWatchSlot:Hide()
 
   return cooldownWatchSlot
@@ -266,6 +267,12 @@ end
   @param {table} cooldown
 ]]--
 function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
+  --[[
+    Every branch below (including the animated-clear path) mutates widget state, so the slot no
+    longer matches the cleared baseline ClearCooldownWatchSlot's guard stands for.
+  ]]--
+  cooldownWatchSlot.isCleared = false
+
   local timePassed = (GetTime() - cooldown.spellData.castTime)
   local timeLeftBig = cooldown.spellData.cooldown - timePassed
   local timeLeftSmall
@@ -463,15 +470,24 @@ end
 --[[
   Clear a cooldownWatchSlot without any animation
 
+  Idempotent: the OnUpdate ticker calls this for every empty slot on every tick for the whole
+  session, so without the isCleared guard an already-empty bar would re-issue the widget writes
+  below permanently. The flag is reset in UpdateCooldownWatchSlot, the only path that dirties
+  slot widgets after a clear (the fade OnFinished cleanup only ever moves a slot closer to the
+  cleared state, never away from it).
+
   @param {table} cooldownWatchSlot
 ]]--
 function me.ClearCooldownWatchSlot(cooldownWatchSlot)
+  if cooldownWatchSlot.isCleared then return end
+
   cooldownWatchSlot.targetSpellTimeBig:SetText("")
   cooldownWatchSlot.targetSpellTimeSmall:SetText("")
   cooldownWatchSlot.iconHolderTexture:SetTexture(nil)
   cooldownWatchSlot.iconHolderTexture.spellId = nil
   cooldownWatchSlot.highlightFrame:Hide()
   cooldownWatchSlot.targetCooldownOverlay.spellId = nil
+  cooldownWatchSlot.isCleared = true
 
   cooldownWatchSlot:Hide()
 end
