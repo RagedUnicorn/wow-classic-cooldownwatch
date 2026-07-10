@@ -145,6 +145,67 @@ function me.RemoveCooldown(sourceGuid, spellId)
 end
 
 --[[
+  Whether an entry expired longer than the prune grace ago. The grace keeps entries
+  alive through the render fade (see COOLDOWN_QUEUE_PRUNE_GRACE) so pruning never
+  removes an entry the renderer is still fading out.
+
+  @param {table} cooldownEvent
+    A queue entry (see the storage layout above)
+  @param {number} now
+    The current timestamp
+
+  @return {boolean}
+]]--
+local function IsPrunable(cooldownEvent, now)
+  local spellData = cooldownEvent.spellData
+
+  return now - spellData.castTime > spellData.cooldown + RGCW_CONSTANTS.COOLDOWN_QUEUE_PRUNE_GRACE
+end
+
+--[[
+  Remove long-expired cooldowns for a single caster. Cheap enough for the render
+  hot path (buckets hold a handful of entries); invoked per tick for the current
+  target so entries beyond the visible slots don't outlive their expiry.
+
+  `now` is taken as a parameter (rather than calling GetTime internally) to keep
+  this module free of WoW APIs and unit-testable under the headless harness.
+
+  @param {string} sourceGuid
+    A unique identification for a caster
+  @param {number} now
+    The current timestamp (production passes GetTime())
+]]--
+function me.PruneCooldownsByTarget(sourceGuid, now)
+  local casterBucket = cooldownQueue[sourceGuid]
+  if not casterBucket then return end
+
+  for spellId, cooldownEvent in pairs(casterBucket) do
+    if IsPrunable(cooldownEvent, now) then
+      casterBucket[spellId] = nil
+      mod.logger.LogDebug(me.tag, "Pruned expired cooldown - '" .. spellId .. "' for player: " .. sourceGuid)
+    end
+  end
+
+  if next(casterBucket) == nil then
+    cooldownQueue[sourceGuid] = nil
+  end
+end
+
+--[[
+  Remove long-expired cooldowns across all casters. The data-layer backstop for
+  entries the renderer never visits (casters that are never retargeted); invoked
+  on PLAYER_TARGET_CHANGED rather than per tick.
+
+  @param {number} now
+    The current timestamp (production passes GetTime())
+]]--
+function me.PruneExpiredCooldowns(now)
+  for sourceGuid in pairs(cooldownQueue) do
+    me.PruneCooldownsByTarget(sourceGuid, now)
+  end
+end
+
+--[[
   Remove all cooldowns from queue
 ]]--
 function me.ClearCooldownQueue()

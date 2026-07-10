@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals CreateFrame UIParent
+-- luacheck: globals CreateFrame UIParent GetTime
 
 --[[
   Lifecycle, frame construction and per-tick orchestration for the TargetCooldownBar. Owns the bar frame
@@ -172,6 +172,11 @@ function me.TargetCooldownBarOnUpdate()
   local cooldowns
 
   if targetGuid ~= "" then
+    --[[
+      Prune before reading: the fade animation only removes entries that occupy a visible
+      slot, so entries beyond the slot amount would otherwise linger in the bucket forever.
+    ]]--
+    mod.cooldownQueue.PruneCooldownsByTarget(targetGuid, GetTime())
     cooldowns = mod.cooldownQueue.GetCooldownsByTarget(targetGuid)
   end
 
