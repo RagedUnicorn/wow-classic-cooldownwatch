@@ -41,6 +41,12 @@ CooldownWatchConfiguration = {
   ]]--
   ["addonVersion"] = nil,
   --[[
+    Per-category cooldown tracking state. The default derives from
+    mod.profile.GetDefaultProfile(), which is not loaded yet at this point —
+    SetupConfiguration seeds it instead. Declared here for visibility only.
+  ]]--
+  ["cooldownConfiguration"] = nil,
+  --[[
     Framepositions for user draggable Frames
     frames = {
       -- should match the actual frame name
@@ -86,11 +92,6 @@ end
   to run through migration paths.
 ]]--
 function me.SetAddonVersion()
-  -- if no version set so far make sure to set the current one
-  if CooldownWatchConfiguration.addonVersion == nil then
-    CooldownWatchConfiguration.addonVersion = GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
-  end
-
   -- me.MigrationPath()
   -- migration done update addon version to current
   CooldownWatchConfiguration.addonVersion = GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
