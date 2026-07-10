@@ -70,10 +70,38 @@ function M.install(stubs)
 end
 
 --[[
-  Ready-made stub builders for the WoW globals the specs touch. Empty for now -- the Cmd spec
-  installs its WoW globals (SlashCmdList, ReloadUI, DEFAULT_CHAT_FRAME, ...) ad hoc via install().
-  Add shared builders here as new specs need them.
+  Ready-made stub builders for the WoW globals the specs touch. The Cmd spec installs its WoW
+  globals (SlashCmdList, ReloadUI, DEFAULT_CHAT_FRAME, ...) ad hoc via install(). Add shared
+  builders here as new specs need them.
 ]]--
 M.stubs = {}
+
+--[[
+  GetLocale() -> string (localization files branch on this at load time).
+
+  @param {string} locale
+  @return {function}
+]]--
+function M.stubs.GetLocale(locale)
+  return function()
+    return locale or "enUS"
+  end
+end
+
+--[[
+  GetAddOnMetadata(addonName, key) -> string (the legacy global the localization files call for
+  their `version` string). `metadata` maps the requested key (e.g. "Version") to the value to
+  return.
+
+  @param {table} metadata
+  @return {function}
+]]--
+function M.stubs.GetAddOnMetadata(metadata)
+  metadata = metadata or {}
+
+  return function(_, key)
+    return metadata[key]
+  end
+end
 
 return M
