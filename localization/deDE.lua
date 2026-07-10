@@ -26,10 +26,10 @@ if (GetLocale() == "deDE") then
   -- general
   rgcw.L["general_category_name"] = "Allgemein"
   rgcw.L["general_title"] = "Allgemeine Konfiguration"
-  rgcw.L["window_lock_target_cooldow_bar"] = "Sperre Zielabklingzeitenbalken"
-  rgcw.L["window_lock_target_cooldow_bar_tooltip"] = "Verhindert das bewegen des Zielabklingzeitenbalken"
+  rgcw.L["window_lock_target_cooldown_bar"] = "Sperre Zielabklingzeitenbalken"
+  rgcw.L["window_lock_target_cooldown_bar_tooltip"] = "Verhindert das bewegen des Zielabklingzeitenbalken"
 
-  -- cooldown menu TODO translate
+  -- cooldown menu
   rgcw.L["category_priest"] = "Priester"
   rgcw.L["category_rogue"] = "Schurke"
   rgcw.L["category_mage"] = "Magier"
@@ -40,5 +40,5 @@ if (GetLocale() == "deDE") then
   rgcw.L["category_shaman"] = "Shamane"
   rgcw.L["category_warrior"] = "Krieger"
   rgcw.L["category_racials"] = "Rassenfähigkeiten"
-  rgcw.L["category_misc"] = "Misc"
+  rgcw.L["category_misc"] = "Verschiedenes"
 end

@@ -37,8 +37,8 @@ me.tag = "GeneralMenu"
 local options = {
   {
     "WindowLockTargetCooldownBar",
-    rgcw.L["window_lock_target_cooldow_bar"],
-    rgcw.L["window_lock_target_cooldow_bar_tooltip"]
+    rgcw.L["window_lock_target_cooldown_bar"],
+    rgcw.L["window_lock_target_cooldown_bar_tooltip"]
   }
 }
 
