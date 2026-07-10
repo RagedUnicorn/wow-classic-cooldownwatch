@@ -254,9 +254,10 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
 
   --[[
     Key the sweep init on the slot's currently applied spellId rather than a "once per cooldown" flag.
-    Slots are bound to cooldowns positionally over an unordered, compacting queue array, so a slot can be
-    reassigned to a different spell without passing through a Clear. Comparing the applied spellId (mirroring
-    UpdateCooldownSlotTexture) re-initializes the sweep on reassignment instead of keeping the stale timer.
+    Slots are bound to cooldowns positionally over a compacting queue array (deterministically ordered,
+    but entries still shift left on removal), so a slot can be reassigned to a different spell without
+    passing through a Clear. Comparing the applied spellId (mirroring UpdateCooldownSlotTexture)
+    re-initializes the sweep on reassignment instead of keeping the stale timer.
   ]]--
   if cooldownWatchSlot.targetCooldownOverlay.spellId ~= cooldown.spellData.spellId then
     me.InitCooldownSlotCooldownOverlay(cooldownWatchSlot, cooldown)

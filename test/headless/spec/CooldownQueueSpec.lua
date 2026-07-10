@@ -35,12 +35,12 @@ describe("CooldownQueue", function()
   -- name) plus the timing fields a queue entry carries. Kept inline rather than
   -- pulled from SpellMap: these specs exercise the queue's bookkeeping, not spell
   -- identity, so synthetic ids keep each scenario self-contained.
-  local function makeSpell(spellId, name, castTime, active)
+  local function makeSpell(spellId, name, castTime, active, cooldown)
     return {
       ["spellId"] = spellId,
       ["name"] = name,
       ["castTime"] = castTime,
-      ["cooldown"] = 30,
+      ["cooldown"] = cooldown or 30,
       ["cooldownWorstCase"] = 20,
       ["active"] = active == nil and true or active
     }
@@ -134,6 +134,54 @@ describe("CooldownQueue", function()
 
   it("GetCooldownsByTarget returns an empty table for an unknown sourceGuid", function()
     assert.same({}, queue.GetCooldownsByTarget("guid-nobody"))
+  end)
+
+  it("GetCooldownsByTarget orders cooldowns soonest ready first", function()
+    -- ready times (castTime + cooldown): Counterspell 330, Frost Nova 130, Icy Veins 230
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(2139, "Counterspell", 300))
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(122, "Frost Nova", 100))
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(12472, "Icy Veins", 200))
+
+    local cooldowns = queue.GetCooldownsByTarget("guid-1")
+
+    assert.equal(122, cooldowns[1].spellData.spellId)
+    assert.equal(12472, cooldowns[2].spellData.spellId)
+    assert.equal(2139, cooldowns[3].spellData.spellId)
+  end)
+
+  it("GetCooldownsByTarget ranks a later cast with a shorter cooldown first", function()
+    -- Frost Nova is cast first but ready last: 100 + 30 = 130 vs 110 + 10 = 120
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(122, "Frost Nova", 100, nil, 30))
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(2139, "Counterspell", 110, nil, 10))
+
+    local cooldowns = queue.GetCooldownsByTarget("guid-1")
+
+    assert.equal(2139, cooldowns[1].spellData.spellId)
+    assert.equal(122, cooldowns[2].spellData.spellId)
+  end)
+
+  it("GetCooldownsByTarget breaks ready-time ties by ascending spellId", function()
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(2139, "Counterspell", 100))
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(122, "Frost Nova", 100))
+
+    local cooldowns = queue.GetCooldownsByTarget("guid-1")
+
+    assert.equal(122, cooldowns[1].spellData.spellId)
+    assert.equal(2139, cooldowns[2].spellData.spellId)
+  end)
+
+  it("GetCooldownsByTarget keeps the order stable when an entry is removed", function()
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(122, "Frost Nova", 100))
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(12472, "Icy Veins", 200))
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(2139, "Counterspell", 300))
+
+    queue.RemoveCooldown("guid-1", 12472)
+
+    local cooldowns = queue.GetCooldownsByTarget("guid-1")
+
+    -- remaining entries compact left but keep their relative order
+    assert.equal(122, cooldowns[1].spellData.spellId)
+    assert.equal(2139, cooldowns[2].spellData.spellId)
   end)
 
   -- makeSpell uses cooldown = 30, so an entry cast at time t is prunable once
