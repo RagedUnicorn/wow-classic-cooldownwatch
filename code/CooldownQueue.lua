@@ -248,7 +248,29 @@ function me.BuildExampleCooldown(castTime)
 end
 
 --[[
-  Retrieve cooldowns for a specific caster
+  Comparator for GetCooldownsByTarget: soonest ready first (castTime + cooldown
+  ascending), spellId as tiebreaker. The order must be a function of the entries
+  themselves - never of Lua hash order - because the render layer binds the returned
+  array positionally to fixed slots. Soonest-ready-first puts the most urgent threat
+  in the first slot, and when more cooldowns are tracked than there are slots the
+  truncation deterministically keeps the ones that come back soonest. Ready times are
+  fixed per entry, so icons only shift when the tracked set itself changes (a new cast
+  with a short cooldown inserts mid-bar).
+]]--
+local function CompareCooldowns(a, b)
+  local aReadyTime = a.spellData.castTime + a.spellData.cooldown
+  local bReadyTime = b.spellData.castTime + b.spellData.cooldown
+
+  if aReadyTime ~= bReadyTime then
+    return aReadyTime < bReadyTime
+  end
+
+  return a.spellData.spellId < b.spellData.spellId
+end
+
+--[[
+  Retrieve cooldowns for a specific caster, ordered soonest ready first
+  (see CompareCooldowns)
 
   @param {string} sourceGuid
     A unique identification for a caster
@@ -265,6 +287,8 @@ function me.GetCooldownsByTarget(sourceGuid)
   for _, cooldownEvent in pairs(casterBucket) do
     table.insert(cooldowns, cooldownEvent)
   end
+
+  table.sort(cooldowns, CompareCooldowns)
 
   return cooldowns
 end
