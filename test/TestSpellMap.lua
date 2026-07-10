@@ -159,6 +159,15 @@ function me.TestCooldownWorstCaseSane()
     "cooldownWorstCase out-of-range failure(s)")
 end
 
+function me.TestItemIdSane()
+  RunValidator("TestItemIdSane",
+    function()
+      return mod.spellMapValidation.ValidateItemIdSane(mod.spellMap.GetSpellMap())
+    end,
+    "Every itemId is a positive integer on a primary entry",
+    "itemId failure(s)")
+end
+
 --[[
   Run all spellMap data-integrity tests.
 ]]--
@@ -176,6 +185,7 @@ function me.RunAllTests()
   me.TestUnknownCategoryReturnsEmpty()
   me.TestCategoriesMatchSpellMap()
   me.TestCooldownWorstCaseSane()
+  me.TestItemIdSane()
 
   mod.testLogger.LogInfo("SpellMap", "=== SpellMap Tests Complete ===")
 end

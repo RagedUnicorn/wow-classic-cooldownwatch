@@ -22,12 +22,39 @@
   SOFTWARE.
 ]]--
 
+-- luacheck: globals GetSpellInfo GetItemIcon
+
 local mod = rgcw
 local me = {}
 
 mod.guiHelper = me
 
 me.tag = "GuiHelper"
+
+--[[
+  Resolve the icon for a spellMap-derived entry (a config-menu row or a queue
+  entry's spellData).
+
+  For most items we have to track the actual spell-effect in the combat log.
+  However for people to recognize the item it is much better to use the item's
+  icon itself - entries carrying an itemId resolve through GetItemIcon, all
+  others through GetSpellInfo.
+
+  @param {table} spellEntry
+    Any table with a spellId and an optional itemId (see SpellMap entry shape)
+
+  @return {number}
+    The iconId for the spellEntry
+]]--
+function me.GetIconId(spellEntry)
+  if spellEntry.itemId ~= nil then
+    return GetItemIcon(spellEntry.itemId)
+  end
+
+  local _, _, iconId = GetSpellInfo(spellEntry.spellId)
+
+  return iconId
+end
 
 --[[
   Assemble a backdrop table for a cooldown slot widget from shared geometry.

@@ -23,7 +23,7 @@
 ]]--
 
 -- luacheck: globals CreateFrame STANDARD_TEXT_FONT FauxScrollFrame_Update FauxScrollFrame_GetOffset
--- luacheck: globals GetSpellInfo GetItemIcon CloseMenus
+-- luacheck: globals CloseMenus
 
 local mod = rgcw
 local me = {}
@@ -221,7 +221,7 @@ function me.SpellListScrollFrameOnUpdate(scrollFrame, categoryName)
     cachedCategoryData = mod.spellMapHelper.GetAllForCategory(categoryName)
   end
 
-  local maxValue = #cachedCategoryData or 0
+  local maxValue = #cachedCategoryData
 
   if maxValue <= RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS then
     maxValue = RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS + 1
@@ -249,27 +249,6 @@ function me.SpellListScrollFrameOnUpdate(scrollFrame, categoryName)
 end
 
 --[[
-  @param {table} cooldown
-
-  @return {number}
-    The iconId for the cooldown
-]]--
-function me.GetIconId(cooldown)
-  local _, iconId
-  --[[
-    For most items we have to track the actual spell-effect in the combat log. However for
-    people to recognize the item it is much better to use items icon itself.
-  ]]--
-  if cooldown.itemId ~= nil then
-    iconId = GetItemIcon(cooldown.itemId)
-  else
-    _, _, iconId = GetSpellInfo(cooldown.spellId)
-  end
-
-  return iconId
-end
-
---[[
   @param {table} row
   @param {table} cooldown
   @param {string} categoryName
@@ -277,7 +256,7 @@ end
 function me.UpdateCooldownUiState(row, cooldown, categoryName)
   local enabled = mod.configuration.GetCooldownConfigurationState(categoryName, cooldown.spellId)
 
-  row.cooldownIcon:SetTexture(me.GetIconId(cooldown))
+  row.cooldownIcon:SetTexture(mod.guiHelper.GetIconId(cooldown))
   row.cooldownStatus.text:SetText(cooldown.name)
 
   if enabled then

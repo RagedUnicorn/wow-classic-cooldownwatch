@@ -42,6 +42,8 @@ local function IsPrimary(entry)
   return type(entry) == "table" and type(entry.name) == "string"
 end
 
+local GetItemIdFailure
+
 --[[
   Verify every refId entry points at a primary entry in the same category.
 
@@ -398,6 +400,59 @@ function me.ValidateCooldownWorstCaseSane(spellMap)
           string.format("%s/%s ('%s'): cooldownWorstCase %s exceeds cooldown %s",
             category, tostring(spellId), entry.name,
             tostring(entry.cooldownWorstCase), tostring(entry.cooldown)))
+      end
+    end
+  end
+
+  return failures
+end
+
+--[[
+  Check a single entry's itemId. Part of ValidateItemIdSane.
+
+  @param {string} category
+  @param {number} spellId
+  @param {table} entry
+
+  @return {string|nil}
+    A failure description, or nil if the entry has no itemId or a valid one
+]]--
+GetItemIdFailure = function(category, spellId, entry)
+  if entry.itemId == nil then return nil end
+
+  if not IsPrimary(entry) then
+    return string.format("%s/%s: itemId %s on alias entry is ignored - move it to the primary",
+      category, tostring(spellId), tostring(entry.itemId))
+  end
+
+  if type(entry.itemId) ~= "number" or entry.itemId <= 0 or entry.itemId % 1 ~= 0 then
+    return string.format("%s/%s ('%s'): itemId %s is not a positive integer",
+      category, tostring(spellId), entry.name, tostring(entry.itemId))
+  end
+
+  return nil
+end
+
+--[[
+  Verify itemId, where present, is a positive integer and sits on a primary
+  entry. itemId points at the item whose "Use" effect casts the tracked spell
+  so the ui can show the recognizable item icon (GuiHelper.GetIconId). An
+  itemId on an alias entry would be silently ignored (lookups resolve to the
+  primary), and a non-numeric or non-positive value would break GetItemIcon.
+
+  @param {table} spellMap
+
+  @return {table}
+]]--
+function me.ValidateItemIdSane(spellMap)
+  local failures = {}
+
+  for category, spells in pairs(spellMap) do
+    for spellId, entry in pairs(spells) do
+      local failure = GetItemIdFailure(category, spellId, entry)
+
+      if failure ~= nil then
+        table.insert(failures, failure)
       end
     end
   end

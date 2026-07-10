@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals CreateFrame STANDARD_TEXT_FONT GetTime GetSpellInfo
+-- luacheck: globals CreateFrame STANDARD_TEXT_FONT GetTime
 
 --[[
   Per-slot construction and update logic for the TargetCooldownBar. Every function operates on an explicit
@@ -297,7 +297,7 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   me.UpdateCooldownSlotHighlightFrame(cooldownWatchSlot, cooldown.spellData.cooldown, timeLeftBig)
   me.UpdateCooldownSlotBigCooldownTextPosition(cooldownWatchSlot, timeLeftBig)
   me.UpdateCooldownSlotCooldownText(cooldownWatchSlot, timeLeftBig, timeLeftSmall)
-  me.UpdateCooldownSlotTexture(cooldownWatchSlot, cooldown.spellData.spellId)
+  me.UpdateCooldownSlotTexture(cooldownWatchSlot, cooldown.spellData)
 
   --[[
     Key the sweep init on the slot's currently applied spellId rather than a "once per cooldown" flag.
@@ -388,14 +388,13 @@ end
   Update the texture of a cooldownWatchSlot
 
   @param {table} cooldownWatchSlot
-  @param {number} spellId
+  @param {table} spellData
 ]]--
-function me.UpdateCooldownSlotTexture(cooldownWatchSlot, spellId)
-  if cooldownWatchSlot.iconHolderTexture.spellId == spellId then return end
+function me.UpdateCooldownSlotTexture(cooldownWatchSlot, spellData)
+  if cooldownWatchSlot.iconHolderTexture.spellId == spellData.spellId then return end
 
-  local _, _, iconTexture = GetSpellInfo(spellId)
-  cooldownWatchSlot.iconHolderTexture:SetTexture(iconTexture)
-  cooldownWatchSlot.iconHolderTexture.spellId = spellId
+  cooldownWatchSlot.iconHolderTexture:SetTexture(mod.guiHelper.GetIconId(spellData))
+  cooldownWatchSlot.iconHolderTexture.spellId = spellData.spellId
 end
 
 --[[

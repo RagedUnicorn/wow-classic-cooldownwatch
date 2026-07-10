@@ -82,4 +82,8 @@ describe("SpellMap data integrity", function()
   it("every cooldownWorstCase is less than or equal to its base cooldown", function()
     assert.same({}, rgcw.spellMapValidation.ValidateCooldownWorstCaseSane(spellMap))
   end)
+
+  it("every itemId is a positive integer on a primary entry", function()
+    assert.same({}, rgcw.spellMapValidation.ValidateItemIdSane(spellMap))
+  end)
 end)

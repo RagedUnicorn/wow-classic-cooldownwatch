@@ -1353,11 +1353,18 @@ local spellMap = {
       }
     }
   },
+  --[[
+    Every misc entry is an item-triggered cooldown: the combat log fires with the
+    item's "Use" effect spell, but players recognize these by the item icon, not
+    the spell icon. `itemId` points at the triggering item so the ui can resolve
+    the icon via GetItemIcon (see GuiHelper.GetIconId).
+  ]]--
   ["misc"] = {
     [23132] = {
       name = "Shadow Reflector",
       type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
       cooldown = 300,
+      itemId = 18639, -- Ultra-Flash Shadow Reflector
       active = true,
       trackedEvents = {
         "SPELL_CAST_SUCCESS",
@@ -1370,6 +1377,7 @@ local spellMap = {
       name = "Frost Reflector",
       type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
       cooldown = 300,
+      itemId = 18634, -- Gyrofreeze Ice Reflector
       active = true,
       trackedEvents = {
         "SPELL_CAST_SUCCESS",
@@ -1382,6 +1390,7 @@ local spellMap = {
       name = "Fire Reflector",
       type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
       cooldown = 300,
+      itemId = 18638, -- Hyper-Radiant Flame Reflector
       active = true,
       trackedEvents = {
         "SPELL_CAST_SUCCESS",
@@ -1394,6 +1403,9 @@ local spellMap = {
       name = "Reckless Charge",
       type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
       cooldown = 1200,
+      -- Horned Viking Helmet (9394, 30 min) casts the same spell; the 20 min
+      -- cooldown above already commits this entry to the Goblin Rocket Helmet
+      itemId = 10588, -- Goblin Rocket Helmet
       active = true,
       trackedEvents = {
         "SPELL_CAST_SUCCESS",
@@ -1406,6 +1418,7 @@ local spellMap = {
       name = "Gnomish Rocket Boots",
       type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
       cooldown = 1800,
+      itemId = 10724, -- Gnomish Rocket Boots
       active = true,
       trackedEvents = {
         "SPELL_CAST_SUCCESS",
@@ -1418,6 +1431,7 @@ local spellMap = {
       name = "Goblin Rocket Boots",
       type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
       cooldown = 300,
+      itemId = 7189, -- Goblin Rocket Boots
       active = true,
       trackedEvents = {
         "SPELL_CAST_SUCCESS",
@@ -1430,6 +1444,7 @@ local spellMap = {
       name = "Net-o-Matic",
       type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
       cooldown = 600,
+      itemId = 10720, -- Gnomish Net-o-Matic Projector
       active = true,
       trackedEvents = {
         "SPELL_CAST_SUCCESS",

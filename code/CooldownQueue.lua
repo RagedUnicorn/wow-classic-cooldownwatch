@@ -53,6 +53,9 @@ me.tag = "CooldownQueue"
         - {number} Worst case cooldown for the cooldown.
         Assuming the enemy player has its spell fully reduced with either a talent or an item.
         Note: If an item is unlikely to be worn by players it might get omitted here
+      ["itemId"] = itemId,
+        - {number} Optional, item-triggered cooldowns only. The item whose "Use" effect
+        casts the tracked spell; the ui resolves the icon through it (GuiHelper.GetIconId)
       ["active"] = boolean
         - {boolean} Whether the spell is active and tracked or not
     }
