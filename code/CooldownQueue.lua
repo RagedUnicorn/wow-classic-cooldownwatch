@@ -48,11 +48,14 @@ me.tag = "CooldownQueue"
       ["castTime"] = castTime,
         - {number} Time at which the spell was detected
       ["cooldown"] = cooldown,
-        - {number} Cooldown of the spell
+        - {number} Cooldown of the spell. The resolved value: when the player opted
+        into assuming the worst case for the spell, ResolveCooldown already promoted
+        cooldownWorstCase into this field before the entry was written
       ["cooldownWorstCase"] = cooldownWorstCase,
         - {number} Worst case cooldown for the cooldown.
         Assuming the enemy player has its spell fully reduced with either a talent or an item.
         Note: If an item is unlikely to be worn by players it might get omitted here
+        Note: nil when the worst case was promoted into cooldown (see ResolveCooldown)
       ["itemId"] = itemId,
         - {number} Optional, item-triggered cooldowns only. The item whose "Use" effect
         casts the tracked spell; the ui resolves the icon through it (GuiHelper.GetIconId)
@@ -64,8 +67,37 @@ me.tag = "CooldownQueue"
 local cooldownQueue = {}
 
 --[[
+  Resolve which cooldown value a spell should run with before it is queued.
+  When the player opted into assuming the worst case for the spell (per-spell
+  configuration toggle) the worst-case value is promoted into `cooldown` and
+  `cooldownWorstCase` is cleared, so the bar shows a single authoritative timer
+  (the small hint timer hides itself when the field is nil).
+
+  Mutates spellData in place — safe because every enqueue path hands over a
+  clone (SearchBySpellId / GetSpellById), never the SpellMap base entry.
+  Resolution happens once per enqueue: toggling the setting off leaves in-flight
+  entries untouched and takes effect on the next cast.
+
+  @param {string} category
+    The category the spell belongs to
+  @param {table} spellData
+    A spellData with all its relevant information
+]]--
+function me.ResolveCooldown(category, spellData)
+  if spellData.cooldownWorstCase == nil then return end
+  if not mod.configuration.IsCooldownWorstCaseAssumed(category, spellData.spellId) then return end
+
+  spellData.cooldown = spellData.cooldownWorstCase
+  spellData.cooldownWorstCase = nil
+end
+
+--[[
   Add a cooldown to the queue. If a cooldown for the same (sourceGuid, spellId)
   already exists it is refreshed in place rather than duplicated.
+
+  The spell's cooldown value is resolved here (see ResolveCooldown) so every
+  enqueue path — combat log, shared-cooldown sibling fan-out, tests — applies
+  the player's per-spell configuration consistently.
 
   @param {string} sourceGuid
     A unique identification for a caster (player or npc).
@@ -95,6 +127,8 @@ function me.AddCooldown(sourceGuid, sourceName, category, spellData)
     mod.logger.LogWarn(me.tag, "Ignored inactive spell: " .. spellData.name)
     return -- abort
   end
+
+  me.ResolveCooldown(category, spellData)
 
   local casterBucket = cooldownQueue[sourceGuid]
 

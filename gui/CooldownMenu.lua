@@ -142,6 +142,7 @@ function me.CreateRuleRowFrame(frame, position)
 
   row.cooldownIcon = me.CreateCooldownSpellIcon(row)
   row.cooldownStatus = me.CreateCooldownSpell(row)
+  row.worstCaseToggle = me.CreateWorstCaseToggle(row)
 
   return row
 end
@@ -210,6 +211,42 @@ function me.CreateCooldownSpell(spellFrame)
 end
 
 --[[
+  Create the per-spell worst-case toggle. Checking it makes the runtime assume
+  the spell's worst-case cooldown (see CooldownQueue.ResolveCooldown); it is
+  hidden by UpdateWorstCaseToggleState for spells without a cooldownWorstCase value.
+
+  @param {table} spellFrame
+
+  @return {table}
+    The created checkbox
+]]--
+function me.CreateWorstCaseToggle(spellFrame)
+  local worstCaseCheckBox = CreateFrame(
+    "CheckButton",
+    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_WORST_CASE,
+    spellFrame,
+    "UICheckButtonTemplate"
+  )
+  worstCaseCheckBox:SetSize(
+    RGCW_CONSTANTS.COOLDOWN_SPELL_DEFAULT_SIZE,
+    RGCW_CONSTANTS.COOLDOWN_SPELL_DEFAULT_SIZE
+  )
+  -- right-aligned column; the negative offset leaves room for the trailing label text
+  worstCaseCheckBox:SetPoint("RIGHT", -110, 0)
+
+  worstCaseCheckBox.text = _G[worstCaseCheckBox:GetName() .. 'Text']
+  worstCaseCheckBox.text:SetFont(STANDARD_TEXT_FONT, 15)
+  worstCaseCheckBox.text:SetTextColor(.95, .95, .95)
+  worstCaseCheckBox.text:SetText(rgcw.L["option_assume_worst_case"])
+
+  worstCaseCheckBox:SetScript("OnEnter", me.WorstCaseToggleOnEnter)
+  worstCaseCheckBox:SetScript("OnLeave", me.WorstCaseToggleOnLeave)
+  worstCaseCheckBox:SetScript("OnClick", me.WorstCaseToggleOnClick)
+
+  return worstCaseCheckBox
+end
+
+--[[
   Update the spell list
 
   @param {table} scrollFrame
@@ -265,9 +302,34 @@ function me.UpdateCooldownUiState(row, cooldown, categoryName)
     row.cooldownStatus:SetChecked(false)
   end
 
+  me.UpdateWorstCaseToggleState(row.worstCaseToggle, cooldown, categoryName)
+
   row.spellId = cooldown.spellId
   row.categoryName = categoryName
   row:Show()
+end
+
+--[[
+  Update the worst-case toggle of a row. Rows are recycled across spells while
+  scrolling, so both the visibility and the checked state are set on every pass.
+  Spells without a cooldownWorstCase value have nothing to assume — their toggle
+  is hidden entirely.
+
+  @param {table} worstCaseToggle
+  @param {table} cooldown
+  @param {string} categoryName
+]]--
+function me.UpdateWorstCaseToggleState(worstCaseToggle, cooldown, categoryName)
+  if cooldown.cooldownWorstCase == nil then
+    worstCaseToggle:Hide()
+
+    return
+  end
+
+  worstCaseToggle:SetChecked(
+    mod.configuration.IsCooldownWorstCaseAssumed(categoryName, cooldown.spellId)
+  )
+  worstCaseToggle:Show()
 end
 
 --[[
@@ -279,4 +341,32 @@ function me.CooldownEntryOnClick(self)
   local enabled = self:GetChecked()
 
   mod.configuration.UpdateCooldownConfigurationState(enabled, self:GetParent().categoryName, self:GetParent().spellId)
+end
+
+--[[
+  OnClick callback for the worst-case toggle
+
+  @param {table} self
+]]--
+function me.WorstCaseToggleOnClick(self)
+  local assumed = self:GetChecked()
+
+  mod.configuration.UpdateCooldownWorstCaseState(assumed, self:GetParent().categoryName, self:GetParent().spellId)
+end
+
+--[[
+  OnEnter callback for the worst-case toggle - show tooltip
+]]--
+function me.WorstCaseToggleOnEnter()
+  mod.tooltip.BuildTooltipForOption(
+    rgcw.L["option_assume_worst_case"],
+    rgcw.L["option_assume_worst_case_tooltip"]
+  )
+end
+
+--[[
+  OnLeave callback for the worst-case toggle - hide tooltip
+]]--
+function me.WorstCaseToggleOnLeave()
+  mod.tooltip.TooltipClear()
 end

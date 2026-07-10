@@ -47,6 +47,21 @@ CooldownWatchConfiguration = {
   ]]--
   ["cooldownConfiguration"] = nil,
   --[[
+    Per-spell cooldown overrides. The default derives from
+    mod.profile.GetDefaultCooldownOverrides(), which is not loaded yet at this
+    point — SetupConfiguration seeds it instead. Declared here for visibility only.
+
+    cooldownOverrides = {
+      [categoryName] = {
+        [primarySpellId] = {
+          worstCase = {boolean}
+          -- true if the runtime should assume the worst-case cooldown
+        }
+      }
+    }
+  ]]--
+  ["cooldownOverrides"] = nil,
+  --[[
     Framepositions for user draggable Frames
     frames = {
       -- should match the actual frame name
@@ -73,6 +88,11 @@ function me.SetupConfiguration()
   if CooldownWatchConfiguration.cooldownConfiguration == nil then
     mod.logger.LogInfo(me.tag, "cooldownConfiguration has unexpected nil value")
     CooldownWatchConfiguration.cooldownConfiguration = mod.profile.GetDefaultProfile()
+  end
+
+  if CooldownWatchConfiguration.cooldownOverrides == nil then
+    mod.logger.LogInfo(me.tag, "cooldownOverrides has unexpected nil value")
+    CooldownWatchConfiguration.cooldownOverrides = mod.profile.GetDefaultCooldownOverrides()
   end
 
   if CooldownWatchConfiguration.frames == nil then
@@ -208,4 +228,63 @@ function me.GetCooldownConfigurationState(categoryName, spellId)
   end
 
   return config[categoryName][spellId] == true
+end
+
+--[[
+  Update whether the worst-case cooldown should be assumed for a spell in a
+  certain category
+
+  @param {boolean} assumed
+    Whether the worst-case cooldown should be assumed or not
+  @param {string} categoryName
+  @param {number} spellId
+]]--
+function me.UpdateCooldownWorstCaseState(assumed, categoryName, spellId)
+  --[[
+    Lazily create the table chain: cooldownOverrides itself may be nil when
+    SetupConfiguration never ran (headless test harness), and the per-spell
+    entry is table-valued so future override fields survive a toggle.
+  ]]--
+  if CooldownWatchConfiguration.cooldownOverrides == nil then
+    CooldownWatchConfiguration.cooldownOverrides = {}
+  end
+
+  local overrides = CooldownWatchConfiguration.cooldownOverrides
+
+  if overrides[categoryName] == nil then
+    overrides[categoryName] = {}
+  end
+
+  if overrides[categoryName][spellId] == nil then
+    overrides[categoryName][spellId] = {}
+  end
+
+  if assumed then
+    overrides[categoryName][spellId].worstCase = true
+    mod.logger.LogDebug(me.tag, "Enabled worst-case cooldown: " .. categoryName .. " - " .. spellId)
+  else
+    overrides[categoryName][spellId].worstCase = false
+    mod.logger.LogDebug(me.tag, "Disabled worst-case cooldown: " .. categoryName .. " - " .. spellId)
+  end
+end
+
+--[[
+  Get whether the worst-case cooldown should be assumed for a spell in a
+  certain category
+
+  @param {string} categoryName
+  @param {number} spellId
+
+  @return {boolean}
+    true  - If the worst-case cooldown should be assumed
+    false - Otherwise (disabled, or never configured)
+]]--
+function me.IsCooldownWorstCaseAssumed(categoryName, spellId)
+  local overrides = CooldownWatchConfiguration.cooldownOverrides
+
+  if overrides == nil or overrides[categoryName] == nil or overrides[categoryName][spellId] == nil then
+    return false
+  end
+
+  return overrides[categoryName][spellId].worstCase == true
 end

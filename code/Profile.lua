@@ -51,3 +51,19 @@ end
 function me.GetDefaultProfile()
   return mod.common.Clone(defaultProfile)
 end
+
+--[[
+  Default cooldown-override state: one empty bucket per category, keyed by
+  categoryName. Shares the tracking profile's skeleton (both are category-keyed
+  maps of per-spell entries) so a category added to the catalog propagates to
+  both defaults automatically.
+
+  [{string}] = {
+    -- e.g. paladin, racials etc
+    [{number}] = {table}
+    -- per-spell override entry, e.g. { worstCase = true }
+  }
+]]--
+function me.GetDefaultCooldownOverrides()
+  return mod.common.Clone(defaultProfile)
+end

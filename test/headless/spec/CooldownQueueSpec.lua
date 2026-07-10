@@ -51,6 +51,9 @@ describe("CooldownQueue", function()
     -- The queue keeps module-level state; reset between scenarios so each `it`
     -- starts from an empty queue.
     queue.ClearCooldownQueue()
+    -- AddCooldown resolves against the worst-case toggles; reset them so no
+    -- scenario inherits another's overrides.
+    CooldownWatchConfiguration.cooldownOverrides = nil
   end)
 
   it("AddCooldown creates a new entry", function()
@@ -74,6 +77,60 @@ describe("CooldownQueue", function()
 
     assert.equal(1, #cooldowns)
     assert.equal(250, cooldowns[1].spellData.castTime)
+  end)
+
+  it("ResolveCooldown promotes the worst case and clears the field when assumed", function()
+    rgcw.configuration.UpdateCooldownWorstCaseState(true, "priest", 10947)
+    local spell = makeSpell(10947, "Mind Blast", 100)
+
+    queue.ResolveCooldown("priest", spell)
+
+    assert.equal(20, spell.cooldown)
+    assert.is_nil(spell.cooldownWorstCase)
+  end)
+
+  it("ResolveCooldown is a no-op when the toggle is not assumed", function()
+    local spell = makeSpell(10947, "Mind Blast", 100)
+
+    queue.ResolveCooldown("priest", spell)
+
+    assert.equal(30, spell.cooldown)
+    assert.equal(20, spell.cooldownWorstCase)
+  end)
+
+  it("ResolveCooldown is a no-op for spells without a worst case", function()
+    rgcw.configuration.UpdateCooldownWorstCaseState(true, "priest", 10947)
+    local spell = makeSpell(10947, "Mind Blast", 100)
+    spell.cooldownWorstCase = nil
+
+    queue.ResolveCooldown("priest", spell)
+
+    assert.equal(30, spell.cooldown)
+  end)
+
+  it("AddCooldown queues the resolved worst-case cooldown when assumed", function()
+    rgcw.configuration.UpdateCooldownWorstCaseState(true, "priest", 10947)
+
+    queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
+
+    local cooldowns = queue.GetCooldownsByTarget("guid-1")
+    assert.equal(20, cooldowns[1].spellData.cooldown)
+    assert.is_nil(cooldowns[1].spellData.cooldownWorstCase)
+  end)
+
+  it("AddCooldown resolves each spell against its own toggle", function()
+    -- only Mind Blast opts into the worst case; Psychic Scream keeps its base
+    rgcw.configuration.UpdateCooldownWorstCaseState(true, "priest", 10947)
+
+    queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
+    queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10890, "Psychic Scream", 100))
+
+    local cooldowns = queue.GetCooldownsByTarget("guid-1")
+    -- worst case (20) readies before base (30), so Mind Blast sorts first
+    assert.equal(10947, cooldowns[1].spellData.spellId)
+    assert.equal(20, cooldowns[1].spellData.cooldown)
+    assert.equal(30, cooldowns[2].spellData.cooldown)
+    assert.equal(20, cooldowns[2].spellData.cooldownWorstCase)
   end)
 
   it("AddCooldown silently drops inactive spells", function()

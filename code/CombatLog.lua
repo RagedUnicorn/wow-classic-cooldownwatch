@@ -141,6 +141,10 @@ end
   per-sibling enabled flag — otherwise the UI would falsely show a sibling as
   available.
 
+  Each sibling passes through AddCooldown individually, so its cooldown value
+  resolves against its own worst-case toggle (CooldownQueue.ResolveCooldown) —
+  one member's toggle never propagates to the others.
+
   @param {string} sourceGuid
   @param {string} sourceName
   @param {table} originalSpell
