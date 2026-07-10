@@ -57,6 +57,12 @@ RGCW_CONSTANTS = {
   EXAMPLE_COOLDOWN_SPELL_ID = 2094,
   ELEMENT_TARGET_COOLDOWN_BAR_SLOT_ANIMATION = "CooldownWatchAnimation",
   TARGET_COOLDOWN_BAR_SLOT_FADE_DURATION = 2,
+  --[[
+    Grace period in seconds an expired cooldown survives in the queue before queue-side
+    pruning removes it. Must exceed TARGET_COOLDOWN_BAR_SLOT_FADE_DURATION so a fade that
+    is playing for a visible slot always completes before its entry is pruned underneath it.
+  ]]--
+  COOLDOWN_QUEUE_PRUNE_GRACE = 5,
   ELEMENT_TARGET_COOLDOWN_BAR_SLOT_COOLDOWN_FRAME = "$parent_Cooldown",
   ELEMENT_TARGET_COOLDOWN_BAR_SLOT_ICON_TEXTURE_NAME = "$parent_Icon",
   ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT = "$parent_BigText",

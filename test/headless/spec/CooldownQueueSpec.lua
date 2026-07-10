@@ -135,4 +135,58 @@ describe("CooldownQueue", function()
   it("GetCooldownsByTarget returns an empty table for an unknown sourceGuid", function()
     assert.same({}, queue.GetCooldownsByTarget("guid-nobody"))
   end)
+
+  -- makeSpell uses cooldown = 30, so an entry cast at time t is prunable once
+  -- now > t + 30 + COOLDOWN_QUEUE_PRUNE_GRACE.
+  local function pruneCutoff(castTime)
+    return castTime + 30 + RGCW_CONSTANTS.COOLDOWN_QUEUE_PRUNE_GRACE
+  end
+
+  it("PruneCooldownsByTarget removes entries expired beyond the grace period", function()
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(122, "Frost Nova", 100))
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(2139, "Counterspell", 500))
+
+    queue.PruneCooldownsByTarget("guid-1", pruneCutoff(100) + 1)
+
+    local cooldowns = queue.GetCooldownsByTarget("guid-1")
+    assert.equal(1, #cooldowns)
+    assert.equal(2139, cooldowns[1].spellData.spellId)
+  end)
+
+  it("PruneCooldownsByTarget keeps entries expired within the grace period", function()
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(122, "Frost Nova", 100))
+
+    -- expired (cooldown of 30 has passed) but still inside the grace window
+    queue.PruneCooldownsByTarget("guid-1", pruneCutoff(100) - 1)
+
+    assert.equal(1, #queue.GetCooldownsByTarget("guid-1"))
+  end)
+
+  it("PruneCooldownsByTarget is a no-op for an unknown caster", function()
+    assert.has_no.errors(function()
+      queue.PruneCooldownsByTarget("guid-unknown", 1000)
+    end)
+  end)
+
+  it("PruneCooldownsByTarget empties the caster bucket when its last entry is pruned", function()
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(122, "Frost Nova", 100))
+
+    queue.PruneCooldownsByTarget("guid-1", pruneCutoff(100) + 1)
+
+    assert.same({}, queue.GetCooldownsByTarget("guid-1"))
+  end)
+
+  it("PruneExpiredCooldowns sweeps long-expired entries across all casters", function()
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(122, "Frost Nova", 100))
+    queue.AddCooldown("guid-2", "Bob", "rogue", makeSpell(1766, "Kick", 100))
+    queue.AddCooldown("guid-2", "Bob", "rogue", makeSpell(2094, "Blind", 500))
+
+    queue.PruneExpiredCooldowns(pruneCutoff(100) + 1)
+
+    assert.same({}, queue.GetCooldownsByTarget("guid-1"))
+
+    local cooldowns = queue.GetCooldownsByTarget("guid-2")
+    assert.equal(1, #cooldowns)
+    assert.equal(2094, cooldowns[1].spellData.spellId)
+  end)
 end)

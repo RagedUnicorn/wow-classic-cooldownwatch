@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals GetAddOnMetadata CombatLogGetCurrentEventInfo
+-- luacheck: globals GetAddOnMetadata CombatLogGetCurrentEventInfo GetTime
 
 rgcw = rgcw or {}
 local me = rgcw
@@ -56,10 +56,13 @@ OnCombatLog = function()
 end
 
 --[[
-  Update the tracked target when the player's target changes.
+  Update the tracked target when the player's target changes. Also sweep
+  long-expired cooldowns of all casters from the queue - the data-layer backstop
+  for entries the renderer never visits (casters that are never retargeted).
 ]]--
 OnTargetChanged = function()
   me.target.UpdateCurrentTarget()
+  me.cooldownQueue.PruneExpiredCooldowns(GetTime())
 end
 
 --[[
