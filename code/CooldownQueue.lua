@@ -269,6 +269,14 @@ local function CompareCooldowns(a, b)
 end
 
 --[[
+  Reused snapshot array for GetCooldownsByTarget. The function is called 20 times
+  per second from the render ticker (TargetCooldownBarOnUpdate) whenever an enemy
+  target exists; refilling one module-local array instead of allocating a fresh
+  table per call keeps the render path free of steady GC churn.
+]]--
+local cooldownSnapshot = {}
+
+--[[
   Retrieve cooldowns for a specific caster, ordered soonest ready first
   (see CompareCooldowns)
 
@@ -278,17 +286,27 @@ end
   @return {table}
     The castEvents that were found for the caster
     Note: May be an empty table
+    Note: A module-owned scratch array rebuilt on every call - only valid until
+    the next call; do not retain or mutate it. The sole production caller
+    (TargetCooldownBarOnUpdate) consumes it synchronously within the same tick.
 ]]--
 function me.GetCooldownsByTarget(sourceGuid)
-  local cooldowns = {}
+  local count = 0
   local casterBucket = cooldownQueue[sourceGuid]
-  if not casterBucket then return cooldowns end
 
-  for _, cooldownEvent in pairs(casterBucket) do
-    table.insert(cooldowns, cooldownEvent)
+  if casterBucket then
+    for _, cooldownEvent in pairs(casterBucket) do
+      count = count + 1
+      cooldownSnapshot[count] = cooldownEvent
+    end
   end
 
-  table.sort(cooldowns, CompareCooldowns)
+  -- truncate entries left over from a previous, larger snapshot
+  for i = #cooldownSnapshot, count + 1, -1 do
+    cooldownSnapshot[i] = nil
+  end
 
-  return cooldowns
+  table.sort(cooldownSnapshot, CompareCooldowns)
+
+  return cooldownSnapshot
 end

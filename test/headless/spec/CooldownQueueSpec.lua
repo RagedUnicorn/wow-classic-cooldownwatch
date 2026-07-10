@@ -170,6 +170,21 @@ describe("CooldownQueue", function()
     assert.equal(2139, cooldowns[2].spellData.spellId)
   end)
 
+  it("GetCooldownsByTarget reuses one snapshot table across calls", function()
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(122, "Frost Nova", 100))
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(2139, "Counterspell", 100))
+
+    local first = queue.GetCooldownsByTarget("guid-1")
+    assert.equal(2, #first)
+
+    -- The snapshot is a module-owned scratch array refilled per call: a held
+    -- reference is only valid until the next call. This pins the render-path
+    -- allocation contract - callers must consume the result synchronously.
+    local second = queue.GetCooldownsByTarget("guid-nobody")
+    assert.equal(first, second)
+    assert.same({}, second)
+  end)
+
   it("GetCooldownsByTarget keeps the order stable when an entry is removed", function()
     queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(122, "Frost Nova", 100))
     queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(12472, "Icy Veins", 200))
