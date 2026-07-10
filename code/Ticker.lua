@@ -38,7 +38,7 @@ local targetCooldownBarTicker
   Start the repeating update ticker for targetCastBar
 ]]--
 function me.StartTickerTargetCooldownBar()
-  if targetCooldownBarTicker == nil or targetCooldownBarTicker.IsCancelled() then
+  if targetCooldownBarTicker == nil or targetCooldownBarTicker:IsCancelled() then
     targetCooldownBarTicker = C_Timer.NewTicker(
       RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_UPDATE_INTERVAL, mod.targetCooldownBar.TargetCooldownBarOnUpdate)
       mod.logger.LogInfo(me.tag, "Started 'TargetCooldownBarTicker'")
