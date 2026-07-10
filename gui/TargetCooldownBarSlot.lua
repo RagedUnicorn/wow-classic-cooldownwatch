@@ -93,7 +93,9 @@ function me.CreateCooldownSlot(frame, position)
 end
 
 --[[
-  Create an animation for a cooldownWatchSlot
+  Create an animation for a cooldownWatchSlot. The OnFinished cleanup is installed once
+  here; the cooldown it removes is handed over via cooldownWatchSlot.fadingCooldown when
+  ClearCooldownSlotAnimated starts the fade.
 
   @param {table} cooldownWatchSlot
 ]]--
@@ -107,6 +109,44 @@ function me.CreateAnimation(cooldownWatchSlot)
   animation:SetFromAlpha(1)
   animation:SetToAlpha(0)
   animation:SetSmoothing("OUT")
+
+  animationGroup:SetScript("OnFinished", function()
+    local cooldown = cooldownWatchSlot.fadingCooldown
+    cooldownWatchSlot.fadingCooldown = nil
+
+    --[[
+      The fade races cooldown refreshes: UpdateCooldownWatchSlot cancels a playing fade,
+      but only on its next tick. If the entry was refreshed (AddCooldown swaps spellData
+      in place, so reading it here sees the fresh timing) and the fade completed inside
+      that window, the cooldown is live again - hand the slot back to the update path
+      untouched instead of destroying fresh state.
+    ]]--
+    local spellData = cooldown.spellData
+    local timeLeft = spellData.cooldown - (GetTime() - spellData.castTime)
+
+    if timeLeft > 0 then
+      cooldownWatchSlot:SetAlpha(1)
+      return
+    end
+
+    mod.cooldownQueue.RemoveCooldown(cooldown.sourceGuid, spellData.spellId)
+
+    --[[
+      A non-nil overlay spellId means the update path rebound this slot to another live
+      cooldown while the fade was playing. The expired queue entry is removed above, but
+      the slot visuals now belong to that other cooldown - don't blank them.
+    ]]--
+    if cooldownWatchSlot.targetCooldownOverlay.spellId ~= nil then
+      cooldownWatchSlot:SetAlpha(1)
+      return
+    end
+
+    cooldownWatchSlot.iconHolderTexture:SetTexture(nil)
+    cooldownWatchSlot.iconHolderTexture.spellId = nil
+    cooldownWatchSlot.highlightFrame:Hide()
+    cooldownWatchSlot:SetAlpha(1)
+    cooldownWatchSlot:Hide()
+  end)
 end
 
 --[[
@@ -382,56 +422,25 @@ end
 
   Step 1 - Hide cooldown texts
   Step 2 - Start animating fade alpha
-  Step 3 - Execute cleanup script once animation is done
+  Step 3 - Execute cleanup (installed once in CreateAnimation) once animation is done
+
+  The update path re-enters here every tick while the cooldown stays expired; once the
+  fade is playing there is nothing left to do, so re-entries are no-ops.
 
   @param {table} cooldownWatchSlot
   @param {table} cooldown
 ]]--
 function me.ClearCooldownSlotAnimated(cooldownWatchSlot, cooldown)
+  local animationGroup = cooldownWatchSlot:GetAnimationGroups()
+
+  if animationGroup:IsPlaying() then return end
+
   cooldownWatchSlot.targetSpellTimeBig:SetText("")
   cooldownWatchSlot.targetSpellTimeSmall:SetText("")
   cooldownWatchSlot.targetCooldownOverlay.spellId = nil
+  cooldownWatchSlot.fadingCooldown = cooldown
 
-  local animationGroup = cooldownWatchSlot:GetAnimationGroups()
-
-  animationGroup:SetScript("OnFinished", function()
-    --[[
-      The fade races cooldown refreshes: UpdateCooldownWatchSlot cancels a playing fade,
-      but only on its next tick. If the entry was refreshed (AddCooldown swaps spellData
-      in place, so reading it here sees the fresh timing) and the fade completed inside
-      that window, the cooldown is live again - hand the slot back to the update path
-      untouched instead of destroying fresh state.
-    ]]--
-    local spellData = cooldown.spellData
-    local timeLeft = spellData.cooldown - (GetTime() - spellData.castTime)
-
-    if timeLeft > 0 then
-      cooldownWatchSlot:SetAlpha(1)
-      return
-    end
-
-    mod.cooldownQueue.RemoveCooldown(cooldown.sourceGuid, spellData.spellId)
-
-    --[[
-      A non-nil overlay spellId means the update path rebound this slot to another live
-      cooldown while the fade was playing. The expired queue entry is removed above, but
-      the slot visuals now belong to that other cooldown - don't blank them.
-    ]]--
-    if cooldownWatchSlot.targetCooldownOverlay.spellId ~= nil then
-      cooldownWatchSlot:SetAlpha(1)
-      return
-    end
-
-    cooldownWatchSlot.iconHolderTexture:SetTexture(nil)
-    cooldownWatchSlot.iconHolderTexture.spellId = nil
-    cooldownWatchSlot.highlightFrame:Hide()
-    cooldownWatchSlot:SetAlpha(1)
-    cooldownWatchSlot:Hide()
-  end)
-
-  if not animationGroup:IsPlaying() then
-    animationGroup:Play()
-  end
+  animationGroup:Play()
 end
 
 --[[
@@ -446,6 +455,7 @@ function me.CancelCooldownSlotFade(cooldownWatchSlot)
 
   if animationGroup:IsPlaying() then
     animationGroup:Stop()
+    cooldownWatchSlot.fadingCooldown = nil
     cooldownWatchSlot:SetAlpha(1)
   end
 end
