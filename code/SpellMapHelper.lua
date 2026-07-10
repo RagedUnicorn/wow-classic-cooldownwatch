@@ -91,7 +91,7 @@ end
   @param {string} category
 
   @return {table}
-    Map for the passed category
+    Array of cloned primary spell entries for the passed category, sorted by name
 ]]--
 function me.GetAllForCategory(category)
   if not category then return nil end
@@ -104,6 +104,11 @@ function me.GetAllForCategory(category)
     clonedSpell.spellId = spellId
     table.insert(spellList, clonedSpell)
   end
+
+  -- the category table is keyed by spellId; sort for a stable, findable ui order
+  table.sort(spellList, function(a, b)
+    return (a.name or "") < (b.name or "")
+  end)
 
   return spellList
 end

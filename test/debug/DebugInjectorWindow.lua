@@ -152,10 +152,6 @@ function me.SelectCategory(categoryName)
 
   local spells = mod.spellMapHelper.GetAllForCategory(categoryName) or {}
 
-  table.sort(spells, function(a, b)
-    return (a.name or "") < (b.name or "")
-  end)
-
   for index, spell in ipairs(spells) do
     table.insert(spellRows, CreateSpellRow(scrollChild, index, categoryName, spell))
   end
