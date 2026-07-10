@@ -36,9 +36,9 @@
 package.path = "./test/headless/?.lua;" .. package.path
 
 -- WoW Classic Era runs Lua 5.1, where `unpack` is a global. busted may run a
--- newer Lua where it moved to `table.unpack`. Mirror the WoW global so
--- production code that calls unpack() (e.g. Common.SelectMultiple) behaves the
--- same headless as it does in-game.
+-- newer Lua where it moved to `table.unpack`. Mirror the WoW global so any
+-- production code that calls unpack() behaves the same headless as it does
+-- in-game.
 -- luacheck: push ignore 143
 unpack = unpack or table.unpack
 -- luacheck: pop
@@ -48,6 +48,7 @@ rgcw = {}
 RGCW_ENVIRONMENT = { TEST = true }
 
 rgcw.logger = {
+  IsDebugEnabled = function() return false end,
   LogDebug = function() end,
   LogInfo = function() end,
   LogWarn = function() end,

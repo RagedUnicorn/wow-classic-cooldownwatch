@@ -66,24 +66,3 @@ function me.Clone(obj)
 
   return res
 end
-
---[[
-  Select multiple values from a variable argument list based on the provided indices
-
-  @param {table} indices
-    A table containing the indices of the values to select
-  @param {...}
-    Variable number of arguments from which to select values
-
-  @return {table}
-    Returns a table containing the selected values
-]]--
-function me.SelectMultiple(indices, ...)
-  local results = {}
-
-  for i, index in ipairs(indices) do
-    results[i] = select(index, ...)
-  end
-
-  return unpack(results)
-end

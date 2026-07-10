@@ -84,6 +84,19 @@ local PrintLogMessage = function(levelColor, tag, message)
 end
 
 --[[
+  Cheap level check for hot paths. Callers that build their log message
+  dynamically (concatenation, string.format) should guard the LogDebug call
+  with this so the message is never built when debug logging is off.
+
+  @return {boolean}
+    true  - If debug messages would be printed
+    false - If debug messages are suppressed
+]]--
+function me.IsDebugEnabled()
+  return me.logLevel == me.debug
+end
+
+--[[
   @param {string} tag
   @param {string} message
 ]]--

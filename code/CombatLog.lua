@@ -37,7 +37,8 @@ me.tag = "CombatLog"
   @param {vararg} ...
 ]]--
 function me.ProcessUnfilteredCombatLogEvent(...)
-  local event, sourceFlags = mod.common.SelectMultiple({2, 6}, ...)
+  -- direct destructuring instead of a helper — this runs for every CLEU line and must not allocate
+  local _, event, _, _, _, sourceFlags = ...
 
   -- TODO [FEATURE]: Might want to filter events in specific zones
 
@@ -56,7 +57,9 @@ end
 ]]--
 function me.ProcessEventHostilePlayers(event, ...)
   if event ~= "SPELL_CAST_SUCCESS" then
-    mod.logger.LogDebug(me.tag, "Ignore unsupported event: " .. event)
+    if mod.logger.IsDebugEnabled() then
+      mod.logger.LogDebug(me.tag, "Ignore unsupported event: " .. event)
+    end
     return
   end
 
@@ -73,11 +76,14 @@ function me.ProcessNormal(event, ...)
   end
 
   local castTime = GetTime()
-  local sourceGuid, sourceName, spellId = mod.common.SelectMultiple({4, 5, 12}, ...)
+  local sourceGuid, sourceName = select(4, ...)
+  local spellId = select(12, ...)
   local category, _, spell = mod.spellMapHelper.SearchBySpellId(spellId, event)
 
   if not spell then
-    mod.logger.LogDebug(me.tag, "SpellId " .. spellId .. " not found in spellMap - aborting...")
+    if mod.logger.IsDebugEnabled() then
+      mod.logger.LogDebug(me.tag, "SpellId " .. spellId .. " not found in spellMap - aborting...")
+    end
     return
   end
 

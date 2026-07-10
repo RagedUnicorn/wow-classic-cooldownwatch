@@ -55,26 +55,4 @@ describe("Common pure helpers", function()
       end)
     end
   end)
-
-  describe("SelectMultiple", function()
-    it("selects values at the given indices", function()
-      assert.same({ "b", "d" },
-        { common.SelectMultiple({ 2, 4 }, "a", "b", "c", "d", "e") })
-    end)
-
-    it("preserves the order of the indices, not the source order", function()
-      assert.same({ "c", "a" },
-        { common.SelectMultiple({ 3, 1 }, "a", "b", "c") })
-    end)
-
-    it("selects a single value", function()
-      assert.same({ "x" },
-        { common.SelectMultiple({ 1 }, "x", "y", "z") })
-    end)
-
-    it("returns nothing for an empty index list", function()
-      assert.same({},
-        { common.SelectMultiple({}, "a", "b", "c") })
-    end)
-  end)
 end)
