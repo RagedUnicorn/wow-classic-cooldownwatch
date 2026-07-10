@@ -33,6 +33,7 @@ mod.ticker = me
 me.tag = "Ticker"
 
 local targetCooldownBarTicker
+local targetCooldownBarPreviewTicker
 
 --[[
   Start the repeating update ticker for targetCastBar
@@ -53,5 +54,29 @@ function me.StopTickerTargetCooldownBar()
     targetCooldownBarTicker:Cancel()
     targetCooldownBarTicker = nil
     mod.logger.LogInfo(me.tag, "Stopped 'TargetCooldownBarTicker'")
+  end
+end
+
+--[[
+  Start the repeating update ticker for the targetCooldownBar preview ("example") mode. Runs at
+  the same interval as the live ticker so the preview animates exactly like the live bar.
+]]--
+function me.StartTickerTargetCooldownBarPreview()
+  if targetCooldownBarPreviewTicker == nil or targetCooldownBarPreviewTicker:IsCancelled() then
+    targetCooldownBarPreviewTicker = C_Timer.NewTicker(
+      RGCW_CONSTANTS.TARGET_COOLDOWN_BAR_UPDATE_INTERVAL,
+      mod.targetCooldownBarPreview.TargetCooldownBarPreviewOnUpdate)
+      mod.logger.LogInfo(me.tag, "Started 'TargetCooldownBarPreviewTicker'")
+  end
+end
+
+--[[
+  Stop the repeating update ticker for the targetCooldownBar preview ("example") mode
+]]--
+function me.StopTickerTargetCooldownBarPreview()
+  if targetCooldownBarPreviewTicker then
+    targetCooldownBarPreviewTicker:Cancel()
+    targetCooldownBarPreviewTicker = nil
+    mod.logger.LogInfo(me.tag, "Stopped 'TargetCooldownBarPreviewTicker'")
   end
 end
