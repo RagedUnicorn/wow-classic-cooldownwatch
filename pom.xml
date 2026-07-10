@@ -15,26 +15,33 @@
     <addon.displayName>cooldownwatch</addon.displayName>
     <addon.curseforge.projectId>TODO</addon.curseforge.projectId>
     <!--
-      Classic (Interface: 11508) - covers: Classic Era, Hardcore, Season of Discovery
+      CurseForge game version IDs (not WoW interface numbers)
+
+      Classic - covers: Classic Era, Hardcore, Season of Discovery
+      Anniversary TBC - covers: TBC Anniversary Edition
     -->
     <!-- renovate: datasource=custom.wow-game-versions-classic depName=wow-gameversion-classic versioning=loose -->
-    <addon.curseforge.gameVersionClassic>10341</addon.curseforge.gameVersionClassic>
+    <addon.curseforge.gameVersionClassic>14029</addon.curseforge.gameVersionClassic>
+    <!-- renovate: datasource=custom.wow-game-versions-tbcc depName=wow-gameversion-tbcc versioning=loose -->
+    <addon.curseforge.gameVersionTbcc>14300</addon.curseforge.gameVersionTbcc>
     <addon.wago.projectId>TODO</addon.wago.projectId>
     <addon.name.short>CW</addon.name.short>
     <addon.tag.version>v${project.version}</addon.tag.version>
-    <!--
-      Classic (Interface: 11508) - covers: Classic Era, Hardcore, Season of Discovery
-    -->
     <!-- renovate: datasource=custom.wow-versions-classic depName=wow-interface-classic versioning=loose -->
     <addon.interface.classic>11508</addon.interface.classic>
-    <!-- Aggregated interface line consumed by the .toc template. When additional WoW variants are supported, list them here as a comma-separated string. -->
+    <!-- renovate: datasource=custom.wow-versions-tbcc depName=wow-interface-tbcc versioning=loose -->
+    <addon.interface.tbcc>20506</addon.interface.tbcc>
+    <!-- Aggregated interface line consumed by the .toc template. ${addon.interface.tbcc} joins the aggregate once the spell catalog supports TBC. -->
     <addon.interface>${addon.interface.classic}</addon.interface>
     <!--
       Wago patch versions.
-      Classic (1.15.8) - covers: Classic Era, Hardcore, Season of Discovery
+      Classic - covers: Classic Era, Hardcore, Season of Discovery
+      TBC - covers: TBC Anniversary (Burning Crusade Classic)
     -->
     <!-- renovate: datasource=custom.wow-patch-versions-classic depName=wow-patch-classic versioning=loose -->
     <addon.supported.patch.classic>1.15.8</addon.supported.patch.classic>
+    <!-- renovate: datasource=custom.wow-patch-versions-tbcc depName=wow-patch-tbcc versioning=loose -->
+    <addon.supported.patch.tbcc>2.5.6</addon.supported.patch.tbcc>
     <addon.identifier>${project.groupId}.${project.artifactId}</addon.identifier>
     <addon.project.categories>PvP Combat</addon.project.categories>
   </properties>
@@ -144,6 +151,7 @@
                   <changelogType>markdown</changelogType>
                   <gameVersions>
                     <gameVersion>${addon.curseforge.gameVersionClassic}</gameVersion>
+                    <!-- add ${addon.curseforge.gameVersionTbcc} once the spell catalog supports TBC -->
                   </gameVersions>
                   <releaseType>release</releaseType>
                   <file>${project.basedir}/target/${addon.name}.zip</file>
@@ -185,6 +193,7 @@
                   <label>${addon.displayName}-${addon.tag.version}-classic.zip</label>
                   <changelogFile>${project.basedir}/build-resources/release-notes.md</changelogFile>
                   <supportedClassicPatch>${addon.supported.patch.classic}</supportedClassicPatch>
+                  <!-- add <supportedBccPatch>${addon.supported.patch.tbcc}</supportedBccPatch> once the spell catalog supports TBC -->
                   <stability>stable</stability>
                   <file>${project.basedir}/target/${addon.name}.zip</file>
                   <!--suppress UnresolvedMavenProperty -->

@@ -88,22 +88,48 @@ mvn generate-resources -D generate.sources.overwrite=true -P release
 mvn package -P release
 ```
 
-### Deploy a Release
+### Deploy GitHub Release
 
-Before creating a new release update `addon.tag.version` in `pom.xml`. Afterwards to create a new release and deploy to GitHub the `deploy` profile has to be used.
+Before creating a new release update `addon.tag.version` in `pom.xml`. Afterwards to create a new release and deploy to GitHub the `deploy-github` profile has to be used.
 
 ```
 # switch environment to release
 mvn generate-resources -D generate.sources.overwrite=true -P release
-# deploy release to GitHub
-mvn package -P deploy
+# deploy release
+mvn package -P deploy-github -D github.auth-token=[token]
 ```
 
-For this to work an oauth token for GitHub is required and has to be configured in your `.m2` settings file.
+**Note:** This is only intended for manual deployment to GitHub. With GitHub actions the token is supplied as a secret to the build process
+
+### Deploy CurseForge Release
+
+**Note:** It's best to create the release for GitHub first and only afterwards the CurseForge release. That way the tag was already created.
+
+```
+# switch environment to release
+mvn generate-resources -D generate.sources.overwrite=true -P release
+# deploy release
+mvn package -P deploy-curseforge -D curseforge.auth-token=[token]
+```
+
+**Note:** This is only intended for manual deployment to CurseForge. With GitHub actions the token is supplied as a secret to the build process
+
+### Deploy Wago.io Release
+
+**Note:** It's best to create the release for GitHub first and only afterwards the Wago.io release. That way the tag was already created.
+
+```
+# switch environment to release
+mvn generate-resources -D generate.sources.overwrite=true -P release
+# deploy release
+mvn package -P deploy-wago -D wago.auth-token=[token]
+```
+
+**Note:** This is only intended for manual deployment to Wago.io. With GitHub actions the token is supplied as a secret to the build process
 
 ### GitHub Action Profiles
 
-Both `deploy-github-action` and `deploy-curseforge-action` should not be deployed manually. They are solely intended for being used by GitHub actions
+This project has GitHub action profiles for different DevOps-related work such as linting and deployments to different providers. See `.github` folder for details.
 
 ## License
 
