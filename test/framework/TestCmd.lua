@@ -128,14 +128,16 @@ HandleTestCommand = function(testCommand, args)
 end
 
 --[[
-  Toggle debug mode
+  Toggle debug mode. The logger's logLevel is the runtime source of truth;
+  RGCW_ENVIRONMENT.LOG_LEVEL is only its load-time initial value.
 ]]--
 ToggleDebugMode = function()
-  if RGCW_ENVIRONMENT.LOG_LEVEL == 4 then
-    RGCW_ENVIRONMENT.LOG_LEVEL = 1
+  if mod.logger.logLevel == mod.logger.debug then
+    -- log before lowering the level so the confirmation still prints
     mod.logger.LogInfo(me.tag, "Debug mode disabled")
+    mod.logger.logLevel = mod.logger.error
   else
-    RGCW_ENVIRONMENT.LOG_LEVEL = 4
+    mod.logger.logLevel = mod.logger.debug
     mod.logger.LogInfo(me.tag, "Debug mode enabled")
   end
 end

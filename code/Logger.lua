@@ -47,6 +47,11 @@ me.warn = 2
 me.error = 1
 me.event = 0
 
+--[[
+  Runtime source of truth for the log level. RGCW_ENVIRONMENT.LOG_LEVEL only
+  seeds the initial value — mutate me.logLevel (not the environment table) to
+  change the level at runtime.
+]]--
 me.logLevel = RGCW_ENVIRONMENT.LOG_LEVEL
 
 --[[
