@@ -27,6 +27,9 @@ rgcw.L["general_category_name"] = "General"
 rgcw.L["general_title"] = "General Configuration"
 rgcw.L["window_lock_target_cooldown_bar"] = "Lock Targetcooldownbar"
 rgcw.L["window_lock_target_cooldown_bar_tooltip"] = "Prevents Targetcooldownbar frame from being moved"
+rgcw.L["option_global_assume_worst_case"] = "Assume worst case for all cooldowns"
+rgcw.L["option_global_assume_worst_case_tooltip"] = "Assume every enemy has talents or gear reducing "
+  .. "their cooldowns. Worst case settings on individual cooldowns still take precedence."
 
 -- cooldown menu
 rgcw.L["category_priest"] = "Priest"

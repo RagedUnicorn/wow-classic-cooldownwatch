@@ -51,9 +51,10 @@ describe("CooldownQueue", function()
     -- The queue keeps module-level state; reset between scenarios so each `it`
     -- starts from an empty queue.
     queue.ClearCooldownQueue()
-    -- AddCooldown resolves against the worst-case toggles; reset them so no
-    -- scenario inherits another's overrides.
+    -- AddCooldown resolves against the worst-case toggles and the global
+    -- default; reset both so no scenario inherits another's configuration.
     CooldownWatchConfiguration.cooldownOverrides = nil
+    CooldownWatchConfiguration.globalAssumeWorstCase = nil
   end)
 
   it("AddCooldown creates a new entry", function()
@@ -100,6 +101,48 @@ describe("CooldownQueue", function()
 
   it("ResolveCooldown is a no-op for spells without a worst case", function()
     rgcw.configuration.UpdateCooldownWorstCaseState(true, "priest", 10947)
+    local spell = makeSpell(10947, "Mind Blast", 100)
+    spell.cooldownWorstCase = nil
+
+    queue.ResolveCooldown("priest", spell)
+
+    assert.equal(30, spell.cooldown)
+  end)
+
+  it("ResolveCooldown promotes the worst case for an unconfigured spell when the global default is on", function()
+    rgcw.configuration.UpdateGlobalWorstCaseState(true)
+    local spell = makeSpell(10947, "Mind Blast", 100)
+
+    queue.ResolveCooldown("priest", spell)
+
+    assert.equal(20, spell.cooldown)
+    assert.is_nil(spell.cooldownWorstCase)
+  end)
+
+  it("ResolveCooldown lets an explicit per-spell opt-out beat the global default", function()
+    rgcw.configuration.UpdateGlobalWorstCaseState(true)
+    rgcw.configuration.UpdateCooldownWorstCaseState(false, "priest", 10947)
+    local spell = makeSpell(10947, "Mind Blast", 100)
+
+    queue.ResolveCooldown("priest", spell)
+
+    assert.equal(30, spell.cooldown)
+    assert.equal(20, spell.cooldownWorstCase)
+  end)
+
+  it("ResolveCooldown lets an explicit per-spell opt-in beat a disabled global default", function()
+    rgcw.configuration.UpdateGlobalWorstCaseState(false)
+    rgcw.configuration.UpdateCooldownWorstCaseState(true, "priest", 10947)
+    local spell = makeSpell(10947, "Mind Blast", 100)
+
+    queue.ResolveCooldown("priest", spell)
+
+    assert.equal(20, spell.cooldown)
+    assert.is_nil(spell.cooldownWorstCase)
+  end)
+
+  it("ResolveCooldown with the global default on is still a no-op for spells without a worst case", function()
+    rgcw.configuration.UpdateGlobalWorstCaseState(true)
     local spell = makeSpell(10947, "Mind Blast", 100)
     spell.cooldownWorstCase = nil
 

@@ -29,6 +29,10 @@ if (GetLocale() == "deDE") then
   rgcw.L["general_title"] = "Allgemeine Konfiguration"
   rgcw.L["window_lock_target_cooldown_bar"] = "Sperre Zielabklingzeitenbalken"
   rgcw.L["window_lock_target_cooldown_bar_tooltip"] = "Verhindert das bewegen des Zielabklingzeitenbalken"
+  rgcw.L["option_global_assume_worst_case"] = "Worst Case für alle Abklingzeiten annehmen"
+  rgcw.L["option_global_assume_worst_case_tooltip"] = "Nimmt an, dass jeder Gegner Talente oder Ausrüstung "
+    .. "besitzt, die seine Abklingzeiten verkürzen. Worst-Case-Einstellungen einzelner Abklingzeiten "
+    .. "haben weiterhin Vorrang."
 
   -- cooldown menu
   rgcw.L["category_priest"] = "Priester"

@@ -142,8 +142,8 @@ end
   available.
 
   Each sibling passes through AddCooldown individually, so its cooldown value
-  resolves against its own worst-case toggle (CooldownQueue.ResolveCooldown) —
-  one member's toggle never propagates to the others.
+  resolves against its own worst-case configuration (CooldownQueue.ResolveCooldown)
+  — one member's toggle never propagates to the others.
 
   @param {string} sourceGuid
   @param {string} sourceName

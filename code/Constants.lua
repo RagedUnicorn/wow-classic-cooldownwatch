@@ -103,6 +103,7 @@ RGCW_CONSTANTS = {
   ELEMENT_GENERAL_OPT = "CW_Opt",
   ELEMENT_GENERAL_TITLE = "CW_GeneralTitle",
   ELEMENT_GENERAL_OPT_WINDOW_LOCK_TARGET_COOLDOWN_BAR = "CW_OptWindowLockTargetCooldownBar",
+  ELEMENT_GENERAL_OPT_GLOBAL_ASSUME_WORST_CASE = "CW_OptGlobalAssumeWorstCase",
   --[[
     Cooldown spellList frame
   ]]--

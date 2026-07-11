@@ -36,9 +36,10 @@ describe("Configuration cooldown overrides", function()
     --[[
       SetupConfiguration never runs headless (it reaches for GetAddOnMetadata),
       so cooldownOverrides starts nil - the exact state the accessors must
-      survive. Reset between scenarios.
+      survive. Reset between scenarios, globalAssumeWorstCase included.
     ]]--
     CooldownWatchConfiguration.cooldownOverrides = nil
+    CooldownWatchConfiguration.globalAssumeWorstCase = nil
   end)
 
   it("IsCooldownWorstCaseAssumed is false while cooldownOverrides is nil", function()
@@ -78,6 +79,46 @@ describe("Configuration cooldown overrides", function()
     configuration.UpdateCooldownWorstCaseState(false, "paladin", 1022)
 
     assert.equal(42, CooldownWatchConfiguration.cooldownOverrides["paladin"][1022].futureField)
+  end)
+
+  it("GetCooldownWorstCaseOverride is nil while cooldownOverrides is nil", function()
+    assert.is_nil(configuration.GetCooldownWorstCaseOverride("paladin", 1022))
+  end)
+
+  it("GetCooldownWorstCaseOverride is nil for a never-configured spell in a known category", function()
+    configuration.UpdateCooldownWorstCaseState(true, "paladin", 1022)
+
+    assert.is_nil(configuration.GetCooldownWorstCaseOverride("paladin", 853))
+  end)
+
+  it("GetCooldownWorstCaseOverride surfaces an explicit opt-in", function()
+    configuration.UpdateCooldownWorstCaseState(true, "paladin", 1022)
+
+    assert.is_true(configuration.GetCooldownWorstCaseOverride("paladin", 1022))
+  end)
+
+  it("GetCooldownWorstCaseOverride keeps an explicit opt-out distinct from never-configured", function()
+    configuration.UpdateCooldownWorstCaseState(true, "paladin", 1022)
+    configuration.UpdateCooldownWorstCaseState(false, "paladin", 1022)
+
+    assert.is_false(configuration.GetCooldownWorstCaseOverride("paladin", 1022))
+  end)
+
+  it("IsGlobalWorstCaseAssumed is false while globalAssumeWorstCase is nil", function()
+    assert.is_false(configuration.IsGlobalWorstCaseAssumed())
+  end)
+
+  it("UpdateGlobalWorstCaseState round-trips an enabled default", function()
+    configuration.UpdateGlobalWorstCaseState(true)
+
+    assert.is_true(configuration.IsGlobalWorstCaseAssumed())
+  end)
+
+  it("UpdateGlobalWorstCaseState round-trips a disabled default", function()
+    configuration.UpdateGlobalWorstCaseState(true)
+    configuration.UpdateGlobalWorstCaseState(false)
+
+    assert.is_false(configuration.IsGlobalWorstCaseAssumed())
   end)
 
   it("GetDefaultCooldownOverrides carries one empty bucket per category", function()

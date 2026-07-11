@@ -68,14 +68,19 @@ local cooldownQueue = {}
 
 --[[
   Resolve which cooldown value a spell should run with before it is queued.
-  When the player opted into assuming the worst case for the spell (per-spell
-  configuration toggle) the worst-case value is promoted into `cooldown` and
+  Resolution order:
+
+  1. Per-spell toggle (CooldownMenu) — an explicit opt-in or opt-out always wins
+  2. Global default (GeneralMenu) — applies to spells the player never configured
+  3. Base cooldown
+
+  When the worst case is assumed its value is promoted into `cooldown` and
   `cooldownWorstCase` is cleared, so the bar shows a single authoritative timer
   (the small hint timer hides itself when the field is nil).
 
   Mutates spellData in place — safe because every enqueue path hands over a
   clone (SearchBySpellId / GetSpellById), never the SpellMap base entry.
-  Resolution happens once per enqueue: toggling the setting off leaves in-flight
+  Resolution happens once per enqueue: toggling a setting off leaves in-flight
   entries untouched and takes effect on the next cast.
 
   @param {string} category
@@ -85,7 +90,11 @@ local cooldownQueue = {}
 ]]--
 function me.ResolveCooldown(category, spellData)
   if spellData.cooldownWorstCase == nil then return end
-  if not mod.configuration.IsCooldownWorstCaseAssumed(category, spellData.spellId) then return end
+
+  local override = mod.configuration.GetCooldownWorstCaseOverride(category, spellData.spellId)
+
+  if override == false then return end
+  if override == nil and not mod.configuration.IsGlobalWorstCaseAssumed() then return end
 
   spellData.cooldown = spellData.cooldownWorstCase
   spellData.cooldownWorstCase = nil
@@ -97,7 +106,7 @@ end
 
   The spell's cooldown value is resolved here (see ResolveCooldown) so every
   enqueue path — combat log, shared-cooldown sibling fan-out, tests — applies
-  the player's per-spell configuration consistently.
+  the player's worst-case configuration consistently.
 
   @param {string} sourceGuid
     A unique identification for a caster (player or npc).

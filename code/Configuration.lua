@@ -54,13 +54,22 @@ CooldownWatchConfiguration = {
     cooldownOverrides = {
       [categoryName] = {
         [primarySpellId] = {
-          worstCase = {boolean}
+          worstCase = {boolean | nil}
           -- true if the runtime should assume the worst-case cooldown
+          -- false if it should not, even when the global default is enabled
+          -- nil (never configured) defers to globalAssumeWorstCase
         }
       }
     }
   ]]--
   ["cooldownOverrides"] = nil,
+  --[[
+    Global default for the worst-case cooldown assumption. When enabled, every
+    spell with a cooldownWorstCase value resolves to it unless the player set a
+    per-spell override — the per-spell toggle wins in both directions
+    (see CooldownQueue.ResolveCooldown).
+  ]]--
+  ["globalAssumeWorstCase"] = false,
   --[[
     Framepositions for user draggable Frames
     frames = {
@@ -93,6 +102,11 @@ function me.SetupConfiguration()
   if CooldownWatchConfiguration.cooldownOverrides == nil then
     mod.logger.LogInfo(me.tag, "cooldownOverrides has unexpected nil value")
     CooldownWatchConfiguration.cooldownOverrides = mod.profile.GetDefaultCooldownOverrides()
+  end
+
+  if CooldownWatchConfiguration.globalAssumeWorstCase == nil then
+    mod.logger.LogInfo(me.tag, "globalAssumeWorstCase has unexpected nil value")
+    CooldownWatchConfiguration.globalAssumeWorstCase = false
   end
 
   if CooldownWatchConfiguration.frames == nil then
@@ -269,6 +283,30 @@ function me.UpdateCooldownWorstCaseState(assumed, categoryName, spellId)
 end
 
 --[[
+  Get the raw per-spell worst-case override for a spell in a certain category.
+  Unlike IsCooldownWorstCaseAssumed this distinguishes an explicit opt-out from
+  a spell the player never configured — only the latter falls back to the
+  global default (see CooldownQueue.ResolveCooldown).
+
+  @param {string} categoryName
+  @param {number} spellId
+
+  @return {boolean | nil}
+    true  - The player explicitly opted into the worst-case cooldown
+    false - The player explicitly opted out
+    nil   - Never configured; the global default applies
+]]--
+function me.GetCooldownWorstCaseOverride(categoryName, spellId)
+  local overrides = CooldownWatchConfiguration.cooldownOverrides
+
+  if overrides == nil or overrides[categoryName] == nil or overrides[categoryName][spellId] == nil then
+    return nil
+  end
+
+  return overrides[categoryName][spellId].worstCase
+end
+
+--[[
   Get whether the worst-case cooldown should be assumed for a spell in a
   certain category
 
@@ -280,11 +318,31 @@ end
     false - Otherwise (disabled, or never configured)
 ]]--
 function me.IsCooldownWorstCaseAssumed(categoryName, spellId)
-  local overrides = CooldownWatchConfiguration.cooldownOverrides
+  return me.GetCooldownWorstCaseOverride(categoryName, spellId) == true
+end
 
-  if overrides == nil or overrides[categoryName] == nil or overrides[categoryName][spellId] == nil then
-    return false
+--[[
+  Update the global default for assuming worst-case cooldowns. A per-spell
+  override still wins in both directions (see GetCooldownWorstCaseOverride).
+
+  @param {boolean} assumed
+    Whether worst-case cooldowns should be assumed by default
+]]--
+function me.UpdateGlobalWorstCaseState(assumed)
+  if assumed then
+    CooldownWatchConfiguration.globalAssumeWorstCase = true
+    mod.logger.LogDebug(me.tag, "Enabled global worst-case cooldown default")
+  else
+    CooldownWatchConfiguration.globalAssumeWorstCase = false
+    mod.logger.LogDebug(me.tag, "Disabled global worst-case cooldown default")
   end
+end
 
-  return overrides[categoryName][spellId].worstCase == true
+--[[
+  @return {boolean}
+    true  - If worst-case cooldowns should be assumed by default
+    false - Otherwise
+]]--
+function me.IsGlobalWorstCaseAssumed()
+  return CooldownWatchConfiguration.globalAssumeWorstCase == true
 end

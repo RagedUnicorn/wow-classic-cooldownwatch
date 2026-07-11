@@ -39,6 +39,10 @@ local options = {
     "WindowLockTargetCooldownBar",
     rgcw.L["window_lock_target_cooldown_bar"],
     rgcw.L["window_lock_target_cooldown_bar_tooltip"]
+  }, {
+    "GlobalAssumeWorstCase",
+    rgcw.L["option_global_assume_worst_case"],
+    rgcw.L["option_global_assume_worst_case_tooltip"]
   }
 }
 
@@ -68,6 +72,15 @@ function me.BuildUi(frame)
     -80,
     me.LockWindowTargetCooldownBarOnShow,
     me.LockWindowTargetCooldownBarOnClick
+  )
+
+  me.BuildCheckButtonOption(
+    frame,
+    RGCW_CONSTANTS.ELEMENT_GENERAL_OPT_GLOBAL_ASSUME_WORST_CASE,
+    20,
+    -110,
+    me.GlobalAssumeWorstCaseOnShow,
+    me.GlobalAssumeWorstCaseOnClick
   )
 
   builtMenu = true
@@ -179,4 +192,26 @@ function me.LockWindowTargetCooldownBarOnClick(self)
   else
     mod.configuration.UnlockTargetCooldownBar()
   end
+end
+
+--[[
+  OnShow callback for checkbuttons - global assume worst case
+
+  @param {table} self
+]]--
+function me.GlobalAssumeWorstCaseOnShow(self)
+  if mod.configuration.IsGlobalWorstCaseAssumed() then
+    self:SetChecked(true)
+  else
+    self:SetChecked(false)
+  end
+end
+
+--[[
+  OnClick callback for checkbuttons - global assume worst case
+
+  @param {table} self
+]]--
+function me.GlobalAssumeWorstCaseOnClick(self)
+  mod.configuration.UpdateGlobalWorstCaseState(self:GetChecked() == true)
 end
