@@ -1,0 +1,29 @@
+name: Release Wago
+on: [workflow_dispatch]
+
+jobs:
+  wago-release-job:
+    runs-on: ubuntu-latest
+    name: Wago Release
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7
+      - name: Set up Java and Maven
+        uses: actions/setup-java@v5
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: maven
+      - name: Cache Local Maven Repository
+        uses: actions/cache@v6
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Package Production
+        run: mvn generate-resources -D generate.sources.overwrite=true -P release
+      - name: Publish Package to Wago
+        run: mvn package -P deploy-wago -D wago.auth-token=$TOKEN_WAGO
+        env:
+          TOKEN_WAGO: ${{ secrets.TOKEN_WAGO }}
