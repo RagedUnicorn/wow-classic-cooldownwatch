@@ -143,6 +143,7 @@ function me.CreateRuleRowFrame(frame, position)
   row.cooldownIcon = me.CreateCooldownSpellIcon(row)
   row.cooldownStatus = me.CreateCooldownSpell(row)
   row.worstCaseToggle = me.CreateWorstCaseToggle(row)
+  row.manualOverrideInput = me.CreateManualOverrideInput(row)
 
   return row
 end
@@ -247,6 +248,44 @@ function me.CreateWorstCaseToggle(spellFrame)
 end
 
 --[[
+  Create the per-spell manual cooldown override input. A committed value
+  replaces the resolved cooldown entirely (see CooldownQueue.ResolveCooldown);
+  an empty box means no override. Compact and label-free by design — the row
+  already carries the tracking checkbox and the worst-case toggle, so the
+  input explains itself through its tooltip instead of an inline label.
+
+  @param {table} spellFrame
+
+  @return {table}
+    The created editbox
+]]--
+function me.CreateManualOverrideInput(spellFrame)
+  local manualOverrideInput = CreateFrame(
+    "EditBox",
+    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_MANUAL_OVERRIDE,
+    spellFrame,
+    "InputBoxTemplate"
+  )
+  manualOverrideInput:SetSize(
+    RGCW_CONSTANTS.MANUAL_OVERRIDE_EDIT_BOX_WIDTH,
+    RGCW_CONSTANTS.MANUAL_OVERRIDE_EDIT_BOX_HEIGHT
+  )
+  -- right-aligned column left of the worst-case toggle and its label
+  manualOverrideInput:SetPoint("RIGHT", -160, 0)
+  manualOverrideInput:SetAutoFocus(false)
+  manualOverrideInput:SetMaxLetters(RGCW_CONSTANTS.MANUAL_OVERRIDE_EDIT_BOX_MAX_LETTERS)
+  manualOverrideInput:SetJustifyH("CENTER")
+
+  manualOverrideInput:SetScript("OnEnter", me.ManualOverrideOnEnter)
+  manualOverrideInput:SetScript("OnLeave", me.ManualOverrideOnLeave)
+  manualOverrideInput:SetScript("OnEnterPressed", me.ManualOverrideOnEnterPressed)
+  manualOverrideInput:SetScript("OnEscapePressed", me.ManualOverrideOnEscapePressed)
+  manualOverrideInput:SetScript("OnEditFocusLost", me.RefreshManualOverride)
+
+  return manualOverrideInput
+end
+
+--[[
   Update the spell list
 
   @param {table} scrollFrame
@@ -303,6 +342,7 @@ function me.UpdateCooldownUiState(row, cooldown, categoryName)
   end
 
   me.UpdateWorstCaseToggleState(row.worstCaseToggle, cooldown, categoryName)
+  me.UpdateManualOverrideState(row.manualOverrideInput, cooldown, categoryName)
 
   row.spellId = cooldown.spellId
   row.categoryName = categoryName
@@ -368,5 +408,101 @@ end
   OnLeave callback for the worst-case toggle - hide tooltip
 ]]--
 function me.WorstCaseToggleOnLeave()
+  mod.tooltip.TooltipClear()
+end
+
+--[[
+  Update the manual override input of a row. Rows are recycled across spells
+  while scrolling, so the text is rebound from the store on every pass. An
+  in-progress edit is dropped first (ClearFocus) — its OnEditFocusLost handler
+  restores the previous spell's value while the row still carries that spell's
+  identity, before the rebind below writes the new spell's value.
+
+  @param {table} manualOverrideInput
+  @param {table} cooldown
+  @param {string} categoryName
+]]--
+function me.UpdateManualOverrideState(manualOverrideInput, cooldown, categoryName)
+  manualOverrideInput:ClearFocus()
+
+  local value = mod.configuration.GetCooldownManualOverride(categoryName, cooldown.spellId)
+
+  manualOverrideInput:SetText(value ~= nil and tostring(value) or "")
+  manualOverrideInput:SetTextColor(1, 1, 1)
+end
+
+--[[
+  Rebind the manual override input from the store — restores the persisted
+  value (or empty) and resets the reject coloring. Serves as the
+  OnEditFocusLost handler so an abandoned edit never lingers in the box.
+
+  @param {table} self
+]]--
+function me.RefreshManualOverride(self)
+  local row = self:GetParent()
+  local value = mod.configuration.GetCooldownManualOverride(row.categoryName, row.spellId)
+
+  self:SetText(value ~= nil and tostring(value) or "")
+  self:SetTextColor(1, 1, 1)
+end
+
+--[[
+  OnEnterPressed callback for the manual override input. Commits the typed
+  value: empty clears the override, a valid number is stored (capped at the
+  spell's base cooldown — see Configuration.UpdateCooldownManualOverride) and
+  the box re-renders the stored value via the focus-lost refresh. A rejected
+  value (non-numeric, zero or negative) turns red and keeps focus so it can
+  be corrected; leaving the box restores the previous value instead.
+
+  @param {table} self
+]]--
+function me.ManualOverrideOnEnterPressed(self)
+  local row = self:GetParent()
+  local text = self:GetText()
+
+  if text == "" then
+    mod.configuration.UpdateCooldownManualOverride(nil, row.categoryName, row.spellId)
+    self:ClearFocus()
+
+    return
+  end
+
+  local storedValue = mod.configuration.UpdateCooldownManualOverride(
+    tonumber(text), row.categoryName, row.spellId
+  )
+
+  if storedValue == nil then
+    self:SetTextColor(1, 0, 0)
+
+    return
+  end
+
+  self:ClearFocus()
+end
+
+--[[
+  OnEscapePressed callback for the manual override input - abandon the edit
+  (the focus-lost refresh restores the persisted value)
+
+  @param {table} self
+]]--
+function me.ManualOverrideOnEscapePressed(self)
+  self:ClearFocus()
+end
+
+--[[
+  OnEnter callback for the manual override input - show tooltip
+]]--
+function me.ManualOverrideOnEnter()
+  mod.tooltip.BuildTooltipForOption(
+    rgcw.L["option_manual_cooldown_override"],
+    rgcw.L["option_manual_cooldown_override_tooltip"]
+  )
+end
+
+--[[
+  OnLeave callback for the manual override input - hide tooltip
+]]--
+function me.ManualOverrideOnLeave()
   mod.tooltip.TooltipClear()
 end

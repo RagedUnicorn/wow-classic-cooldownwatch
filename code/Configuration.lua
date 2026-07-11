@@ -54,10 +54,14 @@ CooldownWatchConfiguration = {
     cooldownOverrides = {
       [categoryName] = {
         [primarySpellId] = {
-          worstCase = {boolean | nil}
+          worstCase = {boolean | nil},
           -- true if the runtime should assume the worst-case cooldown
           -- false if it should not, even when the global default is enabled
           -- nil (never configured) defers to globalAssumeWorstCase
+          value = {number | nil}
+          -- manual cooldown override in seconds; replaces the resolved cooldown
+          -- entirely and beats both worst-case settings
+          -- nil (never configured) defers to the worst-case resolution
         }
       }
     }
@@ -319,6 +323,98 @@ end
 ]]--
 function me.IsCooldownWorstCaseAssumed(categoryName, spellId)
   return me.GetCooldownWorstCaseOverride(categoryName, spellId) == true
+end
+
+--[[
+  Update the manual cooldown override for a spell in a certain category. The
+  manual value replaces the resolved cooldown entirely and beats both
+  worst-case settings (see CooldownQueue.ResolveCooldown).
+
+  Validation lives here rather than in the GUI so it applies to every caller
+  and is testable under the headless harness:
+   - nil clears the override (sibling fields on the entry survive)
+   - non-numbers, NaN and values <= 0 are rejected without touching the store
+   - values above the spell's base cooldown are capped at the base — the
+     override can only lower the tracked time. A genuinely longer cooldown is
+     a SpellMap data bug and should be fixed in the catalog instead
+
+  @param {number | nil} value
+    The override in seconds, or nil to clear it
+  @param {string} categoryName
+  @param {number} spellId
+
+  @return {number | nil}
+    The value that was stored (after capping) — callers display this instead
+    of the raw input. nil when the override was cleared or rejected.
+]]--
+function me.UpdateCooldownManualOverride(value, categoryName, spellId)
+  local overrides = CooldownWatchConfiguration.cooldownOverrides
+
+  if value == nil then
+    if overrides and overrides[categoryName] and overrides[categoryName][spellId] then
+      overrides[categoryName][spellId].value = nil
+      mod.logger.LogDebug(me.tag, "Cleared manual cooldown override: " .. categoryName .. " - " .. spellId)
+    end
+
+    return nil
+  end
+
+  if type(value) ~= "number" or value ~= value or value <= 0 then
+    mod.logger.LogWarn(me.tag, "Rejected invalid manual cooldown override: "
+      .. categoryName .. " - " .. spellId .. " - " .. tostring(value))
+
+    return nil
+  end
+
+  local _, _, spell = mod.spellMapHelper.GetSpellById(spellId)
+
+  if spell and value > spell.cooldown then
+    value = spell.cooldown
+  end
+
+  --[[
+    Lazily create the table chain: cooldownOverrides itself may be nil when
+    SetupConfiguration never ran (headless test harness), and the per-spell
+    entry is table-valued so the worst-case toggle survives an override edit.
+  ]]--
+  if overrides == nil then
+    overrides = {}
+    CooldownWatchConfiguration.cooldownOverrides = overrides
+  end
+
+  if overrides[categoryName] == nil then
+    overrides[categoryName] = {}
+  end
+
+  if overrides[categoryName][spellId] == nil then
+    overrides[categoryName][spellId] = {}
+  end
+
+  overrides[categoryName][spellId].value = value
+  mod.logger.LogDebug(me.tag, "Set manual cooldown override: "
+    .. categoryName .. " - " .. spellId .. " - " .. value)
+
+  return value
+end
+
+--[[
+  Get the manual cooldown override for a spell in a certain category
+
+  @param {string} categoryName
+  @param {number} spellId
+
+  @return {number | nil}
+    number - The override in seconds
+    nil    - Never configured; the worst-case resolution applies
+]]--
+function me.GetCooldownManualOverride(categoryName, spellId)
+  local overrides = CooldownWatchConfiguration.cooldownOverrides
+
+  if overrides == nil or overrides[categoryName] == nil or overrides[categoryName][spellId] == nil then
+    return nil
+  end
+
+  return overrides[categoryName][spellId].value
 end
 
 --[[

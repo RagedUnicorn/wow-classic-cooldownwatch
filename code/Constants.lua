@@ -123,8 +123,13 @@ RGCW_CONSTANTS = {
   ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON = "$parentIcon",
   ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS = "$parentStatus",
   ELEMENT_CATEGORY_COOLDOWN_SPELL_WORST_CASE = "$parentWorstCase",
+  ELEMENT_CATEGORY_COOLDOWN_SPELL_MANUAL_OVERRIDE = "$parentManualOverride",
   CATEGORY_COOLDOWN_SPELL_ICON_SIZE = 32,
   COOLDOWN_SPELL_DEFAULT_SIZE = 32,
+  MANUAL_OVERRIDE_EDIT_BOX_WIDTH = 45,
+  MANUAL_OVERRIDE_EDIT_BOX_HEIGHT = 20,
+  -- longest catalog cooldowns are four digits (e.g. 1800s racials)
+  MANUAL_OVERRIDE_EDIT_BOX_MAX_LETTERS = 4,
   --[[
     Cooldown slot colors as {r, g, b, a} tuples for unpack() at the call sites
   ]]--

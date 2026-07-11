@@ -151,6 +151,52 @@ describe("CooldownQueue", function()
     assert.equal(30, spell.cooldown)
   end)
 
+  -- Manual override scenarios inject cooldownOverrides directly: these specs
+  -- exercise ResolveCooldown's priority order, not the store's validation
+  -- (rejection and base-cooldown capping live in ConfigurationSpec).
+  it("ResolveCooldown lets a manual override beat the per-spell toggle and the global default", function()
+    rgcw.configuration.UpdateGlobalWorstCaseState(true)
+    rgcw.configuration.UpdateCooldownWorstCaseState(true, "priest", 10947)
+    CooldownWatchConfiguration.cooldownOverrides["priest"][10947].value = 15
+    local spell = makeSpell(10947, "Mind Blast", 100)
+
+    queue.ResolveCooldown("priest", spell)
+
+    assert.equal(15, spell.cooldown)
+    assert.is_nil(spell.cooldownWorstCase)
+  end)
+
+  it("ResolveCooldown lets a manual override beat an explicit per-spell opt-out", function()
+    rgcw.configuration.UpdateCooldownWorstCaseState(false, "priest", 10947)
+    CooldownWatchConfiguration.cooldownOverrides["priest"][10947].value = 15
+    local spell = makeSpell(10947, "Mind Blast", 100)
+
+    queue.ResolveCooldown("priest", spell)
+
+    assert.equal(15, spell.cooldown)
+    assert.is_nil(spell.cooldownWorstCase)
+  end)
+
+  it("ResolveCooldown applies a manual override to spells without a worst case", function()
+    CooldownWatchConfiguration.cooldownOverrides = { ["priest"] = { [10947] = { value = 15 } } }
+    local spell = makeSpell(10947, "Mind Blast", 100)
+    spell.cooldownWorstCase = nil
+
+    queue.ResolveCooldown("priest", spell)
+
+    assert.equal(15, spell.cooldown)
+  end)
+
+  it("AddCooldown queues the manual override when set", function()
+    CooldownWatchConfiguration.cooldownOverrides = { ["priest"] = { [10947] = { value = 15 } } }
+
+    queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
+
+    local cooldowns = queue.GetCooldownsByTarget("guid-1")
+    assert.equal(15, cooldowns[1].spellData.cooldown)
+    assert.is_nil(cooldowns[1].spellData.cooldownWorstCase)
+  end)
+
   it("AddCooldown queues the resolved worst-case cooldown when assumed", function()
     rgcw.configuration.UpdateCooldownWorstCaseState(true, "priest", 10947)
 

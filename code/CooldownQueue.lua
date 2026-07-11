@@ -48,9 +48,10 @@ me.tag = "CooldownQueue"
       ["castTime"] = castTime,
         - {number} Time at which the spell was detected
       ["cooldown"] = cooldown,
-        - {number} Cooldown of the spell. The resolved value: when the player opted
-        into assuming the worst case for the spell, ResolveCooldown already promoted
-        cooldownWorstCase into this field before the entry was written
+        - {number} Cooldown of the spell. The resolved value: when the player set a
+        manual override or opted into assuming the worst case for the spell,
+        ResolveCooldown already promoted that value into this field before the
+        entry was written
       ["cooldownWorstCase"] = cooldownWorstCase,
         - {number} Worst case cooldown for the cooldown.
         Assuming the enemy player has its spell fully reduced with either a talent or an item.
@@ -70,13 +71,15 @@ local cooldownQueue = {}
   Resolve which cooldown value a spell should run with before it is queued.
   Resolution order:
 
-  1. Per-spell toggle (CooldownMenu) — an explicit opt-in or opt-out always wins
-  2. Global default (GeneralMenu) — applies to spells the player never configured
-  3. Base cooldown
+  1. Manual override (CooldownMenu) — an explicit numeric value replaces the
+     cooldown entirely, worst-case settings included
+  2. Per-spell toggle (CooldownMenu) — an explicit opt-in or opt-out always wins
+  3. Global default (GeneralMenu) — applies to spells the player never configured
+  4. Base cooldown
 
-  When the worst case is assumed its value is promoted into `cooldown` and
-  `cooldownWorstCase` is cleared, so the bar shows a single authoritative timer
-  (the small hint timer hides itself when the field is nil).
+  When the manual override or the worst case applies its value is promoted into
+  `cooldown` and `cooldownWorstCase` is cleared, so the bar shows a single
+  authoritative timer (the small hint timer hides itself when the field is nil).
 
   Mutates spellData in place — safe because every enqueue path hands over a
   clone (SearchBySpellId / GetSpellById), never the SpellMap base entry.
@@ -89,6 +92,15 @@ local cooldownQueue = {}
     A spellData with all its relevant information
 ]]--
 function me.ResolveCooldown(category, spellData)
+  local manualCooldown = mod.configuration.GetCooldownManualOverride(category, spellData.spellId)
+
+  if manualCooldown ~= nil then
+    spellData.cooldown = manualCooldown
+    spellData.cooldownWorstCase = nil
+
+    return
+  end
+
   if spellData.cooldownWorstCase == nil then return end
 
   local override = mod.configuration.GetCooldownWorstCaseOverride(category, spellData.spellId)

@@ -104,6 +104,96 @@ describe("Configuration cooldown overrides", function()
     assert.is_false(configuration.GetCooldownWorstCaseOverride("paladin", 1022))
   end)
 
+  it("GetCooldownManualOverride is nil while cooldownOverrides is nil", function()
+    assert.is_nil(configuration.GetCooldownManualOverride("paladin", 1022))
+  end)
+
+  it("GetCooldownManualOverride is nil for a never-configured spell in a known category", function()
+    configuration.UpdateCooldownManualOverride(42, "paladin", 1022)
+
+    assert.is_nil(configuration.GetCooldownManualOverride("paladin", 853))
+  end)
+
+  it("UpdateCooldownManualOverride round-trips a value and returns it", function()
+    local storedValue = configuration.UpdateCooldownManualOverride(42, "paladin", 1022)
+
+    assert.equal(42, storedValue)
+    assert.equal(42, configuration.GetCooldownManualOverride("paladin", 1022))
+  end)
+
+  it("UpdateCooldownManualOverride clears the override when passed nil", function()
+    configuration.UpdateCooldownManualOverride(42, "paladin", 1022)
+
+    local storedValue = configuration.UpdateCooldownManualOverride(nil, "paladin", 1022)
+
+    assert.is_nil(storedValue)
+    assert.is_nil(configuration.GetCooldownManualOverride("paladin", 1022))
+  end)
+
+  it("UpdateCooldownManualOverride clearing a never-configured spell leaves the store untouched", function()
+    configuration.UpdateCooldownManualOverride(nil, "paladin", 1022)
+
+    -- the clear path must not fabricate the table chain it found missing
+    assert.is_nil(CooldownWatchConfiguration.cooldownOverrides)
+  end)
+
+  it("UpdateCooldownManualOverride rejects non-numeric values without touching the store", function()
+    local storedValue = configuration.UpdateCooldownManualOverride("fast", "paladin", 1022)
+
+    assert.is_nil(storedValue)
+    assert.is_nil(configuration.GetCooldownManualOverride("paladin", 1022))
+  end)
+
+  it("UpdateCooldownManualOverride rejects zero, negative and NaN values", function()
+    assert.is_nil(configuration.UpdateCooldownManualOverride(0, "paladin", 1022))
+    assert.is_nil(configuration.UpdateCooldownManualOverride(-30, "paladin", 1022))
+    assert.is_nil(configuration.UpdateCooldownManualOverride(0 / 0, "paladin", 1022))
+
+    assert.is_nil(configuration.GetCooldownManualOverride("paladin", 1022))
+  end)
+
+  it("UpdateCooldownManualOverride caps the value at the spell's base cooldown", function()
+    -- base cooldown read from SpellMap rather than restated (see CLAUDE.md)
+    local category, spellId, spell = rgcw.spellMapHelper.GetSpellById(RGCW_CONSTANTS.EXAMPLE_COOLDOWN_SPELL_ID)
+
+    local storedValue = configuration.UpdateCooldownManualOverride(spell.cooldown + 100, category, spellId)
+
+    assert.equal(spell.cooldown, storedValue)
+    assert.equal(spell.cooldown, configuration.GetCooldownManualOverride(category, spellId))
+  end)
+
+  it("UpdateCooldownManualOverride stores a value below the base cooldown unchanged", function()
+    local category, spellId, spell = rgcw.spellMapHelper.GetSpellById(RGCW_CONSTANTS.EXAMPLE_COOLDOWN_SPELL_ID)
+
+    local storedValue = configuration.UpdateCooldownManualOverride(spell.cooldown - 1, category, spellId)
+
+    assert.equal(spell.cooldown - 1, storedValue)
+  end)
+
+  it("UpdateCooldownManualOverride stores values uncapped for spells unknown to SpellMap", function()
+    local storedValue = configuration.UpdateCooldownManualOverride(9999, "paladin", 999999)
+
+    assert.equal(9999, storedValue)
+  end)
+
+  it("UpdateCooldownManualOverride preserves the worst-case toggle on the per-spell entry", function()
+    configuration.UpdateCooldownWorstCaseState(true, "paladin", 1022)
+
+    configuration.UpdateCooldownManualOverride(42, "paladin", 1022)
+    configuration.UpdateCooldownManualOverride(nil, "paladin", 1022)
+
+    assert.is_true(configuration.GetCooldownWorstCaseOverride("paladin", 1022))
+  end)
+
+  it("UpdateCooldownWorstCaseState preserves a manual override on the per-spell entry", function()
+    configuration.UpdateCooldownManualOverride(42, "paladin", 1022)
+
+    configuration.UpdateCooldownWorstCaseState(true, "paladin", 1022)
+    configuration.UpdateCooldownWorstCaseState(false, "paladin", 1022)
+
+    assert.equal(42, configuration.GetCooldownManualOverride("paladin", 1022))
+  end)
+
   it("IsGlobalWorstCaseAssumed is false while globalAssumeWorstCase is nil", function()
     assert.is_false(configuration.IsGlobalWorstCaseAssumed())
   end)

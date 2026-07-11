@@ -119,21 +119,26 @@ shared cooldowns are a game-mechanics fact, so siblings are queued regardless of
 otherwise the UI would falsely show a sibling as available. `TestSpellMap.TestSharedCooldownGroupsConsistent` verifies
 all members share the same `cooldown`.
 
-### Worst-case cooldown resolution
+### Cooldown resolution
 
-`CooldownQueue.ResolveCooldown` decides once per enqueue whether a spell runs with its base `cooldown` or its
-`cooldownWorstCase`. Resolution order:
+`CooldownQueue.ResolveCooldown` decides once per enqueue which cooldown value a spell runs with. Resolution order:
 
-1. **Per-spell toggle** (`cooldownOverrides[category][spellId].worstCase`, set via the cooldown menu) — an explicit
-   `true`/`false` always wins.
-2. **Global default** (`globalAssumeWorstCase`, set via the general menu) — applies to spells whose per-spell entry was
+1. **Manual override** (`cooldownOverrides[category][spellId].value`, set via the numeric input in the cooldown
+   menu) — replaces the cooldown entirely and beats both worst-case settings. Validation lives in
+   `Configuration.UpdateCooldownManualOverride` (not the GUI) so it is headless-testable and applies to every
+   caller: non-numbers, NaN and values `<= 0` are rejected; values above the spell's base cooldown are capped at
+   the base — the override can only lower the tracked time, a genuinely longer cooldown is a SpellMap data bug.
+2. **Per-spell toggle** (`cooldownOverrides[category][spellId].worstCase`, set via the cooldown menu) — an explicit
+   `true`/`false` always wins over the global default.
+3. **Global default** (`globalAssumeWorstCase`, set via the general menu) — applies to spells whose per-spell entry was
    never configured (`worstCase == nil`). `Configuration.GetCooldownWorstCaseOverride` exposes this tri-state; the
    boolean `IsCooldownWorstCaseAssumed` collapses it and is only suitable for UI checkbox state.
-3. **Base cooldown** — spells without a `cooldownWorstCase` value are never affected by either setting.
+4. **Base cooldown** — spells without a `cooldownWorstCase` value are never affected by the worst-case settings
+   (the manual override applies to every spell).
 
-When the worst case is assumed the value is promoted into `cooldown` and `cooldownWorstCase` is cleared, so the bar
-renders a single authoritative timer. Toggling a setting only affects future casts — in-flight queue entries keep
-their resolved value.
+When the manual override or the worst case applies the value is promoted into `cooldown` and `cooldownWorstCase` is
+cleared, so the bar renders a single authoritative timer. Changing a setting only affects future casts — in-flight
+queue entries keep their resolved value.
 
 ## Linting
 
