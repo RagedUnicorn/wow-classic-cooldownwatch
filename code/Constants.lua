@@ -105,6 +105,32 @@ RGCW_CONSTANTS = {
   ELEMENT_GENERAL_OPT_WINDOW_LOCK_TARGET_COOLDOWN_BAR = "CW_OptWindowLockTargetCooldownBar",
   ELEMENT_GENERAL_OPT_GLOBAL_ASSUME_WORST_CASE = "CW_OptGlobalAssumeWorstCase",
   --[[
+    Profile (import/export and named profiles)
+  ]]--
+  ELEMENT_PROFILE_SUB_OPTION_FRAME = "CW_ProfileMenuOptionsFrame",
+  ELEMENT_PROFILE_TITLE = "CW_ProfileTitle",
+  ELEMENT_PROFILE_LIST_SCROLL_FRAME = "CW_ProfileListScrollFrame",
+  ELEMENT_PROFILE_LIST_CONTENT_FRAME = "CW_ProfileListContentFrame",
+  ELEMENT_PROFILE_LIST_ROW = "CW_ProfileListRow", -- suffixed with the row index
+  ELEMENT_PROFILE_SAVE_BUTTON = "CW_ProfileSaveButton",
+  ELEMENT_PROFILE_APPLY_BUTTON = "CW_ProfileApplyButton",
+  ELEMENT_PROFILE_RENAME_BUTTON = "CW_ProfileRenameButton",
+  ELEMENT_PROFILE_DELETE_BUTTON = "CW_ProfileDeleteButton",
+  ELEMENT_PROFILE_EXPORT_BUTTON = "CW_ProfileExportButton",
+  ELEMENT_PROFILE_IMPORT_BUTTON = "CW_ProfileImportButton",
+  ELEMENT_PROFILE_STRING_SCROLL_FRAME = "CW_ProfileStringScrollFrame",
+  --[[
+    Profile layout sizing
+  ]]--
+  ELEMENT_PROFILE_LIST_WIDTH = 280,
+  ELEMENT_PROFILE_LIST_HEIGHT = 160,
+  ELEMENT_PROFILE_LIST_ROW_HEIGHT = 20,
+  ELEMENT_PROFILE_ACTION_BUTTON_WIDTH = 150,
+  ELEMENT_PROFILE_STRING_BUTTON_WIDTH = 110,
+  ELEMENT_PROFILE_BUTTON_HEIGHT = 24,
+  ELEMENT_PROFILE_STRING_WIDTH = 540,
+  ELEMENT_PROFILE_STRING_HEIGHT = 90,
+  --[[
     Cooldown spellList frame
   ]]--
   ELEMENT_SPELL_LIST_CONTENT_FRAME = "$parent_CW_SpellListContentFrame",

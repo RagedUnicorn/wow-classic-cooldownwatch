@@ -86,7 +86,15 @@ CooldownWatchConfiguration = {
       ...
     }
   ]]--
-  ["frames"] = {}
+  ["frames"] = {},
+  --[[
+    Named configuration profiles managed by rgcw.configProfile
+    profiles = {
+      [profileName] = {snapshot of the PROFILE_FIELDS}
+      ...
+    }
+  ]]--
+  ["profiles"] = {}
 }
 
 --[[
@@ -116,6 +124,11 @@ function me.SetupConfiguration()
   if CooldownWatchConfiguration.frames == nil then
     mod.logger.LogInfo(me.tag, "frames has unexpected nil value")
     CooldownWatchConfiguration.frames = {}
+  end
+
+  if CooldownWatchConfiguration.profiles == nil then
+    mod.logger.LogInfo(me.tag, "profiles has unexpected nil value")
+    CooldownWatchConfiguration.profiles = {}
   end
 
   --[[

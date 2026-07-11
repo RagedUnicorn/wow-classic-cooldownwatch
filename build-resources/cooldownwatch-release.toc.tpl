@@ -30,6 +30,9 @@ code/Target.lua
 code/Ticker.lua
 code/Tooltip.lua
 code/Configuration.lua
+code/Serializer.lua
+code/Encoder.lua
+code/ConfigProfile.lua
 code/Profile.lua
 code/Season.lua
 
@@ -43,4 +46,5 @@ gui/CategoryMenu.lua
 gui/AddonConfiguration.lua
 gui/AboutContent.lua
 gui/GeneralMenu.lua
+gui/ProfileMenu.lua
 gui/CooldownMenu.lua

@@ -68,6 +68,13 @@ function me.SetupAddonConfiguration()
     mod.generalMenu.BuildUi
   )
 
+  me.BuildCategory(
+    RGCW_CONSTANTS.ELEMENT_PROFILE_SUB_OPTION_FRAME,
+    category,
+    rgcw.L["profile_category_name"],
+    mod.profileMenu.BuildUi
+  )
+
   me.BuildCooldownCategories(category)
 end
 
