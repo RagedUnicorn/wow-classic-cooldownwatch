@@ -81,6 +81,8 @@ if (GetLocale() == "deDE") then
   rgcw.L["option_assume_worst_case_tooltip"] = "Nimmt an, dass der Gegner Talente oder Ausrüstung besitzt, "
     .. "die diese Abklingzeit verkürzen. Die Leiste zählt die kürzeste realistische Abklingzeit "
     .. "statt des Grundwerts herunter."
+  rgcw.L["option_cooldown_values"] = "%gs Abklingzeit"
+  rgcw.L["option_cooldown_values_worst_case"] = "%gs Abklingzeit / %gs Worst Case"
   rgcw.L["option_manual_cooldown_override"] = "Abklingzeit überschreiben"
   rgcw.L["option_manual_cooldown_override_tooltip"] = "Überschreibt die verfolgte Abklingzeit in Sekunden. "
     .. "Hat Vorrang vor allen Worst-Case-Einstellungen. Leer lassen für keine Überschreibung. "

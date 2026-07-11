@@ -142,6 +142,7 @@ function me.CreateRuleRowFrame(frame, position)
 
   row.cooldownIcon = me.CreateCooldownSpellIcon(row)
   row.cooldownStatus = me.CreateCooldownSpell(row)
+  row.cooldownValue = me.CreateCooldownValueText(row, row.cooldownStatus)
   row.worstCaseToggle = me.CreateWorstCaseToggle(row)
   row.manualOverrideInput = me.CreateManualOverrideInput(row)
 
@@ -205,10 +206,39 @@ function me.CreateCooldownSpell(spellFrame)
   cooldownSpellStatusCheckBox.text = _G[cooldownSpellStatusCheckBox:GetName() .. 'Text']
   cooldownSpellStatusCheckBox.text:SetFont(STANDARD_TEXT_FONT, 15)
   cooldownSpellStatusCheckBox.text:SetTextColor(.95, .95, .95)
+  -- top-aligned instead of the template's centered anchor so the cooldown
+  -- value line fits below the name (see CreateCooldownValueText)
+  cooldownSpellStatusCheckBox.text:ClearAllPoints()
+  cooldownSpellStatusCheckBox.text:SetPoint("TOPLEFT", cooldownSpellStatusCheckBox, "TOPRIGHT", 2, -3)
 
   cooldownSpellStatusCheckBox:SetScript("OnClick", me.CooldownEntryOnClick)
 
   return cooldownSpellStatusCheckBox
+end
+
+--[[
+  Create the cooldown value line shown below the spell name. The row's
+  horizontal space right of the name is claimed by the override input and the
+  worst-case toggle, so the values live on a second smaller line instead of
+  inline in the name — long names like "Blessing of Protection" would
+  otherwise run into the override input.
+
+  @param {table} spellFrame
+  @param {table} cooldownStatusCheckBox
+
+  @return {table}
+    The created fontstring
+]]--
+function me.CreateCooldownValueText(spellFrame, cooldownStatusCheckBox)
+  local cooldownValueText = spellFrame:CreateFontString(
+    RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_VALUE,
+    "OVERLAY"
+  )
+  cooldownValueText:SetFont(STANDARD_TEXT_FONT, 12)
+  cooldownValueText:SetTextColor(.7, .7, .7)
+  cooldownValueText:SetPoint("BOTTOMLEFT", cooldownStatusCheckBox, "BOTTOMRIGHT", 2, 3)
+
+  return cooldownValueText
 end
 
 --[[
@@ -334,6 +364,7 @@ function me.UpdateCooldownUiState(row, cooldown, categoryName)
 
   row.cooldownIcon:SetTexture(mod.guiHelper.GetIconId(cooldown))
   row.cooldownStatus.text:SetText(cooldown.name)
+  row.cooldownValue:SetText(me.BuildCooldownValueText(cooldown))
 
   if enabled then
     row.cooldownStatus:SetChecked(true)
@@ -347,6 +378,30 @@ function me.UpdateCooldownUiState(row, cooldown, categoryName)
   row.spellId = cooldown.spellId
   row.categoryName = categoryName
   row:Show()
+end
+
+--[[
+  Build the localized cooldown value line for a spell row. Spells with a
+  cooldownWorstCase show both values so the player can judge whether the
+  worst-case toggle is worth flipping; all other spells show the base value
+  only. Values are formatted with %g because the catalog holds fractional
+  cooldowns (e.g. Mind Blast at 5.5s).
+
+  @param {table} cooldown
+
+  @return {string}
+    The formatted cooldown value line
+]]--
+function me.BuildCooldownValueText(cooldown)
+  if cooldown.cooldownWorstCase ~= nil then
+    return string.format(
+      rgcw.L["option_cooldown_values_worst_case"],
+      cooldown.cooldown,
+      cooldown.cooldownWorstCase
+    )
+  end
+
+  return string.format(rgcw.L["option_cooldown_values"], cooldown.cooldown)
 end
 
 --[[
