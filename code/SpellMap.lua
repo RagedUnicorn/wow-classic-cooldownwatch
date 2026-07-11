@@ -36,6 +36,12 @@ me.tag = "SpellMap"
   field. Spells in the same group trigger one another's cooldowns (e.g. Shaman
   shocks). Group membership is enumerated in `sharedCooldownGroups` below so the
   combat-log handler can find sibling spellIds in O(1).
+
+  A primary can also declare an optional `cooldownResets = { spellId, ... }`
+  array: when the spell fires, every listed cooldown is removed from the
+  caster's queue (e.g. rogue Preparation, mage Cold Snap). The asymmetric
+  counterpart to sharedCooldownGroup - targets must be primary spellIds and may
+  live in a different category (see CombatLog.ResetTargetedCooldowns).
 ]]--
 local spellMap = {
   ["priest"] = {
@@ -282,6 +288,39 @@ local spellMap = {
       }
     },
     [408] = { refId = 8643 },
+    [14185] = {
+      name = "Preparation",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 600,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        14185
+      },
+      --[[
+        Vanilla/Classic Era behavior: finishes the cooldown on ALL other rogue
+        abilities. The narrow Evasion/Sprint/Vanish/Cold Blood/Adrenaline
+        Rush/Premeditation list is a TBC change (patch 2.0.3, "Now only
+        resets...") and belongs in the future Tbc overlay (CWI-0027).
+        Premeditation is reset in-game too but is not a tracked spell, so it is
+        intentionally absent - targets are limited to tracked primaries.
+      ]]--
+      cooldownResets = {
+        13750, -- Adrenaline Rush
+        13877, -- Blade Flurry
+        2094,  -- Blind
+        14177, -- Cold Blood
+        5277,  -- Evasion
+        11286, -- Gouge
+        1769,  -- Kick
+        8643,  -- Kidney Shot
+        14251, -- Riposte
+        11305, -- Sprint
+        1857,  -- Vanish
+      }
+    },
     [14251] = {
       name = "Riposte",
       type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -536,6 +575,7 @@ local spellMap = {
       trackedEvents = {
         "SPELL_CAST_SUCCESS",
       },
+      sharedCooldownGroup = "mage_wards",
       allRanks = {
         10225, 543, 8457, 8458, 10223
       }
@@ -552,6 +592,7 @@ local spellMap = {
       trackedEvents = {
         "SPELL_CAST_SUCCESS",
       },
+      sharedCooldownGroup = "mage_wards",
       allRanks = {
         28609, 6143, 8461, 8462, 10177
       }
@@ -560,6 +601,22 @@ local spellMap = {
     [8461] = { refId = 28609 },
     [8462] = { refId = 28609 },
     [10177] = { refId = 28609 },
+    [10230] = {
+      name = "Frost Nova",
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 25,
+      cooldownWorstCase = 21,
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        10230, 122, 865, 6131
+      }
+    },
+    [122] = { refId = 10230 },
+    [865] = { refId = 10230 },
+    [6131] = { refId = 10230 },
     [13033] = {
       name = "Ice Barrier",
       type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -597,6 +654,21 @@ local spellMap = {
       },
       allRanks = {
         12472
+      },
+      --[[
+        Vanilla/Classic Era behavior: finishes the cooldown on all Frost
+        spells. Fire Ward is included because the wards share one cooldown
+        timer (patch 1.11 note) and patch 2.3.2's "no longer resets Fire Ward"
+        confirms the pre-TBC behavior. The TBC-final variant (480s cooldown,
+        no Fire Ward) belongs in the future Tbc overlay (CWI-0027).
+      ]]--
+      cooldownResets = {
+        10230, -- Frost Nova
+        10161, -- Cone of Cold
+        11958, -- Ice Block
+        13033, -- Ice Barrier
+        28609, -- Frost Ward
+        10225, -- Fire Ward
       }
     }
   },
@@ -1472,7 +1544,8 @@ end
   spellIds that share their cooldown.
 ]]--
 local sharedCooldownGroups = {
-  ["shaman_shocks"] = { 10414, 10473, 29228 } -- Earth Shock / Frost Shock / Flame Shock
+  ["shaman_shocks"] = { 10414, 10473, 29228 }, -- Earth Shock / Frost Shock / Flame Shock
+  ["mage_wards"] = { 10225, 28609 } -- Fire Ward / Frost Ward
 }
 
 --[[

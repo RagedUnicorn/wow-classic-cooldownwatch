@@ -87,12 +87,38 @@ function me.ProcessNormal(event, ...)
     return
   end
 
+  if spell.cooldownResets then
+    me.ResetTargetedCooldowns(sourceGuid, spell)
+  end
+
   if not me.IsCooldownTracked(category, spellId) then
     mod.logger.LogDebug(me.tag, "Spell is not enabled - aborting...")
     return
   end
 
   me.TrackCooldown(sourceGuid, sourceName, spell, castTime, category)
+end
+
+--[[
+  Remove every cooldown listed in the spell's cooldownResets from the caster's
+  queue (e.g. rogue Preparation, mage Cold Snap). Runs before the per-spell
+  enabled gate on purpose: a reset corrects cooldowns the queue already shows,
+  so it must apply even when the player never enabled tracking for the trigger
+  spell itself - otherwise the bar keeps showing cooldowns the enemy no longer
+  has. It never adds tracking the player opted out of; the trigger's own
+  cooldown still only queues when enabled.
+
+  RemoveCooldown is a no-op for unknown keys, which covers targets that were
+  never queued before the trigger fired.
+
+  @param {string} sourceGuid
+  @param {table} spell
+    A primary spell entry carrying a cooldownResets array of primary spellIds.
+]]--
+function me.ResetTargetedCooldowns(sourceGuid, spell)
+  for _, targetSpellId in ipairs(spell.cooldownResets) do
+    mod.cooldownQueue.RemoveCooldown(sourceGuid, targetSpellId)
+  end
 end
 
 --[[

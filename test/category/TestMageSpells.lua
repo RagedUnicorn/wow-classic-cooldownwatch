@@ -134,6 +134,143 @@ function me.TestFireBlastRankResolution()
 end
 
 --[[
+  Queue every cooldownResets target of a trigger spell, fire the reset, and
+  assert every target is gone from the caster's queue. Targets are read from
+  the trigger's SpellMap entry - never hardcoded. Pulled out as a local so the
+  per-event loop in the public test function can early-return on assertion
+  failure.
+
+  @param {string} testName
+  @param {number} triggerSpellId
+  @param {string} trackedEvent
+]]--
+local function CheckCooldownResets(testName, triggerSpellId, trackedEvent)
+  mod.cooldownQueue.ClearCooldownQueue()
+
+  local casterData = mod.testHelper.GetTestCasterData()
+
+  if not mod.testAssert.NotNil(testName, casterData, "Failed to get player data") then return end
+
+  local _, _, triggerSpell = mod.spellMapHelper.SearchBySpellId(triggerSpellId, trackedEvent)
+
+  if not mod.testAssert.NotNil(testName, triggerSpell,
+    string.format("SearchBySpellId returned nil for spellId %d (event %s)",
+      triggerSpellId, trackedEvent)) then return end
+  if not mod.testAssert.NotNil(testName, triggerSpell.cooldownResets,
+    string.format("Spell %d has no cooldownResets", triggerSpellId)) then return end
+
+  for _, targetSpellId in ipairs(triggerSpell.cooldownResets) do
+    local targetCategory, _, targetSpell = mod.spellMapHelper.GetSpellById(targetSpellId)
+
+    if not mod.testAssert.NotNil(testName, targetSpell,
+      string.format("GetSpellById returned nil for reset target %d", targetSpellId)) then return end
+
+    targetSpell.castTime = GetTime()
+    mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, targetCategory, targetSpell)
+  end
+
+  mod.combatLog.ResetTargetedCooldowns(casterData.guid, triggerSpell)
+
+  local remaining = {}
+
+  for _, cd in ipairs(mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)) do
+    remaining[cd.spellData.spellId] = true
+  end
+
+  for _, targetSpellId in ipairs(triggerSpell.cooldownResets) do
+    if remaining[targetSpellId] then
+      mod.testLogger.EndTest(testName, false,
+        string.format("Reset target %d is still in the queue after the reset", targetSpellId))
+      return
+    end
+  end
+
+  mod.testLogger.EndTest(testName, true,
+    string.format("Reset %d queued cooldowns via '%s' (event %s)",
+      #triggerSpell.cooldownResets, triggerSpell.name, trackedEvent))
+end
+
+--[[
+  Test that Cold Snap clears the queued cooldowns of every spell listed in its
+  cooldownResets (vanilla behavior: finishes the cooldown on all Frost spells,
+  Fire Ward included via the shared ward cooldown timer).
+]]--
+function me.TestColdSnapResetsCooldowns()
+  local coldSnapSpellId = 12472
+  local primary = mod.spellMap.GetSpellMap()[CATEGORY][coldSnapSpellId]
+
+  for _, trackedEvent in ipairs(primary.trackedEvents) do
+    local testName = "TestMage_ColdSnap_ResetsCooldowns_" .. trackedEvent
+    mod.testLogger.StartTest(testName)
+    CheckCooldownResets(testName, coldSnapSpellId, trackedEvent)
+  end
+end
+
+--[[
+  Test that casting one ward queues both wards via the shared-cooldown group.
+  Drives CombatLog.TrackCooldown to exercise the production fan-out path.
+]]--
+function me.TestWardSharedCooldown()
+  local groupName = "mage_wards"
+  local testName = "TestMage_WardSharedCooldown"
+  mod.testLogger.StartTest(testName)
+
+  local casterData = mod.testHelper.GetTestCasterData()
+
+  if not mod.testAssert.NotNil(testName, casterData, "Failed to get player data") then return end
+
+  local expected = mod.spellMap.GetSharedCooldownGroup(groupName)
+
+  if not mod.testAssert.NotNil(testName, expected,
+    string.format("Shared cooldown group '%s' missing in spellMap", groupName)) then return end
+  if #expected == 0 then
+    mod.testLogger.EndTest(testName, false,
+      string.format("Shared cooldown group '%s' is empty", groupName))
+    return
+  end
+
+  local triggerSpellId = expected[1]
+  local triggerPrimary = mod.spellMap.GetSpellMap()[CATEGORY][triggerSpellId]
+
+  if not mod.testAssert.NotNil(testName, triggerPrimary,
+    string.format("Trigger spellId %d primary entry missing in spellMap", triggerSpellId)) then return end
+  if not mod.testAssert.NotNil(testName, triggerPrimary.trackedEvents[1],
+    string.format("Trigger spellId %d primary has no trackedEvents", triggerSpellId)) then return end
+
+  local _, _, triggerSpell = mod.spellMapHelper.SearchBySpellId(triggerSpellId, triggerPrimary.trackedEvents[1])
+
+  if not mod.testAssert.NotNil(testName, triggerSpell,
+    string.format("Trigger spellId %d not found in spellMap", triggerSpellId)) then return end
+
+  local castTime = GetTime()
+  mod.combatLog.TrackCooldown(casterData.guid, casterData.name, triggerSpell, castTime, CATEGORY)
+
+  local cooldowns = mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)
+  local seen = {}
+
+  for _, cd in pairs(cooldowns) do
+    seen[cd.spellData.spellId] = true
+  end
+
+  local missing = {}
+
+  for _, spellId in ipairs(expected) do
+    if not seen[spellId] then
+      table.insert(missing, tostring(spellId))
+    end
+  end
+
+  if #missing == 0 then
+    mod.testLogger.EndTest(testName, true,
+      string.format("'%s' trigger %d fan-out queued all %d group members (%s)",
+        groupName, triggerSpellId, #expected, table.concat(expected, ", ")))
+  else
+    mod.testLogger.EndTest(testName, false,
+      string.format("'%s' missing member(s) after fan-out: %s", groupName, table.concat(missing, ", ")))
+  end
+end
+
+--[[
   Run all mage spell tests.
 ]]--
 function me.RunAllTests()
@@ -146,6 +283,8 @@ function me.RunAllTests()
   end
 
   me.TestFireBlastRankResolution()
+  me.TestColdSnapResetsCooldowns()
+  me.TestWardSharedCooldown()
 
   mod.cooldownQueue.ClearCooldownQueue()
 

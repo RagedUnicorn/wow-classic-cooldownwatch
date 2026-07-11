@@ -159,6 +159,15 @@ function me.TestCooldownWorstCaseSane()
     "cooldownWorstCase out-of-range failure(s)")
 end
 
+function me.TestCooldownResetTargets()
+  RunValidator("TestCooldownResetTargets",
+    function()
+      return mod.spellMapValidation.ValidateCooldownResetTargets(mod.spellMap.GetSpellMap())
+    end,
+    "Every cooldownResets target is a primary entry and not the trigger itself",
+    "cooldownResets failure(s)")
+end
+
 function me.TestItemIdSane()
   RunValidator("TestItemIdSane",
     function()
@@ -185,6 +194,7 @@ function me.RunAllTests()
   me.TestUnknownCategoryReturnsEmpty()
   me.TestCategoriesMatchSpellMap()
   me.TestCooldownWorstCaseSane()
+  me.TestCooldownResetTargets()
   me.TestItemIdSane()
 
   mod.testLogger.LogInfo("SpellMap", "=== SpellMap Tests Complete ===")

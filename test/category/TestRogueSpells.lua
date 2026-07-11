@@ -117,6 +117,63 @@ local function CheckRankResolution(testName, rankSpellId, expectedPrimary, expec
 end
 
 --[[
+  Queue every cooldownResets target of a trigger spell, fire the reset, and
+  assert every target is gone from the caster's queue. Targets are read from
+  the trigger's SpellMap entry - never hardcoded. Pulled out as a local so the
+  per-event loop in the public test function can early-return on assertion
+  failure.
+
+  @param {string} testName
+  @param {number} triggerSpellId
+  @param {string} trackedEvent
+]]--
+local function CheckCooldownResets(testName, triggerSpellId, trackedEvent)
+  mod.cooldownQueue.ClearCooldownQueue()
+
+  local casterData = mod.testHelper.GetTestCasterData()
+
+  if not mod.testAssert.NotNil(testName, casterData, "Failed to get player data") then return end
+
+  local _, _, triggerSpell = mod.spellMapHelper.SearchBySpellId(triggerSpellId, trackedEvent)
+
+  if not mod.testAssert.NotNil(testName, triggerSpell,
+    string.format("SearchBySpellId returned nil for spellId %d (event %s)",
+      triggerSpellId, trackedEvent)) then return end
+  if not mod.testAssert.NotNil(testName, triggerSpell.cooldownResets,
+    string.format("Spell %d has no cooldownResets", triggerSpellId)) then return end
+
+  for _, targetSpellId in ipairs(triggerSpell.cooldownResets) do
+    local targetCategory, _, targetSpell = mod.spellMapHelper.GetSpellById(targetSpellId)
+
+    if not mod.testAssert.NotNil(testName, targetSpell,
+      string.format("GetSpellById returned nil for reset target %d", targetSpellId)) then return end
+
+    targetSpell.castTime = GetTime()
+    mod.cooldownQueue.AddCooldown(casterData.guid, casterData.name, targetCategory, targetSpell)
+  end
+
+  mod.combatLog.ResetTargetedCooldowns(casterData.guid, triggerSpell)
+
+  local remaining = {}
+
+  for _, cd in ipairs(mod.cooldownQueue.GetCooldownsByTarget(casterData.guid)) do
+    remaining[cd.spellData.spellId] = true
+  end
+
+  for _, targetSpellId in ipairs(triggerSpell.cooldownResets) do
+    if remaining[targetSpellId] then
+      mod.testLogger.EndTest(testName, false,
+        string.format("Reset target %d is still in the queue after the reset", targetSpellId))
+      return
+    end
+  end
+
+  mod.testLogger.EndTest(testName, true,
+    string.format("Reset %d queued cooldowns via '%s' (event %s)",
+      #triggerSpell.cooldownResets, triggerSpell.name, trackedEvent))
+end
+
+--[[
   Test that a non-primary rank (Kick rank 1, spellId 1766) resolves through the
   refId chain to the primary spellId (1769). Kick has the most directly
   Wowhead-verified rank chain among the rogue multi-rank spells.
@@ -134,6 +191,22 @@ function me.TestKickRankResolution()
 end
 
 --[[
+  Test that Preparation clears the queued cooldowns of every spell listed in
+  its cooldownResets (vanilla behavior: finishes the cooldown on all other
+  rogue abilities).
+]]--
+function me.TestPreparationResetsCooldowns()
+  local prepSpellId = 14185
+  local primary = mod.spellMap.GetSpellMap()[CATEGORY][prepSpellId]
+
+  for _, trackedEvent in ipairs(primary.trackedEvents) do
+    local testName = "TestRogue_Preparation_ResetsCooldowns_" .. trackedEvent
+    mod.testLogger.StartTest(testName)
+    CheckCooldownResets(testName, prepSpellId, trackedEvent)
+  end
+end
+
+--[[
   Run all rogue spell tests.
 ]]--
 function me.RunAllTests()
@@ -146,6 +219,7 @@ function me.RunAllTests()
   end
 
   me.TestKickRankResolution()
+  me.TestPreparationResetsCooldowns()
 
   mod.cooldownQueue.ClearCooldownQueue()
 

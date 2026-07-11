@@ -86,4 +86,8 @@ describe("SpellMap data integrity", function()
   it("every itemId is a positive integer on a primary entry", function()
     assert.same({}, rgcw.spellMapValidation.ValidateItemIdSane(spellMap))
   end)
+
+  it("every cooldownResets target is a primary and not the trigger itself", function()
+    assert.same({}, rgcw.spellMapValidation.ValidateCooldownResetTargets(spellMap))
+  end)
 end)

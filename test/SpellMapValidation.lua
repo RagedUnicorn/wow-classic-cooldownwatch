@@ -408,6 +408,74 @@ function me.ValidateCooldownWorstCaseSane(spellMap)
 end
 
 --[[
+  Verify every cooldownResets array, where present, sits on a primary entry and
+  contains only valid reset targets: each target must be a number that is a
+  primary entry key in any category (cross-category resets are valid, e.g. an
+  item trigger resetting class cooldowns), must not be the trigger's own
+  spellId, and must not appear twice in the same list. Alias spellIds are
+  rejected because the cooldown queue is keyed by primary spellId - a
+  RemoveCooldown on an alias id would silently never match.
+
+  @param {table} spellMap
+
+  @return {table}
+]]--
+function me.ValidateCooldownResetTargets(spellMap)
+  local failures = {}
+  local primaryIds = {}
+
+  for _, spells in pairs(spellMap) do
+    for spellId, entry in pairs(spells) do
+      if IsPrimary(entry) then
+        primaryIds[spellId] = true
+      end
+    end
+  end
+
+  for category, spells in pairs(spellMap) do
+    for spellId, entry in pairs(spells) do
+      if type(entry) == "table" and entry.cooldownResets ~= nil then
+        if not IsPrimary(entry) then
+          table.insert(failures,
+            string.format("%s/%s: cooldownResets on alias entry is ignored - move it to the primary",
+              category, tostring(spellId)))
+        elseif type(entry.cooldownResets) ~= "table" then
+          table.insert(failures,
+            string.format("%s/%s ('%s'): cooldownResets is not a table",
+              category, tostring(spellId), entry.name))
+        else
+          local seen = {}
+
+          for _, targetSpellId in ipairs(entry.cooldownResets) do
+            if type(targetSpellId) ~= "number" then
+              table.insert(failures,
+                string.format("%s/%s ('%s'): cooldownResets target %s is not a number",
+                  category, tostring(spellId), entry.name, tostring(targetSpellId)))
+            elseif targetSpellId == spellId then
+              table.insert(failures,
+                string.format("%s/%s ('%s'): cooldownResets lists the trigger itself",
+                  category, tostring(spellId), entry.name))
+            elseif not primaryIds[targetSpellId] then
+              table.insert(failures,
+                string.format("%s/%s ('%s'): cooldownResets target %s does not resolve to a primary entry",
+                  category, tostring(spellId), entry.name, tostring(targetSpellId)))
+            elseif seen[targetSpellId] then
+              table.insert(failures,
+                string.format("%s/%s ('%s'): cooldownResets target %s is listed twice",
+                  category, tostring(spellId), entry.name, tostring(targetSpellId)))
+            else
+              seen[targetSpellId] = true
+            end
+          end
+        end
+      end
+    end
+  end
+
+  return failures
+end
+
+--[[
   Check a single entry's itemId. Part of ValidateItemIdSane.
 
   @param {string} category
