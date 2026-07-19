@@ -75,7 +75,12 @@ local spellMap = {
       cooldownWorstCase = 26, -- optional: worst case (talents/items)
       active = true,
       trackedEvents = { "SPELL_CAST_SUCCESS" }, -- SPELL_AURA_REMOVED for buff-then-consume spells, see below
-      allRanks = { 10890, 8122, 8124, 10888 }, -- MUST contain the primary's own id
+      allRanks = { -- structured per-rank entries; MUST contain the primary's own id
+        { spellId = 10890, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8122, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8124, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10888, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      },
       -- sharedCooldownGroup = "shaman_shocks"   -- optional, see below
     },
     [8122] = { refId = 10890 }, -- rank alias entries
@@ -89,9 +94,11 @@ local spellMap = {
 ### Required invariants (enforced by `SpellMapValidation`)
 
 - Every `refId` must point at a primary entry in the same category.
-- Every primary's `allRanks` must include its own spellId.
-- Every id in `allRanks` must exist in the same category as either the primary or a `refId` pointing back to that
-  primary.
+- Every `allRanks` element must be a structured `{ spellId, type }` table with a positive integer `spellId` and a
+  known spell type constant (`SPELL_TYPE_BASE` / `SPELL_TYPE_SOD` / `SPELL_TYPE_TBC`).
+- Every primary's `allRanks` must include an entry for its own spellId.
+- Every spellId in `allRanks` must exist in the same category as either the primary or a `refId` pointing back to
+  that primary.
 - A spellId cannot be primary in more than one category. (Rank aliases may repeat.)
 
 These run in-game via `TestSpellMap` and headless under busted via `test/headless/spec/SpellMapSpec.lua`. See

@@ -62,6 +62,15 @@ function me.TestRefIdsResolve()
     "unresolved refId(s)")
 end
 
+function me.TestAllRanksStructured()
+  RunValidator("TestAllRanksStructured",
+    function()
+      return mod.spellMapValidation.ValidateAllRanksStructured(mod.spellMap.GetSpellMap())
+    end,
+    "All allRanks entries are structured { spellId, type } tables",
+    "malformed allRanks entry(ies)")
+end
+
 function me.TestPrimaryAllRanksContainsSelf()
   RunValidator("TestPrimaryAllRanksContainsSelf",
     function()
@@ -194,6 +203,7 @@ function me.RunAllTests()
   mod.testLogger.LogInfo("SpellMap", "=== Running SpellMap Tests ===")
 
   me.TestRefIdsResolve()
+  me.TestAllRanksStructured()
   me.TestPrimaryAllRanksContainsSelf()
   me.TestAllRanksConsistent()
   me.TestNoDuplicatePrimaryAcrossCategories()

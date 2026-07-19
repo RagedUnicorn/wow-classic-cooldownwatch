@@ -75,7 +75,10 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        10890, 8122, 8124, 10888
+        { spellId = 10890, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8122, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8124, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10888, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [8122] = { refId = 10890 },
@@ -90,7 +93,13 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        19280, 2944, 19276, 19277, 19278, 19279, 25467
+        { spellId = 19280, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 2944, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 19276, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 19277, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 19278, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 19279, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 25467, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [2944] = { refId = 19280 },
@@ -108,7 +117,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        19293
+        { spellId = 19293, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [6346] = {
@@ -120,7 +129,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        6346
+        { spellId = 6346, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [14751] = {
@@ -132,7 +141,7 @@ local spellMap = {
         "SPELL_AURA_REMOVED",
       },
       allRanks = {
-        14751
+        { spellId = 14751, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [10947] = {
@@ -145,7 +154,16 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        10947, 585, 591, 8092, 8102, 8103, 8104, 8105, 8106, 10945
+        { spellId = 10947, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 585, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 591, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8092, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8102, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8103, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8104, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8105, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8106, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10945, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [585] = { refId = 10947 },
@@ -166,7 +184,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        10060
+        { spellId = 10060, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [10901] = {
@@ -178,7 +196,16 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        10901, 17, 592, 600, 3747, 6065, 6066, 10898, 10899, 10900
+        { spellId = 10901, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 17, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 592, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 600, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 3747, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 6065, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 6066, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10898, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10899, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10900, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [17] = { refId = 10901 },
@@ -199,7 +226,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        15487
+        { spellId = 15487, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     }
   },
@@ -213,7 +240,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        13750
+        { spellId = 13750, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [13877] = {
@@ -225,7 +252,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        13877
+        { spellId = 13877, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [2094] = {
@@ -237,7 +264,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        2094
+        { spellId = 2094, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [14177] = {
@@ -249,7 +276,7 @@ local spellMap = {
         "SPELL_AURA_REMOVED",
       },
       allRanks = {
-        14177
+        { spellId = 14177, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [5277] = {
@@ -261,7 +288,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        5277
+        { spellId = 5277, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [11286] = {
@@ -273,7 +300,11 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        11286, 1776, 1777, 8629, 11285
+        { spellId = 11286, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 1776, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 1777, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8629, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 11285, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [1776] = { refId = 11286 },
@@ -289,7 +320,10 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        1769, 1766, 1767, 1768
+        { spellId = 1769, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 1766, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 1767, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 1768, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [1766] = { refId = 1769 },
@@ -304,7 +338,8 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        8643, 408
+        { spellId = 8643, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 408, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [408] = { refId = 8643 },
@@ -317,7 +352,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        14185
+        { spellId = 14185, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       },
       --[[
         Vanilla/Classic Era behavior: finishes the cooldown on ALL other rogue
@@ -350,7 +385,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        14251
+        { spellId = 14251, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [11305] = {
@@ -362,7 +397,9 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        11305, 2983, 8696
+        { spellId = 11305, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 2983, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8696, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [2983] = { refId = 11305 },
@@ -376,7 +413,8 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        1857, 1856
+        { spellId = 1857, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 1856, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [1856] = { refId = 1857 }
@@ -393,7 +431,13 @@ local spellMap = {
       },
       sharedCooldownGroup = "shaman_shocks",
       allRanks = {
-        10414, 8042, 8044, 8045, 8046, 10412, 10413
+        { spellId = 10414, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8042, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8044, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8045, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8046, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10412, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10413, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [8042] = { refId = 10414 },
@@ -413,7 +457,10 @@ local spellMap = {
       },
       sharedCooldownGroup = "shaman_shocks",
       allRanks = {
-        10473, 8056, 8058, 10472
+        { spellId = 10473, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8056, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8058, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10472, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [8056] = { refId = 10473 },
@@ -430,7 +477,12 @@ local spellMap = {
       },
       sharedCooldownGroup = "shaman_shocks",
       allRanks = {
-        29228, 8050, 8052, 8053, 10447, 10448
+        { spellId = 29228, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8050, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8052, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8053, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10447, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10448, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [8050] = { refId = 29228 },
@@ -447,7 +499,7 @@ local spellMap = {
         "SPELL_AURA_REMOVED",
       },
       allRanks = {
-        16166
+        { spellId = 16166, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [11315] = {
@@ -459,7 +511,11 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        11315, 1535, 8498, 8499, 11314
+        { spellId = 11315, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 1535, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8498, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8499, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 11314, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [1535] = { refId = 11315 },
@@ -475,7 +531,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        8177
+        { spellId = 8177, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [2484] = {
@@ -487,7 +543,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        2484
+        { spellId = 2484, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [16188] = {
@@ -499,7 +555,7 @@ local spellMap = {
         "SPELL_AURA_REMOVED",
       },
       allRanks = {
-        16188
+        { spellId = 16188, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     }
   },
@@ -513,7 +569,7 @@ local spellMap = {
         "SPELL_AURA_REMOVED",
       },
       allRanks = {
-        11129
+        { spellId = 11129, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     --[[
@@ -531,7 +587,11 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        10161, 120, 8492, 10159, 10160
+        { spellId = 10161, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 120, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8492, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10159, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10160, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [120] = { refId = 10161 },
@@ -547,7 +607,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        2139
+        { spellId = 2139, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [12043] = {
@@ -559,7 +619,7 @@ local spellMap = {
         "SPELL_AURA_REMOVED",
       },
       allRanks = {
-        12043
+        { spellId = 12043, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [1953] = {
@@ -571,7 +631,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        1953
+        { spellId = 1953, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [10199] = {
@@ -584,7 +644,13 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        10199, 2136, 2137, 2138, 8412, 8413, 10197
+        { spellId = 10199, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 2136, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 2137, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 2138, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8412, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8413, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10197, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [2136] = { refId = 10199 },
@@ -603,7 +669,11 @@ local spellMap = {
       },
       sharedCooldownGroup = "mage_wards",
       allRanks = {
-        10225, 543, 8457, 8458, 10223
+        { spellId = 10225, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 543, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8457, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8458, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10223, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [543] = { refId = 10225 },
@@ -620,7 +690,11 @@ local spellMap = {
       },
       sharedCooldownGroup = "mage_wards",
       allRanks = {
-        28609, 6143, 8461, 8462, 10177
+        { spellId = 28609, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 6143, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8461, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8462, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 10177, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [6143] = { refId = 28609 },
@@ -637,7 +711,10 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        10230, 122, 865, 6131
+        { spellId = 10230, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 122, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 865, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 6131, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [122] = { refId = 10230 },
@@ -652,7 +729,10 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        13033, 11426, 13031, 13032
+        { spellId = 13033, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 11426, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 13031, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 13032, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [11426] = { refId = 13033 },
@@ -667,7 +747,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        11958
+        { spellId = 11958, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [12472] = {
@@ -679,7 +759,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        12472
+        { spellId = 12472, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       },
       --[[
         Vanilla/Classic Era behavior: finishes the cooldown on all Frost
@@ -708,7 +788,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        18499
+        { spellId = 18499, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [2687] = {
@@ -720,7 +800,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        2687
+        { spellId = 2687, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [23894] = {
@@ -732,7 +812,10 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        23894, 23881, 23892, 23893
+        { spellId = 23894, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 23881, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 23892, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 23893, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [23881] = { refId = 23894 },
@@ -747,7 +830,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        12328
+        { spellId = 12328, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [20617] = {
@@ -760,7 +843,9 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        20617, 20252, 20616
+        { spellId = 20617, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 20252, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 20616, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [20252] = { refId = 20617 },
@@ -774,7 +859,9 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        11578, 100, 6178
+        { spellId = 11578, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 100, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 6178, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [100] = { refId = 11578 },
@@ -790,7 +877,12 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        20904, 19434, 20900, 20901, 20902, 20903
+        { spellId = 20904, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 19434, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 20900, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 20901, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 20902, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 20903, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [19434] = { refId = 20904 },
@@ -808,7 +900,14 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        14287, 3044, 14281, 14282, 14283, 14284, 14285, 14286
+        { spellId = 14287, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 3044, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 14281, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 14282, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 14283, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 14284, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 14285, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 14286, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [3044] = { refId = 14287 },
@@ -827,7 +926,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        19574
+        { spellId = 19574, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [5116] = {
@@ -840,7 +939,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        5116
+        { spellId = 5116, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [20910] = {
@@ -852,7 +951,9 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        20910, 19306, 20909
+        { spellId = 20910, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 19306, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 20909, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [19306] = { refId = 20910 },
@@ -866,7 +967,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        3045
+        { spellId = 3045, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [19503] = {
@@ -878,7 +979,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        19503
+        { spellId = 19503, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [19263] = {
@@ -890,7 +991,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        19263
+        { spellId = 19263, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [24133] = {
@@ -902,7 +1003,9 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        24133, 19386, 24132
+        { spellId = 24133, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 19386, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 24132, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [19386] = { refId = 24133 },
@@ -919,7 +1022,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        19577
+        { spellId = 19577, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [1543] = {
@@ -931,7 +1034,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        1543
+        { spellId = 1543, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [25294] = {
@@ -943,7 +1046,11 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        25294, 2643, 14288, 14289, 14290
+        { spellId = 25294, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 2643, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 14288, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 14289, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 14290, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [2643] = { refId = 25294 },
@@ -959,7 +1066,9 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        14295, 1510, 14294
+        { spellId = 14295, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 1510, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 14294, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [1510] = { refId = 14295 },
@@ -975,7 +1084,7 @@ local spellMap = {
         "SPELL_AURA_REMOVED",
       },
       allRanks = {
-        18288
+        { spellId = 18288, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [17926] = {
@@ -987,7 +1096,9 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        17926, 6789, 17925
+        { spellId = 17926, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 6789, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 17925, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [6789] = { refId = 17926 },
@@ -1001,7 +1112,8 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        17928, 5484
+        { spellId = 17928, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 5484, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [5484] = { refId = 17928 },
@@ -1014,7 +1126,10 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        28610, 6229, 11739, 11740
+        { spellId = 28610, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 6229, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 11739, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 11740, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [6229] = { refId = 28610 },
@@ -1029,7 +1144,8 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        17924, 6353
+        { spellId = 17924, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 6353, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [6353] = { refId = 17924 },
@@ -1042,7 +1158,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        18708
+        { spellId = 18708, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [18871] = {
@@ -1054,7 +1170,12 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        18871, 17877, 18867, 18868, 18869, 18870
+        { spellId = 18871, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 17877, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 18867, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 18868, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 18869, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 18870, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [17877] = { refId = 18871 },
@@ -1071,7 +1192,10 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        18932, 17962, 18930, 18931
+        { spellId = 18932, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 17962, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 18930, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 18931, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [17962] = { refId = 18932 },
@@ -1088,7 +1212,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        1044
+        { spellId = 1044, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [10278] = {
@@ -1101,7 +1225,9 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        10278, 1022, 5599
+        { spellId = 10278, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 1022, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 5599, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [1022] = { refId = 10278 },
@@ -1115,7 +1241,8 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        1020, 642
+        { spellId = 1020, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 642, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [642] = { refId = 1020 },
@@ -1128,7 +1255,8 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        5573, 498
+        { spellId = 5573, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 498, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [498] = { refId = 5573 },
@@ -1142,7 +1270,10 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        10308, 853, 5588, 5589
+        { spellId = 10308, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 853, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 5588, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 5589, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [853] = { refId = 10308 },
@@ -1157,7 +1288,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        20066
+        { spellId = 20066, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [20216] = {
@@ -1169,7 +1300,7 @@ local spellMap = {
         "SPELL_AURA_REMOVED",
       },
       allRanks = {
-        20216
+        { spellId = 20216, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [20930] = {
@@ -1181,7 +1312,9 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        20930, 20473, 20929
+        { spellId = 20930, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 20473, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 20929, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [20473] = { refId = 20930 },
@@ -1196,7 +1329,9 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        10310, 633, 2800
+        { spellId = 10310, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 633, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 2800, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [633] = { refId = 10310 },
@@ -1212,7 +1347,9 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        8983, 5211, 6798
+        { spellId = 8983, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 5211, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 6798, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [5211] = { refId = 8983 },
@@ -1226,7 +1363,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        16979
+        { spellId = 16979, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [22896] = {
@@ -1238,7 +1375,9 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        22896, 22842, 22895
+        { spellId = 22896, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 22842, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 22895, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [22842] = { refId = 22896 },
@@ -1252,7 +1391,7 @@ local spellMap = {
         "SPELL_AURA_REMOVED",
       },
       allRanks = {
-        17116
+        { spellId = 17116, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [29166] = {
@@ -1264,7 +1403,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        29166
+        { spellId = 29166, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [18562] = {
@@ -1276,7 +1415,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        18562
+        { spellId = 18562, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [22812] = {
@@ -1288,7 +1427,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        22812
+        { spellId = 22812, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [9821] = {
@@ -1300,7 +1439,8 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        9821, 1850
+        { spellId = 9821, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 1850, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [1850] = { refId = 9821 },
@@ -1313,7 +1453,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        5229
+        { spellId = 5229, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [20748] = {
@@ -1325,7 +1465,11 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        20748, 20484, 20739, 20742, 20747
+        { spellId = 20748, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 20484, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 20739, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 20742, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 20747, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [20484] = { refId = 20748 },
@@ -1341,7 +1485,10 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        9863, 740, 8918, 9862
+        { spellId = 9863, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 740, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 8918, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 9862, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [740] = { refId = 9863 },
@@ -1356,7 +1503,12 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        17329, 16689, 16810, 16811, 16812, 16813
+        { spellId = 17329, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 16689, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 16810, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 16811, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 16812, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+        { spellId = 16813, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [16689] = { refId = 17329 },
@@ -1375,7 +1527,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        20589
+        { spellId = 20589, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [20600] = {
@@ -1387,7 +1539,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        20600
+        { spellId = 20600, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [20594] = {
@@ -1399,7 +1551,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        20594
+        { spellId = 20594, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [7744] = {
@@ -1411,7 +1563,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        7744
+        { spellId = 7744, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [20549] = {
@@ -1423,7 +1575,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        20549
+        { spellId = 20549, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [20572] = {
@@ -1435,7 +1587,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        20572
+        { spellId = 20572, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [26296] = {
@@ -1447,7 +1599,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        26296
+        { spellId = 26296, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     }
   },
@@ -1472,7 +1624,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        23132
+        { spellId = 23132, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [23131] = {
@@ -1485,7 +1637,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        23131
+        { spellId = 23131, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [23097] = {
@@ -1498,7 +1650,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        23097
+        { spellId = 23097, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [22641] = {
@@ -1513,7 +1665,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        22641
+        { spellId = 22641, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [13141] = {
@@ -1526,7 +1678,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        13141
+        { spellId = 13141, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [8892] = {
@@ -1539,7 +1691,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        8892
+        { spellId = 8892, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [13120] = {
@@ -1552,7 +1704,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        13120
+        { spellId = 13120, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     --[[
@@ -1572,7 +1724,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        5579
+        { spellId = 5579, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [23273] = {
@@ -1585,7 +1737,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        23273
+        { spellId = 23273, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [23274] = {
@@ -1598,7 +1750,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        23274
+        { spellId = 23274, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [23276] = {
@@ -1611,7 +1763,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        23276
+        { spellId = 23276, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [23277] = {
@@ -1624,7 +1776,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        23277
+        { spellId = 23277, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [24499] = {
@@ -1637,7 +1789,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        24499
+        { spellId = 24499, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [24532] = {
@@ -1650,7 +1802,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        24532
+        { spellId = 24532, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     },
     [24571] = {
@@ -1664,7 +1816,7 @@ local spellMap = {
         "SPELL_CAST_SUCCESS",
       },
       allRanks = {
-        24571
+        { spellId = 24571, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       }
     }
   }

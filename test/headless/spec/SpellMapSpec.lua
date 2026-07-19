@@ -43,6 +43,10 @@ describe("SpellMap data integrity", function()
     assert.same({}, rgcw.spellMapValidation.ValidateRefIdsResolve(spellMap))
   end)
 
+  it("every allRanks entry is a structured { spellId, type } table", function()
+    assert.same({}, rgcw.spellMapValidation.ValidateAllRanksStructured(spellMap))
+  end)
+
   it("every primary appears in its own allRanks", function()
     assert.same({}, rgcw.spellMapValidation.ValidatePrimaryAllRanksContainsSelf(spellMap))
   end)

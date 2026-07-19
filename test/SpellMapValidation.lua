@@ -72,6 +72,54 @@ function me.ValidateRefIdsResolve(spellMap)
 end
 
 --[[
+  Verify every allRanks element is a structured entry: a table carrying a
+  positive integer spellId and a type that is one of the known spell type
+  constants (SPELL_TYPE_BASE / SPELL_TYPE_SOD / SPELL_TYPE_TBC). A bare-number
+  rank entry (the pre-structured shape) or an unknown type would break the
+  per-branch rank handling that builds on this shape.
+
+  @param {table} spellMap
+
+  @return {table}
+]]--
+function me.ValidateAllRanksStructured(spellMap)
+  local failures = {}
+  local validTypes = {
+    [RGCW_CONSTANTS.SPELL_TYPE_BASE] = true,
+    [RGCW_CONSTANTS.SPELL_TYPE_SOD] = true,
+    [RGCW_CONSTANTS.SPELL_TYPE_TBC] = true
+  }
+
+  for category, spells in pairs(spellMap) do
+    for spellId, entry in pairs(spells) do
+      if IsPrimary(entry) and type(entry.allRanks) == "table" then
+        for index, rank in ipairs(entry.allRanks) do
+          if type(rank) ~= "table" then
+            table.insert(failures,
+              string.format("%s/%s ('%s'): allRanks[%d] is %s, expected { spellId, type } table",
+                category, tostring(spellId), entry.name, index, type(rank)))
+          else
+            if type(rank.spellId) ~= "number" or rank.spellId <= 0 or rank.spellId % 1 ~= 0 then
+              table.insert(failures,
+                string.format("%s/%s ('%s'): allRanks[%d].spellId %s is not a positive integer",
+                  category, tostring(spellId), entry.name, index, tostring(rank.spellId)))
+            end
+
+            if not validTypes[rank.type] then
+              table.insert(failures,
+                string.format("%s/%s ('%s'): allRanks[%d].type %s is not a known spell type",
+                  category, tostring(spellId), entry.name, index, tostring(rank.type)))
+            end
+          end
+        end
+      end
+    end
+  end
+
+  return failures
+end
+
+--[[
   Verify every primary entry's allRanks list contains its own spellId.
 
   @param {table} spellMap
@@ -86,8 +134,8 @@ function me.ValidatePrimaryAllRanksContainsSelf(spellMap)
       if IsPrimary(entry) and type(entry.allRanks) == "table" then
         local found = false
 
-        for _, rankId in ipairs(entry.allRanks) do
-          if rankId == spellId then
+        for _, rank in ipairs(entry.allRanks) do
+          if type(rank) == "table" and rank.spellId == spellId then
             found = true
 
             break
@@ -109,6 +157,8 @@ end
 --[[
   Verify every spellId in a primary's allRanks list exists in the same category
   and is either the primary itself or a refId entry pointing back to it.
+  Non-table allRanks elements are skipped here - ValidateAllRanksStructured
+  reports them.
 
   @param {table} spellMap
 
@@ -120,18 +170,21 @@ function me.ValidateAllRanksConsistent(spellMap)
   for category, spells in pairs(spellMap) do
     for primaryId, entry in pairs(spells) do
       if IsPrimary(entry) and type(entry.allRanks) == "table" then
-        for _, rankId in ipairs(entry.allRanks) do
-          local rankEntry = spells[rankId]
+        for _, rank in ipairs(entry.allRanks) do
+          if type(rank) == "table" and type(rank.spellId) == "number" then
+            local rankId = rank.spellId
+            local rankEntry = spells[rankId]
 
-          if not rankEntry then
-            table.insert(failures,
-              string.format("%s/%s ('%s'): rank id %s missing from category",
-                category, tostring(primaryId), entry.name, tostring(rankId)))
-          elseif rankId ~= primaryId then
-            if type(rankEntry.refId) ~= "number" or rankEntry.refId ~= primaryId then
+            if not rankEntry then
               table.insert(failures,
-                string.format("%s/%s ('%s'): rank id %s does not refId back to primary",
+                string.format("%s/%s ('%s'): rank id %s missing from category",
                   category, tostring(primaryId), entry.name, tostring(rankId)))
+            elseif rankId ~= primaryId then
+              if type(rankEntry.refId) ~= "number" or rankEntry.refId ~= primaryId then
+                table.insert(failures,
+                  string.format("%s/%s ('%s'): rank id %s does not refId back to primary",
+                    category, tostring(primaryId), entry.name, tostring(rankId)))
+              end
             end
           end
         end
