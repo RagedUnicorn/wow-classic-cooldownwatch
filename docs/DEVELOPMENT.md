@@ -62,37 +62,40 @@ generated file in lockstep so day-to-day testing works without a rebuild).
 
 ## Adding a class to the spellMap
 
-The spell catalog lives in `code/SpellMap/Base.lua` (Classic Era base), keyed by **category** (class name) →
-**primary spellId** → spell data, with rank aliases pointing at the primary via `refId`. Per-branch differences
-(SoD / TBC) go into `code/SpellMap/Overlay/Sod.lua` / `Tbc.lua` as `remove` / `add` / `replace` / `appendRanks`
-ops; `code/SpellMap.lua` is the orchestrator that detects the active branch, merges base + overlays through
-`code/SpellMap/Assemble.lua`, caches the assembled map per branch, and exposes the public accessors
-(`GetSpellMap` and friends — consumers never read Base or overlays directly). Walk through with priest as the
-model.
+The spell catalog lives in per-category slice files under `code/SpellMap/Base/` (`Priest.lua`, `Rogue.lua`, …,
+`Racials.lua`, `Items.lua`), each keyed by **primary spellId** → spell data, with rank aliases pointing at the
+primary via `refId`. Every slice registers its category on the shared `mod.spellMapBaseClasses` table, and
+`code/SpellMap/Base.lua` assembles the slices (plus the central `sharedCooldownGroups`) into the Classic Era base
+map. Per-branch differences (SoD / TBC) go into `code/SpellMap/Overlay/Sod.lua` / `Tbc.lua` as `remove` / `add` /
+`replace` / `appendRanks` ops; `code/SpellMap.lua` is the orchestrator that detects the active branch, merges
+base + overlays through `code/SpellMap/Assemble.lua`, caches the assembled map per branch, and exposes the public
+accessors (`GetSpellMap` and friends — consumers never read Base or overlays directly). Walk through with priest
+as the model.
 
 ```lua
-local spellMap = {
-  ["priest"] = {
-    [10890] = {                                  -- primary entry: highest-rank spellId
-      name = "Psychic Scream",
-      type = RGCW_CONSTANTS.SPELL_TYPE_BASE, -- BASE = always available, SOD = SoD-only
-      cooldown = 30,
-      cooldownWorstCase = 26, -- optional: worst case (talents/items)
-      active = true,
-      trackedEvents = { "SPELL_CAST_SUCCESS" }, -- SPELL_AURA_REMOVED for buff-then-consume spells, see below
-      allRanks = { -- structured per-rank entries; MUST contain the primary's own id
-        { spellId = 10890, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
-        { spellId = 8122, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
-        { spellId = 8124, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
-        { spellId = 10888, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
-      },
-      -- sharedCooldownGroup = "shaman_shocks"   -- optional, see below
+-- code/SpellMap/Base/Priest.lua
+mod.spellMapBaseClasses = mod.spellMapBaseClasses or {}
+
+mod.spellMapBaseClasses["priest"] = {
+  [10890] = {                                  -- primary entry: highest-rank spellId
+    name = "Psychic Scream",
+    type = RGCW_CONSTANTS.SPELL_TYPE_BASE, -- BASE = always available, SOD = SoD-only
+    cooldown = 30,
+    cooldownWorstCase = 26, -- optional: worst case (talents/items)
+    active = true,
+    trackedEvents = { "SPELL_CAST_SUCCESS" }, -- SPELL_AURA_REMOVED for buff-then-consume spells, see below
+    allRanks = { -- structured per-rank entries; MUST contain the primary's own id
+      { spellId = 10890, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 8122, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 8124, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 10888, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     },
-    [8122] = { refId = 10890 }, -- rank alias entries
-    [8124] = { refId = 10890 },
-    [10888] = { refId = 10890 },
-    -- ...next primary
+    -- sharedCooldownGroup = "shaman_shocks"   -- optional, see below
   },
+  [8122] = { refId = 10890 }, -- rank alias entries
+  [8124] = { refId = 10890 },
+  [10888] = { refId = 10890 },
+  -- ...next primary
 }
 ```
 

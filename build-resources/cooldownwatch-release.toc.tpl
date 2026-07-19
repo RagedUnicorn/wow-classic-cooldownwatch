@@ -24,6 +24,17 @@ code/Cmd.lua
 code/CombatLog.lua
 code/Common.lua
 code/SpellMapHelper.lua
+code/SpellMap/Base/Priest.lua
+code/SpellMap/Base/Rogue.lua
+code/SpellMap/Base/Shaman.lua
+code/SpellMap/Base/Mage.lua
+code/SpellMap/Base/Warrior.lua
+code/SpellMap/Base/Hunter.lua
+code/SpellMap/Base/Warlock.lua
+code/SpellMap/Base/Paladin.lua
+code/SpellMap/Base/Druid.lua
+code/SpellMap/Base/Racials.lua
+code/SpellMap/Base/Items.lua
 code/SpellMap/Base.lua
 code/SpellMap/Overlay/Sod.lua
 code/SpellMap/Overlay/Tbc.lua

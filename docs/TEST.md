@@ -65,7 +65,8 @@ docker compose run --rm busted
 
 This loads `test/headless/Bootstrap.lua`, which stubs the WoW globals the production files reach for at load time, then
 `dofile`s `code/Constants.lua`, `code/Event.lua`, `code/Common.lua`, `code/Categories.lua`, the SpellMap modules
-(`code/SpellMap/Base.lua`, the `code/SpellMap/Overlay/` files, `code/SpellMap/Assemble.lua`, `code/SpellMap.lua`),
+(the `code/SpellMap/Base/` category slices, `code/SpellMap/Base.lua`, the `code/SpellMap/Overlay/` files,
+`code/SpellMap/Assemble.lua`, `code/SpellMap.lua`),
 `code/SpellMapHelper.lua`, `code/CooldownQueue.lua`, and `test/SpellMapValidation.lua`. Specs in `test/headless/spec/`
 are then discovered by busted's `Spec` pattern.
 

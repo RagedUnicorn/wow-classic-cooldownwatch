@@ -14,6 +14,7 @@
         <include>LICENSE</include>
         <include>code/*.lua</include>
         <include>code/SpellMap/*.lua</include>
+        <include>code/SpellMap/Base/*.lua</include>
         <include>code/SpellMap/Overlay/*.lua</include>
         <include>gui/*.lua</include>
         <include>gui/*.xml</include>
