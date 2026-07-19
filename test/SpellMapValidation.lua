@@ -619,3 +619,51 @@ function me.ValidateItemIdSane(spellMap)
 
   return failures
 end
+
+--[[
+  Verify the base catalog carries only SPELL_TYPE_BASE entries. Branch-specific
+  spells (SPELL_TYPE_SOD / SPELL_TYPE_TBC) belong in their branch overlay under
+  code/spellmap/overlay/ - a branch-only spell as an add op, a branch rework as
+  replace, a branch-only rank as appendRanks - never in the base slices. Checks
+  each primary's own type and every allRanks entry's type; rank entries with a
+  malformed or unknown type are ValidateAllRanksStructured's job and are not
+  re-reported here.
+
+  Run this against mod.spellMapBase.GetMap(), not the assembled map - after
+  assembly, overlay-added entries legitimately carry branch types.
+
+  @param {table} baseMap - The unassembled base catalog (mod.spellMapBase.GetMap)
+
+  @return {table}
+]]--
+function me.ValidateBaseEntriesAreBaseType(baseMap)
+  local failures = {}
+  local branchTypes = {
+    [RGCW_CONSTANTS.SPELL_TYPE_SOD] = true,
+    [RGCW_CONSTANTS.SPELL_TYPE_TBC] = true
+  }
+
+  for category, spells in pairs(baseMap) do
+    for spellId, entry in pairs(spells) do
+      if IsPrimary(entry) then
+        if entry.type ~= RGCW_CONSTANTS.SPELL_TYPE_BASE then
+          table.insert(failures, string.format(
+            "%s/%s ('%s'): type %s is not SPELL_TYPE_BASE - branch-specific entries live in their overlay",
+            category, tostring(spellId), entry.name, tostring(entry.type)))
+        end
+
+        if type(entry.allRanks) == "table" then
+          for index, rank in ipairs(entry.allRanks) do
+            if type(rank) == "table" and branchTypes[rank.type] then
+              table.insert(failures, string.format(
+                "%s/%s ('%s'): allRanks[%d].type %s is branch-specific - append it via the overlay's appendRanks",
+                category, tostring(spellId), entry.name, index, tostring(rank.type)))
+            end
+          end
+        end
+      end
+    end
+  end
+
+  return failures
+end

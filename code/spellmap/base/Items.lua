@@ -62,7 +62,7 @@ end
 
   Taxonomy (aligned with PVPWarn): "items" holds actual items — engineering
   gadgets, trinkets, insignias. Consumables (potions, bandages, elixirs) will
-  live in a separate "misc" category once CWI-0011 lands.
+  live in a separate "misc" category once the first of them is ported.
 ]]--
 mod.spellMapBaseClasses["items"] = {
   [23132] = {

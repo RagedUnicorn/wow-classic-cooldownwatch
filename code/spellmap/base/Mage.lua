@@ -239,7 +239,7 @@ mod.spellMapBaseClasses["mage"] = {
       spells. Fire Ward is included because the wards share one cooldown
       timer (patch 1.11 note) and patch 2.3.2's "no longer resets Fire Ward"
       confirms the pre-TBC behavior. The TBC-final variant (480s cooldown,
-      no Fire Ward) belongs in the future Tbc overlay (CWI-0027).
+      no Fire Ward) belongs in the future Tbc overlay.
     ]]--
     cooldownResets = {
       10230, -- Frost Nova

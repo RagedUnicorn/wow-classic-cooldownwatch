@@ -30,10 +30,20 @@ mod.spellMapOverlaySod = me
 me.tag = "SpellMapOverlaySod"
 
 --[[
-  Branch overlay applied when Season of Discovery is the active client. Empty
-  until SoD-specific cooldowns land (CWI-0029) - rune abilities, reworked
-  cooldown values, and SoD-only ranks all express as remove/add/replace/
-  appendRanks ops against the Classic Era base catalog.
+  Branch overlay applied when Season of Discovery is the active client.
+  Currently data-empty - CooldownWatch catalogs no SoD-specific cooldowns yet.
+
+  When one lands it is added HERE, never in code/spellmap/base/ (enforced by
+  ValidateBaseEntriesAreBaseType): a SoD-only spell as an `add` op typed
+  SPELL_TYPE_SOD, a SoD rework of a Classic spell as `replace` (or remove+add
+  when the rework has a new spellId), a SoD-only rank of a Classic spell as
+  `appendRanks`. PVPWarn's code/spellmap/overlay/Sod.lua is the worked
+  reference for all three shapes.
+
+  The SPELL_TYPE_SOD tag on each entry stays meaningful alongside the overlay
+  (PVPWarn parity): the overlay decides which entries exist in the
+  assembled map per branch, while SpellMapHelper.IsPrimaryAllowedInCurrentSeason
+  keeps filtering by tag for UI listings, lookups, and TEST-mode visibility.
 
   @return {table}
     Overlay table consumed by mod.spellMapAssembler.Apply

@@ -99,4 +99,9 @@ describe("SpellMap data integrity", function()
     assert.same({},
       rgcw.spellMapValidation.ValidateTrackedEventsSupported(spellMap, rgcw.combatLog.GetSupportedEvents()))
   end)
+
+  it("base catalog carries only SPELL_TYPE_BASE entries (branch spells live in overlays)", function()
+    assert.same({},
+      rgcw.spellMapValidation.ValidateBaseEntriesAreBaseType(rgcw.spellMapBase.GetMap()))
+  end)
 end)

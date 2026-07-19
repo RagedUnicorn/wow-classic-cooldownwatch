@@ -67,7 +67,7 @@ end
   overlays to the base catalog, then decorate every primary with its
   normalizedSpellName. Validation failures are logged; Apply skips the
   offending ops. Post-assembly derivations belong here (not in Base) so
-  overlay-added entries are covered too - rank-alias synthesis (CWI-0032)
+  overlay-added entries are covered too - future rank-alias synthesis
   hooks in after Apply for the same reason.
 
   @param {string} branch

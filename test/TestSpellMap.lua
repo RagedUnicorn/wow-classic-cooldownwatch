@@ -196,6 +196,15 @@ function me.TestItemIdSane()
     "itemId failure(s)")
 end
 
+function me.TestBaseEntriesAreBaseType()
+  RunValidator("TestBaseEntriesAreBaseType",
+    function()
+      return mod.spellMapValidation.ValidateBaseEntriesAreBaseType(mod.spellMapBase.GetMap())
+    end,
+    "Base catalog carries only SPELL_TYPE_BASE entries",
+    "branch-typed base entry(ies)")
+end
+
 --[[
   Run all spellMap data-integrity tests.
 ]]--
@@ -217,6 +226,7 @@ function me.RunAllTests()
   me.TestCooldownResetTargets()
   me.TestTrackedEventsSupported()
   me.TestItemIdSane()
+  me.TestBaseEntriesAreBaseType()
 
   mod.testLogger.LogInfo("SpellMap", "=== SpellMap Tests Complete ===")
 end

@@ -108,9 +108,35 @@ mod.spellMapBaseClasses["priest"] = {
 - Every spellId in `allRanks` must exist in the same category as either the primary or a `refId` pointing back to
   that primary.
 - A spellId cannot be primary in more than one category. (Rank aliases may repeat.)
+- Base catalog entries (each primary's `type` and every `allRanks` entry's `type`) must be `SPELL_TYPE_BASE` —
+  branch-specific spells live in their branch overlay, never in the base slices (see below).
 
 These run in-game via `TestSpellMap` and headless under busted via `test/headless/spec/SpellMapSpec.lua`. See
 `docs/TEST.md` for how to invoke them.
+
+### Branch-specific spells (Season of Discovery / TBC)
+
+Version-specific spell data never goes into `code/spellmap/base/` — it goes into the branch overlay
+(`code/spellmap/overlay/Sod.lua` / `Tbc.lua`) as ops against the Classic Era base, applied per category in this
+order:
+
+- `remove` — drop a base spellId that does not exist (or was replaced) on the branch.
+- `add` — add a branch-only spell (typed `SPELL_TYPE_SOD` / `SPELL_TYPE_TBC`); the spellId must not exist in the
+  base.
+- `replace` — swap an existing base entry for branch-specific data, e.g. a SoD rework that changes a cooldown.
+  A rework with a **new** spellId is modeled as `remove` + `add` instead, so each client shows exactly one
+  option for the spell.
+- `appendRanks` — append a branch-only rank (`{ spellId, type }`) to an existing base entry's `allRanks`
+  without duplicating the whole entry.
+
+Ops are validated on assembly (`spellMapAssembler.Validate` logs every violation; `Apply` skips invalid ops),
+and `ValidateBaseEntriesAreBaseType` fails the test suites if a branch-typed entry sneaks into the base.
+PVPWarn's `code/spellmap/overlay/Sod.lua` is the worked reference for all op shapes.
+
+**Type tags and overlays coexist** (PVPWarn parity): the overlay decides which entries
+exist in the assembled map for a branch, while the `type` tag on each entry still drives
+`SpellMapHelper.IsPrimaryAllowedInCurrentSeason` — season/UI gating of listings and lookups, plus TEST-mode
+visibility. Both an overlay op and a correct `type` tag are required when adding a branch-specific spell.
 
 ### Buff-then-consume spells: track `SPELL_AURA_REMOVED`
 

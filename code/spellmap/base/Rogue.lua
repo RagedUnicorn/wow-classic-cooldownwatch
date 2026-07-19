@@ -160,7 +160,7 @@ mod.spellMapBaseClasses["rogue"] = {
       Vanilla/Classic Era behavior: finishes the cooldown on ALL other rogue
       abilities. The narrow Evasion/Sprint/Vanish/Cold Blood/Adrenaline
       Rush/Premeditation list is a TBC change (patch 2.0.3, "Now only
-      resets...") and belongs in the future Tbc overlay (CWI-0027).
+      resets...") and belongs in the future Tbc overlay.
       Premeditation is reset in-game too but is not a tracked spell, so it is
       intentionally absent - targets are limited to tracked primaries.
     ]]--
