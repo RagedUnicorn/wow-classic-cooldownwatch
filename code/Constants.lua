@@ -93,7 +93,23 @@ RGCW_CONSTANTS = {
   --[[
     Addon Configuration General Elements
   ]]--
-  CHECK_OPTION_SIZE = 32,
+  --[[
+    Design colour tokens as { r, g, b } in the 0-1 range. Mirrors Pulse's and GearMenu's
+    COLOR table (derived from Quartermaster, with BODY / SUBNOTE brightened for the lighter
+    stock settings canvas these panels render on). Distinct from COLORS below, which holds
+    CooldownWatch-specific { r, g, b, a } slot colors for the target cooldown bar.
+  ]]--
+  COLOR = {
+    TITLE_GOLD = { 1.0, 0.819, 0.0 },       -- #ffd100 panel titles
+    SECTION_GOLD = { 0.851, 0.647, 0.129 }, -- #d9a521 section headers
+    BODY = { 0.91, 0.87, 0.80 },            -- #e8decc body text / option labels (warm near-white)
+    MUTED = { 0.541, 0.486, 0.392 },        -- #8a7c64 idle / dim text
+    DISABLED = { 0.45, 0.41, 0.35 },        -- disabled control labels
+    SUBNOTE = { 0.66, 0.60, 0.50 }          -- #a89980 option descriptions (warm mid gray)
+  },
+  CHECK_OPTION_SIZE = 24,
+  -- keeps option descriptions from running the full settings canvas width
+  CHECK_OPTION_DESCRIPTION_WIDTH = 540,
   --[[
     AboutMenu
   ]]--
@@ -158,6 +174,7 @@ RGCW_CONSTANTS = {
   ELEMENT_CATEGORY_COOLDOWN_SPELL_MANUAL_OVERRIDE = "$parentManualOverride",
   ELEMENT_CATEGORY_COOLDOWN_SPELL_VALUE = "$parentCooldownValue",
   CATEGORY_COOLDOWN_SPELL_ICON_SIZE = 32,
+  -- used by the target cooldown bar slot overlay; the spell-list checkboxes size via CHECK_OPTION_SIZE
   COOLDOWN_SPELL_DEFAULT_SIZE = 32,
   MANUAL_OVERRIDE_EDIT_BOX_WIDTH = 45,
   MANUAL_OVERRIDE_EDIT_BOX_HEIGHT = 20,

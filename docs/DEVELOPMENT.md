@@ -199,6 +199,32 @@ When the manual override or the worst case applies the value is promoted into `c
 cleared, so the bar renders a single authoritative timer. Changing a setting only affects future casts — in-flight
 queue entries keep their resolved value.
 
+## Configuration panel design (family convention)
+
+The configuration panels follow the shared design of Pulse and GearMenu (derived from Quartermaster):
+
+- **Colors** come from the `RGCW_CONSTANTS.COLOR` token table (`TITLE_GOLD`, `SECTION_GOLD`, `BODY`, `MUTED`,
+  `DISABLED`, `SUBNOTE`), applied via `GuiHelper.SetColor`. The table mirrors Pulse's and GearMenu's values exactly —
+  when a token changes, change it in the whole family. It is distinct from `RGCW_CONSTANTS.COLORS`, the
+  CooldownWatch-specific `{ r, g, b, a }` slot colors of the target cooldown bar.
+- **Panel titles** are `GameFontNormalLarge` font strings anchored `TOPLEFT 16, -16` in `TITLE_GOLD` — not centered,
+  not `STANDARD_TEXT_FONT`.
+- **Checkboxes** are built through `GuiHelper.CreateCheckBox` (`SettingsCheckboxTemplate`, sized by
+  `CHECK_OPTION_SIZE`): the template's list-row hover scripts are removed, a `BODY`-colored label is created as
+  `.text` (the template ships none), and an optional always-visible `SUBNOTE` description renders beneath the box
+  (width-capped by `CHECK_OPTION_DESCRIPTION_WIDTH`) instead of a hover `GameTooltip`. `UICheckButtonTemplate` is not
+  used anywhere in the family anymore. The description strings reuse the former `*_tooltip` localization keys; the key
+  names are kept to avoid churning every locale.
+- **Space-constrained list rows** — the cooldown menu's per-spell worst-case toggle and manual-override input —
+  deliberately keep their descriptions on hover tooltips: the rows have no vertical room for an extra line. They still
+  build their checkboxes through `GuiHelper.CreateCheckBox` (label only, tooltip scripts re-attached after creation).
+- **Scrollbars** are minimal: a bare `ScrollFrame` plus a `MinimalScrollBar` EventFrame anchored 8px to its right,
+  wired with `ScrollUtil.InitScrollFrameWithScrollBar` (handles the wheel too). `UIPanelScrollFrameTemplate` and
+  `FauxScrollFrameTemplate` are not used anymore — the spell list keeps one real row per spell in the scroll child
+  (rows created on demand, surplus rows hidden, scroll range driven by the content height) instead of faux-scroll row
+  recycling. The export/import box keeps `InputScrollFrameTemplate`'s own bar (family precedent; it only appears on
+  overflow).
+
 ## Linting
 
 ```

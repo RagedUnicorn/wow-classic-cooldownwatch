@@ -24,8 +24,8 @@ rgcw.L["version"] = "Version: " .. GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "
 rgcw.L["issues"] = "Issues: https://github.com/RagedUnicorn/wow-classic-cooldownwatch/issues"
 
 -- general
-rgcw.L["general_category_name"] = "General"
-rgcw.L["general_title"] = "General Configuration"
+rgcw.L["general_category_name"] = "Options"
+rgcw.L["general_title"] = "Options"
 rgcw.L["window_lock_target_cooldown_bar"] = "Lock Targetcooldownbar"
 rgcw.L["window_lock_target_cooldown_bar_tooltip"] = "Prevents Targetcooldownbar frame from being moved"
 rgcw.L["option_global_assume_worst_case"] = "Assume worst case for all cooldowns"
@@ -34,7 +34,7 @@ rgcw.L["option_global_assume_worst_case_tooltip"] = "Assume every enemy has tale
 
 -- profiles
 rgcw.L["profile_category_name"] = "Profiles"
-rgcw.L["profile_title"] = "Configuration Profiles"
+rgcw.L["profile_title"] = "Profiles"
 rgcw.L["profile_list_label"] = "Saved Profiles"
 rgcw.L["profile_string_label"] = "Profile String (Export / Import)"
 rgcw.L["profile_save_button"] = "Save current as..."

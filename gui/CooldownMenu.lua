@@ -22,8 +22,7 @@
   SOFTWARE.
 ]]--
 
--- luacheck: globals CreateFrame STANDARD_TEXT_FONT FauxScrollFrame_Update FauxScrollFrame_GetOffset
--- luacheck: globals CloseMenus
+-- luacheck: globals CreateFrame STANDARD_TEXT_FONT ScrollUtil
 
 local mod = rgcw
 local me = {}
@@ -33,6 +32,8 @@ me.tag = "CooldownMenu"
 
 local uiState = {
   spellListScrollFrame = nil,
+  spellListScrollBar = nil,
+  spellListContent = nil,
   spellRows = {},
 }
 
@@ -57,7 +58,7 @@ function me.InitCooldownMenu(frame, categoryName)
 
     me.UpdateCategoryMenu(frame)
     -- update the scrolllist with new category data
-    me.SpellListScrollFrameOnUpdate(uiState.spellListScrollFrame, categoryName)
+    me.RefreshSpellList(categoryName)
   else
     me.BuildUi(frame, categoryName)
     builtMenu = true
@@ -69,35 +70,31 @@ end
   @param {string} categoryName
 ]]--
 function me.BuildUi(parentFrame, categoryName)
+  local listWidth = RGCW_CONSTANTS.SPELL_LIST_CONTENT_FRAME_WIDTH - 22
+  local listHeight = RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT * RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS
+
   local spellListScrollFrame = CreateFrame(
     "ScrollFrame",
     RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SCROLL_FRAME,
-    parentFrame,
-    "FauxScrollFrameTemplate"
+    parentFrame
   )
-
-  spellListScrollFrame:SetWidth(RGCW_CONSTANTS.SPELL_LIST_CONTENT_FRAME_WIDTH)
-  spellListScrollFrame:SetHeight(
-    RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT * RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS
-  )
-  spellListScrollFrame:EnableMouseWheel(true)
-
-  spellListScrollFrame:SetScript("OnVerticalScroll", function(self, offset)
-    CloseMenus()
-    self.ScrollBar:SetValue(offset)
-    self.offset = math.floor(offset / RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT + 0.5)
-    me.SpellListScrollFrameOnUpdate(self, self:GetParent().categoryName)
-  end)
-
-  for i = 1, RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS do
-    table.insert(uiState.spellRows, me.CreateRuleRowFrame(spellListScrollFrame, i))
-  end
-
-  spellListScrollFrame:ClearAllPoints()
+  spellListScrollFrame:SetSize(listWidth, listHeight)
   spellListScrollFrame:SetPoint("TOPLEFT", parentFrame)
 
-  me.SpellListScrollFrameOnUpdate(spellListScrollFrame, categoryName)
+  local scrollBar = CreateFrame("EventFrame", nil, parentFrame, "MinimalScrollBar")
+  scrollBar:SetPoint("TOPLEFT", spellListScrollFrame, "TOPRIGHT", 8, 0)
+  scrollBar:SetPoint("BOTTOMLEFT", spellListScrollFrame, "BOTTOMRIGHT", 8, 0)
+  ScrollUtil.InitScrollFrameWithScrollBar(spellListScrollFrame, scrollBar)
+
+  local spellListContent = CreateFrame("Frame", nil, spellListScrollFrame)
+  spellListContent:SetSize(listWidth, listHeight)
+  spellListScrollFrame:SetScrollChild(spellListContent)
+
   uiState.spellListScrollFrame = spellListScrollFrame
+  uiState.spellListScrollBar = scrollBar
+  uiState.spellListContent = spellListContent
+
+  me.RefreshSpellList(categoryName)
 end
 
 --[[
@@ -110,6 +107,7 @@ function me.UpdateCategoryMenu(parentFrame)
   scrollFrame:ClearAllPoints()
   scrollFrame:SetPoint("TOPLEFT", parentFrame)
   scrollFrame:SetParent(parentFrame)
+  uiState.spellListScrollBar:SetParent(parentFrame)
   scrollFrame:SetVerticalScroll(0) -- reset scroll position to top
 end
 
@@ -191,27 +189,17 @@ end
     The created checkbox
 ]]--
 function me.CreateCooldownSpell(spellFrame)
-  local cooldownSpellStatusCheckBox = CreateFrame(
-    "CheckButton",
+  local cooldownSpellStatusCheckBox = mod.guiHelper.CreateCheckBox(
     RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_STATUS,
     spellFrame,
-    "UICheckButtonTemplate"
+    {"LEFT", RGCW_CONSTANTS.CATEGORY_COOLDOWN_SPELL_ICON_SIZE + 20, 0},
+    me.CooldownEntryOnClick
   )
-  cooldownSpellStatusCheckBox:SetSize(
-    RGCW_CONSTANTS.COOLDOWN_SPELL_DEFAULT_SIZE,
-    RGCW_CONSTANTS.COOLDOWN_SPELL_DEFAULT_SIZE
-  )
-  cooldownSpellStatusCheckBox:SetPoint("LEFT", RGCW_CONSTANTS.CATEGORY_COOLDOWN_SPELL_ICON_SIZE + 20, 0)
 
-  cooldownSpellStatusCheckBox.text = _G[cooldownSpellStatusCheckBox:GetName() .. 'Text']
-  cooldownSpellStatusCheckBox.text:SetFont(STANDARD_TEXT_FONT, 15)
-  cooldownSpellStatusCheckBox.text:SetTextColor(.95, .95, .95)
-  -- top-aligned instead of the template's centered anchor so the cooldown
+  -- top-aligned instead of the helper's centered anchor so the cooldown
   -- value line fits below the name (see CreateCooldownValueText)
   cooldownSpellStatusCheckBox.text:ClearAllPoints()
-  cooldownSpellStatusCheckBox.text:SetPoint("TOPLEFT", cooldownSpellStatusCheckBox, "TOPRIGHT", 2, -3)
-
-  cooldownSpellStatusCheckBox:SetScript("OnClick", me.CooldownEntryOnClick)
+  cooldownSpellStatusCheckBox.text:SetPoint("TOPLEFT", cooldownSpellStatusCheckBox, "TOPRIGHT", 5, 2)
 
   return cooldownSpellStatusCheckBox
 end
@@ -235,8 +223,8 @@ function me.CreateCooldownValueText(spellFrame, cooldownStatusCheckBox)
     "OVERLAY"
   )
   cooldownValueText:SetFont(STANDARD_TEXT_FONT, 12)
-  cooldownValueText:SetTextColor(.7, .7, .7)
-  cooldownValueText:SetPoint("BOTTOMLEFT", cooldownStatusCheckBox, "BOTTOMRIGHT", 2, 3)
+  mod.guiHelper.SetColor(cooldownValueText, RGCW_CONSTANTS.COLOR.SUBNOTE)
+  cooldownValueText:SetPoint("TOPLEFT", cooldownStatusCheckBox.text, "BOTTOMLEFT", 0, -2)
 
   return cooldownValueText
 end
@@ -252,27 +240,19 @@ end
     The created checkbox
 ]]--
 function me.CreateWorstCaseToggle(spellFrame)
-  local worstCaseCheckBox = CreateFrame(
-    "CheckButton",
+  local worstCaseCheckBox = mod.guiHelper.CreateCheckBox(
     RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_WORST_CASE,
     spellFrame,
-    "UICheckButtonTemplate"
+    -- right-aligned column; the negative offset leaves room for the trailing label text
+    {"RIGHT", -110, 0},
+    me.WorstCaseToggleOnClick,
+    nil,
+    rgcw.L["option_assume_worst_case"]
   )
-  worstCaseCheckBox:SetSize(
-    RGCW_CONSTANTS.COOLDOWN_SPELL_DEFAULT_SIZE,
-    RGCW_CONSTANTS.COOLDOWN_SPELL_DEFAULT_SIZE
-  )
-  -- right-aligned column; the negative offset leaves room for the trailing label text
-  worstCaseCheckBox:SetPoint("RIGHT", -110, 0)
 
-  worstCaseCheckBox.text = _G[worstCaseCheckBox:GetName() .. 'Text']
-  worstCaseCheckBox.text:SetFont(STANDARD_TEXT_FONT, 15)
-  worstCaseCheckBox.text:SetTextColor(.95, .95, .95)
-  worstCaseCheckBox.text:SetText(rgcw.L["option_assume_worst_case"])
-
+  -- the space-constrained rows keep their description on a hover tooltip
   worstCaseCheckBox:SetScript("OnEnter", me.WorstCaseToggleOnEnter)
   worstCaseCheckBox:SetScript("OnLeave", me.WorstCaseToggleOnLeave)
-  worstCaseCheckBox:SetScript("OnClick", me.WorstCaseToggleOnClick)
 
   return worstCaseCheckBox
 end
@@ -316,42 +296,38 @@ function me.CreateManualOverrideInput(spellFrame)
 end
 
 --[[
-  Update the spell list
+  Update the spell list. One row per spell in the category lives in the scroll
+  child - rows are created on demand (the pool grows to the largest category
+  seen) and surplus rows from a larger previous category are hidden. The scroll
+  range follows from the content height (content height - visible height).
 
-  @param {table} scrollFrame
   @param {string} categoryName
 ]]--
-function me.SpellListScrollFrameOnUpdate(scrollFrame, categoryName)
+function me.RefreshSpellList(categoryName)
   if cachedCategoryData == nil then
     mod.logger.LogInfo(me.tag, string.format("Warmed up cached spellList for category '%s'", categoryName))
     cachedCategoryData = mod.spellMapHelper.GetAllForCategory(categoryName)
   end
 
-  local maxValue = #cachedCategoryData
+  local rowCount = #cachedCategoryData
 
-  if maxValue <= RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS then
-    maxValue = RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS + 1
-  end
-
-  -- Note: maxValue needs to be at least max_rows + 1
-  FauxScrollFrame_Update(
-    scrollFrame,
-    maxValue,
-    RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS,
-    RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT
-  )
-
-  for index = 1, RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS do
-    local value = index + FauxScrollFrame_GetOffset(scrollFrame)
+  for index = 1, math.max(rowCount, #uiState.spellRows) do
     local row = uiState.spellRows[index]
-    local cooldown = cachedCategoryData[value]
+    local cooldown = cachedCategoryData[index]
 
     if cooldown then
+      if row == nil then
+        row = me.CreateRuleRowFrame(uiState.spellListContent, index)
+        uiState.spellRows[index] = row
+      end
+
       me.UpdateCooldownUiState(row, cooldown, categoryName)
-    else
+    elseif row then
       row:Hide()
     end
   end
+
+  uiState.spellListContent:SetHeight(math.max(rowCount * RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT, 1))
 end
 
 --[[

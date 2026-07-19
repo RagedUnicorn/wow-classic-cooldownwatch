@@ -22,7 +22,7 @@
   SOFTWARE.
 ]]--
 
--- luacheck: globals CreateFrame STANDARD_TEXT_FONT StaticPopupDialogs StaticPopup_Show ReloadUI
+-- luacheck: globals CreateFrame STANDARD_TEXT_FONT StaticPopupDialogs StaticPopup_Show ReloadUI ScrollUtil
 -- luacheck: globals ACCEPT CANCEL YES NO
 
 local mod = rgcw
@@ -75,15 +75,15 @@ function me.BuildUi(frame)
   if not builtMenu then
     SetupStaticPopups()
 
-    local titleFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_PROFILE_TITLE, "OVERLAY")
-    titleFontString:SetFont(STANDARD_TEXT_FONT, 20)
-    titleFontString:SetPoint("TOP", 0, -20)
-    titleFontString:SetSize(frame:GetWidth(), 20)
+    local titleFontString = frame:CreateFontString(
+      RGCW_CONSTANTS.ELEMENT_PROFILE_TITLE, "OVERLAY", "GameFontNormalLarge")
+    titleFontString:SetPoint("TOPLEFT", 16, -16)
+    mod.guiHelper.SetColor(titleFontString, RGCW_CONSTANTS.COLOR.TITLE_GOLD)
     titleFontString:SetText(rgcw.L["profile_title"])
 
     local listLabel = frame:CreateFontString(nil, "OVERLAY")
     listLabel:SetFont(STANDARD_TEXT_FONT, 13)
-    listLabel:SetPoint("TOPLEFT", 20, -62)
+    listLabel:SetPoint("TOPLEFT", 20, -46)
     listLabel:SetText(rgcw.L["profile_list_label"])
 
     me.BuildProfileList(frame)
@@ -91,7 +91,7 @@ function me.BuildUi(frame)
 
     local stringLabel = frame:CreateFontString(nil, "OVERLAY")
     stringLabel:SetFont(STANDARD_TEXT_FONT, 13)
-    stringLabel:SetPoint("TOPLEFT", 20, -262)
+    stringLabel:SetPoint("TOPLEFT", 20, -246)
     stringLabel:SetText(rgcw.L["profile_string_label"])
 
     me.BuildStringBox(frame)
@@ -113,29 +113,24 @@ function me.BuildProfileList(frame)
 
   local listContainer = CreateFrame("Frame", nil, frame, "BackdropTemplate")
   listContainer:SetSize(listWidth, listHeight)
-  listContainer:SetPoint("TOPLEFT", 20, -80)
-  listContainer:SetBackdrop({
-    bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    tile = true,
-    tileSize = 16,
-    edgeSize = 12,
-    insets = { left = 3, right = 3, top = 3, bottom = 3 }
-  })
-  listContainer:SetBackdropColor(0, 0, 0, 0.4)
-  listContainer:SetBackdropBorderColor(0.6, 0.6, 0.6, 1)
+  listContainer:SetPoint("TOPLEFT", 20, -64)
+  mod.guiHelper.ApplyBorderBackdrop(listContainer)
 
   local scrollFrame = CreateFrame(
     "ScrollFrame",
     RGCW_CONSTANTS.ELEMENT_PROFILE_LIST_SCROLL_FRAME,
-    listContainer,
-    "UIPanelScrollFrameTemplate"
+    listContainer
   )
   scrollFrame:SetPoint("TOPLEFT", 6, -6)
-  scrollFrame:SetPoint("BOTTOMRIGHT", -28, 6)
+  scrollFrame:SetPoint("BOTTOMRIGHT", -22, 6)
+
+  local scrollBar = CreateFrame("EventFrame", nil, listContainer, "MinimalScrollBar")
+  scrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 8, 0)
+  scrollBar:SetPoint("BOTTOMLEFT", scrollFrame, "BOTTOMRIGHT", 8, 0)
+  ScrollUtil.InitScrollFrameWithScrollBar(scrollFrame, scrollBar)
 
   profileListContent = CreateFrame("Frame", RGCW_CONSTANTS.ELEMENT_PROFILE_LIST_CONTENT_FRAME, scrollFrame)
-  profileListContent:SetSize(listWidth - 34, listHeight)
+  profileListContent:SetSize(listWidth - 28, listHeight)
   scrollFrame:SetScrollChild(profileListContent)
 end
 
@@ -150,7 +145,7 @@ function me.BuildActionButtons(frame)
     frame,
     RGCW_CONSTANTS.ELEMENT_PROFILE_SAVE_BUTTON,
     RGCW_CONSTANTS.ELEMENT_PROFILE_ACTION_BUTTON_WIDTH,
-    {"TOPLEFT", 320, -80},
+    {"TOPLEFT", 320, -64},
     rgcw.L["profile_save_button"],
     function()
       StaticPopup_Show("COOLDOWNWATCH_PROFILE_SAVE")
@@ -161,7 +156,7 @@ function me.BuildActionButtons(frame)
     frame,
     RGCW_CONSTANTS.ELEMENT_PROFILE_APPLY_BUTTON,
     RGCW_CONSTANTS.ELEMENT_PROFILE_ACTION_BUTTON_WIDTH,
-    {"TOPLEFT", 320, -112},
+    {"TOPLEFT", 320, -96},
     rgcw.L["profile_apply_button"],
     function()
       if not me.selectedProfile then
@@ -177,7 +172,7 @@ function me.BuildActionButtons(frame)
     frame,
     RGCW_CONSTANTS.ELEMENT_PROFILE_RENAME_BUTTON,
     RGCW_CONSTANTS.ELEMENT_PROFILE_ACTION_BUTTON_WIDTH,
-    {"TOPLEFT", 320, -144},
+    {"TOPLEFT", 320, -128},
     rgcw.L["profile_rename_button"],
     function()
       if not me.selectedProfile then
@@ -193,7 +188,7 @@ function me.BuildActionButtons(frame)
     frame,
     RGCW_CONSTANTS.ELEMENT_PROFILE_DELETE_BUTTON,
     RGCW_CONSTANTS.ELEMENT_PROFILE_ACTION_BUTTON_WIDTH,
-    {"TOPLEFT", 320, -176},
+    {"TOPLEFT", 320, -160},
     rgcw.L["profile_delete_button"],
     function()
       if not me.selectedProfile then
@@ -212,23 +207,41 @@ end
   @param {table} frame
 ]]--
 function me.BuildStringBox(frame)
-  local stringContainer = CreateFrame(
+  local stringContainer = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+  stringContainer:SetSize(RGCW_CONSTANTS.ELEMENT_PROFILE_STRING_WIDTH, RGCW_CONSTANTS.ELEMENT_PROFILE_STRING_HEIGHT)
+  stringContainer:SetPoint("TOPLEFT", 20, -264)
+  mod.guiHelper.ApplyBorderBackdrop(stringContainer)
+
+  local scrollContainer = CreateFrame(
     "ScrollFrame",
     RGCW_CONSTANTS.ELEMENT_PROFILE_STRING_SCROLL_FRAME,
-    frame,
+    stringContainer,
     "InputScrollFrameTemplate"
   )
-  stringContainer:SetSize(RGCW_CONSTANTS.ELEMENT_PROFILE_STRING_WIDTH, RGCW_CONSTANTS.ELEMENT_PROFILE_STRING_HEIGHT)
-  stringContainer:SetPoint("TOPLEFT", 20, -280)
+  scrollContainer:SetPoint("TOPLEFT", 6, -6)
+  scrollContainer:SetPoint("BOTTOMRIGHT", -6, 6)
 
-  if stringContainer.CharCount then
-    stringContainer.CharCount:Hide()
+  --[[ the template draws its own input-border art outside its rect which does not line
+       up with the profile list's backdrop - hide it, the container draws the border ]]--
+  local artKeys = {
+    "TopLeftTex", "TopRightTex", "BottomLeftTex", "BottomRightTex",
+    "TopTex", "BottomTex", "LeftTex", "RightTex", "MiddleTex"
+  }
+
+  for _, artKey in ipairs(artKeys) do
+    if scrollContainer[artKey] then
+      scrollContainer[artKey]:Hide()
+    end
   end
 
-  profileEditBox = stringContainer.EditBox
+  if scrollContainer.CharCount then
+    scrollContainer.CharCount:Hide()
+  end
+
+  profileEditBox = scrollContainer.EditBox
   profileEditBox:SetMaxLetters(0)
   profileEditBox:SetFontObject("ChatFontNormal")
-  profileEditBox:SetWidth(RGCW_CONSTANTS.ELEMENT_PROFILE_STRING_WIDTH - 18)
+  profileEditBox:SetWidth(RGCW_CONSTANTS.ELEMENT_PROFILE_STRING_WIDTH - 30)
   profileEditBox:SetScript("OnEscapePressed", function(self)
     self:ClearFocus()
   end)
@@ -237,7 +250,7 @@ function me.BuildStringBox(frame)
     frame,
     RGCW_CONSTANTS.ELEMENT_PROFILE_EXPORT_BUTTON,
     RGCW_CONSTANTS.ELEMENT_PROFILE_STRING_BUTTON_WIDTH,
-    {"TOPLEFT", 20, -382},
+    {"TOPLEFT", 20, -366},
     rgcw.L["profile_export_button"],
     HandleExport
   )
@@ -246,7 +259,7 @@ function me.BuildStringBox(frame)
     frame,
     RGCW_CONSTANTS.ELEMENT_PROFILE_IMPORT_BUTTON,
     RGCW_CONSTANTS.ELEMENT_PROFILE_STRING_BUTTON_WIDTH,
-    {"TOPLEFT", 140, -382},
+    {"TOPLEFT", 140, -366},
     rgcw.L["profile_import_button"],
     HandleImport
   )

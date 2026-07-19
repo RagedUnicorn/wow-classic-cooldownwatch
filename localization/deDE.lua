@@ -26,8 +26,8 @@ if (GetLocale() == "deDE") then
   rgcw.L["issues"] = "Probleme: https://github.com/RagedUnicorn/wow-classic-cooldownwatch/issues"
 
   -- general
-  rgcw.L["general_category_name"] = "Allgemein"
-  rgcw.L["general_title"] = "Allgemeine Konfiguration"
+  rgcw.L["general_category_name"] = "Optionen"
+  rgcw.L["general_title"] = "Optionen"
   rgcw.L["window_lock_target_cooldown_bar"] = "Sperre Zielabklingzeitenbalken"
   rgcw.L["window_lock_target_cooldown_bar_tooltip"] = "Verhindert das bewegen des Zielabklingzeitenbalken"
   rgcw.L["option_global_assume_worst_case"] = "Worst Case für alle Abklingzeiten annehmen"
@@ -37,7 +37,7 @@ if (GetLocale() == "deDE") then
 
   -- profiles
   rgcw.L["profile_category_name"] = "Profile"
-  rgcw.L["profile_title"] = "Konfigurationsprofile"
+  rgcw.L["profile_title"] = "Profile"
   rgcw.L["profile_list_label"] = "Gespeicherte Profile"
   rgcw.L["profile_string_label"] = "Profil-Zeichenkette (Export / Import)"
   rgcw.L["profile_save_button"] = "Aktuelles speichern als..."
