@@ -58,6 +58,7 @@ rgcw.logger = {
 
 rgcw.season = {
   IsSodActive = function() return false end,
+  IsTbcActive = function() return false end,
 }
 
 -- SpellMap resolves faction-mirrored insignia itemIds at load time
@@ -72,6 +73,10 @@ dofile("code/Configuration.lua")
 dofile("code/Serializer.lua")
 dofile("code/Encoder.lua")
 dofile("code/ConfigProfile.lua")
+dofile("code/SpellMap/Base.lua")
+dofile("code/SpellMap/Overlay/Sod.lua")
+dofile("code/SpellMap/Overlay/Tbc.lua")
+dofile("code/SpellMap/Assemble.lua")
 dofile("code/SpellMap.lua")
 dofile("code/SpellMapHelper.lua")
 dofile("code/CooldownQueue.lua")

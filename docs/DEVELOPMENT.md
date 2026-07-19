@@ -62,8 +62,13 @@ generated file in lockstep so day-to-day testing works without a rebuild).
 
 ## Adding a class to the spellMap
 
-`code/SpellMap.lua` is keyed by **category** (class name) → **primary spellId** → spell data, with rank aliases pointing
-at the primary via `refId`. Walk through with priest as the model.
+The spell catalog lives in `code/SpellMap/Base.lua` (Classic Era base), keyed by **category** (class name) →
+**primary spellId** → spell data, with rank aliases pointing at the primary via `refId`. Per-branch differences
+(SoD / TBC) go into `code/SpellMap/Overlay/Sod.lua` / `Tbc.lua` as `remove` / `add` / `replace` / `appendRanks`
+ops; `code/SpellMap.lua` is the orchestrator that detects the active branch, merges base + overlays through
+`code/SpellMap/Assemble.lua`, caches the assembled map per branch, and exposes the public accessors
+(`GetSpellMap` and friends — consumers never read Base or overlays directly). Walk through with priest as the
+model.
 
 ```lua
 local spellMap = {

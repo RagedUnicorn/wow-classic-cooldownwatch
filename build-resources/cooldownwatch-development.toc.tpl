@@ -24,6 +24,10 @@ code/Cmd.lua
 code/CombatLog.lua
 code/Common.lua
 code/SpellMapHelper.lua
+code/SpellMap/Base.lua
+code/SpellMap/Overlay/Sod.lua
+code/SpellMap/Overlay/Tbc.lua
+code/SpellMap/Assemble.lua
 code/SpellMap.lua
 code/CooldownQueue.lua
 code/Target.lua
