@@ -196,6 +196,16 @@ function me.TestItemIdSane()
     "itemId failure(s)")
 end
 
+function me.TestSpellTypesMatchBranch()
+  RunValidator("TestSpellTypesMatchBranch",
+    function()
+      return mod.spellMapValidation.ValidateSpellTypesMatchBranch(
+        mod.spellMap.GetSpellMap(), mod.spellMap.GetActiveBranch())
+    end,
+    "Every spell type is allowed on the active branch",
+    "branch-mismatched spell type(s)")
+end
+
 function me.TestBaseEntriesAreBaseType()
   RunValidator("TestBaseEntriesAreBaseType",
     function()
@@ -226,6 +236,7 @@ function me.RunAllTests()
   me.TestCooldownResetTargets()
   me.TestTrackedEventsSupported()
   me.TestItemIdSane()
+  me.TestSpellTypesMatchBranch()
   me.TestBaseEntriesAreBaseType()
 
   mod.testLogger.LogInfo("SpellMap", "=== SpellMap Tests Complete ===")

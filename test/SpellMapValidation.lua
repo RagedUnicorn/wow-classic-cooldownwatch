@@ -621,6 +621,76 @@ function me.ValidateItemIdSane(spellMap)
 end
 
 --[[
+  Verify every primary's type and every allRanks entry's type is allowed on the
+  passed branch: classic allows SPELL_TYPE_BASE only, sod adds SPELL_TYPE_SOD,
+  tbc adds SPELL_TYPE_TBC. Run this against the ASSEMBLED map for a branch - it
+  is the post-assembly counterpart to ValidateBaseEntriesAreBaseType and
+  catches an overlay op that smuggles a wrong-branch entry or rank into a
+  branch's map (e.g. a TBC-typed rank appended by the SoD overlay). A primary
+  with an unknown type is reported here too (no other validator checks primary
+  types after assembly); rank entries with a malformed or unknown type are
+  ValidateAllRanksStructured's job and are not re-reported.
+
+  @param {table} spellMap - The assembled spellMap for the branch
+  @param {string} branch - "classic" | "sod" | "tbc"
+
+  @return {table}
+]]--
+function me.ValidateSpellTypesMatchBranch(spellMap, branch)
+  local failures = {}
+  local allowedByBranch = {
+    classic = {
+      [RGCW_CONSTANTS.SPELL_TYPE_BASE] = true
+    },
+    sod = {
+      [RGCW_CONSTANTS.SPELL_TYPE_BASE] = true,
+      [RGCW_CONSTANTS.SPELL_TYPE_SOD] = true
+    },
+    tbc = {
+      [RGCW_CONSTANTS.SPELL_TYPE_BASE] = true,
+      [RGCW_CONSTANTS.SPELL_TYPE_TBC] = true
+    }
+  }
+  local knownTypes = {
+    [RGCW_CONSTANTS.SPELL_TYPE_BASE] = true,
+    [RGCW_CONSTANTS.SPELL_TYPE_SOD] = true,
+    [RGCW_CONSTANTS.SPELL_TYPE_TBC] = true
+  }
+  local allowed = allowedByBranch[branch]
+
+  if allowed == nil then
+    table.insert(failures,
+      string.format("unknown branch '%s' - expected classic, sod or tbc", tostring(branch)))
+
+    return failures
+  end
+
+  for category, spells in pairs(spellMap) do
+    for spellId, entry in pairs(spells) do
+      if IsPrimary(entry) then
+        if not allowed[entry.type] then
+          table.insert(failures,
+            string.format("%s/%s ('%s'): type %s is not allowed on the %s branch",
+              category, tostring(spellId), entry.name, tostring(entry.type), branch))
+        end
+
+        if type(entry.allRanks) == "table" then
+          for index, rank in ipairs(entry.allRanks) do
+            if type(rank) == "table" and knownTypes[rank.type] and not allowed[rank.type] then
+              table.insert(failures,
+                string.format("%s/%s ('%s'): allRanks[%d].type %s is not allowed on the %s branch",
+                  category, tostring(spellId), entry.name, index, tostring(rank.type), branch))
+            end
+          end
+        end
+      end
+    end
+  end
+
+  return failures
+end
+
+--[[
   Verify the base catalog carries only SPELL_TYPE_BASE entries. Branch-specific
   spells (SPELL_TYPE_SOD / SPELL_TYPE_TBC) belong in their branch overlay under
   code/spellmap/overlay/ - a branch-only spell as an add op, a branch rework as

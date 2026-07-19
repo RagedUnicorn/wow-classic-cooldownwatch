@@ -124,6 +124,19 @@ local function EnsureAssembled()
 end
 
 --[[
+  Get the branch the spellMap is assembled for. Exposed so branch-aware
+  consumers (per-branch data validation, debug surfaces) share the
+  orchestrator's branch decision instead of re-deriving it from the season
+  globals - the TEST-mode override would otherwise be bypassed.
+
+  @return {string}
+    "classic" | "sod" | "tbc"
+]]--
+function me.GetActiveBranch()
+  return DetermineActiveBranch()
+end
+
+--[[
   Get the spellMap assembled for the active branch. Callers MUST treat the
   result as read-only and never mutate it (returned directly, not cloned,
   because it runs in the combat-log hot path).

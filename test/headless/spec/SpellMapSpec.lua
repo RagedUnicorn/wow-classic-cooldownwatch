@@ -105,3 +105,174 @@ describe("SpellMap data integrity", function()
       rgcw.spellMapValidation.ValidateBaseEntriesAreBaseType(rgcw.spellMapBase.GetMap()))
   end)
 end)
+
+--[[
+  The same consistency checks, but run against the map assembled for EVERY
+  branch, not just the active one - an overlay op that breaks a shared-cooldown
+  group, drops a rank alias, or smuggles a wrong-branch type only surfaces in
+  the branch it targets. Maps are assembled directly via the assembler (not the
+  orchestrator) so the orchestrator's per-branch cache stays untouched - the
+  sod cache entry is owned by SpellMapSodOverlaySpec.
+
+  The event-aware helper validators (unknown-spellId / alias-event) stay in the
+  active-map describe above: they go through mod.spellMapHelper, which always
+  resolves against the active branch.
+]]--
+describe("SpellMap data integrity per assembled branch", function()
+  local BRANCHES = { "classic", "sod", "tbc" }
+
+  local function OverlaysForBranch(branch)
+    if branch == "sod" then return { rgcw.spellMapOverlaySod.GetOverlay() } end
+    if branch == "tbc" then return { rgcw.spellMapOverlayTbc.GetOverlay() } end
+
+    return {}
+  end
+
+  --[[
+    Branch-local stand-in for mod.spellMapHelper.GetSpellById: same
+    category/realSpellId/entry contract, but resolving against the passed
+    assembled map instead of the active branch's (and without season-gating,
+    which would reject TBC-typed entries outside a TBC client).
+  ]]--
+  local function BuildGetSpellById(assembledMap)
+    return function(spellId)
+      for category, spells in pairs(assembledMap) do
+        local entry = spells[spellId]
+
+        if type(entry) == "table" then
+          if type(entry.name) == "string" then
+            return category, spellId, entry
+          elseif type(entry.refId) == "number" and spells[entry.refId] ~= nil then
+            return category, entry.refId, spells[entry.refId]
+          end
+        end
+      end
+
+      return nil
+    end
+  end
+
+  for _, branch in ipairs(BRANCHES) do
+    describe("branch " .. branch, function()
+      local assembled
+      local getSpellById
+
+      setup(function()
+        assembled = rgcw.spellMapAssembler.Apply(rgcw.spellMapBase.GetMap(), OverlaysForBranch(branch))
+        getSpellById = BuildGetSpellById(assembled)
+      end)
+
+      it("every refId resolves to a primary entry", function()
+        assert.same({}, rgcw.spellMapValidation.ValidateRefIdsResolve(assembled))
+      end)
+
+      it("every allRanks entry is a structured { spellId, type } table", function()
+        assert.same({}, rgcw.spellMapValidation.ValidateAllRanksStructured(assembled))
+      end)
+
+      it("every primary appears in its own allRanks", function()
+        assert.same({}, rgcw.spellMapValidation.ValidatePrimaryAllRanksContainsSelf(assembled))
+      end)
+
+      it("allRanks members refId back to their primary", function()
+        assert.same({}, rgcw.spellMapValidation.ValidateAllRanksConsistent(assembled))
+      end)
+
+      it("no spellId is primary in more than one category", function()
+        assert.same({}, rgcw.spellMapValidation.ValidateNoDuplicatePrimaryAcrossCategories(assembled))
+      end)
+
+      it("shared-cooldown groups are internally consistent", function()
+        assert.same({}, rgcw.spellMapValidation.ValidateSharedCooldownGroupsConsistent(
+          assembled, rgcw.spellMap.GetAllSharedCooldownGroups(), getSpellById))
+      end)
+
+      it("category catalog and SpellMap categories are in one-to-one correspondence", function()
+        assert.same({}, rgcw.spellMapValidation.ValidateCategoriesMatchSpellMap(
+          rgcw.categories.GetCategories(), assembled))
+      end)
+
+      it("every cooldownWorstCase is less than or equal to its base cooldown", function()
+        assert.same({}, rgcw.spellMapValidation.ValidateCooldownWorstCaseSane(assembled))
+      end)
+
+      it("every cooldownResets target is a primary and not the trigger itself", function()
+        assert.same({}, rgcw.spellMapValidation.ValidateCooldownResetTargets(assembled))
+      end)
+
+      it("every itemId is a positive integer on a primary entry", function()
+        assert.same({}, rgcw.spellMapValidation.ValidateItemIdSane(assembled))
+      end)
+
+      it("every trackedEvents entry is an event CombatLog dispatches on", function()
+        assert.same({}, rgcw.spellMapValidation.ValidateTrackedEventsSupported(
+          assembled, rgcw.combatLog.GetSupportedEvents()))
+      end)
+
+      it("every spell type is allowed on the branch", function()
+        assert.same({}, rgcw.spellMapValidation.ValidateSpellTypesMatchBranch(assembled, branch))
+      end)
+    end)
+  end
+end)
+
+--[[
+  Negative fixtures for ValidateSpellTypesMatchBranch. The per-branch runs
+  above can only ever pass while the overlays are data-empty, so these
+  synthetic maps prove the validator actually rejects wrong-branch types.
+]]--
+describe("ValidateSpellTypesMatchBranch rejections", function()
+  local function BuildMap(primaryType, rankType)
+    return {
+      priest = {
+        [999001] = {
+          name = "Branch Fixture Spell",
+          type = primaryType,
+          cooldown = 30,
+          active = true,
+          trackedEvents = { "SPELL_CAST_SUCCESS" },
+          allRanks = {
+            { spellId = 999001, type = rankType }
+          }
+        }
+      }
+    }
+  end
+
+  it("rejects a SoD-typed primary on the classic branch", function()
+    local failures = rgcw.spellMapValidation.ValidateSpellTypesMatchBranch(
+      BuildMap(RGCW_CONSTANTS.SPELL_TYPE_SOD, RGCW_CONSTANTS.SPELL_TYPE_BASE), "classic")
+
+    assert.equal(1, #failures)
+    assert.matches("type SPELL_TYPE_SOD is not allowed on the classic branch", failures[1])
+  end)
+
+  it("rejects a TBC-typed rank on the sod branch", function()
+    local failures = rgcw.spellMapValidation.ValidateSpellTypesMatchBranch(
+      BuildMap(RGCW_CONSTANTS.SPELL_TYPE_BASE, RGCW_CONSTANTS.SPELL_TYPE_TBC), "sod")
+
+    assert.equal(1, #failures)
+    assert.matches("allRanks%[1%].type SPELL_TYPE_TBC is not allowed on the sod branch", failures[1])
+  end)
+
+  it("rejects a primary with an unknown type on every branch", function()
+    local failures = rgcw.spellMapValidation.ValidateSpellTypesMatchBranch(
+      BuildMap("SPELL_TYPE_BOGUS", RGCW_CONSTANTS.SPELL_TYPE_BASE), "tbc")
+
+    assert.equal(1, #failures)
+    assert.matches("type SPELL_TYPE_BOGUS is not allowed on the tbc branch", failures[1])
+  end)
+
+  it("accepts branch-typed entries on their own branch", function()
+    assert.same({}, rgcw.spellMapValidation.ValidateSpellTypesMatchBranch(
+      BuildMap(RGCW_CONSTANTS.SPELL_TYPE_SOD, RGCW_CONSTANTS.SPELL_TYPE_SOD), "sod"))
+  end)
+
+  it("reports an unknown branch instead of validating against nothing", function()
+    local failures = rgcw.spellMapValidation.ValidateSpellTypesMatchBranch(
+      BuildMap(RGCW_CONSTANTS.SPELL_TYPE_BASE, RGCW_CONSTANTS.SPELL_TYPE_BASE), "wrath")
+
+    assert.equal(1, #failures)
+    assert.matches("unknown branch 'wrath'", failures[1])
+  end)
+end)
