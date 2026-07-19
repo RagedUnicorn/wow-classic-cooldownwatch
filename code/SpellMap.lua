@@ -23,13 +23,33 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals GetLocale
+-- luacheck: globals GetLocale UnitFactionGroup
 
 local mod = rgcw
 local me = {}
 mod.spellMap = me
 
 me.tag = "SpellMap"
+
+--[[
+  Resolve the insignia itemId for the player's own faction. Each PvP insignia
+  Use-effect spell is cast by two faction-mirrored items; the player's own
+  variant is the icon they recognize best (they equip and press it themselves).
+  Mirrors PVPWarn's insignia handling. Resolved once at file load - faction
+  never changes within a session.
+
+  @param {number} allianceItemId
+  @param {number} hordeItemId
+
+  @return {number}
+]]--
+local function InsigniaItemId(allianceItemId, hordeItemId)
+  if UnitFactionGroup(RGCW_CONSTANTS.UNIT_ID_PLAYER) == "Horde" then
+    return hordeItemId
+  end
+
+  return allianceItemId
+end
 
 --[[
   Each primary entry can declare an optional `sharedCooldownGroup = "<name>"`
@@ -1533,6 +1553,78 @@ local spellMap = {
       },
       allRanks = {
         13120
+      }
+    },
+    --[[
+      PvP insignia trinkets (Insignia of the Alliance / Horde). One Use-effect
+      spell per class group, shared by both factions' items; the spell names
+      are the real GetSpellInfo names and describe which effects each class's
+      insignia dispels. Icon resolves to the player's own faction's item via
+      InsigniaItemId.
+    ]]--
+    [5579] = {
+      name = "Immune Root/Snare/Stun", -- warrior / hunter / shaman insignia
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      itemId = InsigniaItemId(18854, 18834),
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        5579
+      }
+    },
+    [23273] = {
+      name = "Immune Charm/Fear/Polymorph", -- warlock / rogue insignia
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      itemId = InsigniaItemId(18858, 18852),
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        23273
+      }
+    },
+    [23274] = {
+      name = "Immune Fear/Polymorph/Snare", -- mage insignia
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      itemId = InsigniaItemId(18859, 18850),
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        23274
+      }
+    },
+    [23276] = {
+      name = "Immune Fear/Polymorph/Stun", -- priest / paladin insignia
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      itemId = InsigniaItemId(18862, 18851),
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        23276
+      }
+    },
+    [23277] = {
+      name = "Immune Charm/Fear/Stun", -- druid insignia
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 300,
+      itemId = InsigniaItemId(18863, 18853),
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        23277
       }
     }
   }

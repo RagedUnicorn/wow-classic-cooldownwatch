@@ -30,7 +30,7 @@
   Expected cwd: addon repo root. Run from elsewhere and the dofile()s will fail.
 ]]--
 
--- luacheck: globals rgcw RGCW_ENVIRONMENT unpack
+-- luacheck: globals rgcw RGCW_ENVIRONMENT unpack UnitFactionGroup
 
 -- allow specs to require the opt-in WoW-global stub registry as `require("WowStubs")`
 package.path = "./test/headless/?.lua;" .. package.path
@@ -59,6 +59,9 @@ rgcw.logger = {
 rgcw.season = {
   IsSodActive = function() return false end,
 }
+
+-- SpellMap resolves faction-mirrored insignia itemIds at load time
+UnitFactionGroup = function() return "Alliance" end
 
 dofile("code/Constants.lua")
 dofile("code/Event.lua")
