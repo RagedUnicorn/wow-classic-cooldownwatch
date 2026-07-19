@@ -27,11 +27,11 @@
 local mod = rgcw
 local me = {}
 
-mod.testMiscSpells = me
+mod.testItemsSpells = me
 
-me.tag = "TestMiscSpells"
+me.tag = "TestItemsSpells"
 
-local CATEGORY = "misc"
+local CATEGORY = "items"
 
 --[[
   Build a stable test name from a spell name (strips spaces and punctuation).
@@ -41,7 +41,7 @@ local CATEGORY = "misc"
   @return {string}
 ]]--
 local function TestNameFor(spellName)
-  return "TestMisc_" .. (spellName:gsub("[^%w]", ""))
+  return "TestItems_" .. (spellName:gsub("[^%w]", ""))
 end
 
 --[[
@@ -91,11 +91,11 @@ local function VerifySpellTracking(testSpell, trackedEvent)
 end
 
 --[[
-  Run all misc engineering-item spell tests. Misc items are single-spellId, so
+  Run all items engineering-item spell tests. Items entries are single-spellId, so
   no rank-resolution helper is needed in this file.
 ]]--
 function me.RunAllTests()
-  mod.testLogger.LogInfo("MiscSpells", "=== Running Misc Spell Tests ===")
+  mod.testLogger.LogInfo("ItemsSpells", "=== Running Items Spell Tests ===")
 
   for _, testSpell in ipairs(mod.testHelper.GetSpellsForCategory(CATEGORY)) do
     for _, trackedEvent in ipairs(testSpell.trackedEvents) do
@@ -105,7 +105,7 @@ function me.RunAllTests()
 
   mod.cooldownQueue.ClearCooldownQueue()
 
-  mod.testLogger.LogInfo("MiscSpells", "=== Misc Spell Tests Complete ===")
+  mod.testLogger.LogInfo("ItemsSpells", "=== Items Spell Tests Complete ===")
 end
 
-mod.testRunner.Register("miscspells", "misc spell tracking suite", me.RunAllTests)
+mod.testRunner.Register("itemsspells", "items spell tracking suite", me.RunAllTests)

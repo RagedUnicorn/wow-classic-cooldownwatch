@@ -98,8 +98,8 @@ local categories = {
     ["name"] = "CW_RacialsOptionsFrame"
   },
   [11] = {
-    ["categoryName"] = "misc",
-    ["localizationKey"] = "category_misc",
+    ["categoryName"] = "items",
+    ["localizationKey"] = "category_items",
     ["name"] = "CW_ItemsOptionsFrame"
   }
 }

@@ -1432,12 +1432,16 @@ local spellMap = {
     }
   },
   --[[
-    Every misc entry is an item-triggered cooldown: the combat log fires with the
+    Every items entry is an item-triggered cooldown: the combat log fires with the
     item's "Use" effect spell, but players recognize these by the item icon, not
     the spell icon. `itemId` points at the triggering item so the ui can resolve
     the icon via GetItemIcon (see GuiHelper.GetIconId).
+
+    Taxonomy (aligned with PVPWarn): "items" holds actual items — engineering
+    gadgets, trinkets, insignias. Consumables (potions, bandages, elixirs) will
+    live in a separate "misc" category once CWI-0011 lands.
   ]]--
-  ["misc"] = {
+  ["items"] = {
     [23132] = {
       name = "Shadow Reflector",
       type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
