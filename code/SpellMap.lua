@@ -1626,6 +1626,46 @@ local spellMap = {
       allRanks = {
         23277
       }
+    },
+    [24499] = {
+      name = "Energized Shield", -- shaman: Lightning Shield damage +100%
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 180,
+      itemId = 19956, -- Wushoolay's Charm of Spirits
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        24499
+      }
+    },
+    [24532] = {
+      name = "Burst of Energy", -- rogue: +60 energy
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 180,
+      itemId = 19954, -- Renataki's Charm of Trickery
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        24532
+      }
+    },
+    [24571] = {
+      -- shares its name with the orc racial (different spellId, racials category)
+      name = "Blood Fury", -- warrior: +30 rage
+      type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+      cooldown = 180,
+      itemId = 19951, -- Gri'lek's Charm of Might
+      active = true,
+      trackedEvents = {
+        "SPELL_CAST_SUCCESS",
+      },
+      allRanks = {
+        24571
+      }
     }
   }
 }
