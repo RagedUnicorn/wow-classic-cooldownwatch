@@ -350,6 +350,8 @@ function me.UpdateCooldownUiState(row, cooldown, categoryName)
 
   me.UpdateWorstCaseToggleState(row.worstCaseToggle, cooldown, categoryName)
   me.UpdateManualOverrideState(row.manualOverrideInput, cooldown, categoryName)
+  -- after UpdateManualOverrideState - its rebind resets the input text color to white
+  me.UpdateRowControlsState(row, enabled)
 
   row.spellId = cooldown.spellId
   row.categoryName = categoryName
@@ -412,6 +414,35 @@ function me.CooldownEntryOnClick(self)
   local enabled = self:GetChecked()
 
   mod.configuration.UpdateCooldownConfigurationState(enabled, self:GetParent().categoryName, self:GetParent().spellId)
+  me.UpdateRowControlsState(self:GetParent(), enabled)
+end
+
+--[[
+  Follow the tracking state with the whole row: gray out the spell title and
+  disable the per-spell controls (worst-case toggle and manual override input)
+  while the spell itself is deactivated. Rows are recycled across spells while
+  scrolling, so the state is also rebound on every UpdateCooldownUiState pass —
+  never only on click.
+
+  @param {table} row
+  @param {boolean} enabled
+]]--
+function me.UpdateRowControlsState(row, enabled)
+  if enabled then
+    mod.guiHelper.SetColor(row.cooldownStatus.text, RGCW_CONSTANTS.COLOR.SPELL_TITLE)
+    mod.guiHelper.SetColor(row.worstCaseToggle.text, RGCW_CONSTANTS.COLOR.BODY)
+    row.worstCaseToggle:Enable()
+    row.manualOverrideInput:Enable()
+    row.manualOverrideInput:SetTextColor(1, 1, 1)
+  else
+    mod.guiHelper.SetColor(row.cooldownStatus.text, RGCW_CONSTANTS.COLOR.DISABLED)
+    mod.guiHelper.SetColor(row.worstCaseToggle.text, RGCW_CONSTANTS.COLOR.DISABLED)
+    row.worstCaseToggle:Disable()
+    -- drop an in-progress edit before locking the box - focus survives Disable
+    row.manualOverrideInput:ClearFocus()
+    row.manualOverrideInput:Disable()
+    mod.guiHelper.SetColor(row.manualOverrideInput, RGCW_CONSTANTS.COLOR.DISABLED)
+  end
 end
 
 --[[

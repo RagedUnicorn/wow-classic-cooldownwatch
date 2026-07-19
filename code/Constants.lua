@@ -103,6 +103,7 @@ RGCW_CONSTANTS = {
     TITLE_GOLD = { 1.0, 0.819, 0.0 },       -- #ffd100 panel titles
     SECTION_GOLD = { 0.851, 0.647, 0.129 }, -- #d9a521 section headers
     BODY = { 0.91, 0.87, 0.80 },            -- #e8decc body text / option labels (warm near-white)
+    SPELL_TITLE = { 0.95, 0.95, 0.95 },     -- #f2f2f2 spell names in the per-spell lists
     MUTED = { 0.541, 0.486, 0.392 },        -- #8a7c64 idle / dim text
     DISABLED = { 0.45, 0.41, 0.35 },        -- disabled control labels
     SUBNOTE = { 0.66, 0.60, 0.50 }          -- #a89980 option descriptions (warm mid gray)
