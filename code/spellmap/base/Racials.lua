@@ -26,27 +26,15 @@
 local mod = rgcw
 
 --[[
-  Warrior slice of the Classic Era base spell catalog. Each slice file
+  Racials slice of the Classic Era base spell catalog. Each slice file
   registers exactly one category on the shared spellMapBaseClasses table;
-  code/SpellMap/Base.lua assembles the slices into the base map.
+  code/spellmap/Base.lua assembles the slices into the base map.
 ]]--
 mod.spellMapBaseClasses = mod.spellMapBaseClasses or {}
 
-mod.spellMapBaseClasses["warrior"] = {
-  [18499] = {
-    name = "Berserker Rage",
-    type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
-    cooldown = 30,
-    active = true,
-    trackedEvents = {
-      "SPELL_CAST_SUCCESS",
-    },
-    allRanks = {
-      { spellId = 18499, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
-    }
-  },
-  [2687] = {
-    name = "Bloodrage",
+mod.spellMapBaseClasses["racials"] = {
+  [20589] = {
+    name = "Escape Artist",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 60,
     active = true,
@@ -54,29 +42,11 @@ mod.spellMapBaseClasses["warrior"] = {
       "SPELL_CAST_SUCCESS",
     },
     allRanks = {
-      { spellId = 2687, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 20589, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [23894] = {
-    name = "Bloodthirst",
-    type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
-    cooldown = 6,
-    active = true,
-    trackedEvents = {
-      "SPELL_CAST_SUCCESS",
-    },
-    allRanks = {
-      { spellId = 23894, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
-      { spellId = 23881, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
-      { spellId = 23892, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
-      { spellId = 23893, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
-    }
-  },
-  [23881] = { refId = 23894 },
-  [23892] = { refId = 23894 },
-  [23893] = { refId = 23894 },
-  [12328] = {
-    name = "Death Wish",
+  [20600] = {
+    name = "Perception",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
     active = true,
@@ -84,40 +54,67 @@ mod.spellMapBaseClasses["warrior"] = {
       "SPELL_CAST_SUCCESS",
     },
     allRanks = {
-      { spellId = 12328, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 20600, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [20617] = {
-    name = "Intercept",
+  [20594] = {
+    name = "Stoneform",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
-    cooldown = 30,
-    cooldownWorstCase = 20,
+    cooldown = 180,
     active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
     allRanks = {
-      { spellId = 20617, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
-      { spellId = 20252, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
-      { spellId = 20616, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 20594, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [20252] = { refId = 20617 },
-  [20616] = { refId = 20617 },
-  [11578] = {
-    name = "Charge",
+  [7744] = {
+    name = "Will of the Forsaken",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
-    cooldown = 15,
+    cooldown = 120,
     active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
     allRanks = {
-      { spellId = 11578, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
-      { spellId = 100, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
-      { spellId = 6178, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 7744, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [100] = { refId = 11578 },
-  [6178] = { refId = 11578 }
+  [20549] = {
+    name = "War Stomp",
+    type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+    cooldown = 120,
+    active = true,
+    trackedEvents = {
+      "SPELL_CAST_SUCCESS",
+    },
+    allRanks = {
+      { spellId = 20549, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+    }
+  },
+  [20572] = {
+    name = "Blood Fury",
+    type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+    cooldown = 120,
+    active = true,
+    trackedEvents = {
+      "SPELL_CAST_SUCCESS",
+    },
+    allRanks = {
+      { spellId = 20572, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+    }
+  },
+  [26296] = {
+    name = "Berserking",
+    type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+    cooldown = 180,
+    active = true,
+    trackedEvents = {
+      "SPELL_CAST_SUCCESS",
+    },
+    allRanks = {
+      { spellId = 26296, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+    }
+  }
 }

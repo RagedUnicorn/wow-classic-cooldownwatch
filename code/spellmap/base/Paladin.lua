@@ -28,7 +28,7 @@ local mod = rgcw
 --[[
   Paladin slice of the Classic Era base spell catalog. Each slice file
   registers exactly one category on the shared spellMapBaseClasses table;
-  code/SpellMap/Base.lua assembles the slices into the base map.
+  code/spellmap/Base.lua assembles the slices into the base map.
 ]]--
 mod.spellMapBaseClasses = mod.spellMapBaseClasses or {}
 

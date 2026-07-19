@@ -65,8 +65,8 @@ docker compose run --rm busted
 
 This loads `test/headless/Bootstrap.lua`, which stubs the WoW globals the production files reach for at load time, then
 `dofile`s `code/Constants.lua`, `code/Event.lua`, `code/Common.lua`, `code/Categories.lua`, the SpellMap modules
-(the `code/SpellMap/Base/` category slices, `code/SpellMap/Base.lua`, the `code/SpellMap/Overlay/` files,
-`code/SpellMap/Assemble.lua`, `code/SpellMap.lua`),
+(the `code/spellmap/base/` category slices, `code/spellmap/Base.lua`, the `code/spellmap/overlay/` files,
+`code/spellmap/Assemble.lua`, `code/SpellMap.lua`),
 `code/SpellMapHelper.lua`, `code/CooldownQueue.lua`, and `test/SpellMapValidation.lua`. Specs in `test/headless/spec/`
 are then discovered by busted's `Spec` pattern.
 
@@ -78,7 +78,7 @@ CI runs the same specs on every push and pull request via `.github/workflows/tes
 
 | File                                  | What it covers                                                                                                                                                                                                                                                                      |
 |---------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `test/SpellMapValidation.lua`         | Pure-data validators for the assembled spellMap (`code/SpellMap/` + orchestrator; no WoW APIs, no logging). Source of truth for both the in-game `TestSpellMap` suite and the busted spec.                                                                                                                              |
+| `test/SpellMapValidation.lua`         | Pure-data validators for the assembled spellMap (`code/spellmap/` + orchestrator; no WoW APIs, no logging). Source of truth for both the in-game `TestSpellMap` suite and the busted spec.                                                                                                                              |
 | `test/TestSpellMap.lua`               | In-game wrapper — runs the validators and reports through `testLogger`. No targeting required.                                                                                                                                                                                      |
 | `test/headless/spec/`                 | Busted specs (`*Spec.lua`) — SpellMap validators, cooldown queue, event bus, command dispatch, common helpers, localization parity. Run headlessly under busted (locally and in CI).                                                                                                |
 | `test/TestCooldownQueue.lua`          | Queue mechanics — add, multiple, duplicate-prevention, remove. In-game only.                                                                                                                                                                                                        |

@@ -62,18 +62,18 @@ generated file in lockstep so day-to-day testing works without a rebuild).
 
 ## Adding a class to the spellMap
 
-The spell catalog lives in per-category slice files under `code/SpellMap/Base/` (`Priest.lua`, `Rogue.lua`, …,
+The spell catalog lives in per-category slice files under `code/spellmap/base/` (`Priest.lua`, `Rogue.lua`, …,
 `Racials.lua`, `Items.lua`), each keyed by **primary spellId** → spell data, with rank aliases pointing at the
 primary via `refId`. Every slice registers its category on the shared `mod.spellMapBaseClasses` table, and
-`code/SpellMap/Base.lua` assembles the slices (plus the central `sharedCooldownGroups`) into the Classic Era base
-map. Per-branch differences (SoD / TBC) go into `code/SpellMap/Overlay/Sod.lua` / `Tbc.lua` as `remove` / `add` /
+`code/spellmap/Base.lua` assembles the slices (plus the central `sharedCooldownGroups`) into the Classic Era base
+map. Per-branch differences (SoD / TBC) go into `code/spellmap/overlay/Sod.lua` / `Tbc.lua` as `remove` / `add` /
 `replace` / `appendRanks` ops; `code/SpellMap.lua` is the orchestrator that detects the active branch, merges
-base + overlays through `code/SpellMap/Assemble.lua`, caches the assembled map per branch, and exposes the public
+base + overlays through `code/spellmap/Assemble.lua`, caches the assembled map per branch, and exposes the public
 accessors (`GetSpellMap` and friends — consumers never read Base or overlays directly). Walk through with priest
 as the model.
 
 ```lua
--- code/SpellMap/Base/Priest.lua
+-- code/spellmap/base/Priest.lua
 mod.spellMapBaseClasses = mod.spellMapBaseClasses or {}
 
 mod.spellMapBaseClasses["priest"] = {

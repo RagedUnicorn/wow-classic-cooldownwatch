@@ -13,9 +13,9 @@
         <include>README.md</include>
         <include>LICENSE</include>
         <include>code/*.lua</include>
-        <include>code/SpellMap/*.lua</include>
-        <include>code/SpellMap/Base/*.lua</include>
-        <include>code/SpellMap/Overlay/*.lua</include>
+        <include>code/spellmap/*.lua</include>
+        <include>code/spellmap/base/*.lua</include>
+        <include>code/spellmap/overlay/*.lua</include>
         <include>gui/*.lua</include>
         <include>gui/*.xml</include>
         <include>assets/*.blp</include>

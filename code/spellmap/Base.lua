@@ -44,7 +44,7 @@ me.tag = "SpellMapBase"
 
 --[[
   The catalog itself lives in the per-category slice files under
-  code/SpellMap/Base/ (loaded before this file), each registering its
+  code/spellmap/base/ (loaded before this file), each registering its
   category on mod.spellMapBaseClasses. Assembling them here keeps a single
   ownership point for the full base map.
 ]]--

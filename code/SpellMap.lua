@@ -25,8 +25,8 @@
 
 --[[
   SpellMap orchestrator. The spell catalog itself lives in
-  code/SpellMap/Base.lua (Classic Era base) plus the per-branch overlays in
-  code/SpellMap/Overlay/. This module detects the active WoW branch, assembles
+  code/spellmap/Base.lua (Classic Era base) plus the per-branch overlays in
+  code/spellmap/overlay/. This module detects the active WoW branch, assembles
   base + overlays via mod.spellMapAssembler, caches the result per branch, and
   exposes the public accessors every consumer reads spell data through.
 ]]--
