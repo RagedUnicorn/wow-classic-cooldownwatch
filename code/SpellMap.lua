@@ -109,7 +109,7 @@ local spellMap = {
       cooldown = 180,
       active = true,
       trackedEvents = {
-        "SPELL_CAST_SUCCESS",
+        "SPELL_AURA_REMOVED",
       },
       allRanks = {
         14751
@@ -226,7 +226,7 @@ local spellMap = {
       cooldown = 180,
       active = true,
       trackedEvents = {
-        "SPELL_CAST_SUCCESS",
+        "SPELL_AURA_REMOVED",
       },
       allRanks = {
         14177
@@ -424,7 +424,7 @@ local spellMap = {
       cooldown = 180,
       active = true,
       trackedEvents = {
-        "SPELL_CAST_SUCCESS",
+        "SPELL_AURA_REMOVED",
       },
       allRanks = {
         16166
@@ -476,7 +476,7 @@ local spellMap = {
       cooldown = 180,
       active = true,
       trackedEvents = {
-        "SPELL_CAST_SUCCESS",
+        "SPELL_AURA_REMOVED",
       },
       allRanks = {
         16188
@@ -490,12 +490,18 @@ local spellMap = {
       cooldown = 180,
       active = true,
       trackedEvents = {
-        "SPELL_CAST_SUCCESS",
+        "SPELL_AURA_REMOVED",
       },
       allRanks = {
         11129
       }
     },
+    --[[
+      Not a rank: casting Combustion (11129) triggers buff 28682, and the
+      SPELL_AURA_REMOVED event carries the buff's id, so it aliases back to
+      the primary (verified on the wowhead spell=11129 effects list).
+    ]]--
+    [28682] = { refId = 11129 },
     [10161] = {
       name = "Cone of Cold",
       type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -530,7 +536,7 @@ local spellMap = {
       cooldown = 180,
       active = true,
       trackedEvents = {
-        "SPELL_CAST_SUCCESS",
+        "SPELL_AURA_REMOVED",
       },
       allRanks = {
         12043
@@ -946,7 +952,7 @@ local spellMap = {
       cooldown = 180,
       active = true,
       trackedEvents = {
-        "SPELL_CAST_SUCCESS",
+        "SPELL_AURA_REMOVED",
       },
       allRanks = {
         18288
@@ -1140,7 +1146,7 @@ local spellMap = {
       cooldown = 120,
       active = true,
       trackedEvents = {
-        "SPELL_CAST_SUCCESS",
+        "SPELL_AURA_REMOVED",
       },
       allRanks = {
         20216
@@ -1223,7 +1229,7 @@ local spellMap = {
       cooldown = 180,
       active = true,
       trackedEvents = {
-        "SPELL_CAST_SUCCESS",
+        "SPELL_AURA_REMOVED",
       },
       allRanks = {
         17116

@@ -74,7 +74,7 @@ local spellMap = {
       cooldown = 30,
       cooldownWorstCase = 26, -- optional: worst case (talents/items)
       active = true,
-      trackedEvents = { "SPELL_CAST_SUCCESS" },
+      trackedEvents = { "SPELL_CAST_SUCCESS" }, -- SPELL_AURA_REMOVED for buff-then-consume spells, see below
       allRanks = { 10890, 8122, 8124, 10888 }, -- MUST contain the primary's own id
       -- sharedCooldownGroup = "shaman_shocks"   -- optional, see below
     },
@@ -96,6 +96,24 @@ local spellMap = {
 
 These run in-game via `TestSpellMap` and headless under busted via `test/headless/spec/SpellMapSpec.lua`. See
 `docs/TEST.md` for how to invoke them.
+
+### Buff-then-consume spells: track `SPELL_AURA_REMOVED`
+
+Next-spell-modifier buffs (Cold Blood, Presence of Mind, Inner Focus, Divine Favor, Nature's Swiftness,
+Elemental Mastery, Combustion, Amplify Curse) start their cooldown when the buff **disappears** — consumed,
+cancelled, or purged — not when it is cast. Their entries use
+`trackedEvents = { "SPELL_AURA_REMOVED" }` instead of `SPELL_CAST_SUCCESS`; tracking the cast would queue the
+cooldown too early.
+
+Two things to check when adding such a spell:
+
+- **Aura spellId vs cast spellId.** Verify on the wowhead spell page that the buff is applied by the same
+  spellId ("Apply Aura" effect on the cast spell). If the cast *triggers* a separate buff spell (Combustion
+  `11129` triggers buff `28682`), the removal event carries the **buff's** id — add a `refId` alias entry for
+  the aura id pointing at the primary.
+- **Supported events.** `CombatLog` only dispatches events listed in its `supportedEvents` table
+  (`GetSupportedEvents`); the `ValidateTrackedEventsSupported` validator fails on anything else. Aura events
+  attribute the acting player via the **dest** unit (the buff owner) since aura events may carry no source.
 
 ### Shared-cooldown groups
 

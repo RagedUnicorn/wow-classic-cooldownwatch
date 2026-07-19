@@ -502,6 +502,45 @@ GetItemIdFailure = function(category, spellId, entry)
 end
 
 --[[
+  Verify every primary's trackedEvents contains only events CombatLog actually
+  dispatches on (CombatLog.GetSupportedEvents). An unsupported event name (typo
+  or an event the combat-log gate drops) would never fire and the spell would
+  silently stop being tracked. Also catches empty or missing trackedEvents,
+  which would make the spell unreachable from the combat-log path entirely.
+
+  @param {table} spellMap
+  @param {table} supportedEvents - Map of eventName -> properties table
+    (mod.combatLog.GetSupportedEvents)
+
+  @return {table}
+]]--
+function me.ValidateTrackedEventsSupported(spellMap, supportedEvents)
+  local failures = {}
+
+  for category, spells in pairs(spellMap) do
+    for spellId, entry in pairs(spells) do
+      if IsPrimary(entry) then
+        if type(entry.trackedEvents) ~= "table" or #entry.trackedEvents == 0 then
+          table.insert(failures,
+            string.format("%s/%s ('%s'): trackedEvents is missing or empty",
+              category, tostring(spellId), entry.name))
+        else
+          for _, trackedEvent in ipairs(entry.trackedEvents) do
+            if supportedEvents[trackedEvent] == nil then
+              table.insert(failures,
+                string.format("%s/%s ('%s'): tracked event '%s' is not dispatched by CombatLog",
+                  category, tostring(spellId), entry.name, tostring(trackedEvent)))
+            end
+          end
+        end
+      end
+    end
+  end
+
+  return failures
+end
+
+--[[
   Verify itemId, where present, is a positive integer and sits on a primary
   entry. itemId points at the item whose "Use" effect casts the tracked spell
   so the ui can show the recognizable item icon (GuiHelper.GetIconId). An

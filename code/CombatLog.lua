@@ -32,51 +32,80 @@ mod.combatLog = me
 me.tag = "CombatLog"
 
 --[[
+  CLEU sub-events the addon reacts to, keyed by event name. `useDestUnit`
+  selects which unit triple attributes the event: cast events act from the
+  source unit; aura events describe the dest unit (the buff owner) and may
+  carry no source unit at all.
+
+  SPELL_AURA_REMOVED exists for buff-then-consume spells (Cold Blood, Presence
+  of Mind, Inner Focus, ...): the game starts their cooldown when the buff is
+  consumed/cancelled/purged, not when it is cast, so their SpellMap entries
+  track the removal instead of the cast.
+]]--
+local supportedEvents = {
+  ["SPELL_CAST_SUCCESS"] = { useDestUnit = false },
+  ["SPELL_AURA_REMOVED"] = { useDestUnit = true },
+}
+
+--[[
+  The CLEU sub-events CombatLog dispatches on. Consumed by the trackedEvents
+  validator so SpellMap entries cannot reference events that would never fire.
+
+  @return {table}
+    Read-only - returned directly, not cloned, because it feeds the combat-log
+    hot path. Clone explicitly if you need to mutate.
+]]--
+function me.GetSupportedEvents()
+  return supportedEvents
+end
+
+--[[
   Processing the details of the current combat log event. Invoked when 'COMBAT_LOG_EVENT_UNFILTERED' is fired
 
   @param {vararg} ...
 ]]--
 function me.ProcessUnfilteredCombatLogEvent(...)
   -- direct destructuring instead of a helper — this runs for every CLEU line and must not allocate
-  local _, event, _, _, _, sourceFlags = ...
+  local _, event, _, _, _, sourceFlags, _, _, _, destFlags = ...
+  local eventProperties = supportedEvents[event]
+
+  if not eventProperties then return end
 
   -- TODO [FEATURE]: Might want to filter events in specific zones
 
   --[[
-    Filter for hostile player events only
+    Filter for hostile player events only. Aura events are attributed to the
+    dest unit (the buff owner); cast events to the source unit.
   ]]--
-  if CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS) then
-    me.ProcessEventHostilePlayers(event, ...)
+  local unitFlags = eventProperties.useDestUnit and destFlags or sourceFlags
+
+  if CombatLog_Object_IsA(unitFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS) then
+    me.ProcessNormal(event, eventProperties, ...)
   end
   -- TODO [FEATURE]: We could track friendly cooldowns as well and put it behind a configuration flag
 end
 
 --[[
   @param {string} event
+  @param {table} eventProperties
+    The supportedEvents entry for the event; useDestUnit picks which unit
+    triple the acting player is read from.
   @param {vararg} ...
 ]]--
-function me.ProcessEventHostilePlayers(event, ...)
-  if event ~= "SPELL_CAST_SUCCESS" then
-    if mod.logger.IsDebugEnabled() then
-      mod.logger.LogDebug(me.tag, "Ignore unsupported event: " .. event)
-    end
-    return
-  end
-
-  me.ProcessNormal(event, ...)
-end
-
---[[
-  @param {string} event
-  @param {vararg} ...
-]]--
-function me.ProcessNormal(event, ...)
+function me.ProcessNormal(event, eventProperties, ...)
   if RGCW_ENVIRONMENT.DEBUG then
     mod.debug.TrackLogNormalEvent(...)
   end
 
   local castTime = GetTime()
-  local sourceGuid, sourceName = select(4, ...)
+  local sourceGuid, sourceName
+
+  if eventProperties.useDestUnit then
+    sourceGuid, sourceName = select(8, ...)
+  else
+    sourceGuid, sourceName = select(4, ...)
+  end
+
   local spellId = select(12, ...)
   local category, _, spell = mod.spellMapHelper.SearchBySpellId(spellId, event)
 
@@ -148,10 +177,12 @@ end
   @param {string} sourceName
   @param {table} spell
   @param {number} castTime
+    The time the cooldown started. For cast-tracked spells that is the cast
+    itself; for buff-then-consume spells it is the buff removal.
   @param {string} category
 ]]--
 function me.TrackCooldown(sourceGuid, sourceName, spell, castTime, category)
-  spell.castTime = castTime -- add time when spell was detected
+  spell.castTime = castTime -- add time when the cooldown was detected as started
   mod.cooldownQueue.AddCooldown(sourceGuid, sourceName, category, spell)
 
   if spell.sharedCooldownGroup then

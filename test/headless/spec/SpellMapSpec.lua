@@ -90,4 +90,9 @@ describe("SpellMap data integrity", function()
   it("every cooldownResets target is a primary and not the trigger itself", function()
     assert.same({}, rgcw.spellMapValidation.ValidateCooldownResetTargets(spellMap))
   end)
+
+  it("every trackedEvents entry is an event CombatLog dispatches on", function()
+    assert.same({},
+      rgcw.spellMapValidation.ValidateTrackedEventsSupported(spellMap, rgcw.combatLog.GetSupportedEvents()))
+  end)
 end)

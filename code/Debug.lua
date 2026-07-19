@@ -34,9 +34,12 @@ me.tag = "Debug"
   Take an event from CombatLogGetCurrentEventInfo and store it in a savedVariable. This allows to read a textfile with
   all the logs after a reload.
 
-  Filtering for oneOf (and COMBATLOG_FILTER_HOSTILE_PLAYERS):
+  Filtering for oneOf (and COMBATLOG_FILTER_HOSTILE_PLAYERS - the source unit
+  for cast events, the dest unit for aura events; see CombatLog's
+  supportedEvents):
 
   - SPELL_CAST_SUCCESS
+  - SPELL_AURA_REMOVED
 
   @param {table} vararg
     The event to track

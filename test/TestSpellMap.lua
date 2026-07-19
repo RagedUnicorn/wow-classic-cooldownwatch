@@ -168,6 +168,16 @@ function me.TestCooldownResetTargets()
     "cooldownResets failure(s)")
 end
 
+function me.TestTrackedEventsSupported()
+  RunValidator("TestTrackedEventsSupported",
+    function()
+      return mod.spellMapValidation.ValidateTrackedEventsSupported(
+        mod.spellMap.GetSpellMap(), mod.combatLog.GetSupportedEvents())
+    end,
+    "Every trackedEvents entry is an event CombatLog dispatches on",
+    "unsupported tracked event(s)")
+end
+
 function me.TestItemIdSane()
   RunValidator("TestItemIdSane",
     function()
@@ -195,6 +205,7 @@ function me.RunAllTests()
   me.TestCategoriesMatchSpellMap()
   me.TestCooldownWorstCaseSane()
   me.TestCooldownResetTargets()
+  me.TestTrackedEventsSupported()
   me.TestItemIdSane()
 
   mod.testLogger.LogInfo("SpellMap", "=== SpellMap Tests Complete ===")
