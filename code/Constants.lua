@@ -193,6 +193,25 @@ RGCW_CONSTANTS = {
     TIMER_BIG_TEXT = {1, 1, 0},
     -- small worst-case timer text (cyan)
     TIMER_SMALL_TEXT = {0.01, 0.66, 0.95, 1},
+    -- fallback for categories without a CATEGORY entry
+    CATEGORY_NEUTRAL = {0.5, 0.5, 0.5, 1},
+    --[[
+      Spell icon border colors keyed by categoryName. Values mirror PVPWarn's
+      RGPVPW_COLORS.CATEGORIES - the class categories carry the class colors.
+    ]]--
+    CATEGORY = {
+      priest = {1.00, 1.00, 1.00, 1},
+      rogue = {1.00, 0.96, 0.41, 1},
+      mage = {0.25, 0.78, 0.92, 1},
+      hunter = {0.67, 0.83, 0.45, 1},
+      warlock = {0.53, 0.53, 0.93, 1},
+      paladin = {0.96, 0.55, 0.73, 1},
+      druid = {1.00, 0.49, 0.04, 1},
+      shaman = {0.00, 0.44, 0.87, 1},
+      warrior = {0.78, 0.61, 0.43, 1},
+      racials = {0.94, 0.37, 0.36, 1},
+      items = {0, 0.96, 0.83, 1}
+    },
   },
   --[[
     Shared backdrop geometry for cooldown slot widgets. Consumed by

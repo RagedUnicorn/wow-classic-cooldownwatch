@@ -151,6 +151,20 @@ function me.GetIconId(spellEntry)
 end
 
 --[[
+  Resolve the spell icon border color for a category. Class categories carry
+  the class color; categories without an entry fall back to a neutral gray.
+
+  @param {string} categoryName
+    A categoryName as listed in code/Categories.lua (e.g. "priest")
+
+  @return {table}
+    A { r, g, b, a } tuple for unpack() at the call site
+]]--
+function me.GetCategoryColor(categoryName)
+  return RGCW_CONSTANTS.COLORS.CATEGORY[categoryName] or RGCW_CONSTANTS.COLORS.CATEGORY_NEUTRAL
+end
+
+--[[
   Assemble a backdrop table for a cooldown slot widget from shared geometry.
 
   Centralises the table skeleton so the slot look-and-feel lives in one place

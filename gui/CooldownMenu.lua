@@ -196,7 +196,9 @@ function me.CreateCooldownSpellIcon(spellFrame)
 
   iconHolder:SetBackdrop(backdrop)
   iconHolder:SetBackdropColor(0.15, 0.15, 0.15, 1)
-  iconHolder:SetBackdropBorderColor(0.47, 0.21, 0.74, 1)
+  -- the border color is category-dependent (class color) and applied by
+  -- UpdateCooldownUiState - rows are recycled across categories
+  iconHolder:SetBackdropBorderColor(unpack(RGCW_CONSTANTS.COLORS.CATEGORY_NEUTRAL))
 
   return cooldownIcon
 end
@@ -361,6 +363,7 @@ function me.UpdateCooldownUiState(row, cooldown, categoryName)
   -- itemId may be nil which clears a stale value when the row is reused
   row.cooldownIcon.iconHolder.spellId = cooldown.spellId
   row.cooldownIcon.iconHolder.itemId = cooldown.itemId
+  row.cooldownIcon.iconHolder:SetBackdropBorderColor(unpack(mod.guiHelper.GetCategoryColor(categoryName)))
   row.cooldownStatus.text:SetText(cooldown.name)
   row.cooldownValue:SetText(me.BuildCooldownValueText(cooldown))
 
