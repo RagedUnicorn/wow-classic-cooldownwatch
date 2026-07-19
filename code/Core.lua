@@ -83,6 +83,13 @@ function me.OnLoad(self)
   me.event.Register("COMBAT_LOG_EVENT_UNFILTERED", OnCombatLog, { gated = true })
   -- Register to the event that fires when the players target changes
   me.event.Register("PLAYER_TARGET_CHANGED", OnTargetChanged)
+  -- Version broadcast: receive other players' versions and announce our own on roster edges
+  me.event.Register("CHAT_MSG_ADDON", me.comm.OnChatMsgAddon, { gated = true })
+  me.event.Register(
+    { "PLAYER_ENTERING_WORLD", "GROUP_ROSTER_UPDATE" },
+    me.comm.BroadcastVersion,
+    { gated = true }
+  )
 
   me.event.Setup(self)
 end
@@ -114,6 +121,8 @@ Initialize = function()
   me.ticker.StartTickerTargetCooldownBar()
   -- update initial view of gearBars after addon initialization
   me.targetCooldownBar.TargetCooldownBarUiUpdate()
+  -- register addon message prefix for the version broadcast
+  me.comm.Initialize()
   -- initialize test commands and logger (debug mode only)
 
   InitializeTestFramework()

@@ -94,7 +94,12 @@ CooldownWatchConfiguration = {
       ...
     }
   ]]--
-  ["profiles"] = {}
+  ["profiles"] = {},
+  --[[
+    Newest addon version already announced by the update notice (see Comm.lua).
+    Empty string means no version was announced yet
+  ]]--
+  ["lastNotifiedVersion"] = ""
 }
 
 --[[
@@ -131,6 +136,11 @@ function me.SetupConfiguration()
     CooldownWatchConfiguration.profiles = {}
   end
 
+  if CooldownWatchConfiguration.lastNotifiedVersion == nil then
+    mod.logger.LogInfo(me.tag, "lastNotifiedVersion has unexpected nil value")
+    CooldownWatchConfiguration.lastNotifiedVersion = ""
+  end
+
   --[[
     Set saved variables with addon version. This can be used later to determine whether
     a migration path applies to the current saved variables or not
@@ -146,6 +156,33 @@ function me.SetAddonVersion()
   -- me.MigrationPath()
   -- migration done update addon version to current
   CooldownWatchConfiguration.addonVersion = GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
+end
+
+--[[
+  Semver-ish comparison of two version strings of the form "v1.2.0" (the leading "v"
+  is optional). Missing or unparseable versions are never considered older.
+
+  @param {string | nil} version
+  @param {string} otherVersion
+  @return {boolean}
+    true - if version is older than otherVersion
+    false - otherwise
+]]--
+function me.IsVersionBefore(version, otherVersion)
+  local major, minor, patch = string.match(version or "", "^v?(%d+)%.(%d+)%.(%d+)")
+  local otherMajor, otherMinor, otherPatch = string.match(otherVersion or "", "^v?(%d+)%.(%d+)%.(%d+)")
+
+  if major == nil or otherMajor == nil then return false end
+
+  if tonumber(major) ~= tonumber(otherMajor) then
+    return tonumber(major) < tonumber(otherMajor)
+  end
+
+  if tonumber(minor) ~= tonumber(otherMinor) then
+    return tonumber(minor) < tonumber(otherMinor)
+  end
+
+  return tonumber(patch) < tonumber(otherPatch)
 end
 
 --[[

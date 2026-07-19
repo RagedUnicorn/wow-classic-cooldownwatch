@@ -26,6 +26,10 @@
 RGCW_CONSTANTS = {
   ADDON_NAME = "CooldownWatch",
   --[[
+    Addon message prefix for the version broadcast (max 16 characters)
+  ]]--
+  ADDON_MESSAGE_PREFIX = "RGCW_VER",
+  --[[
     Unit ids
   ]]--
   UNIT_ID_TARGET = "target",

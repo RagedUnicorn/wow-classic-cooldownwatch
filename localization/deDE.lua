@@ -17,6 +17,7 @@ if (GetLocale() == "deDE") then
   rgcw.L["test"] = "|cFFFFFF00test|r - Test-Befehle (nutze |cFFFFC300/rgcw test|r für das vollständige Menü)"
   rgcw.L["info_title"] = "|cFF00FFB0CooldownWatch:|r"
   rgcw.L["invalid_argument"] = "Ungültiges Argument übergeben"
+  rgcw.L["update_available"] = "Neue Version |cFFFFC300%s|r ist verfügbar - |cFF00FFB0Update empfohlen!|r"
 
   -- about tab
   rgcw.L["author"] = "Autor: Michael Wiesendanger"

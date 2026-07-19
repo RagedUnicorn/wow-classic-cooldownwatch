@@ -15,6 +15,7 @@ rgcw.L["conf"] = "|cFFFFC300conf enable||disable|r - Show or hide the example ta
 rgcw.L["test"] = "|cFFFFFF00test|r - Test commands (use |cFFFFC300/rgcw test|r for the full menu)"
 rgcw.L["info_title"] = "|cFF00FFB0CooldownWatch:|r"
 rgcw.L["invalid_argument"] = "Invalid argument passed"
+rgcw.L["update_available"] = "New version |cFFFFC300%s|r is available - |cFF00FFB0consider updating!|r"
 
 -- about
 rgcw.L["author"] = "Author: Michael Wiesendanger"
