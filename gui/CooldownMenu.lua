@@ -22,7 +22,7 @@
   SOFTWARE.
 ]]--
 
--- luacheck: globals CreateFrame STANDARD_TEXT_FONT ScrollUtil
+-- luacheck: globals CreateFrame STANDARD_TEXT_FONT ScrollUtil GameTooltip
 
 local mod = rgcw
 local me = {}
@@ -148,6 +148,9 @@ function me.CreateRuleRowFrame(frame, position)
 end
 
 --[[
+  Creates the spell icon with a tooltip showing the hovered spell or item. The
+  displayed spellId/itemId is stored on the iconHolder by the spell list row update.
+
   @param {table} spellFrame
 
   @return {table}
@@ -160,8 +163,24 @@ function me.CreateCooldownSpellIcon(spellFrame)
     RGCW_CONSTANTS.CATEGORY_COOLDOWN_SPELL_ICON_SIZE + 5
   )
   iconHolder:SetPoint("LEFT", 10, 0)
+  iconHolder:EnableMouse(true)
+  iconHolder:SetScript("OnEnter", function(self)
+    if self.itemId ~= nil then
+      GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+      GameTooltip:SetItemByID(self.itemId)
+      GameTooltip:Show()
+    elseif self.spellId ~= nil then
+      GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+      GameTooltip:SetSpellByID(self.spellId)
+      GameTooltip:Show()
+    end
+  end)
+  iconHolder:SetScript("OnLeave", function()
+    GameTooltip:Hide()
+  end)
 
   local cooldownIcon = iconHolder:CreateTexture(RGCW_CONSTANTS.ELEMENT_CATEGORY_COOLDOWN_SPELL_ICON, "ARTWORK")
+  cooldownIcon.iconHolder = iconHolder
   cooldownIcon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
   cooldownIcon:SetPoint("CENTER", 0, 0)
   cooldownIcon:SetSize(
@@ -339,6 +358,9 @@ function me.UpdateCooldownUiState(row, cooldown, categoryName)
   local enabled = mod.configuration.GetCooldownConfigurationState(categoryName, cooldown.spellId)
 
   row.cooldownIcon:SetTexture(mod.guiHelper.GetIconId(cooldown))
+  -- itemId may be nil which clears a stale value when the row is reused
+  row.cooldownIcon.iconHolder.spellId = cooldown.spellId
+  row.cooldownIcon.iconHolder.itemId = cooldown.itemId
   row.cooldownStatus.text:SetText(cooldown.name)
   row.cooldownValue:SetText(me.BuildCooldownValueText(cooldown))
 
