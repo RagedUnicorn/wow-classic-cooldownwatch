@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📖 Contribution Guide
+    url: https://github.com/RagedUnicorn/wow-classic-cooldownwatch/blob/master/CONTRIBUTING.md
+    about: How to contribute — spell-data reports, SpellMap entries, and the lint/test gates.
+  - name: 📦 Releases
+    url: https://github.com/RagedUnicorn/wow-classic-cooldownwatch/releases
+    about: Download the latest release of CooldownWatch.

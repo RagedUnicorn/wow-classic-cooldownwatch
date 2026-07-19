@@ -41,6 +41,11 @@ his cooldown.
 
 Proximity probably not needed there should always be a caster
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) — from reporting wrong cooldown data to contributing
+SpellMap entries, including the lint and test gates every pull request must pass.
+
 ## Development
 
 ### Switching between Environments

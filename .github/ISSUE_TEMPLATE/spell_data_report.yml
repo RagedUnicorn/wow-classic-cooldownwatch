@@ -1,0 +1,96 @@
+name: ⏱️ Spell Data Report
+description: Report a missing spell or wrong cooldown data in CooldownWatch.
+title: "[Spell Data] "
+labels: ["spell-data"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Spell data — cooldown durations, ranks, talent reductions — is
+        exactly the kind of thing players spot before the maintainer does.
+
+        Every entry is verified against [Wowhead Classic](https://www.wowhead.com/classic/), so
+        a Wowhead link in your report saves a round-trip. See
+        [CONTRIBUTING.md](https://github.com/RagedUnicorn/wow-classic-cooldownwatch/blob/master/CONTRIBUTING.md)
+        if you'd rather contribute the fix yourself.
+  - type: dropdown
+    id: report-type
+    attributes:
+      label: What kind of report is this?
+      options:
+        - Missing spell (not tracked at all)
+        - Wrong cooldown value
+        - Missing or wrong rank
+        - Wrong worst-case value (talent / set bonus)
+        - Other / not sure
+    validations:
+      required: true
+  - type: input
+    id: spell-name
+    attributes:
+      label: Spell name
+      description: Include the rank if it matters for the report.
+      placeholder: e.g. Psychic Scream (Rank 4)
+    validations:
+      required: true
+  - type: input
+    id: spell-link
+    attributes:
+      label: Wowhead link or spell ID
+      description: >
+        A link like https://www.wowhead.com/classic/spell=10890 — or just the spell ID if you
+        have it. Strongly recommended.
+      placeholder: https://www.wowhead.com/classic/spell=10890
+    validations:
+      required: false
+  - type: dropdown
+    id: category
+    attributes:
+      label: Class / category
+      options:
+        - Druid
+        - Hunter
+        - Mage
+        - Paladin
+        - Priest
+        - Rogue
+        - Shaman
+        - Warlock
+        - Warrior
+        - Racials
+        - Items
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: game-version
+    attributes:
+      label: Game version
+      description: Which client did you observe this on?
+      options:
+        - WoW Classic Era
+        - Season of Discovery
+        - Burning Crusade Anniversary
+        - Other / not sure
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What does CooldownWatch show, and what should it show?
+      description: >
+        Describe what the addon currently does versus what actually happens in-game. For wrong
+        cooldowns, include both numbers if you know them — and whether a talent or set bonus is
+        involved.
+      placeholder: |
+        e.g. CooldownWatch shows Psychic Scream on a 30s cooldown, but the enemy priest had it
+        back up after 26s (Improved Psychic Scream talent).
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Anything else? (optional)
+      description: Any other notes — e.g. how you verified it, or a screenshot.
+    validations:
+      required: false
