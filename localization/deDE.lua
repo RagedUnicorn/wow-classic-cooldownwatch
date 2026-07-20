@@ -78,6 +78,7 @@ if (GetLocale() == "deDE") then
   rgcw.L["category_warrior"] = "Krieger"
   rgcw.L["category_racials"] = "Rassenfähigkeiten"
   rgcw.L["category_items"] = "Items"
+  rgcw.L["category_misc"] = "Diverse"
   rgcw.L["option_assume_worst_case"] = "Worst Case"
   rgcw.L["option_assume_worst_case_tooltip"] = "Nimmt an, dass der Gegner Talente oder Ausrüstung besitzt, "
     .. "die diese Abklingzeit verkürzen. Die Leiste zählt die kürzeste realistische Abklingzeit "

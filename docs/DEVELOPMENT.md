@@ -63,7 +63,7 @@ generated file in lockstep so day-to-day testing works without a rebuild).
 ## Adding a class to the spellMap
 
 The spell catalog lives in per-category slice files under `code/spellmap/base/` (`Priest.lua`, `Rogue.lua`, …,
-`Racials.lua`, `Items.lua`), each keyed by **primary spellId** → spell data. Rank aliases
+`Racials.lua`, `Items.lua`, `Misc.lua`), each keyed by **primary spellId** → spell data. Rank aliases
 (`[rankSpellId] = { refId = primarySpellId }`) are NOT written by hand — they are synthesized from each primary's
 `allRanks` list after assembly (`SpellMap.SynthesizeRankAliases`), so a slice only ever carries an explicit
 `refId` entry for an alias that is not derivable from `allRanks` (an aura id differing from the cast id, see the

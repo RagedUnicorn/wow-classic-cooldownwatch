@@ -36,6 +36,7 @@ code/spellmap/base/Paladin.lua
 code/spellmap/base/Druid.lua
 code/spellmap/base/Racials.lua
 code/spellmap/base/Items.lua
+code/spellmap/base/Misc.lua
 code/spellmap/Base.lua
 code/spellmap/overlay/Sod.lua
 code/spellmap/overlay/Tbc.lua

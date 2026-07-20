@@ -36,6 +36,7 @@ code/spellmap/base/Paladin.lua
 code/spellmap/base/Druid.lua
 code/spellmap/base/Racials.lua
 code/spellmap/base/Items.lua
+code/spellmap/base/Misc.lua
 code/spellmap/Base.lua
 code/spellmap/overlay/Sod.lua
 code/spellmap/overlay/Tbc.lua
@@ -79,6 +80,7 @@ test/category/TestPaladinSpells.lua
 test/category/TestDruidSpells.lua
 test/category/TestRacialsSpells.lua
 test/category/TestItemsSpells.lua
+test/category/TestMiscSpells.lua
 
 # Debug Tools (Development Only)
 test/debug/DebugInjectorWindow.lua

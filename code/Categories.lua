@@ -101,6 +101,11 @@ local categories = {
     ["categoryName"] = "items",
     ["localizationKey"] = "category_items",
     ["name"] = "CW_ItemsOptionsFrame"
+  },
+  [12] = {
+    ["categoryName"] = "misc",
+    ["localizationKey"] = "category_misc",
+    ["name"] = "CW_MiscOptionsFrame"
   }
 }
 

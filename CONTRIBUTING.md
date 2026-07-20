@@ -41,7 +41,7 @@ and combat-log handling all derive from it, so a data contribution is usually a 
 change. The essentials:
 
 - **Entries live in per-category slice files** under `code/spellmap/base/` (`Priest.lua`,
-  `Rogue.lua`, …, `Racials.lua`, `Items.lua`). Each spell has one **primary entry** (highest
+  `Rogue.lua`, …, `Racials.lua`, `Items.lua`, `Misc.lua`). Each spell has one **primary entry** (highest
   rank) with `name`, `type`, `cooldown`, `active`, `trackedEvents`, and a structured `allRanks`
   list. Rank alias entries (`[rankSpellId] = { refId = primarySpellId }`) are synthesized from
   `allRanks` at assembly time — do not write them by hand.

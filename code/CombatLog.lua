@@ -41,10 +41,16 @@ me.tag = "CombatLog"
   of Mind, Inner Focus, ...): the game starts their cooldown when the buff is
   consumed/cancelled/purged, not when it is cast, so their SpellMap entries
   track the removal instead of the cast.
+
+  SPELL_AURA_APPLIED exists for debuff-tracked lockouts (Recently Bandaged):
+  the lockout lives on the unit that received the debuff, not on a caster
+  cooldown, so the entry tracks the application on the dest unit - correct
+  even when one enemy bandages another.
 ]]--
 local supportedEvents = {
   ["SPELL_CAST_SUCCESS"] = { useDestUnit = false },
   ["SPELL_AURA_REMOVED"] = { useDestUnit = true },
+  ["SPELL_AURA_APPLIED"] = { useDestUnit = true },
 }
 
 --[[
