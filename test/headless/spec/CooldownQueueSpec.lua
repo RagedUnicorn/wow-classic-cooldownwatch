@@ -31,8 +31,8 @@
 describe("CooldownQueue", function()
   local queue
 
-  -- Build a minimal spellData in the shape AddCooldown reads (active / spellId /
-  -- name) plus the timing fields a queue entry carries. Kept inline rather than
+  -- Build a minimal spellData in the shape AddCooldown reads (spellId / name)
+  -- plus the timing fields a queue entry carries. Kept inline rather than
   -- pulled from SpellMap: these specs exercise the queue's bookkeeping, not spell
   -- identity, so synthetic ids keep each scenario self-contained.
   local function makeSpell(spellId, name, castTime, active, cooldown)
@@ -222,13 +222,15 @@ describe("CooldownQueue", function()
     assert.equal(20, cooldowns[2].spellData.cooldownWorstCase)
   end)
 
-  it("AddCooldown silently drops inactive spells", function()
+  it("AddCooldown queues a catalog-inactive spell - the enabled gate lives upstream in CombatLog", function()
     queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100, false))
 
-    assert.same({}, queue.GetCooldownsByTarget("guid-1"))
+    local cooldowns = queue.GetCooldownsByTarget("guid-1")
+    assert.equal(1, #cooldowns)
+    assert.equal(10947, cooldowns[1].spellData.spellId)
   end)
 
-  it("AddCooldown wakes the render ticker on add and refresh but not on an inactive drop", function()
+  it("AddCooldown wakes the render ticker on add and refresh, catalog-active or not", function()
     local wakeCalls = 0
     local originalWake = rgcw.targetCooldownBar.WakeRenderTicker
     rgcw.targetCooldownBar.WakeRenderTicker = function() wakeCalls = wakeCalls + 1 end
@@ -239,7 +241,7 @@ describe("CooldownQueue", function()
 
     rgcw.targetCooldownBar.WakeRenderTicker = originalWake
 
-    assert.equal(2, wakeCalls)
+    assert.equal(3, wakeCalls)
   end)
 
   it("HasCooldowns reflects bucket presence through add, remove and prune", function()
@@ -478,10 +480,10 @@ describe("CooldownQueue", function()
       assert.equal(15, scheduledTimers[1].delay)
     end)
 
-    it("AddCooldown schedules no timer for an inactive spell", function()
+    it("AddCooldown schedules an expiry timer for a catalog-inactive spell", function()
       queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100, false))
 
-      assert.equal(0, #scheduledTimers)
+      assert.equal(1, #scheduledTimers)
     end)
 
     it("a valid fire removes the entry when the caster is not the current target", function()

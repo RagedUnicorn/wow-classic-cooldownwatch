@@ -235,3 +235,57 @@ describe("Configuration cooldown overrides", function()
     assert.is_nil(second["paladin"][1022])
   end)
 end)
+
+describe("Configuration cooldown enabled state", function()
+  local configuration
+
+  before_each(function()
+    configuration = rgcw.configuration
+    --[[
+      SetupConfiguration never runs headless, so cooldownConfiguration starts
+      nil - the accessor must survive that. Reset between scenarios.
+    ]]--
+    CooldownWatchConfiguration.cooldownConfiguration = nil
+  end)
+
+  it("GetCooldownConfigurationState is false while cooldownConfiguration is nil and no default is passed", function()
+    assert.is_false(configuration.GetCooldownConfigurationState("priest", 10947))
+  end)
+
+  it("GetCooldownConfigurationState falls back to a true catalog default while cooldownConfiguration is nil", function()
+    assert.is_true(configuration.GetCooldownConfigurationState("priest", 10947, true))
+  end)
+
+  it("GetCooldownConfigurationState falls back to the catalog default for a never-configured category", function()
+    CooldownWatchConfiguration.cooldownConfiguration = {}
+
+    assert.is_true(configuration.GetCooldownConfigurationState("priest", 10947, true))
+    assert.is_false(configuration.GetCooldownConfigurationState("priest", 10947, false))
+  end)
+
+  it("GetCooldownConfigurationState falls back for a never-configured spell in a known category", function()
+    CooldownWatchConfiguration.cooldownConfiguration = {}
+    configuration.UpdateCooldownConfigurationState(true, "priest", 10890)
+
+    assert.is_true(configuration.GetCooldownConfigurationState("priest", 10947, true))
+    assert.is_false(configuration.GetCooldownConfigurationState("priest", 10947, false))
+  end)
+
+  it("an explicit enable wins over a false catalog default", function()
+    CooldownWatchConfiguration.cooldownConfiguration = {}
+    configuration.UpdateCooldownConfigurationState(true, "priest", 10947)
+
+    assert.is_true(configuration.GetCooldownConfigurationState("priest", 10947, false))
+  end)
+
+  it("an explicit disable wins over a true catalog default", function()
+    CooldownWatchConfiguration.cooldownConfiguration = {}
+    configuration.UpdateCooldownConfigurationState(false, "priest", 10947)
+
+    assert.is_false(configuration.GetCooldownConfigurationState("priest", 10947, true))
+  end)
+
+  it("a non-boolean catalog default is treated as disabled", function()
+    assert.is_false(configuration.GetCooldownConfigurationState("priest", 10947, "yes"))
+  end)
+end)

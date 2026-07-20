@@ -194,9 +194,10 @@ function me.ProcessNormal(event, eventProperties, isPetSource, ...)
   --[[
     The enabled state is keyed by the PRIMARY spellId (the config ui only ever
     writes primaries) - gate on realSpellId so a lower-rank cast of an enabled
-    spell tracks like its max rank.
+    spell tracks like its max rank. Spells the player never configured fall
+    back to the catalog's `active` default.
   ]]--
-  if not me.IsCooldownTracked(category, realSpellId) then
+  if not me.IsCooldownTracked(category, realSpellId, spell.active) then
     mod.logger.LogDebug(me.tag, "Spell is not enabled - aborting...")
     return
   end
@@ -234,19 +235,22 @@ end
 --[[
   @param {string} category
   @param {number} spellId
+  @param {boolean} defaultState
+    Optional. The spell's catalog `active` flag - the tracked state that
+    applies while the player never configured the spell
 
   @return {boolean}
     true  - If the cooldown is enabled
     false - If the cooldown is disabled
 ]]--
-function me.IsCooldownTracked(category, spellId)
+function me.IsCooldownTracked(category, spellId, defaultState)
   assert(type(category) == "string",
     string.format("bad argument #1 to `IsCooldownTracked` (expected string got %s)", type(category)))
 
   assert(type(spellId) == "number",
     string.format("bad argument #2 to `IsCooldownTracked` (expected number got %s)", type(spellId)))
 
-  return mod.configuration.GetCooldownConfigurationState(category, spellId)
+  return mod.configuration.GetCooldownConfigurationState(category, spellId, defaultState)
 end
 
 --[[

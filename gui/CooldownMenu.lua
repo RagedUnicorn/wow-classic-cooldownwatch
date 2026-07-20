@@ -514,7 +514,7 @@ end
   @param {string} categoryName
 ]]--
 function me.UpdateCooldownUiState(row, cooldown, categoryName)
-  local enabled = mod.configuration.GetCooldownConfigurationState(categoryName, cooldown.spellId)
+  local enabled = mod.configuration.GetCooldownConfigurationState(categoryName, cooldown.spellId, cooldown.active)
 
   --[[
     Bind the new spell identity first - the control updates below read it (the

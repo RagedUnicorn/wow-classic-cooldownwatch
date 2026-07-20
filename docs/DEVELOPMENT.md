@@ -85,7 +85,7 @@ mod.spellMapBaseClasses["priest"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE, -- BASE = always available, SOD = SoD-only
     cooldown = 30,
     cooldownWorstCase = 26, -- optional: worst case (talents/items)
-    active = true,
+    active = true, -- default tracked state on a fresh profile; an explicit player toggle always wins
     trackedEvents = { "SPELL_CAST_SUCCESS" }, -- SPELL_AURA_REMOVED for buff-then-consume spells, see below
     allRanks = { -- structured per-rank entries; MUST contain the primary's own id
       { spellId = 10890, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },

@@ -68,7 +68,10 @@ me.tag = "CooldownQueue"
         - {number} Optional, item-triggered cooldowns only. The item whose "Use" effect
         casts the tracked spell; the ui resolves the icon through it (GuiHelper.GetIconId)
       ["active"] = boolean
-        - {boolean} Whether the spell is active and tracked or not
+        - {boolean} The catalog's intended default tracked state. Not read on
+        the queue path - the enabled authority is the player's
+        cooldownConfiguration, checked upstream in CombatLog.IsCooldownTracked
+        with this flag as the never-configured fallback
     }
   }
 ]]--
@@ -193,11 +196,6 @@ function me.AddCooldown(sourceGuid, sourceName, category, spellData)
 
   assert(type(spellData) == "table",
     string.format("bad argument #4 to `AddCooldown` (expected table got %s)", type(spellData)))
-
-  if not spellData.active then
-    mod.logger.LogWarn(me.tag, "Ignored inactive spell: " .. spellData.name)
-    return -- abort
-  end
 
   me.ResolveCooldown(category, spellData)
 

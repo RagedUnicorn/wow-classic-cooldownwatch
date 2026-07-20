@@ -281,21 +281,33 @@ end
 --[[
   Get the tracking state of a cooldown spell for a certain category
 
+  Never-configured and explicitly disabled are distinct states: the config ui
+  writes an explicit true/false on every toggle, so a nil entry means the
+  player never touched the spell and the catalog's intended default applies.
+
   @param {string} categoryName
   @param {number} spellId
+  @param {boolean} defaultState
+    Optional. The spell's catalog `active` flag - the tracked state that
+    applies while the player never configured the spell. Omitting it keeps
+    the pure config read (never-configured resolves to false).
 
   @return {boolean}
-    true  - If the cooldown is tracked (enabled) in the category
-    false - Otherwise (disabled, or never configured in the category)
+    true  - If the cooldown is tracked (enabled explicitly, or never
+            configured with a true defaultState)
+    false - Otherwise (disabled explicitly, or never configured without a
+            true defaultState)
 ]]--
-function me.GetCooldownConfigurationState(categoryName, spellId)
+function me.GetCooldownConfigurationState(categoryName, spellId, defaultState)
   local config = CooldownWatchConfiguration.cooldownConfiguration
+  local categoryConfig = config and config[categoryName]
+  local state = categoryConfig and categoryConfig[spellId]
 
-  if config[categoryName] == nil then
-    return false -- no entry for this category yet
+  if state == nil then
+    return defaultState == true -- never configured - the catalog default decides
   end
 
-  return config[categoryName][spellId] == true
+  return state == true
 end
 
 --[[
