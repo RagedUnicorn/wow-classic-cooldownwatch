@@ -113,4 +113,31 @@ mod.spellMapBaseClasses["warrior"] = {
       { spellId = 6178, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
+  [6554] = {
+    name = "Pummel",
+    type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+    cooldown = 10,
+    active = true,
+    trackedEvents = {
+      "SPELL_CAST_SUCCESS",
+    },
+    allRanks = {
+      { spellId = 6554, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 6552, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+    }
+  },
+  [1672] = {
+    name = "Shield Bash",
+    type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+    cooldown = 12,
+    active = true,
+    trackedEvents = {
+      "SPELL_CAST_SUCCESS",
+    },
+    allRanks = {
+      { spellId = 1672, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 72, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 1671, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+    }
+  },
 }
