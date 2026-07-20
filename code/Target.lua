@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals UnitIsEnemy UnitGUID UnitName
+-- luacheck: globals UnitIsEnemy UnitGUID UnitName UnitPlayerControlled UnitOwnerGUID GetPlayerInfoByGUID
 
 local mod = rgcw
 local me = {}
@@ -34,6 +34,45 @@ me.tag = "Target"
 
 local currentTargetGuid = ""
 local currentTargetName = ""
+
+--[[
+  Resolve a targeted hostile player pet to its owning player. Cooldowns are
+  keyed by the owner's guid (pet guids change on every resummon), so targeting
+  the pet renders the owner's full cooldown bucket - which includes the
+  pet-cast entries the pet itself queued (see PetOwner). The sighting is
+  recorded either way, flushing any casts parked while the owner was unknown.
+
+  @param {string} targetId
+  @param {string} targetName
+
+  @return ({string} {string})
+    ownerGuid/ownerName when the target is a player pet with a resolvable
+    owner; the passed target identity otherwise.
+]]--
+local function ResolvePetTarget(targetId, targetName)
+  if targetId == nil then return targetId, targetName end
+  if string.find(targetId, "^Pet%-") == nil then return targetId, targetName end
+  if not UnitPlayerControlled(RGCW_CONSTANTS.UNIT_ID_TARGET) then return targetId, targetName end
+  if UnitOwnerGUID == nil then return targetId, targetName end
+
+  local ownerGuid = UnitOwnerGUID(RGCW_CONSTANTS.UNIT_ID_TARGET)
+
+  if ownerGuid == nil then return targetId, targetName end
+
+  -- may return nothing for players the client has not met yet
+  local ownerName = select(6, GetPlayerInfoByGUID(ownerGuid))
+
+  mod.petOwner.RecordSighting(targetId, ownerGuid, ownerName)
+
+  if ownerName == nil then
+    local _, recordedName = mod.petOwner.GetOwner(targetId)
+    ownerName = recordedName
+  end
+
+  mod.logger.LogDebug(me.tag, "Redirecting pet target " .. targetId .. " to owner " .. ownerGuid)
+
+  return ownerGuid, ownerName or targetName
+end
 
 --[[
   Returns the players current target uid or an empty string if the player has no target.
@@ -66,6 +105,7 @@ function me.UpdateCurrentTarget()
   if UnitIsEnemy(RGCW_CONSTANTS.UNIT_ID_PLAYER, RGCW_CONSTANTS.UNIT_ID_TARGET) or RGCW_ENVIRONMENT.DEBUG then
     targetId = UnitGUID(RGCW_CONSTANTS.UNIT_ID_TARGET)
     targetName = UnitName(RGCW_CONSTANTS.UNIT_ID_TARGET)
+    targetId, targetName = ResolvePetTarget(targetId, targetName)
   end
 
   if targetId == nil then

@@ -196,6 +196,15 @@ function me.TestItemIdSane()
     "itemId failure(s)")
 end
 
+function me.TestPetCastTrackedEvents()
+  RunValidator("TestPetCastTrackedEvents",
+    function()
+      return mod.spellMapValidation.ValidatePetCastTrackedEvents(mod.spellMap.GetSpellMap())
+    end,
+    "Every petCast entry is a primary tracking exactly SPELL_CAST_SUCCESS",
+    "petCast failure(s)")
+end
+
 function me.TestSpellTypesMatchBranch()
   RunValidator("TestSpellTypesMatchBranch",
     function()
@@ -245,6 +254,7 @@ function me.RunAllTests()
   me.TestCooldownResetTargets()
   me.TestTrackedEventsSupported()
   me.TestItemIdSane()
+  me.TestPetCastTrackedEvents()
   me.TestSpellTypesMatchBranch()
   me.TestBaseEntriesAreBaseType()
   me.TestBaseHasNoHandWrittenRankAliases()

@@ -159,9 +159,12 @@ mod.spellMapBaseClasses["hunter"] = {
       { spellId = 24132, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  -- Intimidation is cast by the hunter's pet, so SPELL_CAST_SUCCESS fires from
-  -- the pet's GUID, not the hunter's. The entry tracks but won't currently
-  -- credit the hunter target.
+  --[[
+    Intimidation is a hunter spellbook talent: SPELL_CAST_SUCCESS 19577 fires
+    from the HUNTER (8% base mana cost; the DB2 "Wearer Casts Proc Trigger"
+    attribute pins only the delayed stun 24394 to the pet), so the entry tracks
+    like any other hunter spell - no petCast.
+  ]]--
   [19577] = {
     name = "Intimidation",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,

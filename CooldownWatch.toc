@@ -23,6 +23,7 @@ code/Logger.lua
 code/Cmd.lua
 code/Comm.lua
 code/CombatLog.lua
+code/PetOwner.lua
 code/Common.lua
 code/SpellMapHelper.lua
 code/spellmap/base/Priest.lua

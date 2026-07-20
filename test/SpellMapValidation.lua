@@ -621,6 +621,46 @@ function me.ValidateItemIdSane(spellMap)
 end
 
 --[[
+  Verify petCast, where present, is `true`, sits on a primary entry, and the
+  primary tracks exactly { "SPELL_CAST_SUCCESS" }. Pet-cast attribution resolves
+  the owner of the acting SOURCE unit; aura events attribute by dest unit (the
+  aura owner), so a petCast entry tracking anything else would attribute the
+  cooldown to the wrong unit entirely. petCast on an alias entry would be
+  silently ignored (lookups resolve to the primary).
+
+  @param {table} spellMap
+
+  @return {table}
+]]--
+function me.ValidatePetCastTrackedEvents(spellMap)
+  local failures = {}
+
+  for category, spells in pairs(spellMap) do
+    for spellId, entry in pairs(spells) do
+      if type(entry) == "table" and entry.petCast ~= nil then
+        if not IsPrimary(entry) then
+          table.insert(failures,
+            string.format("%s/%s: petCast on a non-primary entry is ignored",
+              category, tostring(spellId)))
+        elseif entry.petCast ~= true then
+          table.insert(failures,
+            string.format("%s/%s ('%s'): petCast is %s, expected true or absent",
+              category, tostring(spellId), entry.name, tostring(entry.petCast)))
+        elseif type(entry.trackedEvents) ~= "table"
+          or #entry.trackedEvents ~= 1
+          or entry.trackedEvents[1] ~= "SPELL_CAST_SUCCESS" then
+          table.insert(failures,
+            string.format("%s/%s ('%s'): petCast entries must track exactly SPELL_CAST_SUCCESS",
+              category, tostring(spellId), entry.name))
+        end
+      end
+    end
+  end
+
+  return failures
+end
+
+--[[
   Verify every primary's type and every allRanks entry's type is allowed on the
   passed branch: classic allows SPELL_TYPE_BASE only, sod adds SPELL_TYPE_SOD,
   tbc adds SPELL_TYPE_TBC. Run this against the ASSEMBLED map for a branch - it

@@ -91,6 +91,10 @@ describe("SpellMap data integrity", function()
     assert.same({}, rgcw.spellMapValidation.ValidateItemIdSane(spellMap))
   end)
 
+  it("every petCast entry is a primary tracking exactly SPELL_CAST_SUCCESS", function()
+    assert.same({}, rgcw.spellMapValidation.ValidatePetCastTrackedEvents(spellMap))
+  end)
+
   it("every cooldownResets target is a primary and not the trigger itself", function()
     assert.same({}, rgcw.spellMapValidation.ValidateCooldownResetTargets(spellMap))
   end)
@@ -210,6 +214,10 @@ describe("SpellMap data integrity per assembled branch", function()
 
       it("every itemId is a positive integer on a primary entry", function()
         assert.same({}, rgcw.spellMapValidation.ValidateItemIdSane(assembled))
+      end)
+
+      it("every petCast entry is a primary tracking exactly SPELL_CAST_SUCCESS", function()
+        assert.same({}, rgcw.spellMapValidation.ValidatePetCastTrackedEvents(assembled))
       end)
 
       it("every trackedEvents entry is an event CombatLog dispatches on", function()

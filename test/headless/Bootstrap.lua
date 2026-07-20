@@ -30,7 +30,7 @@
   Expected cwd: addon repo root. Run from elsewhere and the dofile()s will fail.
 ]]--
 
--- luacheck: globals rgcw RGCW_ENVIRONMENT unpack UnitFactionGroup C_Timer GetTime
+-- luacheck: globals rgcw RGCW_ENVIRONMENT unpack bit UnitFactionGroup C_Timer GetTime
 
 -- allow specs to require the opt-in WoW-global stub registry as `require("WowStubs")`
 package.path = "./test/headless/?.lua;" .. package.path
@@ -42,6 +42,30 @@ package.path = "./test/headless/?.lua;" .. package.path
 -- luacheck: push ignore 143
 unpack = unpack or table.unpack
 -- luacheck: pop
+
+--[[
+  WoW ships the LuaJIT-style `bit` library (CombatLog uses bit.band for the
+  combat-log unit-flag checks); the busted Lua may not. The arithmetic fallback
+  is version-agnostic - plain Lua 5.1 has no bitwise operators to mirror.
+]]--
+bit = bit or {
+  band = function(a, b)
+    local result = 0
+    local bitValue = 1
+
+    while a > 0 and b > 0 do
+      if a % 2 == 1 and b % 2 == 1 then
+        result = result + bitValue
+      end
+
+      a = math.floor(a / 2)
+      b = math.floor(b / 2)
+      bitValue = bitValue * 2
+    end
+
+    return result
+  end,
+}
 
 rgcw = {}
 
@@ -116,5 +140,6 @@ dofile("code/spellmap/Assemble.lua")
 dofile("code/SpellMap.lua")
 dofile("code/SpellMapHelper.lua")
 dofile("code/CooldownQueue.lua")
+dofile("code/PetOwner.lua")
 dofile("code/CombatLog.lua")
 dofile("test/SpellMapValidation.lua")

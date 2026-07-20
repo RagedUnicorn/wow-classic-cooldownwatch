@@ -23,7 +23,8 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals CombatLog_Object_IsA COMBATLOG_FILTER_HOSTILE_PLAYERS GetTime
+-- luacheck: globals CombatLog_Object_IsA COMBATLOG_FILTER_HOSTILE_PLAYERS GetTime bit
+-- luacheck: globals COMBATLOG_OBJECT_TYPE_PET COMBATLOG_OBJECT_CONTROL_PLAYER COMBATLOG_OBJECT_REACTION_HOSTILE
 
 local mod = rgcw
 local me = {}
@@ -66,6 +67,21 @@ function me.GetSupportedEvents()
 end
 
 --[[
+  Whether the acting unit's flags describe a hostile player's pet: pet-type,
+  player-controlled, hostile. Totems and other guardian npcs carry different
+  type bits and stay excluded; wild npcs fail the player-control check.
+
+  @param {number} unitFlags
+
+  @return {boolean}
+]]--
+local function IsHostilePlayerPet(unitFlags)
+  return bit.band(unitFlags, COMBATLOG_OBJECT_TYPE_PET) > 0
+    and bit.band(unitFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0
+    and bit.band(unitFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0
+end
+
+--[[
   Processing the details of the current combat log event. Invoked when 'COMBAT_LOG_EVENT_UNFILTERED' is fired
 
   @param {vararg} ...
@@ -75,20 +91,52 @@ function me.ProcessUnfilteredCombatLogEvent(...)
   local _, event, _, _, _, sourceFlags, _, _, _, destFlags = ...
   local eventProperties = supportedEvents[event]
 
-  if not eventProperties then return end
+  if not eventProperties then
+    --[[
+      SPELL_SUMMON is infrastructure, not a trackable cooldown event: a hostile
+      player summoning a pet reveals the pet -> owner mapping the pet-cast
+      attribution needs. Deliberately NOT in supportedEvents - spells must never
+      declare it in trackedEvents (ValidateTrackedEventsSupported).
+    ]]--
+    if event == "SPELL_SUMMON" then
+      me.ProcessSummon(...)
+    end
+
+    return
+  end
 
   -- TODO [FEATURE]: Might want to filter events in specific zones
 
   --[[
-    Filter for hostile player events only. Aura events are attributed to the
-    dest unit (the buff owner); cast events to the source unit.
+    Filter for hostile player events - and their pets, whose casts are
+    attributed to the owning player (petCast entries). Aura events are
+    attributed to the dest unit (the buff owner); cast events to the source unit.
   ]]--
   local unitFlags = eventProperties.useDestUnit and destFlags or sourceFlags
 
   if CombatLog_Object_IsA(unitFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS) then
-    me.ProcessNormal(event, eventProperties, ...)
+    me.ProcessNormal(event, eventProperties, false, ...)
+  elseif IsHostilePlayerPet(unitFlags) then
+    me.ProcessNormal(event, eventProperties, true, ...)
   end
   -- TODO [FEATURE]: We could track friendly cooldowns as well and put it behind a configuration flag
+end
+
+--[[
+  Record the pet -> owner mapping a SPELL_SUMMON event reveals (source is the
+  summoning owner, dest the freshly summoned unit). Only hostile player sources
+  matter, and only actual pets - totems and guardian npcs arrive with
+  Creature- guids and are not queue keys.
+
+  @param {vararg} ...
+]]--
+function me.ProcessSummon(...)
+  local _, _, _, sourceGuid, sourceName, sourceFlags, _, destGuid = ...
+
+  if not CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS) then return end
+  if type(destGuid) ~= "string" or string.find(destGuid, "^Pet%-") == nil then return end
+
+  mod.petOwner.RecordSummon(destGuid, sourceGuid, sourceName)
 end
 
 --[[
@@ -96,9 +144,11 @@ end
   @param {table} eventProperties
     The supportedEvents entry for the event; useDestUnit picks which unit
     triple the acting player is read from.
+  @param {boolean} isPetSource
+    Whether the acting unit is a hostile player's pet rather than the player.
   @param {vararg} ...
 ]]--
-function me.ProcessNormal(event, eventProperties, ...)
+function me.ProcessNormal(event, eventProperties, isPetSource, ...)
   if RGCW_ENVIRONMENT.DEBUG then
     mod.debug.TrackLogNormalEvent(...)
   end
@@ -112,8 +162,13 @@ function me.ProcessNormal(event, eventProperties, ...)
     sourceGuid, sourceName = select(4, ...)
   end
 
+  if not isPetSource then
+    -- directory feed for the pet-owner name -> guid promotion (see PetOwner)
+    mod.petOwner.NotePlayer(sourceGuid, sourceName)
+  end
+
   local spellId = select(12, ...)
-  local category, _, spell = mod.spellMapHelper.SearchBySpellId(spellId, event)
+  local category, realSpellId, spell = mod.spellMapHelper.SearchBySpellId(spellId, event)
 
   if not spell then
     if mod.logger.IsDebugEnabled() then
@@ -122,12 +177,32 @@ function me.ProcessNormal(event, eventProperties, ...)
     return
   end
 
+  --[[
+    petCast entries and pet sources must pair up: a pet-cast spell arriving
+    from a player would be an npc lookalike, and a player spell arriving from
+    a pet would attribute a cooldown the owner does not have.
+  ]]--
+  if isPetSource ~= (spell.petCast == true) then
+    mod.logger.LogDebug(me.tag, "Source unit kind does not match petCast - aborting...")
+    return
+  end
+
   if spell.cooldownResets then
     me.ResetTargetedCooldowns(sourceGuid, spell)
   end
 
-  if not me.IsCooldownTracked(category, spellId) then
+  --[[
+    The enabled state is keyed by the PRIMARY spellId (the config ui only ever
+    writes primaries) - gate on realSpellId so a lower-rank cast of an enabled
+    spell tracks like its max rank.
+  ]]--
+  if not me.IsCooldownTracked(category, realSpellId) then
     mod.logger.LogDebug(me.tag, "Spell is not enabled - aborting...")
+    return
+  end
+
+  if spell.petCast then
+    mod.petOwner.AttributeCast(sourceGuid, category, spell, castTime)
     return
   end
 

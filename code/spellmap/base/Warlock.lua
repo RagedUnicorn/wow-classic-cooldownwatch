@@ -144,4 +144,40 @@ mod.spellMapBaseClasses["warlock"] = {
       { spellId = 18931, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
+  --[[
+    Felhunter abilities: cast by the warlock's pet, so the combat-log event
+    fires with the PET's guid as source. petCast routes them through the
+    pet-owner attribution (CombatLog/PetOwner) so the cooldown lands under the
+    owning warlock. Spell Lock is 30s in Classic Era
+  ]]--
+  [19647] = {
+    name = "Spell Lock",
+    type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+    cooldown = 30,
+    active = true,
+    petCast = true,
+    trackedEvents = {
+      "SPELL_CAST_SUCCESS",
+    },
+    allRanks = {
+      { spellId = 19647, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 19244, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+    }
+  },
+  [19736] = {
+    name = "Devour Magic",
+    type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
+    cooldown = 8,
+    active = false,
+    petCast = true,
+    trackedEvents = {
+      "SPELL_CAST_SUCCESS",
+    },
+    allRanks = {
+      { spellId = 19736, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 19505, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 19731, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 19734, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+    }
+  },
 }
