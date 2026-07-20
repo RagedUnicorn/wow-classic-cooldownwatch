@@ -59,10 +59,16 @@ end
   Update the tracked target when the player's target changes. Also sweep
   long-expired cooldowns of all casters from the queue - the data-layer backstop
   for entries the renderer never visits (casters that are never retargeted).
+
+  Acquiring a target is a start edge for the render ticker: wake it (after the
+  sweep, so a fully expired bucket no longer counts as work) when the new target
+  has queued cooldowns. Losing the target needs no action here - the running
+  ticker sees the empty target itself, clears the bar and stops.
 ]]--
 OnTargetChanged = function()
   me.target.UpdateCurrentTarget()
   me.cooldownQueue.PruneExpiredCooldowns(GetTime())
+  me.targetCooldownBar.WakeRenderTicker()
 end
 
 --[[
@@ -117,8 +123,6 @@ Initialize = function()
   me.targetCooldownBar.BuildUi()
   -- load addon variables
   me.configuration.SetupConfiguration()
-  -- setup tickers
-  me.ticker.StartTickerTargetCooldownBar()
   -- update initial view of gearBars after addon initialization
   me.targetCooldownBar.TargetCooldownBarUiUpdate()
   -- register addon message prefix for the version broadcast

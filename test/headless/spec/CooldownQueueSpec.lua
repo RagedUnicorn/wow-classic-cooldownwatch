@@ -228,6 +228,38 @@ describe("CooldownQueue", function()
     assert.same({}, queue.GetCooldownsByTarget("guid-1"))
   end)
 
+  it("AddCooldown wakes the render ticker on add and refresh but not on an inactive drop", function()
+    local wakeCalls = 0
+    local originalWake = rgcw.targetCooldownBar.WakeRenderTicker
+    rgcw.targetCooldownBar.WakeRenderTicker = function() wakeCalls = wakeCalls + 1 end
+
+    queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
+    queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 250))
+    queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10890, "Psychic Scream", 100, false))
+
+    rgcw.targetCooldownBar.WakeRenderTicker = originalWake
+
+    assert.equal(2, wakeCalls)
+  end)
+
+  it("HasCooldowns reflects bucket presence through add, remove and prune", function()
+    assert.is_false(queue.HasCooldowns("guid-1"))
+
+    queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
+    assert.is_true(queue.HasCooldowns("guid-1"))
+
+    queue.RemoveCooldown("guid-1", 10947)
+    assert.is_false(queue.HasCooldowns("guid-1"))
+
+    -- entries inside the post-expiry prune grace still count as renderable work
+    queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
+    queue.PruneCooldownsByTarget("guid-1", 100 + 30 + RGCW_CONSTANTS.COOLDOWN_QUEUE_PRUNE_GRACE)
+    assert.is_true(queue.HasCooldowns("guid-1"))
+
+    queue.PruneCooldownsByTarget("guid-1", 100 + 30 + RGCW_CONSTANTS.COOLDOWN_QUEUE_PRUNE_GRACE + 1)
+    assert.is_false(queue.HasCooldowns("guid-1"))
+  end)
+
   it("RemoveCooldown is a no-op for an unknown caster", function()
     assert.has_no.errors(function()
       queue.RemoveCooldown("guid-unknown", 10947)

@@ -49,10 +49,28 @@ me.tag = "TargetCooldownBarPreview"
 local exampleCooldowns = {}
 
 --[[
+  Whether preview mode currently owns the slot widgets. While true the live render ticker
+  must stay down: combat log events keep enqueueing during the preview, and their wake edge
+  (CooldownQueue.AddCooldown -> TargetCooldownBar.WakeRenderTicker) would otherwise bring
+  the live ticker up to fight the preview ticker over the slots.
+]]--
+local previewActive = false
+
+--[[
+  @return {boolean}
+    Whether preview ("example") mode is currently active
+]]--
+function me.IsPreviewActive()
+  return previewActive
+end
+
+--[[
   Interrupt regular onUpdate for the TargetCooldownBar and show example cooldowns to the player.
   Renders one immediate frame, then hands over to the preview ticker for animation.
 ]]--
 function me.ShowExampleTargetCooldownBar()
+  previewActive = true
+
   mod.ticker.StopTickerTargetCooldownBar() -- stop regular updates
   mod.cooldownQueue.ClearCooldownQueue() -- drop all current cooldowns
 
@@ -92,9 +110,13 @@ function me.TargetCooldownBarPreviewOnUpdate()
 end
 
 --[[
-  Stop the preview and restart regular onUpdate ticks for the TargetCooldownBar
+  Stop the preview and hand the slots back to the live render lifecycle. The live ticker is
+  not restarted unconditionally - the wake edge decides whether there is anything to render
+  (the queue was cleared when the preview started, so usually there is not).
 ]]--
 function me.HideExampleTargetCooldownBar()
+  previewActive = false
+
   mod.ticker.StopTickerTargetCooldownBarPreview()
 
   local cooldownSlots = mod.targetCooldownBar.GetCooldownSlots()
@@ -110,5 +132,5 @@ function me.HideExampleTargetCooldownBar()
 
   exampleCooldowns = {}
 
-  mod.ticker.StartTickerTargetCooldownBar() -- restart regular updates
+  mod.targetCooldownBar.WakeRenderTicker() -- restart regular updates only if there is work
 end

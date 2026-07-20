@@ -160,26 +160,32 @@ function me.AddCooldown(sourceGuid, sourceName, category, spellData)
       "Refreshed cooldown - '" .. spellData.name .. "' for player (" .. category .. "): "
         .. sourceName .. " (" .. sourceGuid .. ") "
     )
-    return
+  else
+    if not casterBucket then
+      casterBucket = {}
+      cooldownQueue[sourceGuid] = casterBucket
+    end
+
+    casterBucket[spellData.spellId] = {
+      ["sourceGuid"] = sourceGuid,
+      ["sourceName"] = sourceName,
+      ["categoryName"] = category,
+      ["spellData"] = spellData
+    }
+
+    mod.logger.LogDebug(
+      me.tag,
+      "Added new cooldown - '" .. spellData.name .. "' for player (" .. category .. "): "
+        .. sourceName .. " (" .. sourceGuid .. ") "
+    )
   end
 
-  if not casterBucket then
-    casterBucket = {}
-    cooldownQueue[sourceGuid] = casterBucket
-  end
-
-  casterBucket[spellData.spellId] = {
-    ["sourceGuid"] = sourceGuid,
-    ["sourceName"] = sourceName,
-    ["categoryName"] = category,
-    ["spellData"] = spellData
-  }
-
-  mod.logger.LogDebug(
-    me.tag,
-    "Added new cooldown - '" .. spellData.name .. "' for player (" .. category .. "): "
-      .. sourceName .. " (" .. sourceGuid .. ") "
-  )
+  --[[
+    The render ticker only runs while there is something to render. An enqueue is one of
+    its start edges: if the cooldown belongs to the current target while the bar is idle,
+    the ticker has to come back up (WakeRenderTicker no-ops in every other situation).
+  ]]--
+  mod.targetCooldownBar.WakeRenderTicker()
 end
 
 --[[
@@ -271,6 +277,21 @@ function me.ClearCooldownQueue()
 end
 
 --[[
+  Whether any cooldown is queued for a caster. O(1): emptied buckets are removed
+  eagerly (RemoveCooldown / PruneCooldownsByTarget), so bucket presence implies at
+  least one entry. Entries in the post-expiry prune grace still count - the render
+  layer is still fading them out, so they are something to render.
+
+  @param {string} sourceGuid
+    A unique identification for a caster
+
+  @return {boolean}
+]]--
+function me.HasCooldowns(sourceGuid)
+  return cooldownQueue[sourceGuid] ~= nil
+end
+
+--[[
   Build a single synthetic cooldown entry for the configuration preview
   (`/rgcw conf enable` -> TargetCooldownBar.ShowExampleTargetCooldownBar).
 
@@ -328,9 +349,9 @@ end
 
 --[[
   Reused snapshot array for GetCooldownsByTarget. The function is called 20 times
-  per second from the render ticker (TargetCooldownBarOnUpdate) whenever an enemy
-  target exists; refilling one module-local array instead of allocating a fresh
-  table per call keeps the render path free of steady GC churn.
+  per second from the render ticker (TargetCooldownBarOnUpdate) while it is running;
+  refilling one module-local array instead of allocating a fresh table per call
+  keeps the render path free of steady GC churn.
 ]]--
 local cooldownSnapshot = {}
 

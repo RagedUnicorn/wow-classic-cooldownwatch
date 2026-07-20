@@ -61,6 +61,12 @@ rgcw.season = {
   IsTbcActive = function() return false end,
 }
 
+-- CooldownQueue.AddCooldown wakes the render ticker on enqueue; the gui layer that
+-- owns the real edge check (gui/TargetCooldownBar.lua) is not loaded headless
+rgcw.targetCooldownBar = {
+  WakeRenderTicker = function() end,
+}
+
 -- SpellMap resolves faction-mirrored insignia itemIds at load time
 UnitFactionGroup = function() return "Alliance" end
 

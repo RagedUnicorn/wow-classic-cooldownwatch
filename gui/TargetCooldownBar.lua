@@ -158,7 +158,31 @@ function me.UpdateTargetBarFramePosition()
 end
 
 --[[
-  GUI callback for updating the targetCooldownBar - invoked regularly by a timer
+  Start the render ticker if there is anything for it to render: an enemy target with at
+  least one queued cooldown. The single start edge for the ticker - invoked on target
+  change (Core.OnTargetChanged), on enqueue (CooldownQueue.AddCooldown) and when preview
+  mode hands the bar back (TargetCooldownBarPreview.HideExampleTargetCooldownBar) - so
+  callers never start it unconditionally. Safe to skip the start when the queue is empty:
+  the ticker only ever stops right after a full clear pass (see TargetCooldownBarOnUpdate)
+  so a stopped ticker implies cleared slots. No-ops while preview mode owns the slots and,
+  via the guard in StartTickerTargetCooldownBar, while the ticker is already running.
+]]--
+function me.WakeRenderTicker()
+  if mod.targetCooldownBarPreview.IsPreviewActive() then return end
+
+  local targetGuid = mod.target.GetCurrentTargetGuid()
+
+  if targetGuid ~= "" and mod.cooldownQueue.HasCooldowns(targetGuid) then
+    mod.ticker.StartTickerTargetCooldownBar()
+  end
+end
+
+--[[
+  GUI callback for updating the targetCooldownBar - invoked regularly by the render ticker
+  while there is something to render. Once there is not - the target was lost or its last
+  cooldown left the queue (expiry fade finished or pruned) - the pass below doubles as the
+  final clear pass and the ticker stops itself; one of the WakeRenderTicker edges brings
+  it back up.
 
   Note: Operations within TargetCooldownBarOnUpdate should not be expensive because it is invoked heavily
   to create a smooth visual representation. Make sure to abort as soon as possible.
@@ -186,6 +210,10 @@ function me.TargetCooldownBarOnUpdate()
     else
       mod.targetCooldownBarSlot.ClearCooldownWatchSlot(cooldownSlots[i])
     end
+  end
+
+  if cooldowns == nil or cooldowns[1] == nil then
+    mod.ticker.StopTickerTargetCooldownBar()
   end
 end
 

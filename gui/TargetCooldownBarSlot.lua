@@ -469,11 +469,11 @@ end
 --[[
   Clear a cooldownWatchSlot without any animation
 
-  Idempotent: the OnUpdate ticker calls this for every empty slot on every tick for the whole
-  session, so without the isCleared guard an already-empty bar would re-issue the widget writes
-  below permanently. The flag is reset in UpdateCooldownWatchSlot, the only path that dirties
-  slot widgets after a clear (the fade OnFinished cleanup only ever moves a slot closer to the
-  cleared state, never away from it).
+  Idempotent: while the render ticker runs, the OnUpdate pass calls this for every slot beyond
+  the rendered cooldowns on every tick, so without the isCleared guard a partially filled bar
+  would re-issue the widget writes below 20 times a second. The flag is reset in
+  UpdateCooldownWatchSlot, the only path that dirties slot widgets after a clear (the fade
+  OnFinished cleanup only ever moves a slot closer to the cleared state, never away from it).
 
   @param {table} cooldownWatchSlot
 ]]--
