@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals CreateFrame UIParent GetTime
+-- luacheck: globals CreateFrame UIParent
 
 --[[
   Lifecycle, frame construction and per-tick orchestration for the TargetCooldownBar. Owns the bar frame
@@ -180,9 +180,9 @@ end
 --[[
   GUI callback for updating the targetCooldownBar - invoked regularly by the render ticker
   while there is something to render. Once there is not - the target was lost or its last
-  cooldown left the queue (expiry fade finished or pruned) - the pass below doubles as the
-  final clear pass and the ticker stops itself; one of the WakeRenderTicker edges brings
-  it back up.
+  cooldown left the queue (removed by its expiry timer, the expiry fade's OnFinished or
+  the target-change sweep) - the pass below doubles as the final clear pass and the ticker
+  stops itself; one of the WakeRenderTicker edges brings it back up.
 
   Note: Operations within TargetCooldownBarOnUpdate should not be expensive because it is invoked heavily
   to create a smooth visual representation. Make sure to abort as soon as possible.
@@ -196,11 +196,6 @@ function me.TargetCooldownBarOnUpdate()
   local cooldowns
 
   if targetGuid ~= "" then
-    --[[
-      Prune before reading: the fade animation only removes entries that occupy a visible
-      slot, so entries beyond the slot amount would otherwise linger in the bucket forever.
-    ]]--
-    mod.cooldownQueue.PruneCooldownsByTarget(targetGuid, GetTime())
     cooldowns = mod.cooldownQueue.GetCooldownsByTarget(targetGuid)
   end
 

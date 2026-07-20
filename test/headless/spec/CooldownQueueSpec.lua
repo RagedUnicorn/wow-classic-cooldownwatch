@@ -25,7 +25,7 @@
 -- busted extends `assert` with .same / .equal / etc. at runtime; luacheck
 -- cannot verify those fields statically. Suppress warning 143 (accessing
 -- undefined field of a global variable) for this file.
--- luacheck: globals describe it before_each
+-- luacheck: globals describe it before_each after_each
 -- luacheck: ignore 143
 
 describe("CooldownQueue", function()
@@ -429,5 +429,115 @@ describe("CooldownQueue", function()
     local cooldowns = queue.GetCooldownsByTarget("guid-2")
     assert.equal(1, #cooldowns)
     assert.equal(2094, cooldowns[1].spellData.spellId)
+  end)
+
+  --[[
+    One-shot expiry timers: AddCooldown schedules C_Timer.After per enqueue and the
+    callback validates its castTime generation token against the live entry. The
+    capturing C_Timer stub records every scheduled (delay, callback) pair so scenarios
+    fire callbacks explicitly - including orphaned ones a refresh left behind. GetTime
+    is pinned to the makeSpell castTimes so the scheduled delay is assertable.
+  ]]--
+  describe("expiry timers", function()
+    local wowStubs = require("WowStubs")
+    local scheduledTimers
+    local restoreStubs
+    local originalGetCurrentTargetGuid
+
+    before_each(function()
+      scheduledTimers = {}
+      restoreStubs = wowStubs.install({
+        ["GetTime"] = function() return 100 end,
+        ["C_Timer"] = {
+          After = function(delay, callback)
+            scheduledTimers[#scheduledTimers + 1] = { ["delay"] = delay, ["callback"] = callback }
+          end,
+        },
+      })
+      originalGetCurrentTargetGuid = rgcw.target.GetCurrentTargetGuid
+    end)
+
+    after_each(function()
+      restoreStubs()
+      rgcw.target.GetCurrentTargetGuid = originalGetCurrentTargetGuid
+    end)
+
+    it("AddCooldown schedules a one-shot timer for the resolved cooldown's remaining time", function()
+      queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
+
+      -- castTime 100 + cooldown 30 - GetTime() 100
+      assert.equal(1, #scheduledTimers)
+      assert.equal(30, scheduledTimers[1].delay)
+    end)
+
+    it("AddCooldown schedules the timer against the resolved cooldown, not the base value", function()
+      CooldownWatchConfiguration.cooldownOverrides = { ["priest"] = { [10947] = { value = 15 } } }
+
+      queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
+
+      assert.equal(15, scheduledTimers[1].delay)
+    end)
+
+    it("AddCooldown schedules no timer for an inactive spell", function()
+      queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100, false))
+
+      assert.equal(0, #scheduledTimers)
+    end)
+
+    it("a valid fire removes the entry when the caster is not the current target", function()
+      queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
+
+      scheduledTimers[1].callback()
+
+      assert.same({}, queue.GetCooldownsByTarget("guid-1"))
+    end)
+
+    it("a valid fire flags the current target's entry expired and leaves it queued", function()
+      rgcw.target.GetCurrentTargetGuid = function() return "guid-1" end
+      queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
+
+      scheduledTimers[1].callback()
+
+      local cooldowns = queue.GetCooldownsByTarget("guid-1")
+      assert.equal(1, #cooldowns)
+      assert.is_true(cooldowns[1].expired)
+    end)
+
+    it("a refresh reschedules and the orphaned older timer's fire is a no-op", function()
+      queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
+      queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 250))
+
+      assert.equal(2, #scheduledTimers)
+
+      -- the first timer lost the generation-token race; the refreshed cooldown
+      -- must not be removed early
+      scheduledTimers[1].callback()
+
+      local cooldowns = queue.GetCooldownsByTarget("guid-1")
+      assert.equal(1, #cooldowns)
+      assert.equal(250, cooldowns[1].spellData.castTime)
+      assert.is_nil(cooldowns[1].expired)
+    end)
+
+    it("a refresh clears the expired flag of a flagged entry", function()
+      rgcw.target.GetCurrentTargetGuid = function() return "guid-1" end
+      queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
+      scheduledTimers[1].callback()
+
+      queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 250))
+
+      local cooldowns = queue.GetCooldownsByTarget("guid-1")
+      assert.is_nil(cooldowns[1].expired)
+    end)
+
+    it("a fire after the entry was removed is a no-op", function()
+      queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
+      queue.RemoveCooldown("guid-1", 10947)
+
+      assert.has_no.errors(function()
+        scheduledTimers[1].callback()
+      end)
+      assert.same({}, queue.GetCooldownsByTarget("guid-1"))
+    end)
   end)
 end)

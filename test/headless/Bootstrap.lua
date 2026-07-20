@@ -30,7 +30,7 @@
   Expected cwd: addon repo root. Run from elsewhere and the dofile()s will fail.
 ]]--
 
--- luacheck: globals rgcw RGCW_ENVIRONMENT unpack UnitFactionGroup
+-- luacheck: globals rgcw RGCW_ENVIRONMENT unpack UnitFactionGroup C_Timer GetTime
 
 -- allow specs to require the opt-in WoW-global stub registry as `require("WowStubs")`
 package.path = "./test/headless/?.lua;" .. package.path
@@ -66,6 +66,24 @@ rgcw.season = {
 rgcw.targetCooldownBar = {
   WakeRenderTicker = function() end,
 }
+
+-- CooldownQueue's expiry-timer callback resolves the current target to decide between
+-- flagging and removing; code/Target.lua reads WoW unit APIs and is not loaded headless.
+-- "" (no target) sends every headless expiry fire down the immediate-removal path unless
+-- a spec overrides the function.
+rgcw.target = {
+  GetCurrentTargetGuid = function() return "" end,
+}
+
+--[[
+  CooldownQueue.AddCooldown schedules a one-shot expiry timer per enqueue. The no-op
+  keeps specs that enqueue without caring about expiry green; CooldownQueueSpec installs
+  a capturing C_Timer (and a fixed GetTime) via WowStubs to exercise the timer semantics.
+]]--
+C_Timer = {
+  After = function() end,
+}
+GetTime = function() return 0 end
 
 -- SpellMap resolves faction-mirrored insignia itemIds at load time
 UnitFactionGroup = function() return "Alliance" end

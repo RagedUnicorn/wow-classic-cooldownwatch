@@ -118,19 +118,16 @@ function me.CreateAnimation(cooldownWatchSlot)
     --[[
       The fade races cooldown refreshes: UpdateCooldownWatchSlot cancels a playing fade,
       but only on its next tick. If the entry was refreshed (AddCooldown swaps spellData
-      in place, so reading it here sees the fresh timing) and the fade completed inside
-      that window, the cooldown is live again - hand the slot back to the update path
-      untouched instead of destroying fresh state.
+      in place and clears the expired flag) and the fade completed inside that window,
+      the cooldown is live again - hand the slot back to the update path untouched
+      instead of destroying fresh state.
     ]]--
-    local spellData = cooldown.spellData
-    local timeLeft = spellData.cooldown - (GetTime() - spellData.castTime)
-
-    if timeLeft > 0 then
+    if not cooldown.expired then
       cooldownWatchSlot:SetAlpha(1)
       return
     end
 
-    mod.cooldownQueue.RemoveCooldown(cooldown.sourceGuid, spellData.spellId)
+    mod.cooldownQueue.RemoveCooldown(cooldown.sourceGuid, cooldown.spellData.spellId)
 
     --[[
       A non-nil overlay spellId means the update path rebound this slot to another live
@@ -273,17 +270,17 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   ]]--
   cooldownWatchSlot.isCleared = false
 
+  if cooldown.expired then
+    me.ClearCooldownSlotAnimated(cooldownWatchSlot, cooldown)
+    return
+  end
+
   local timePassed = (GetTime() - cooldown.spellData.castTime)
   local timeLeftBig = cooldown.spellData.cooldown - timePassed
   local timeLeftSmall
 
   if cooldown.spellData.cooldownWorstCase ~= nil then
     timeLeftSmall = cooldown.spellData.cooldownWorstCase - timePassed
-  end
-
-  if timeLeftBig <= 0 then
-    me.ClearCooldownSlotAnimated(cooldownWatchSlot, cooldown)
-    return
   end
 
   --[[

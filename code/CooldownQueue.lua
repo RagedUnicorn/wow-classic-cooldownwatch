@@ -23,6 +23,8 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
+-- luacheck: globals C_Timer GetTime
+
 local mod = rgcw
 local me = {}
 
@@ -40,6 +42,11 @@ me.tag = "CooldownQueue"
       - {string} Actual name of the caster
     ["categoryName"] = categoryName,
       - {string} The category the spell belongs to (e.g. "priest")
+    ["expired"] = expired,
+      - {boolean} Optional, set by the entry's one-shot expiry timer when the caster is
+      the current target. The render pass reacts to the flag by playing the expiry fade;
+      the fade's OnFinished removes the entry. Cleared on refresh - a recast makes the
+      entry live again
     ["spellData"] = {
       ["spellId"] = spellId,
         - {number} SpellId of the spell
@@ -113,6 +120,49 @@ function me.ResolveCooldown(category, spellData)
 end
 
 --[[
+  Schedule the one-shot timer that ends a queued cooldown. Expiry is an event the
+  data layer owns - the render tick only draws; it never computes whether a cooldown
+  ran out.
+
+  C_Timer.After cannot be cancelled, so a refresh simply schedules a newer timer and
+  orphans the old one: the callback validates its generation token (the castTime
+  captured at scheduling) against the live entry and bails out when it lost the race
+  (the entry was refreshed, removed or pruned in the meantime).
+
+  On a valid fire the entry's fate depends on the caster:
+  - current target: flag the entry expired and leave it queued. The render pass reacts
+    to the flag by playing the expiry fade; the fade's OnFinished removes the entry
+  - anyone else: remove immediately - the data-layer prune that keeps buckets of
+    casters who are never (re)targeted from accumulating for the length of a session
+
+  Entries flagged while they cannot be rendered (preview mode owns the slots, or the
+  target changes away before the fade ran) are covered by the PruneExpiredCooldowns
+  backstop on the next target change.
+
+  @param {string} sourceGuid
+    A unique identification for a caster
+  @param {table} spellData
+    The queued entry's spellData (cooldown already resolved, castTime stamped)
+]]--
+local function ScheduleExpiryTimer(sourceGuid, spellData)
+  local spellId = spellData.spellId
+  local castTime = spellData.castTime
+
+  C_Timer.After(castTime + spellData.cooldown - GetTime(), function()
+    local casterBucket = cooldownQueue[sourceGuid]
+    local entry = casterBucket and casterBucket[spellId]
+
+    if not entry or entry.spellData.castTime ~= castTime then return end -- orphaned timer
+
+    if mod.target.GetCurrentTargetGuid() == sourceGuid then
+      entry.expired = true
+    else
+      me.RemoveCooldown(sourceGuid, spellId)
+    end
+  end)
+end
+
+--[[
   Add a cooldown to the queue. If a cooldown for the same (sourceGuid, spellId)
   already exists it is refreshed in place rather than duplicated.
 
@@ -155,6 +205,8 @@ function me.AddCooldown(sourceGuid, sourceName, category, spellData)
 
   if casterBucket and casterBucket[spellData.spellId] then
     casterBucket[spellData.spellId].spellData = spellData
+    -- a recast makes the entry live again; the replaced castTime orphans the old expiry timer
+    casterBucket[spellData.spellId].expired = nil
     mod.logger.LogDebug(
       me.tag,
       "Refreshed cooldown - '" .. spellData.name .. "' for player (" .. category .. "): "
@@ -179,6 +231,8 @@ function me.AddCooldown(sourceGuid, sourceName, category, spellData)
         .. sourceName .. " (" .. sourceGuid .. ") "
     )
   end
+
+  ScheduleExpiryTimer(sourceGuid, spellData)
 
   --[[
     The render ticker only runs while there is something to render. An enqueue is one of
@@ -227,12 +281,13 @@ local function IsPrunable(cooldownEvent, now)
 end
 
 --[[
-  Remove long-expired cooldowns for a single caster. Cheap enough for the render
-  hot path (buckets hold a handful of entries); invoked per tick for the current
-  target so entries beyond the visible slots don't outlive their expiry.
+  Remove long-expired cooldowns for a single caster. The per-caster worker behind
+  PruneExpiredCooldowns; not part of the render path - expiry removal is owned by
+  the one-shot timers (see ScheduleExpiryTimer).
 
-  `now` is taken as a parameter (rather than calling GetTime internally) to keep
-  this module free of WoW APIs and unit-testable under the headless harness.
+  `now` is taken as a parameter (rather than calling GetTime internally) so the
+  prune logic stays unit-testable with synthetic timestamps under the headless
+  harness.
 
   @param {string} sourceGuid
     A unique identification for a caster
@@ -256,9 +311,12 @@ function me.PruneCooldownsByTarget(sourceGuid, now)
 end
 
 --[[
-  Remove long-expired cooldowns across all casters. The data-layer backstop for
-  entries the renderer never visits (casters that are never retargeted); invoked
-  on PLAYER_TARGET_CHANGED rather than per tick.
+  Remove long-expired cooldowns across all casters; invoked on PLAYER_TARGET_CHANGED.
+  The backstop behind the one-shot expiry timers: a timer that fired for the current
+  target only flags its entry and relies on the render fade to remove it, so an entry
+  flagged while it could not be rendered (preview mode owned the slots, or the target
+  changed away before the fade ran) would otherwise linger. The prune grace keeps the
+  sweep from racing a fade that is still playing.
 
   @param {number} now
     The current timestamp (production passes GetTime())

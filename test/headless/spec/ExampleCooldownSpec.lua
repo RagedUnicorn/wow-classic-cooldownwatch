@@ -65,6 +65,10 @@ describe("Example cooldown preview", function()
     local category, _, spellData =
       rgcw.spellMapHelper.GetSpellById(RGCW_CONSTANTS.EXAMPLE_COOLDOWN_SPELL_ID)
 
+    -- every production enqueue path stamps castTime before AddCooldown (the entry
+    -- contract; the expiry timer schedules against it)
+    spellData.castTime = 0
+
     rgcw.cooldownQueue.ClearCooldownQueue()
     rgcw.cooldownQueue.AddCooldown("real-guid", "RealCaster", category, spellData)
     local realEntry = rgcw.cooldownQueue.GetCooldownsByTarget("real-guid")[1]

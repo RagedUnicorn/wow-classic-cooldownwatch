@@ -57,8 +57,10 @@ end
 
 --[[
   Update the tracked target when the player's target changes. Also sweep
-  long-expired cooldowns of all casters from the queue - the data-layer backstop
-  for entries the renderer never visits (casters that are never retargeted).
+  long-expired cooldowns of all casters from the queue - the backstop behind the
+  per-entry expiry timers, catching entries a timer flagged for the current
+  target that then never completed the render fade (the target changed away, or
+  preview mode owned the slots).
 
   Acquiring a target is a start edge for the render ticker: wake it (after the
   sweep, so a fully expired bucket no longer counts as work) when the new target
