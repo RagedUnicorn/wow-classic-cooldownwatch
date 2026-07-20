@@ -695,8 +695,6 @@ end
   the base catalog. Rank aliases ({ refId = primaryId }) are derived from
   allRanks and synthesized post-assembly (SpellMap.SynthesizeRankAliases) -
   hand-writing one in a base slice duplicates allRanks and drifts silently.
-  Aliases NOT derivable from allRanks (aura ids differing from the cast id,
-  e.g. Combustion's buff 28682) legitimately stay hand-written and pass here.
 
   Run this against mod.spellMapBase.GetMap(), not the assembled map - after
   assembly, every rank deliberately has its synthesized entry.

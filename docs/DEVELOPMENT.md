@@ -154,9 +154,11 @@ cooldown too early.
 Two things to check when adding such a spell:
 
 - **Aura spellId vs cast spellId.** Verify on the wowhead spell page that the buff is applied by the same
-  spellId ("Apply Aura" effect on the cast spell). If the cast *triggers* a separate buff spell (Combustion
-  `11129` triggers buff `28682`), the removal event carries the **buff's** id — add a `refId` alias entry for
-  the aura id pointing at the primary.
+  spellId ("Apply Aura" effect on the cast spell). If the cast *triggers* a separate buff spell, the removal
+  event carries the **buff's** id — add a `refId` alias entry for the aura id pointing at the primary. The
+  tell that no alias is needed: the cast id itself carries the DB2 "starts cooldown after aura fades"
+  attribute (wowhead spell filter 63;1;0). Every current buff-then-consume entry does — including Combustion
+  `11129`, whose lookalike buff spell `28682` is not player-used — so the catalog has no such alias today.
 - **Supported events.** `CombatLog` only dispatches events listed in its `supportedEvents` table
   (`GetSupportedEvents`); the `ValidateTrackedEventsSupported` validator fails on anything else. Aura events
   attribute the acting player via the **dest** unit (the buff owner) since aura events may carry no source.

@@ -67,8 +67,7 @@ end
   listed in a primary's allRanks. Rank aliases are derived data - hand-writing
   them in the base slices would duplicate each primary's allRanks list and
   drift silently, so the slices carry only aliases that are NOT derivable from
-  allRanks (aura ids that differ from the cast id, e.g. Combustion's buff
-  28682). Existing entries are never overwritten. Exposed (rather than kept
+  allRanks. Existing entries are never overwritten. Exposed (rather than kept
   local to BuildAssembledMap) for the per-branch validation specs, which
   assemble maps directly via the assembler to keep the orchestrator's
   per-branch cache untouched.

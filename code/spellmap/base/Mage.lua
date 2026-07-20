@@ -45,12 +45,6 @@ mod.spellMapBaseClasses["mage"] = {
       { spellId = 11129, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  --[[
-    Not a rank: casting Combustion (11129) triggers buff 28682, and the
-    SPELL_AURA_REMOVED event carries the buff's id, so it aliases back to
-    the primary (verified on the wowhead spell=11129 effects list).
-  ]]--
-  [28682] = { refId = 11129 },
   [10161] = {
     name = "Cone of Cold",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
