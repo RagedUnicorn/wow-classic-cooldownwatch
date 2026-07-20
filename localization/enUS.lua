@@ -78,6 +78,8 @@ rgcw.L["option_assume_worst_case_tooltip"] = "Assume the enemy has talents or ge
   .. "The bar counts down the shortest realistic cooldown instead of the base value."
 rgcw.L["option_cooldown_values"] = "%gs cooldown"
 rgcw.L["option_cooldown_values_worst_case"] = "%gs cooldown / %gs worst case"
+rgcw.L["option_cooldown_label"] = "Cooldown"
+rgcw.L["option_use_worst_case"] = "Use worst case"
 rgcw.L["option_manual_cooldown_override"] = "Cooldown override"
 rgcw.L["option_manual_cooldown_override_tooltip"] = "Manually override the tracked cooldown in seconds. "
   .. "Takes precedence over all worst case settings. Leave empty for no override. "

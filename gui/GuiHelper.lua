@@ -22,7 +22,7 @@
   SOFTWARE.
 ]]--
 
--- luacheck: globals GetSpellInfo GetItemIcon CreateFrame STANDARD_TEXT_FONT
+-- luacheck: globals GetSpellInfo GetItemIcon CreateFrame CreateColor STANDARD_TEXT_FONT
 
 local mod = rgcw
 local me = {}
@@ -148,6 +148,132 @@ function me.GetIconId(spellEntry)
   local _, _, iconId = GetSpellInfo(spellEntry.spellId)
 
   return iconId
+end
+
+--[[
+  Brighten an { r, g, b } colour by a flat amount, clamped to 1. Returns the three
+  channels separately (ready for SetVertexColor / SetTextColor).
+
+  @param {table} color
+  @param {number} amount
+
+  @return {number}, {number}, {number}
+]]--
+local function Brighten(color, amount)
+  return math.min(color[1] + amount, 1), math.min(color[2] + amount, 1), math.min(color[3] + amount, 1)
+end
+
+--[[
+  Create a single styled "slate key" button: a gradient face over a coloured rim,
+  a beveled inset, an additive hover glow, a 1px press nudge, and an outlined
+  glyph. Trimmed clone of Quartermaster's UiHelper createKey (no tooltip wiring -
+  when the look changes, change the whole family). The caller wires OnClick
+  (RegisterForClicks is already set) and may swap the glyph via :SetGlyph(). Use
+  ASCII glyphs only - some Unicode symbols do not render in the game font.
+
+  @param {string} name
+  @param {table} parent
+  @param {string} kind - a RGCW_CONSTANTS.SLATE_KEY palette key (expand)
+  @param {string} glyph - the character drawn on the key (+, -)
+  @param {number} size
+
+  @return {table}
+    The created button
+]]--
+function me.CreateSlateKey(name, parent, kind, glyph, size)
+  local skin = RGCW_CONSTANTS.SLATE_KEY[kind]
+
+  local button = CreateFrame("Button", name, parent, "BackdropTemplate")
+  button:SetSize(size, size)
+  button:EnableMouse(true)
+
+  -- coloured rim fills the whole button; the face is inset 2px on top of it
+  local rim = button:CreateTexture(nil, "BACKGROUND", nil, 0)
+  rim:SetAllPoints(button)
+  rim:SetColorTexture(skin.rim[1], skin.rim[2], skin.rim[3], 1)
+
+  -- gradient face (darker at the bottom, lighter at the top)
+  local face = button:CreateTexture(nil, "BACKGROUND", nil, 1)
+  face:SetPoint("TOPLEFT", 2, -2)
+  face:SetPoint("BOTTOMRIGHT", -2, 2)
+  face:SetColorTexture(1, 1, 1, 1)
+  face:SetGradient("VERTICAL",
+    CreateColor(skin.bot[1], skin.bot[2], skin.bot[3], 1),
+    CreateColor(skin.top[1], skin.top[2], skin.top[3], 1))
+
+  -- additive hover bloom, hidden until OnEnter
+  local glow = button:CreateTexture(nil, "ARTWORK", nil, 1)
+  glow:SetPoint("CENTER")
+  glow:SetSize(size * 0.92, size * 0.92)
+  glow:SetColorTexture(1, 1, 1, 1)
+  glow:SetBlendMode("ADD")
+  glow:SetVertexColor(skin.glow[1], skin.glow[2], skin.glow[3], 1)
+  glow:SetAlpha(0)
+
+  -- glyph, sized off a TTF so it can be smaller than any Blizzard font object
+  local label = button:CreateFontString(nil, "OVERLAY")
+  label:SetFont(RGCW_CONSTANTS.SLATE_KEY_FONT, math.floor(size * 0.52), "OUTLINE")
+  label:SetPoint("CENTER", 0, 0)
+  label:SetText(glyph)
+  label:SetTextColor(skin.glyph[1], skin.glyph[2], skin.glyph[3], 1)
+  label:SetShadowColor(0, 0, 0, 1)
+  label:SetShadowOffset(0, -1)
+  button.label = label
+
+  -- crisp 2px square border tinted to the rim colour
+  button:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8x8", edgeSize = 2 })
+  button:SetBackdropBorderColor(skin.rim[1], skin.rim[2], skin.rim[3], 1)
+
+  button:SetScript("OnEnter", function(self)
+    self:SetBackdropBorderColor(Brighten(skin.rim, 0.25))
+    rim:SetVertexColor(Brighten(skin.rim, 0.25))
+    glow:SetAlpha(0.22)
+    label:SetTextColor(Brighten(skin.glyph, 0.10))
+  end)
+
+  button:SetScript("OnLeave", function(self)
+    self:SetBackdropBorderColor(skin.rim[1], skin.rim[2], skin.rim[3], 1)
+    rim:SetVertexColor(skin.rim[1], skin.rim[2], skin.rim[3], 1)
+    glow:SetAlpha(0)
+    label:SetTextColor(skin.glyph[1], skin.glyph[2], skin.glyph[3], 1)
+  end)
+
+  -- press = nudge the glyph + glow down 1px
+  button:SetScript("OnMouseDown", function()
+    label:SetPoint("CENTER", 0, -1)
+    glow:SetPoint("CENTER", 0, -1)
+  end)
+
+  button:SetScript("OnMouseUp", function()
+    label:SetPoint("CENTER", 0, 0)
+    glow:SetPoint("CENTER", 0, 0)
+  end)
+
+  -- disabled = desaturate the face / rim and dim the glyph
+  button:SetScript("OnDisable", function()
+    face:SetDesaturated(true)
+    rim:SetDesaturated(true)
+    label:SetTextColor(0.45, 0.41, 0.35, 1)
+  end)
+
+  button:SetScript("OnEnable", function()
+    face:SetDesaturated(false)
+    rim:SetDesaturated(false)
+    label:SetTextColor(skin.glyph[1], skin.glyph[2], skin.glyph[3], 1)
+  end)
+
+  --[[
+    Swap the character drawn on the key (e.g. + to - while a row is expanded)
+
+    @param {string} newGlyph
+  ]]--
+  function button:SetGlyph(newGlyph)
+    self.label:SetText(newGlyph)
+  end
+
+  button:RegisterForClicks("LeftButtonUp")
+
+  return button
 end
 
 --[[

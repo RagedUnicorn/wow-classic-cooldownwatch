@@ -161,6 +161,26 @@ RGCW_CONSTANTS = {
   SPELL_LIST_CONTENT_FRAME_HEIGHT = 552,
   SPELL_LIST_MAX_ROWS = 9,
   SPELL_LIST_ROW_HEIGHT = 50,
+  -- height of the options strip below an expanded row (expanded row = ROW_HEIGHT + this)
+  SPELL_LIST_ROW_EXPANSION_HEIGHT = 40,
+  --[[
+    Styled "slate key" buttons (Quartermaster's stepper-key look, see
+    gui/GuiHelper.lua CreateSlateKey). SLATE_KEY_FONT renders the glyph at a
+    custom size (Blizzard font objects are fixed size). SLATE_KEY holds the
+    per-kind palette as { r, g, b } 0-1: face gradient top / bot, border rim,
+    glyph colour, and additive hover glow.
+  ]]--
+  SLATE_KEY_SIZE = 22,
+  SLATE_KEY_FONT = "Fonts\\FRIZQT__.TTF",
+  SLATE_KEY = {
+    -- expand/collapse: muted gold / brown face, frame-gold rim, BODY glyph
+    expand = {
+      top = { 0.20, 0.17, 0.11 }, bot = { 0.07, 0.06, 0.03 },
+      rim = { 0.435, 0.36, 0.21 },     -- frame gold #6f5c37
+      glyph = { 0.91, 0.87, 0.80 },    -- COLOR.BODY
+      glow = { 0.851, 0.647, 0.129 }   -- COLOR.SECTION_GOLD
+    }
+  },
   --[[
     Cooldown spellList scroll frame
   ]]--
@@ -174,11 +194,14 @@ RGCW_CONSTANTS = {
   ELEMENT_CATEGORY_COOLDOWN_SPELL_WORST_CASE = "$parentWorstCase",
   ELEMENT_CATEGORY_COOLDOWN_SPELL_MANUAL_OVERRIDE = "$parentManualOverride",
   ELEMENT_CATEGORY_COOLDOWN_SPELL_VALUE = "$parentCooldownValue",
+  ELEMENT_CATEGORY_COOLDOWN_SPELL_EXPAND_BUTTON = "$parentExpandButton",
+  ELEMENT_CATEGORY_COOLDOWN_SPELL_EXPANSION = "$parentExpansion",
+  ELEMENT_CATEGORY_COOLDOWN_SPELL_WORST_CASE_VALUE = "$parentWorstCaseValue",
   CATEGORY_COOLDOWN_SPELL_ICON_SIZE = 32,
   -- used by the target cooldown bar slot overlay; the spell-list checkboxes size via CHECK_OPTION_SIZE
   COOLDOWN_SPELL_DEFAULT_SIZE = 32,
   MANUAL_OVERRIDE_EDIT_BOX_WIDTH = 45,
-  MANUAL_OVERRIDE_EDIT_BOX_HEIGHT = 20,
+  MANUAL_OVERRIDE_EDIT_BOX_HEIGHT = 24,
   -- longest catalog cooldowns are four digits (e.g. 1800s racials)
   MANUAL_OVERRIDE_EDIT_BOX_MAX_LETTERS = 4,
   --[[
@@ -193,6 +216,10 @@ RGCW_CONSTANTS = {
     TIMER_BIG_TEXT = {1, 1, 0},
     -- small worst-case timer text (cyan)
     TIMER_SMALL_TEXT = {0.01, 0.66, 0.95, 1},
+    -- expansion strip value fields: flat dark box, 1px border, gold when live
+    VALUE_FIELD_BG = {0.05, 0.04, 0.03, 1},
+    VALUE_FIELD_BORDER = {0.29, 0.24, 0.17, 1},
+    VALUE_FIELD_ACTIVE = {1, 0.819, 0, 1},
     -- fallback for categories without a CATEGORY entry
     CATEGORY_NEUTRAL = {0.5, 0.5, 0.5, 1},
     --[[
