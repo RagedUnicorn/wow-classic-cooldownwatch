@@ -67,10 +67,6 @@ mod.spellMapBaseClasses["mage"] = {
       { spellId = 10160, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [120] = { refId = 10161 },
-  [8492] = { refId = 10161 },
-  [10159] = { refId = 10161 },
-  [10160] = { refId = 10161 },
   [2139] = {
     name = "Counterspell",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -126,12 +122,6 @@ mod.spellMapBaseClasses["mage"] = {
       { spellId = 10197, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [2136] = { refId = 10199 },
-  [2137] = { refId = 10199 },
-  [2138] = { refId = 10199 },
-  [8412] = { refId = 10199 },
-  [8413] = { refId = 10199 },
-  [10197] = { refId = 10199 },
   [10225] = {
     name = "Fire Ward",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -149,10 +139,6 @@ mod.spellMapBaseClasses["mage"] = {
       { spellId = 10223, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [543] = { refId = 10225 },
-  [8457] = { refId = 10225 },
-  [8458] = { refId = 10225 },
-  [10223] = { refId = 10225 },
   [28609] = {
     name = "Frost Ward",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -170,10 +156,6 @@ mod.spellMapBaseClasses["mage"] = {
       { spellId = 10177, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [6143] = { refId = 28609 },
-  [8461] = { refId = 28609 },
-  [8462] = { refId = 28609 },
-  [10177] = { refId = 28609 },
   [10230] = {
     name = "Frost Nova",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -190,9 +172,6 @@ mod.spellMapBaseClasses["mage"] = {
       { spellId = 6131, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [122] = { refId = 10230 },
-  [865] = { refId = 10230 },
-  [6131] = { refId = 10230 },
   [13033] = {
     name = "Ice Barrier",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -208,9 +187,6 @@ mod.spellMapBaseClasses["mage"] = {
       { spellId = 13032, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [11426] = { refId = 13033 },
-  [13031] = { refId = 13033 },
-  [13032] = { refId = 13033 },
   [11958] = {
     name = "Ice Block",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,

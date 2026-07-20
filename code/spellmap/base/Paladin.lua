@@ -60,8 +60,6 @@ mod.spellMapBaseClasses["paladin"] = {
       { spellId = 5599, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [1022] = { refId = 10278 },
-  [5599] = { refId = 10278 },
   [1020] = {
     name = "Divine Shield",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -75,7 +73,6 @@ mod.spellMapBaseClasses["paladin"] = {
       { spellId = 642, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [642] = { refId = 1020 },
   [5573] = {
     name = "Divine Protection",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -89,7 +86,6 @@ mod.spellMapBaseClasses["paladin"] = {
       { spellId = 498, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [498] = { refId = 5573 },
   [10308] = {
     name = "Hammer of Justice",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -106,9 +102,6 @@ mod.spellMapBaseClasses["paladin"] = {
       { spellId = 5589, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [853] = { refId = 10308 },
-  [5588] = { refId = 10308 },
-  [5589] = { refId = 10308 },
   [20066] = {
     name = "Repentance",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -147,8 +140,6 @@ mod.spellMapBaseClasses["paladin"] = {
       { spellId = 20929, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [20473] = { refId = 20930 },
-  [20929] = { refId = 20930 },
   [10310] = {
     name = "Lay on Hands",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -164,6 +155,4 @@ mod.spellMapBaseClasses["paladin"] = {
       { spellId = 2800, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [633] = { refId = 10310 },
-  [2800] = { refId = 10310 }
 }

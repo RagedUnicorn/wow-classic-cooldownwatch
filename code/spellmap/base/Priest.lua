@@ -49,9 +49,6 @@ mod.spellMapBaseClasses["priest"] = {
       { spellId = 10888, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [8122] = { refId = 10890 },
-  [8124] = { refId = 10890 },
-  [10888] = { refId = 10890 },
   [19280] = {
     name = "Devouring Plague",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -70,12 +67,6 @@ mod.spellMapBaseClasses["priest"] = {
       { spellId = 25467, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [2944] = { refId = 19280 },
-  [19276] = { refId = 19280 },
-  [19277] = { refId = 19280 },
-  [19278] = { refId = 19280 },
-  [19279] = { refId = 19280 },
-  [25467] = { refId = 19280 },
   [19293] = {
     name = "Elune's Grace",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -134,15 +125,6 @@ mod.spellMapBaseClasses["priest"] = {
       { spellId = 10945, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [585] = { refId = 10947 },
-  [591] = { refId = 10947 },
-  [8092] = { refId = 10947 },
-  [8102] = { refId = 10947 },
-  [8103] = { refId = 10947 },
-  [8104] = { refId = 10947 },
-  [8105] = { refId = 10947 },
-  [8106] = { refId = 10947 },
-  [10945] = { refId = 10947 },
   [10060] = {
     name = "Power Infusion",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -176,15 +158,6 @@ mod.spellMapBaseClasses["priest"] = {
       { spellId = 10900, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [17] = { refId = 10901 },
-  [592] = { refId = 10901 },
-  [600] = { refId = 10901 },
-  [3747] = { refId = 10901 },
-  [6065] = { refId = 10901 },
-  [6066] = { refId = 10901 },
-  [10898] = { refId = 10901 },
-  [10899] = { refId = 10901 },
-  [10900] = { refId = 10901 },
   [15487] = {
     name = "Silence",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,

@@ -53,12 +53,6 @@ mod.spellMapBaseClasses["shaman"] = {
       { spellId = 10413, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [8042] = { refId = 10414 },
-  [8044] = { refId = 10414 },
-  [8045] = { refId = 10414 },
-  [8046] = { refId = 10414 },
-  [10412] = { refId = 10414 },
-  [10413] = { refId = 10414 },
   [10473] = {
     name = "Frost Shock",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -76,9 +70,6 @@ mod.spellMapBaseClasses["shaman"] = {
       { spellId = 10472, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [8056] = { refId = 10473 },
-  [8058] = { refId = 10473 },
-  [10472] = { refId = 10473 },
   [29228] = {
     name = "Flame Shock",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -98,11 +89,6 @@ mod.spellMapBaseClasses["shaman"] = {
       { spellId = 10448, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [8050] = { refId = 29228 },
-  [8052] = { refId = 29228 },
-  [8053] = { refId = 29228 },
-  [10447] = { refId = 29228 },
-  [10448] = { refId = 29228 },
   [16166] = {
     name = "Elemental Mastery",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -131,10 +117,6 @@ mod.spellMapBaseClasses["shaman"] = {
       { spellId = 11314, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [1535] = { refId = 11315 },
-  [8498] = { refId = 11315 },
-  [8499] = { refId = 11315 },
-  [11314] = { refId = 11315 },
   [8177] = {
     name = "Grounding Totem",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,

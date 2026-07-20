@@ -43,8 +43,8 @@ change. The essentials:
 - **Entries live in per-category slice files** under `code/spellmap/base/` (`Priest.lua`,
   `Rogue.lua`, …, `Racials.lua`, `Items.lua`). Each spell has one **primary entry** (highest
   rank) with `name`, `type`, `cooldown`, `active`, `trackedEvents`, and a structured `allRanks`
-  list, plus one **alias entry** (`[rankSpellId] = { refId = primarySpellId }`) per non-primary
-  rank.
+  list. Rank alias entries (`[rankSpellId] = { refId = primarySpellId }`) are synthesized from
+  `allRanks` at assembly time — do not write them by hand.
 - **Verify every spellId on Wowhead Classic** (`https://www.wowhead.com/classic/spell=<id>`).
   The `name` must match what `GetSpellInfo(spellId)` returns — the spell name, not an item name.
   Watch out for NPC variants with contiguous spellIds that look like player ranks but aren't.

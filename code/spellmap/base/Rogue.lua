@@ -109,10 +109,6 @@ mod.spellMapBaseClasses["rogue"] = {
       { spellId = 11285, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [1776] = { refId = 11286 },
-  [1777] = { refId = 11286 },
-  [8629] = { refId = 11286 },
-  [11285] = { refId = 11286 },
   [1769] = {
     name = "Kick",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -128,9 +124,6 @@ mod.spellMapBaseClasses["rogue"] = {
       { spellId = 1768, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [1766] = { refId = 1769 },
-  [1767] = { refId = 1769 },
-  [1768] = { refId = 1769 },
   [8643] = {
     name = "Kidney Shot",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -144,7 +137,6 @@ mod.spellMapBaseClasses["rogue"] = {
       { spellId = 408, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [408] = { refId = 8643 },
   [14185] = {
     name = "Preparation",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -204,8 +196,6 @@ mod.spellMapBaseClasses["rogue"] = {
       { spellId = 8696, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [2983] = { refId = 11305 },
-  [8696] = { refId = 11305 },
   [1857] = {
     name = "Vanish",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -219,5 +209,4 @@ mod.spellMapBaseClasses["rogue"] = {
       { spellId = 1856, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [1856] = { refId = 1857 }
 }

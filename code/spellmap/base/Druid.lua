@@ -47,8 +47,6 @@ mod.spellMapBaseClasses["druid"] = {
       { spellId = 6798, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [5211] = { refId = 8983 },
-  [6798] = { refId = 8983 },
   [16979] = {
     name = "Feral Charge",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -75,8 +73,6 @@ mod.spellMapBaseClasses["druid"] = {
       { spellId = 22895, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [22842] = { refId = 22896 },
-  [22895] = { refId = 22896 },
   [17116] = {
     name = "Nature's Swiftness",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -138,7 +134,6 @@ mod.spellMapBaseClasses["druid"] = {
       { spellId = 1850, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [1850] = { refId = 9821 },
   [5229] = {
     name = "Enrage",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -167,10 +162,6 @@ mod.spellMapBaseClasses["druid"] = {
       { spellId = 20747, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [20484] = { refId = 20748 },
-  [20739] = { refId = 20748 },
-  [20742] = { refId = 20748 },
-  [20747] = { refId = 20748 },
   [9863] = {
     name = "Tranquility",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -186,9 +177,6 @@ mod.spellMapBaseClasses["druid"] = {
       { spellId = 9862, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [740] = { refId = 9863 },
-  [8918] = { refId = 9863 },
-  [9862] = { refId = 9863 },
   [17329] = {
     name = "Nature's Grasp",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -206,9 +194,4 @@ mod.spellMapBaseClasses["druid"] = {
       { spellId = 16813, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [16689] = { refId = 17329 },
-  [16810] = { refId = 17329 },
-  [16811] = { refId = 17329 },
-  [16812] = { refId = 17329 },
-  [16813] = { refId = 17329 }
 }

@@ -63,12 +63,49 @@ local function DetermineActiveBranch()
 end
 
 --[[
+  Synthesize the { refId = primaryId } alias entry for every non-primary rank
+  listed in a primary's allRanks. Rank aliases are derived data - hand-writing
+  them in the base slices would duplicate each primary's allRanks list and
+  drift silently, so the slices carry only aliases that are NOT derivable from
+  allRanks (aura ids that differ from the cast id, e.g. Combustion's buff
+  28682). Existing entries are never overwritten. Exposed (rather than kept
+  local to BuildAssembledMap) for the per-branch validation specs, which
+  assemble maps directly via the assembler to keep the orchestrator's
+  per-branch cache untouched.
+
+  @param {table} assembledMap
+    The assembled spellMap; mutated in place.
+]]--
+function me.SynthesizeRankAliases(assembledMap)
+  for _, spells in pairs(assembledMap) do
+    -- collect first, insert after: adding keys to a table while pairs-iterating
+    -- it is undefined behavior in Lua
+    local synthesized = {}
+
+    for primaryId, entry in pairs(spells) do
+      if type(entry.name) == "string" and type(entry.allRanks) == "table" then
+        for _, rank in ipairs(entry.allRanks) do
+          if type(rank) == "table" and type(rank.spellId) == "number"
+            and rank.spellId ~= primaryId and spells[rank.spellId] == nil then
+            synthesized[rank.spellId] = primaryId
+          end
+        end
+      end
+    end
+
+    for rankId, primaryId in pairs(synthesized) do
+      spells[rankId] = { refId = primaryId }
+    end
+  end
+end
+
+--[[
   Build the assembled spellMap for a branch: validate and apply the branch's
-  overlays to the base catalog, then decorate every primary with its
-  normalizedSpellName. Validation failures are logged; Apply skips the
-  offending ops. Post-assembly derivations belong here (not in Base) so
-  overlay-added entries are covered too - future rank-alias synthesis
-  hooks in after Apply for the same reason.
+  overlays to the base catalog, then synthesize the rank aliases and decorate
+  every primary with its normalizedSpellName. Validation failures are logged;
+  Apply skips the offending ops. Post-assembly derivations belong here (not in
+  Base) so overlay-added entries are covered too - a rank appended by an
+  overlay's appendRanks op gains its alias like any base rank.
 
   @param {string} branch
 
@@ -94,6 +131,8 @@ local function BuildAssembledMap(branch)
   end
 
   local assembled = mod.spellMapAssembler.Apply(base, overlays)
+
+  me.SynthesizeRankAliases(assembled)
 
   for _, spells in pairs(assembled) do
     for _, spellData in pairs(spells) do

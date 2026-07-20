@@ -50,11 +50,6 @@ mod.spellMapBaseClasses["hunter"] = {
       { spellId = 20903, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [19434] = { refId = 20904 },
-  [20900] = { refId = 20904 },
-  [20901] = { refId = 20904 },
-  [20902] = { refId = 20904 },
-  [20903] = { refId = 20904 },
   [14287] = {
     name = "Arcane Shot",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -75,13 +70,6 @@ mod.spellMapBaseClasses["hunter"] = {
       { spellId = 14286, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [3044] = { refId = 14287 },
-  [14281] = { refId = 14287 },
-  [14282] = { refId = 14287 },
-  [14283] = { refId = 14287 },
-  [14284] = { refId = 14287 },
-  [14285] = { refId = 14287 },
-  [14286] = { refId = 14287 },
   [19574] = {
     name = "Bestial Wrath",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -121,8 +109,6 @@ mod.spellMapBaseClasses["hunter"] = {
       { spellId = 20909, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [19306] = { refId = 20910 },
-  [20909] = { refId = 20910 },
   [3045] = {
     name = "Rapid Fire",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -173,8 +159,6 @@ mod.spellMapBaseClasses["hunter"] = {
       { spellId = 24132, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [19386] = { refId = 24133 },
-  [24132] = { refId = 24133 },
   -- Intimidation is cast by the hunter's pet, so SPELL_CAST_SUCCESS fires from
   -- the pet's GUID, not the hunter's. The entry tracks but won't currently
   -- credit the hunter target.
@@ -218,10 +202,6 @@ mod.spellMapBaseClasses["hunter"] = {
       { spellId = 14290, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [2643] = { refId = 25294 },
-  [14288] = { refId = 25294 },
-  [14289] = { refId = 25294 },
-  [14290] = { refId = 25294 },
   [14295] = {
     name = "Volley",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -236,6 +216,4 @@ mod.spellMapBaseClasses["hunter"] = {
       { spellId = 14294, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [1510] = { refId = 14295 },
-  [14294] = { refId = 14295 }
 }

@@ -72,9 +72,6 @@ mod.spellMapBaseClasses["warrior"] = {
       { spellId = 23893, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [23881] = { refId = 23894 },
-  [23892] = { refId = 23894 },
-  [23893] = { refId = 23894 },
   [12328] = {
     name = "Death Wish",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -102,8 +99,6 @@ mod.spellMapBaseClasses["warrior"] = {
       { spellId = 20616, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [20252] = { refId = 20617 },
-  [20616] = { refId = 20617 },
   [11578] = {
     name = "Charge",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -118,6 +113,4 @@ mod.spellMapBaseClasses["warrior"] = {
       { spellId = 6178, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [100] = { refId = 11578 },
-  [6178] = { refId = 11578 }
 }

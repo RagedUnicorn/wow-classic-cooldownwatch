@@ -104,6 +104,11 @@ describe("SpellMap data integrity", function()
     assert.same({},
       rgcw.spellMapValidation.ValidateBaseEntriesAreBaseType(rgcw.spellMapBase.GetMap()))
   end)
+
+  it("base catalog carries no hand-written rank alias stubs (aliases are synthesized)", function()
+    assert.same({},
+      rgcw.spellMapValidation.ValidateBaseHasNoHandWrittenRankAliases(rgcw.spellMapBase.GetMap()))
+  end)
 end)
 
 --[[
@@ -159,6 +164,9 @@ describe("SpellMap data integrity per assembled branch", function()
 
       setup(function()
         assembled = rgcw.spellMapAssembler.Apply(rgcw.spellMapBase.GetMap(), OverlaysForBranch(branch))
+        -- mirror BuildAssembledMap: rank aliases are synthesized post-assembly,
+        -- so the consistency validators below see what production sees
+        rgcw.spellMap.SynthesizeRankAliases(assembled)
         getSpellById = BuildGetSpellById(assembled)
       end)
 

@@ -59,8 +59,6 @@ mod.spellMapBaseClasses["warlock"] = {
       { spellId = 17925, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [6789] = { refId = 17926 },
-  [17925] = { refId = 17926 },
   [17928] = {
     name = "Howl of Terror",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -74,7 +72,6 @@ mod.spellMapBaseClasses["warlock"] = {
       { spellId = 5484, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [5484] = { refId = 17928 },
   [28610] = {
     name = "Shadow Ward",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -90,9 +87,6 @@ mod.spellMapBaseClasses["warlock"] = {
       { spellId = 11740, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [6229] = { refId = 28610 },
-  [11739] = { refId = 28610 },
-  [11740] = { refId = 28610 },
   [17924] = {
     name = "Soul Fire",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -106,7 +100,6 @@ mod.spellMapBaseClasses["warlock"] = {
       { spellId = 6353, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [6353] = { refId = 17924 },
   [18708] = {
     name = "Fel Domination",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -136,11 +129,6 @@ mod.spellMapBaseClasses["warlock"] = {
       { spellId = 18870, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [17877] = { refId = 18871 },
-  [18867] = { refId = 18871 },
-  [18868] = { refId = 18871 },
-  [18869] = { refId = 18871 },
-  [18870] = { refId = 18871 },
   [18932] = {
     name = "Conflagrate",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -156,7 +144,4 @@ mod.spellMapBaseClasses["warlock"] = {
       { spellId = 18931, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
-  [17962] = { refId = 18932 },
-  [18930] = { refId = 18932 },
-  [18931] = { refId = 18932 }
 }

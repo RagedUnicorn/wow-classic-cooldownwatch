@@ -691,6 +691,42 @@ function me.ValidateSpellTypesMatchBranch(spellMap, branch)
 end
 
 --[[
+  Verify no rank listed in a base primary's allRanks also has its own entry in
+  the base catalog. Rank aliases ({ refId = primaryId }) are derived from
+  allRanks and synthesized post-assembly (SpellMap.SynthesizeRankAliases) -
+  hand-writing one in a base slice duplicates allRanks and drifts silently.
+  Aliases NOT derivable from allRanks (aura ids differing from the cast id,
+  e.g. Combustion's buff 28682) legitimately stay hand-written and pass here.
+
+  Run this against mod.spellMapBase.GetMap(), not the assembled map - after
+  assembly, every rank deliberately has its synthesized entry.
+
+  @param {table} baseMap - The unassembled base catalog (mod.spellMapBase.GetMap)
+
+  @return {table}
+]]--
+function me.ValidateBaseHasNoHandWrittenRankAliases(baseMap)
+  local failures = {}
+
+  for category, spells in pairs(baseMap) do
+    for primaryId, entry in pairs(spells) do
+      if IsPrimary(entry) and type(entry.allRanks) == "table" then
+        for _, rank in ipairs(entry.allRanks) do
+          if type(rank) == "table" and type(rank.spellId) == "number"
+            and rank.spellId ~= primaryId and spells[rank.spellId] ~= nil then
+            table.insert(failures, string.format(
+              "%s/%s ('%s'): rank id %s has a hand-written base entry - rank aliases are synthesized at assembly",
+              category, tostring(primaryId), entry.name, tostring(rank.spellId)))
+          end
+        end
+      end
+    end
+  end
+
+  return failures
+end
+
+--[[
   Verify the base catalog carries only SPELL_TYPE_BASE entries. Branch-specific
   spells (SPELL_TYPE_SOD / SPELL_TYPE_TBC) belong in their branch overlay under
   code/spellmap/overlay/ - a branch-only spell as an add op, a branch rework as

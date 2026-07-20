@@ -215,6 +215,15 @@ function me.TestBaseEntriesAreBaseType()
     "branch-typed base entry(ies)")
 end
 
+function me.TestBaseHasNoHandWrittenRankAliases()
+  RunValidator("TestBaseHasNoHandWrittenRankAliases",
+    function()
+      return mod.spellMapValidation.ValidateBaseHasNoHandWrittenRankAliases(mod.spellMapBase.GetMap())
+    end,
+    "Base catalog carries no hand-written rank alias stubs",
+    "hand-written rank alias(es)")
+end
+
 --[[
   Run all spellMap data-integrity tests.
 ]]--
@@ -238,6 +247,7 @@ function me.RunAllTests()
   me.TestItemIdSane()
   me.TestSpellTypesMatchBranch()
   me.TestBaseEntriesAreBaseType()
+  me.TestBaseHasNoHandWrittenRankAliases()
 
   mod.testLogger.LogInfo("SpellMap", "=== SpellMap Tests Complete ===")
 end

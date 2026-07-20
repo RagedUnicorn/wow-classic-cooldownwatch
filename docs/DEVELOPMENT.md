@@ -63,8 +63,11 @@ generated file in lockstep so day-to-day testing works without a rebuild).
 ## Adding a class to the spellMap
 
 The spell catalog lives in per-category slice files under `code/spellmap/base/` (`Priest.lua`, `Rogue.lua`, …,
-`Racials.lua`, `Items.lua`), each keyed by **primary spellId** → spell data, with rank aliases pointing at the
-primary via `refId`. Every slice registers its category on the shared `mod.spellMapBaseClasses` table, and
+`Racials.lua`, `Items.lua`), each keyed by **primary spellId** → spell data. Rank aliases
+(`[rankSpellId] = { refId = primarySpellId }`) are NOT written by hand — they are synthesized from each primary's
+`allRanks` list after assembly (`SpellMap.SynthesizeRankAliases`), so a slice only ever carries an explicit
+`refId` entry for an alias that is not derivable from `allRanks` (an aura id differing from the cast id, see the
+buff-then-consume section). Every slice registers its category on the shared `mod.spellMapBaseClasses` table, and
 `code/spellmap/Base.lua` assembles the slices (plus the central `sharedCooldownGroups`) into the Classic Era base
 map. Per-branch differences (SoD / TBC) go into `code/spellmap/overlay/Sod.lua` / `Tbc.lua` as `remove` / `add` /
 `replace` / `appendRanks` ops; `code/SpellMap.lua` is the orchestrator that detects the active branch, merges
@@ -92,9 +95,8 @@ mod.spellMapBaseClasses["priest"] = {
     },
     -- sharedCooldownGroup = "shaman_shocks"   -- optional, see below
   },
-  [8122] = { refId = 10890 }, -- rank alias entries
-  [8124] = { refId = 10890 },
-  [10888] = { refId = 10890 },
+  -- no rank alias entries: [8122] = { refId = 10890 } etc. are synthesized
+  -- from allRanks at assembly time
   -- ...next primary
 }
 ```
@@ -108,6 +110,9 @@ mod.spellMapBaseClasses["priest"] = {
 - Every spellId in `allRanks` must exist in the same category as either the primary or a `refId` pointing back to
   that primary.
 - A spellId cannot be primary in more than one category. (Rank aliases may repeat.)
+- No base slice may hand-write a rank alias stub: a spellId listed in a primary's `allRanks` must not have its
+  own entry in the base catalog — those aliases are synthesized at assembly. (Aura aliases, which are not in
+  `allRanks`, stay hand-written and pass this check.)
 - Base catalog entries (each primary's `type` and every `allRanks` entry's `type`) must be `SPELL_TYPE_BASE` —
   branch-specific spells live in their branch overlay, never in the base slices (see below).
 
