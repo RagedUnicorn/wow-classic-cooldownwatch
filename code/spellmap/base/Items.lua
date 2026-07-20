@@ -35,23 +35,25 @@ local mod = rgcw
 mod.spellMapBaseClasses = mod.spellMapBaseClasses or {}
 
 --[[
-  Resolve the insignia itemId for the player's own faction. Each PvP insignia
-  Use-effect spell is cast by two faction-mirrored items; the player's own
-  variant is the icon they recognize best (they equip and press it themselves).
-  Mirrors PVPWarn's insignia handling. Resolved once at file load - faction
-  never changes within a session.
+  Resolve the insignia itemId for the OPPOSING faction. Each PvP insignia
+  Use-effect spell is cast by two faction-mirrored items; CooldownWatch tracks
+  enemy cooldowns, so the insignia a tracked opponent presses is always the
+  opposing faction's item - showing the player's own variant would misrepresent
+  what the enemy actually used. Mirrors PVPWarn's insignia handling. Parameters
+  are named for the actual faction of the item they carry. Resolved once at
+  file load - faction never changes within a session.
 
   @param {number} allianceItemId
   @param {number} hordeItemId
 
   @return {number}
 ]]--
-local function InsigniaItemId(allianceItemId, hordeItemId)
+local function OpposingInsigniaItemId(allianceItemId, hordeItemId)
   if UnitFactionGroup(RGCW_CONSTANTS.UNIT_ID_PLAYER) == "Horde" then
-    return hordeItemId
+    return allianceItemId
   end
 
-  return allianceItemId
+  return hordeItemId
 end
 
 --[[
@@ -162,14 +164,15 @@ mod.spellMapBaseClasses["items"] = {
     PvP insignia trinkets (Insignia of the Alliance / Horde). One Use-effect
     spell per class group, shared by both factions' items; the spell names
     are the real GetSpellInfo names and describe which effects each class's
-    insignia dispels. Icon resolves to the player's own faction's item via
-    InsigniaItemId.
+    insignia dispels. Icon resolves to the OPPOSING faction's item via
+    OpposingInsigniaItemId - tracked cooldowns belong to enemies, so the icon
+    depicts the trinket the enemy actually used.
   ]]--
   [5579] = {
     name = "Immune Root/Snare/Stun", -- warrior / hunter / shaman insignia
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    itemId = InsigniaItemId(18854, 18834),
+    itemId = OpposingInsigniaItemId(18854, 18834),
     active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
@@ -182,7 +185,7 @@ mod.spellMapBaseClasses["items"] = {
     name = "Immune Charm/Fear/Polymorph", -- warlock / rogue insignia
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    itemId = InsigniaItemId(18858, 18852),
+    itemId = OpposingInsigniaItemId(18858, 18852),
     active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
@@ -195,7 +198,7 @@ mod.spellMapBaseClasses["items"] = {
     name = "Immune Fear/Polymorph/Snare", -- mage insignia
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    itemId = InsigniaItemId(18859, 18850),
+    itemId = OpposingInsigniaItemId(18859, 18850),
     active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
@@ -208,7 +211,7 @@ mod.spellMapBaseClasses["items"] = {
     name = "Immune Fear/Polymorph/Stun", -- priest / paladin insignia
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    itemId = InsigniaItemId(18862, 18851),
+    itemId = OpposingInsigniaItemId(18862, 18851),
     active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
@@ -221,7 +224,7 @@ mod.spellMapBaseClasses["items"] = {
     name = "Immune Charm/Fear/Stun", -- druid insignia
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    itemId = InsigniaItemId(18863, 18853),
+    itemId = OpposingInsigniaItemId(18863, 18853),
     active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
