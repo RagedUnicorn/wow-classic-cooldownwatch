@@ -39,14 +39,19 @@ The package goes to `target/CooldownWatch-development.zip`. Maven also writes th
 
 ## Templated files
 
-Two source files are generated from `build-resources/` templates:
+Three files are generated from `build-resources/` templates:
 
 - `CooldownWatch.toc` — generated from `cooldownwatch-development.toc.tpl` or `cooldownwatch-release.toc.tpl`. The
   release template intentionally has no `# Test Framework` block.
 - `code/Environment.lua` — generated from `environment.lua.tpl`, filled from `addon-development.properties` or
   `addon-release.properties`.
+- `docs/wow_badge_classic.svg` — the README WoW version badge, generated from `wow-badge-classic.svg.tpl` and filled
+  from the pom's `addon.supported.patch.classic` / `addon.interface.classic` properties (the per-flavor properties, not
+  the aggregate `addon.interface`). Renovate bumps those properties and the `generate-sources` workflow commits the
+  regenerated badge back onto the Renovate PR branch, so the badge never drifts. A TBC badge template joins once the
+  spell catalog supports TBC.
 
-When editing either, **edit the template + properties, not the generated file**, and re-run `mvn` (or update the
+When editing any of them, **edit the template + properties, not the generated file**, and re-run `mvn` (or update the
 generated file in lockstep so day-to-day testing works without a rebuild).
 
 ## Environment flags
