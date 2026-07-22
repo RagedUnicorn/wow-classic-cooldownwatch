@@ -12,4 +12,4 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v7
       - name: Busted for lua codebases
-        uses: RagedUnicorn/action-busted@v1
+        uses: RagedUnicorn/action-busted@v2
