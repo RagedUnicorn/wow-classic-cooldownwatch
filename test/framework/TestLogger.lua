@@ -23,7 +23,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals GetAddOnMetadata CooldownWatchTestLog date
+-- luacheck: globals C_AddOns CooldownWatchTestLog date
 
 -- Test logger for CooldownWatch addon
 -- Writes test results to SavedVariables for external analysis
@@ -68,7 +68,7 @@ end
 function me.Initialize()
   if not CooldownWatchTestLog then
     CooldownWatchTestLog = {
-      version = GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version"),
+      version = C_AddOns.GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version"),
       sessions = {}
     }
   end
@@ -313,7 +313,7 @@ end
 ]]--
 function me.ClearLogs()
   CooldownWatchTestLog = {
-    version = GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version"),
+    version = C_AddOns.GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version"),
     sessions = {}
   }
   print("|cFF00FFFFTest logs cleared|r")

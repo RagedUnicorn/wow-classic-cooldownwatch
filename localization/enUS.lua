@@ -1,5 +1,5 @@
 
--- luacheck: globals GetAddOnMetadata
+-- luacheck: globals C_AddOns
 
 rgcw = rgcw or {}
 rgcw.L = {}
@@ -20,7 +20,7 @@ rgcw.L["update_available"] = "New version |cFFFFC300%s|r is available - |cFF00FF
 -- about
 rgcw.L["author"] = "Author: Michael Wiesendanger"
 rgcw.L["email"] = "E-Mail: michael.wiesendanger@gmail.com"
-rgcw.L["version"] = "Version: " .. GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
+rgcw.L["version"] = "Version: " .. C_AddOns.GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
 rgcw.L["issues"] = "Issues: https://github.com/RagedUnicorn/wow-classic-cooldownwatch/issues"
 
 -- general

@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals GetAddOnMetadata CombatLogGetCurrentEventInfo GetTime
+-- luacheck: globals C_AddOns CombatLogGetCurrentEventInfo GetTime
 
 rgcw = rgcw or {}
 local me = rgcw
@@ -141,7 +141,7 @@ end
 ShowWelcomeMessage = function()
   print(
     string.format("|cFF00FFB0" .. RGCW_CONSTANTS.ADDON_NAME .. rgcw.L["help"],
-      GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version"))
+      C_AddOns.GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version"))
   )
 end
 

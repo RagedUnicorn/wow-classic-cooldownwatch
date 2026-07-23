@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals C_ChatInfo GetAddOnMetadata UnitName IsInGuild IsInGroup IsInRaid GetTime
+-- luacheck: globals C_ChatInfo C_AddOns UnitName IsInGuild IsInGroup IsInRaid GetTime
 
 local mod = rgcw
 local me = {}
@@ -71,7 +71,7 @@ end
   loop, so the native throttle is never exhausted
 ]]--
 function me.BroadcastVersion()
-  local version = GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
+  local version = C_AddOns.GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
 
   if version == nil then return end
 
@@ -144,7 +144,7 @@ end
 ShouldNotify = function(receivedVersion)
   if notifiedThisSession then return false end
 
-  local version = GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
+  local version = C_AddOns.GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
 
   if not mod.configuration.IsVersionBefore(version, receivedVersion) then return false end
 

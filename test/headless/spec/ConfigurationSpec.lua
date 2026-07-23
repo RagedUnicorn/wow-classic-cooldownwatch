@@ -34,7 +34,7 @@ describe("Configuration cooldown overrides", function()
   before_each(function()
     configuration = rgcw.configuration
     --[[
-      SetupConfiguration never runs headless (it reaches for GetAddOnMetadata),
+      SetupConfiguration never runs headless (it reaches for C_AddOns.GetAddOnMetadata),
       so cooldownOverrides starts nil - the exact state the accessors must
       survive. Reset between scenarios, globalAssumeWorstCase included.
     ]]--

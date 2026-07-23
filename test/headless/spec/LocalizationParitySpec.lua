@@ -38,8 +38,8 @@
 
   Loading mechanics: enUS.lua sets rgcw.L unconditionally, while deDE.lua is wrapped in
   `if (GetLocale() == "deDE")`. So each file is dofile'd with GetLocale() stubbed to return that
-  file's locale; every file's `version` string also reads the legacy GetAddOnMetadata global (via
-  RGCW_CONSTANTS.ADDON_NAME, which Bootstrap's Constants.lua dofile provides), so GetAddOnMetadata
+  file's locale; every file's `version` string also reads C_AddOns.GetAddOnMetadata (via
+  RGCW_CONSTANTS.ADDON_NAME, which Bootstrap's Constants.lua dofile provides), so C_AddOns
   is stubbed too. Both stubs come from WowStubs and are restored after each load. rgcw.L is a deep
   field of the shared rgcw table that busted's file insulation does not roll back, so the original
   (nil) is restored once loading is done.
@@ -74,13 +74,13 @@ local function discoverLocaleFiles()
 end
 
 --[[
-  dofile a single localization file with GetLocale / GetAddOnMetadata stubbed and return a shallow
+  dofile a single localization file with GetLocale / C_AddOns stubbed and return a shallow
   copy of the strings it registered on rgcw.L (as { ["key"] = "value" }).
 ]]--
 local function loadLocaleStrings(path, locale)
   local restore = wowStubs.install({
     GetLocale = wowStubs.stubs.GetLocale(locale),
-    GetAddOnMetadata = wowStubs.stubs.GetAddOnMetadata({ Version = "1.2.3" })
+    C_AddOns = wowStubs.stubs.C_AddOns({ Version = "1.2.3" })
   })
 
   rgcw.L = {}

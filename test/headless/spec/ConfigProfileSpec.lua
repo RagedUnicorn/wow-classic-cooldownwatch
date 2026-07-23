@@ -57,9 +57,9 @@ describe("ConfigProfile", function()
 
   before_each(function()
     -- ApplySnapshot calls Configuration.SetupConfiguration, which reaches for
-    -- GetAddOnMetadata to stamp the addon version
+    -- C_AddOns.GetAddOnMetadata to stamp the addon version
     restore = wowStubs.install({
-      GetAddOnMetadata = wowStubs.stubs.GetAddOnMetadata({ Version = "v9.9.9" })
+      C_AddOns = wowStubs.stubs.C_AddOns({ Version = "v9.9.9" })
     })
 
     savedFields = {}

@@ -31,7 +31,7 @@
   version is seen from another player, persisting it in
   CooldownWatchConfiguration.lastNotifiedVersion.
 
-  The WoW surface (C_ChatInfo, GetAddOnMetadata, UnitName, group/guild predicates, GetTime) is
+  The WoW surface (C_ChatInfo, C_AddOns, UnitName, group/guild predicates, GetTime) is
   stubbed via WowStubs; the notice itself is captured by replacing rgcw.logger.PrintUserMessage.
   Re-dofiling code/Configuration.lua in before_each yields a fresh CooldownWatchConfiguration
   (and the SemVer comparator IsVersionBefore that Comm reuses); re-dofiling code/Comm.lua resets
@@ -77,7 +77,7 @@ describe("Comm", function()
     inGroup = false
 
     restore = wowStubs.install({
-      GetAddOnMetadata = wowStubs.stubs.GetAddOnMetadata({ Version = "1.2.0", Title = "CooldownWatch" }),
+      C_AddOns = wowStubs.stubs.C_AddOns({ Version = "1.2.0", Title = "CooldownWatch" }),
       C_ChatInfo = {
         RegisterAddonMessagePrefix = function(prefix)
           registeredPrefixes[#registeredPrefixes + 1] = prefix

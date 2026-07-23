@@ -89,19 +89,21 @@ function M.stubs.GetLocale(locale)
 end
 
 --[[
-  GetAddOnMetadata(addonName, key) -> string (the legacy global the localization files call for
-  their `version` string). `metadata` maps the requested key (e.g. "Version") to the value to
-  return.
+  C_AddOns namespace with GetAddOnMetadata(addonName, key) -> string (the localization files call
+  it for their `version` string, Logger for the addon title). `metadata` maps the requested key
+  (e.g. "Version") to the value to return.
 
   @param {table} metadata
-  @return {function}
+  @return {table}
 ]]--
-function M.stubs.GetAddOnMetadata(metadata)
+function M.stubs.C_AddOns(metadata)
   metadata = metadata or {}
 
-  return function(_, key)
-    return metadata[key]
-  end
+  return {
+    GetAddOnMetadata = function(_, key)
+      return metadata[key]
+    end
+  }
 end
 
 return M

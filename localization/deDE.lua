@@ -1,5 +1,5 @@
 
--- luacheck: globals GetLocale GetAddOnMetadata
+-- luacheck: globals GetLocale C_AddOns
 
 if (GetLocale() == "deDE") then
   rgcw = rgcw or {}
@@ -22,7 +22,7 @@ if (GetLocale() == "deDE") then
   -- about tab
   rgcw.L["author"] = "Autor: Michael Wiesendanger"
   rgcw.L["email"] = "E-Mail: michael.wiesendanger@gmail.com"
-  rgcw.L["version"] = "Version: " .. GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
+  rgcw.L["version"] = "Version: " .. C_AddOns.GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
   rgcw.L["issues"] = "Probleme: https://github.com/RagedUnicorn/wow-classic-cooldownwatch/issues"
 
   -- general

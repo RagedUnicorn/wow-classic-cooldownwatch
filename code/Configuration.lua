@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals GetAddOnMetadata
+-- luacheck: globals C_AddOns
 
 local mod = rgcw
 local me = {}
@@ -155,7 +155,7 @@ end
 function me.SetAddonVersion()
   -- me.MigrationPath()
   -- migration done update addon version to current
-  CooldownWatchConfiguration.addonVersion = GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
+  CooldownWatchConfiguration.addonVersion = C_AddOns.GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
 end
 
 --[[
