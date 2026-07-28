@@ -1,6 +1,6 @@
 # CooldownWatch
 
-![](docs/cw_ragedunicorn_love_classic.png)
+![](docs/ragedunicorn_wow_banner.png)
 
 > CooldownWatch aims to track your enemies cooldowns and making them visible to the player
 
