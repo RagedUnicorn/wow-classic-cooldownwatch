@@ -41,6 +41,30 @@ his cooldown.
 
 Proximity probably not needed there should always be a caster
 
+## Profiles
+
+CooldownWatch lets you save your configuration as named profiles, so you can switch between different setups or carry your settings to another character. Profiles are managed under the **Profiles** tab of the configuration interface (`/rgcw opt` or `/cooldownwatch opt`).
+
+A profile captures all of your CooldownWatch settings – which cooldowns are tracked per category, the per-spell worst case and cooldown override values, the *Assume worst case for all cooldowns* default, the lock state of the Targetcooldownbar and its on-screen position.
+
+- **Save current as...**: Snapshots your current settings into a new named profile (or overwrites an existing one of the same name).
+- **Apply**: Loads the selected profile and applies its settings. This overwrites your current settings and reloads the UI.
+- **Rename**: Renames the selected profile.
+- **Delete**: Removes the selected profile.
+
+### The Default Profile
+
+Every character starts with a profile named **Default**. It holds CooldownWatch's shipped settings and is created automatically – you never have to save it yourself. It cannot be deleted, renamed or overwritten, so there is always a clean baseline to go back to: select **Default** and click **Apply** to reset CooldownWatch to its factory settings. The Rename and Delete buttons are greyed out while it is selected.
+
+### Sharing Profiles (Export / Import)
+
+Profiles can be shared as portable strings, making it easy to copy a setup between characters or hand it to another player.
+
+- **Export**: Generates a copy-pasteable profile string for the selected profile in the *Profile String* field.
+- **Import**: Paste a profile string into the field and import it as a new profile. Imported strings are validated, so an invalid, corrupted, or non-CooldownWatch string is rejected without changing any of your settings.
+
+> Note: Profiles are stored per character. Use export/import to move a profile to another character.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) — from reporting wrong cooldown data to contributing

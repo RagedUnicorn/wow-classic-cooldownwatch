@@ -125,6 +125,8 @@ Initialize = function()
   me.targetCooldownBar.BuildUi()
   -- load addon variables
   me.configuration.SetupConfiguration()
+  -- guarantee the undeletable default profile exists (needs the defaults applied above)
+  me.configProfile.EnsureDefaultProfile()
   -- update initial view of gearBars after addon initialization
   me.targetCooldownBar.TargetCooldownBarUiUpdate()
   -- register addon message prefix for the version broadcast

@@ -65,6 +65,9 @@ if (GetLocale() == "deDE") then
   rgcw.L["profile_error_name_empty"] = "Der Profilname darf nicht leer sein"
   rgcw.L["profile_error_name_exists"] = "Ein Profil mit diesem Namen existiert bereits"
   rgcw.L["profile_error_no_selection"] = "Kein Profil ausgewählt"
+  rgcw.L["profile_error_default_cannot_be_deleted"] = "Das Profil \"%s\" kann nicht gelöscht werden"
+  rgcw.L["profile_error_default_cannot_be_renamed"] = "Das Profil \"%s\" kann nicht umbenannt werden"
+  rgcw.L["profile_error_default_cannot_be_overwritten"] = "Das Profil \"%s\" kann nicht überschrieben werden"
 
   -- cooldown menu
   rgcw.L["category_priest"] = "Priester"

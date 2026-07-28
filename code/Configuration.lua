@@ -31,6 +31,12 @@ mod.configuration = me
 
 me.tag = "Configuration"
 
+--[[
+  Declaration of the saved variable. WoW replaces this table with the saved one on load,
+  so the values here only ever apply to a character that never saved a configuration -
+  every other backfill (upgrade, applied profile) goes through me.GetDefaults below,
+  which must stay in sync with the values declared here.
+]]--
 CooldownWatchConfiguration = {
   --[[
     Whether the targetCooldownBar is locked from moving or not
@@ -103,42 +109,38 @@ CooldownWatchConfiguration = {
 }
 
 --[[
+  The shipped default value of every configurable field - the single source of truth
+  for SetupConfiguration's nil-guards and for the frozen default profile
+  (see code/ConfigProfile.lua BuildDefaultSnapshot). addonVersion is deliberately
+  absent; it is stamped by SetAddonVersion.
+
+  Returns a fresh table on every call: the two category-keyed maps are derived from
+  the category catalog at call time and must never be shared between the live
+  configuration and a stored profile.
+
+  @return {table}
+]]--
+function me.GetDefaults()
+  return {
+    ["lockTargetCooldownBar"] = false,
+    ["cooldownConfiguration"] = mod.profile.GetDefaultProfile(),
+    ["cooldownOverrides"] = mod.profile.GetDefaultCooldownOverrides(),
+    ["globalAssumeWorstCase"] = false,
+    ["frames"] = {},
+    ["profiles"] = {},
+    ["lastNotifiedVersion"] = ""
+  }
+end
+
+--[[
   Set default values if property is nil. This might happen after an addon upgrade
 ]]--
 function me.SetupConfiguration()
-  if CooldownWatchConfiguration.lockTargetCooldownBar == nil then
-    mod.logger.LogInfo(me.tag, "lockTargetCooldownBar has unexpected nil value")
-    CooldownWatchConfiguration.lockTargetCooldownBar = false
-  end
-
-  if CooldownWatchConfiguration.cooldownConfiguration == nil then
-    mod.logger.LogInfo(me.tag, "cooldownConfiguration has unexpected nil value")
-    CooldownWatchConfiguration.cooldownConfiguration = mod.profile.GetDefaultProfile()
-  end
-
-  if CooldownWatchConfiguration.cooldownOverrides == nil then
-    mod.logger.LogInfo(me.tag, "cooldownOverrides has unexpected nil value")
-    CooldownWatchConfiguration.cooldownOverrides = mod.profile.GetDefaultCooldownOverrides()
-  end
-
-  if CooldownWatchConfiguration.globalAssumeWorstCase == nil then
-    mod.logger.LogInfo(me.tag, "globalAssumeWorstCase has unexpected nil value")
-    CooldownWatchConfiguration.globalAssumeWorstCase = false
-  end
-
-  if CooldownWatchConfiguration.frames == nil then
-    mod.logger.LogInfo(me.tag, "frames has unexpected nil value")
-    CooldownWatchConfiguration.frames = {}
-  end
-
-  if CooldownWatchConfiguration.profiles == nil then
-    mod.logger.LogInfo(me.tag, "profiles has unexpected nil value")
-    CooldownWatchConfiguration.profiles = {}
-  end
-
-  if CooldownWatchConfiguration.lastNotifiedVersion == nil then
-    mod.logger.LogInfo(me.tag, "lastNotifiedVersion has unexpected nil value")
-    CooldownWatchConfiguration.lastNotifiedVersion = ""
+  for field, defaultValue in pairs(me.GetDefaults()) do
+    if CooldownWatchConfiguration[field] == nil then
+      mod.logger.LogInfo(me.tag, field .. " has unexpected nil value")
+      CooldownWatchConfiguration[field] = defaultValue
+    end
   end
 
   --[[

@@ -130,6 +130,12 @@ RGCW_CONSTANTS = {
   --[[
     Profile (import/export and named profiles)
   ]]--
+  --[[
+    Name of the profile that is seeded on first login and can never be deleted,
+    renamed or overwritten. It holds a frozen snapshot of the shipped defaults so
+    every character keeps a baseline to fall back to
+  ]]--
+  DEFAULT_PROFILE_NAME = "Default",
   ELEMENT_PROFILE_SUB_OPTION_FRAME = "CW_ProfileMenuOptionsFrame",
   ELEMENT_PROFILE_TITLE = "CW_ProfileTitle",
   ELEMENT_PROFILE_LIST_SCROLL_FRAME = "CW_ProfileListScrollFrame",

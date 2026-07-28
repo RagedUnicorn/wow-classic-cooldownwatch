@@ -25,7 +25,7 @@
 -- busted extends `assert` with .same / .equal / etc. at runtime; luacheck
 -- cannot verify those fields statically. Suppress warning 143 (accessing
 -- undefined field of a global variable) for this file.
--- luacheck: globals describe it setup before_each after_each CooldownWatchConfiguration
+-- luacheck: globals describe it setup before_each after_each CooldownWatchConfiguration RGCW_CONSTANTS
 -- luacheck: ignore 143
 
 local wowStubs = require("WowStubs")
@@ -291,6 +291,88 @@ describe("ConfigProfile", function()
 
     assert.same({}, configProfile.ListProfiles())
     assert.same({}, CooldownWatchConfiguration.profiles)
+  end)
+
+  describe("default profile", function()
+    local defaultName = RGCW_CONSTANTS.DEFAULT_PROFILE_NAME
+
+    it("seeds the default profile when the store does not hold one yet", function()
+      assert.same({}, configProfile.ListProfiles())
+
+      configProfile.EnsureDefaultProfile()
+
+      assert.same({ defaultName }, configProfile.ListProfiles())
+      assert.is_true(configProfile.ProfileExists(defaultName))
+    end)
+
+    it("seeds it from the shipped defaults, not from the live configuration", function()
+      -- the customized live configuration of the fixture must not bleed into the baseline
+      configProfile.EnsureDefaultProfile()
+
+      local payload = configProfile.GetProfile(defaultName)
+
+      assert.is_false(payload.lockTargetCooldownBar)
+      assert.is_false(payload.globalAssumeWorstCase)
+      assert.same({}, payload.frames)
+      assert.same(rgcw.profile.GetDefaultProfile(), payload.cooldownConfiguration)
+      assert.same(rgcw.profile.GetDefaultCooldownOverrides(), payload.cooldownOverrides)
+    end)
+
+    it("leaves an already seeded default untouched on a second call", function()
+      configProfile.EnsureDefaultProfile()
+      local seeded = configProfile.GetProfile(defaultName)
+
+      configProfile.EnsureDefaultProfile()
+
+      assert.is_true(rawequal(seeded, configProfile.GetProfile(defaultName)))
+    end)
+
+    it("refuses to delete the default profile", function()
+      configProfile.EnsureDefaultProfile()
+
+      assert.is_false(configProfile.DeleteProfile(defaultName))
+      assert.is_true(configProfile.ProfileExists(defaultName))
+    end)
+
+    it("refuses to rename the default profile", function()
+      configProfile.EnsureDefaultProfile()
+
+      assert.is_false(configProfile.RenameProfile(defaultName, "MyDefault"))
+      assert.is_true(configProfile.ProfileExists(defaultName))
+      assert.is_false(configProfile.ProfileExists("MyDefault"))
+    end)
+
+    it("refuses to rename another profile onto the default name", function()
+      configProfile.EnsureDefaultProfile()
+      configProfile.SaveProfile("alpha", configProfile.BuildSnapshot())
+
+      assert.is_false(configProfile.RenameProfile("alpha", defaultName))
+      assert.is_true(configProfile.ProfileExists("alpha"))
+      assert.same(configProfile.BuildDefaultSnapshot(), configProfile.GetProfile(defaultName))
+    end)
+
+    it("refuses to overwrite the default profile through SaveProfile", function()
+      configProfile.EnsureDefaultProfile()
+
+      assert.is_false(configProfile.SaveProfile(defaultName, configProfile.BuildSnapshot()))
+      -- the live config the fixture set up has the bar locked; the baseline must not
+      assert.is_false(configProfile.GetProfile(defaultName).lockTargetCooldownBar)
+    end)
+
+    it("still saves, renames and deletes user created profiles", function()
+      configProfile.EnsureDefaultProfile()
+
+      assert.is_true(configProfile.SaveProfile("alpha", configProfile.BuildSnapshot()))
+      assert.is_true(configProfile.RenameProfile("alpha", "beta"))
+      assert.is_true(configProfile.DeleteProfile("beta"))
+      assert.same({ defaultName }, configProfile.ListProfiles())
+    end)
+
+    it("recognizes only the reserved name as the default profile", function()
+      assert.is_true(configProfile.IsDefaultProfile(defaultName))
+      assert.is_false(configProfile.IsDefaultProfile("default"))
+      assert.is_false(configProfile.IsDefaultProfile(nil))
+    end)
   end)
 
   it("never uses loadstring or load", function()

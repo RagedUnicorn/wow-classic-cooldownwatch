@@ -50,11 +50,19 @@ local rows = {}
 ]]--
 local profileEditBox
 
+--[[
+  The action buttons that are greyed out while the immutable default profile is selected
+]]--
+local renameButton
+local deleteButton
+
 -- forward declarations
 local SetupStaticPopups
 local CreateActionButton
 local CreateProfileRow
 local RefreshList
+local UpdateActionButtonState
+local PrintDefaultProfileError
 local Trim
 local HandleSave
 local HandleApply
@@ -168,7 +176,7 @@ function me.BuildActionButtons(frame)
     end
   )
 
-  CreateActionButton(
+  renameButton = CreateActionButton(
     frame,
     RGCW_CONSTANTS.ELEMENT_PROFILE_RENAME_BUTTON,
     RGCW_CONSTANTS.ELEMENT_PROFILE_ACTION_BUTTON_WIDTH,
@@ -180,11 +188,16 @@ function me.BuildActionButtons(frame)
         return
       end
 
+      if mod.configProfile.IsDefaultProfile(me.selectedProfile) then
+        PrintDefaultProfileError("profile_error_default_cannot_be_renamed")
+        return
+      end
+
       StaticPopup_Show("COOLDOWNWATCH_PROFILE_RENAME", nil, nil, me.selectedProfile)
     end
   )
 
-  CreateActionButton(
+  deleteButton = CreateActionButton(
     frame,
     RGCW_CONSTANTS.ELEMENT_PROFILE_DELETE_BUTTON,
     RGCW_CONSTANTS.ELEMENT_PROFILE_ACTION_BUTTON_WIDTH,
@@ -196,9 +209,16 @@ function me.BuildActionButtons(frame)
         return
       end
 
+      if mod.configProfile.IsDefaultProfile(me.selectedProfile) then
+        PrintDefaultProfileError("profile_error_default_cannot_be_deleted")
+        return
+      end
+
       StaticPopup_Show("COOLDOWNWATCH_PROFILE_DELETE", me.selectedProfile, nil, me.selectedProfile)
     end
   )
+
+  UpdateActionButtonState()
 end
 
 --[[
@@ -280,6 +300,33 @@ function me.SelectProfile(name)
       row.selectedTexture:Hide()
     end
   end
+
+  UpdateActionButtonState()
+end
+
+--[[
+  Grey out Rename and Delete while the immutable default profile is selected. The
+  click handlers guard the same condition - this only makes the refusal visible
+  before the click.
+]]--
+UpdateActionButtonState = function()
+  if not renameButton or not deleteButton then return end
+
+  local isDefault = me.selectedProfile ~= nil and mod.configProfile.IsDefaultProfile(me.selectedProfile)
+
+  renameButton:SetEnabled(not isDefault)
+  deleteButton:SetEnabled(not isDefault)
+end
+
+--[[
+  Print one of the profile_error_default_* messages. The reserved profile name is not
+  translated - it is a saved-variable key that also travels inside export strings - so
+  every locale spells it out verbatim instead of naming it in its own words.
+
+  @param {string} errorKey
+]]--
+PrintDefaultProfileError = function(errorKey)
+  mod.logger.PrintUserError(string.format(rgcw.L[errorKey], RGCW_CONSTANTS.DEFAULT_PROFILE_NAME))
 end
 
 --[[
@@ -357,6 +404,8 @@ RefreshList = function()
   for index = #names + 1, #rows do
     rows[index]:Hide()
   end
+
+  UpdateActionButtonState()
 end
 
 --[[
@@ -404,6 +453,12 @@ HandleSave = function(name)
     return
   end
 
+  --[[ save-as overwrites an existing profile of the same name - the default profile is frozen ]]--
+  if mod.configProfile.IsDefaultProfile(name) then
+    PrintDefaultProfileError("profile_error_default_cannot_be_overwritten")
+    return
+  end
+
   mod.configProfile.SaveProfile(name, mod.configProfile.BuildSnapshot())
   me.selectedProfile = name
   RefreshList()
@@ -433,7 +488,10 @@ end
   @param {string} name
 ]]--
 HandleDelete = function(name)
-  mod.configProfile.DeleteProfile(name)
+  if not mod.configProfile.DeleteProfile(name) then
+    PrintDefaultProfileError("profile_error_default_cannot_be_deleted")
+    return
+  end
 
   if me.selectedProfile == name then
     me.selectedProfile = nil
@@ -454,6 +512,17 @@ HandleRename = function(oldName, newName)
 
   if newName == "" then
     mod.logger.PrintUserError(rgcw.L["profile_error_name_empty"])
+    return
+  end
+
+  if mod.configProfile.IsDefaultProfile(oldName) then
+    PrintDefaultProfileError("profile_error_default_cannot_be_renamed")
+    return
+  end
+
+  --[[ renaming another profile onto the default name would replace the frozen baseline ]]--
+  if mod.configProfile.IsDefaultProfile(newName) then
+    PrintDefaultProfileError("profile_error_default_cannot_be_overwritten")
     return
   end
 
@@ -517,6 +586,11 @@ FinishImport = function(name, envelope)
 
   if name == "" then
     mod.logger.PrintUserError(rgcw.L["profile_error_name_empty"])
+    return
+  end
+
+  if mod.configProfile.IsDefaultProfile(name) then
+    PrintDefaultProfileError("profile_error_default_cannot_be_overwritten")
     return
   end
 

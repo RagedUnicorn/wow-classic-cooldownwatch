@@ -60,6 +60,9 @@ rgcw.L["profile_error_version"] = "This profile string was created by a newer ve
 rgcw.L["profile_error_name_empty"] = "The profile name cannot be empty"
 rgcw.L["profile_error_name_exists"] = "A profile with that name already exists"
 rgcw.L["profile_error_no_selection"] = "No profile selected"
+rgcw.L["profile_error_default_cannot_be_deleted"] = "The \"%s\" profile cannot be deleted"
+rgcw.L["profile_error_default_cannot_be_renamed"] = "The \"%s\" profile cannot be renamed"
+rgcw.L["profile_error_default_cannot_be_overwritten"] = "The \"%s\" profile cannot be overwritten"
 
 -- cooldown menu
 rgcw.L["category_priest"] = "Priest"
