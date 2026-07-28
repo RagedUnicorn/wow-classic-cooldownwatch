@@ -64,6 +64,7 @@ if (GetLocale() == "deDE") then
     .. "von CooldownWatch erstellt"
   rgcw.L["profile_error_name_empty"] = "Der Profilname darf nicht leer sein"
   rgcw.L["profile_error_name_exists"] = "Ein Profil mit diesem Namen existiert bereits"
+  rgcw.L["profile_error_name_too_long"] = "Der Profilname darf nicht länger als %d Zeichen sein"
   rgcw.L["profile_error_no_selection"] = "Kein Profil ausgewählt"
   rgcw.L["profile_error_default_cannot_be_deleted"] = "Das Profil \"%s\" kann nicht gelöscht werden"
   rgcw.L["profile_error_default_cannot_be_renamed"] = "Das Profil \"%s\" kann nicht umbenannt werden"

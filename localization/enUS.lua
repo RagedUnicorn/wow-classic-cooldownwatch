@@ -59,6 +59,7 @@ rgcw.L["profile_error_wrong_addon"] = "This profile string was not created by Co
 rgcw.L["profile_error_version"] = "This profile string was created by a newer version of CooldownWatch"
 rgcw.L["profile_error_name_empty"] = "The profile name cannot be empty"
 rgcw.L["profile_error_name_exists"] = "A profile with that name already exists"
+rgcw.L["profile_error_name_too_long"] = "The profile name cannot be longer than %d characters"
 rgcw.L["profile_error_no_selection"] = "No profile selected"
 rgcw.L["profile_error_default_cannot_be_deleted"] = "The \"%s\" profile cannot be deleted"
 rgcw.L["profile_error_default_cannot_be_renamed"] = "The \"%s\" profile cannot be renamed"
