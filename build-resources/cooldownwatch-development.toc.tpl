@@ -4,6 +4,7 @@
 ## Notes: ${addon.description}
 ## Version: ${addon.tag.version}
 ## SavedVariablesPerCharacter: ${addon.savedVariablesPerCharacter}
+## IconTexture: Interface\AddOns\CooldownWatch\assets\cooldownwatch_icon
 ${addon.comment.generated.toc}
 
 # constant values

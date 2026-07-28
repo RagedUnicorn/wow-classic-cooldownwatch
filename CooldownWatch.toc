@@ -4,6 +4,7 @@
 ## Notes: Addon that tracks cooldowns of enemy players
 ## Version: v1.0.0
 ## SavedVariablesPerCharacter: CooldownWatchConfiguration CooldownWatchTestLog CooldownWatchLogTracker
+## IconTexture: Interface\AddOns\CooldownWatch\assets\cooldownwatch_icon
 # THIS FILE IS AUTO-GENERATED. ALL CHANGES ARE OVERWRITTEN
 
 # constant values
