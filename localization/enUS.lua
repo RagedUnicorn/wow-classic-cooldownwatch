@@ -23,9 +23,9 @@ rgcw.L["email"] = "E-Mail: michael.wiesendanger@gmail.com"
 rgcw.L["version"] = "Version: " .. C_AddOns.GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
 rgcw.L["issues"] = "Issues: https://github.com/RagedUnicorn/wow-classic-cooldownwatch/issues"
 
--- general
-rgcw.L["general_category_name"] = "Options"
-rgcw.L["general_title"] = "Options"
+-- options
+rgcw.L["options_category_name"] = "Options"
+rgcw.L["options_title"] = "Options"
 rgcw.L["window_lock_target_cooldown_bar"] = "Lock Targetcooldownbar"
 rgcw.L["window_lock_target_cooldown_bar_tooltip"] = "Prevents Targetcooldownbar frame from being moved"
 rgcw.L["option_global_assume_worst_case"] = "Assume worst case for all cooldowns"

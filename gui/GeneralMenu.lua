@@ -60,7 +60,7 @@ function me.BuildUi(frame)
     RGCW_CONSTANTS.ELEMENT_GENERAL_TITLE, "OVERLAY", "GameFontNormalLarge")
   titleFontString:SetPoint("TOPLEFT", 16, -16)
   mod.guiHelper.SetColor(titleFontString, RGCW_CONSTANTS.COLOR.TITLE_GOLD)
-  titleFontString:SetText(rgcw.L["general_title"])
+  titleFontString:SetText(rgcw.L["options_title"])
 
   me.BuildCheckButtonOption(
     frame,

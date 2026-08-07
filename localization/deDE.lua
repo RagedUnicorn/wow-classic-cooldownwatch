@@ -25,9 +25,9 @@ if (GetLocale() == "deDE") then
   rgcw.L["version"] = "Version: " .. C_AddOns.GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version")
   rgcw.L["issues"] = "Probleme: https://github.com/RagedUnicorn/wow-classic-cooldownwatch/issues"
 
-  -- general
-  rgcw.L["general_category_name"] = "Optionen"
-  rgcw.L["general_title"] = "Optionen"
+  -- options
+  rgcw.L["options_category_name"] = "Optionen"
+  rgcw.L["options_title"] = "Optionen"
   rgcw.L["window_lock_target_cooldown_bar"] = "Sperre Zielabklingzeitenbalken"
   rgcw.L["window_lock_target_cooldown_bar_tooltip"] = "Verhindert das bewegen des Zielabklingzeitenbalken"
   rgcw.L["option_global_assume_worst_case"] = "Worst Case für alle Abklingzeiten annehmen"

@@ -64,7 +64,7 @@ function me.SetupAddonConfiguration()
   me.BuildCategory(
     RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME,
     category,
-    rgcw.L["general_category_name"],
+    rgcw.L["options_category_name"],
     mod.generalMenu.BuildUi
   )
 
