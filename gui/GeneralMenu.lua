@@ -56,11 +56,11 @@ local builtMenu = false
 function me.BuildUi(frame)
   if builtMenu then return end
 
-  local titleFontString = frame:CreateFontString(
-    RGCW_CONSTANTS.ELEMENT_GENERAL_TITLE, "OVERLAY", "GameFontNormalLarge")
-  titleFontString:SetPoint("TOPLEFT", 16, -16)
-  mod.guiHelper.SetColor(titleFontString, RGCW_CONSTANTS.COLOR.TITLE_GOLD)
-  titleFontString:SetText(rgcw.L["options_title"])
+  mod.guiHelper.CreatePanelTitle(
+    frame,
+    RGCW_CONSTANTS.ELEMENT_GENERAL_TITLE,
+    rgcw.L["options_title"]
+  )
 
   me.BuildCheckButtonOption(
     frame,

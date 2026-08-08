@@ -129,6 +129,8 @@ function me.BuildCooldownCategories(parent)
     menu.parent = parent.name
     menu.value = index
     menu.categoryName = category.categoryName
+    -- carried along so the panel can title itself without looking the category up again
+    menu.localizationKey = category.localizationKey
 
     local subcategory = Settings.RegisterCanvasLayoutSubcategory(parent, menu, category.name)
     subcategory.name = rgcw.L[category.localizationKey]

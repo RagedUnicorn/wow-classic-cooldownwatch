@@ -22,7 +22,7 @@
   SOFTWARE.
 ]]--
 
--- luacheck: globals CreateFrame STANDARD_TEXT_FONT ScrollUtil GameTooltip
+-- luacheck: globals CreateFrame CreateColor STANDARD_TEXT_FONT ScrollUtil GameTooltip
 
 local mod = rgcw
 local me = {}
@@ -31,6 +31,11 @@ mod.cooldownMenu = me
 me.tag = "CooldownMenu"
 
 local uiState = {
+  --[[
+    Outer container holding the scroll frame and its bar. It fills the category content
+    frame and is the only piece re-anchored on a category switch
+  ]]--
+  spellListContainer = nil,
   spellListScrollFrame = nil,
   spellListScrollBar = nil,
   spellListContent = nil,
@@ -73,42 +78,89 @@ function me.InitCooldownMenu(frame, categoryName)
 end
 
 --[[
+  Build the spell list. Everything is anchored rather than sized: the container fills the
+  category content frame (which itself stretches to the settings canvas), the scroll frame
+  fills the container, the scroll child follows the scroll frames width and the rows span
+  the scroll child - so the list uses whatever space the canvas hands out at any resolution
+  or ui scale.
+
   @param {table} parentFrame
   @param {string} categoryName
 ]]--
 function me.BuildUi(parentFrame, categoryName)
-  local listWidth = RGCW_CONSTANTS.SPELL_LIST_CONTENT_FRAME_WIDTH - 22
-  local listHeight = RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT * RGCW_CONSTANTS.SPELL_LIST_MAX_ROWS
+  local container = CreateFrame("Frame", nil, parentFrame)
+  me.AnchorContainer(container, parentFrame)
 
   local spellListScrollFrame = CreateFrame(
     "ScrollFrame",
     RGCW_CONSTANTS.ELEMENT_SPELL_LIST_SCROLL_FRAME,
-    parentFrame
+    container
   )
-  spellListScrollFrame:SetSize(listWidth, listHeight)
-  spellListScrollFrame:SetPoint("TOPLEFT", parentFrame)
+  --[[ the rows fill the container, the scrollbar overlays them - see the scrollbar below ]]--
+  spellListScrollFrame:SetPoint("TOPLEFT")
+  spellListScrollFrame:SetPoint("BOTTOMRIGHT")
 
-  local scrollBar = CreateFrame("EventFrame", nil, parentFrame, "MinimalScrollBar")
-  scrollBar:SetPoint("TOPLEFT", spellListScrollFrame, "TOPRIGHT", 8, 0)
-  scrollBar:SetPoint("BOTTOMLEFT", spellListScrollFrame, "BOTTOMRIGHT", 8, 0)
+  --[[
+    The bar is placed on top of the rows instead of next to them so the row background runs
+    all the way to the border of the list. The rows keep their controls clear of it through
+    RGCW_CONSTANTS.SPELL_LIST_ROW_INSET_RIGHT.
+  ]]--
+  local scrollBar = CreateFrame("EventFrame", nil, container, "MinimalScrollBar")
+  scrollBar:SetPoint("TOPRIGHT", spellListScrollFrame, RGCW_CONSTANTS.SPELL_LIST_SCROLL_BAR_GAP * -1, 0)
+  scrollBar:SetPoint("BOTTOMRIGHT", spellListScrollFrame, RGCW_CONSTANTS.SPELL_LIST_SCROLL_BAR_GAP * -1, 0)
+  --[[ clears the rows, which sit two frame levels below their scroll frame ]]--
+  scrollBar:SetFrameLevel(container:GetFrameLevel() + 10)
   ScrollUtil.InitScrollFrameWithScrollBar(spellListScrollFrame, scrollBar)
   --[[ a category with fewer spells than fit must not show an inert bar ]]--
   mod.guiHelper.EnableScrollBarAutoHide(spellListScrollFrame, scrollBar)
 
   local spellListContent = CreateFrame("Frame", nil, spellListScrollFrame)
   --[[
-    Seed the content with no scrollable extent - RefreshSpellList sets the real height once
-    it knows its row count and the accordion state. Seeding the full listHeight would leave
-    the list scrollable and keep the scrollbar visible on a category that fits
+    Seed the content with the fallback width and no scrollable extent - UpdateContentWidth
+    takes over the width as soon as the canvas reports one and RefreshSpellList sets the real
+    height once it knows its row count and the accordion state. Seeding the full list height
+    would leave the list scrollable and keep the scrollbar visible on a category that fits
   ]]--
-  spellListContent:SetSize(listWidth, 1)
+  spellListContent:SetSize(RGCW_CONSTANTS.SPELL_LIST_CONTENT_FRAME_WIDTH, 1)
   spellListScrollFrame:SetScrollChild(spellListContent)
 
+  uiState.spellListContainer = container
   uiState.spellListScrollFrame = spellListScrollFrame
   uiState.spellListScrollBar = scrollBar
   uiState.spellListContent = spellListContent
 
+  --[[
+    The settings canvas has no size before the panel was shown for the first time and changes
+    with resolution and ui scale - follow it instead of sizing the list once
+  ]]--
+  spellListScrollFrame:HookScript("OnSizeChanged", me.UpdateContentWidth)
+  me.UpdateContentWidth()
+
   me.RefreshSpellList(categoryName)
+end
+
+--[[
+  Anchor the spell list container to fill the content frame it belongs to
+
+  @param {table} container
+  @param {table} parentFrame
+]]--
+function me.AnchorContainer(container, parentFrame)
+  container:ClearAllPoints()
+  container:SetPoint("TOPLEFT", parentFrame)
+  container:SetPoint("BOTTOMRIGHT", parentFrame)
+end
+
+--[[
+  Size the scroll child to the width of its scroll frame so the rows span the whole canvas.
+  The height is owned by RefreshSpellList - it follows the accordion, not the canvas.
+]]--
+function me.UpdateContentWidth()
+  local availableWidth = uiState.spellListScrollFrame:GetWidth()
+
+  if availableWidth > 0 then
+    uiState.spellListContent:SetWidth(availableWidth)
+  end
 end
 
 --[[
@@ -117,12 +169,9 @@ end
   @param {table} parentFrame
 ]]--
 function me.UpdateCategoryMenu(parentFrame)
-  local scrollFrame = uiState.spellListScrollFrame
-  scrollFrame:ClearAllPoints()
-  scrollFrame:SetPoint("TOPLEFT", parentFrame)
-  scrollFrame:SetParent(parentFrame)
-  uiState.spellListScrollBar:SetParent(parentFrame)
-  scrollFrame:SetVerticalScroll(0) -- reset scroll position to top
+  uiState.spellListContainer:SetParent(parentFrame)
+  me.AnchorContainer(uiState.spellListContainer, parentFrame)
+  uiState.spellListScrollFrame:SetVerticalScroll(0) -- reset scroll position to top
 end
 
 --[[
@@ -144,18 +193,27 @@ function me.CreateRuleRowFrame(frame, position)
     frame,
     "BackdropTemplate"
   )
-  row:SetSize(frame:GetWidth() - 5, RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT)
+  --[[
+    Rows carry no width of their own - RefreshSpellList anchors them to both sides of the
+    scroll child so they follow the canvas whenever the settings panel changes size
+  ]]--
+  row:SetHeight(RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT)
   row:SetBackdrop({
     bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
     insets = { left = 0, right = 0, top = 0, bottom = 0 },
   })
+  row:SetBackdropColor(unpack(RGCW_CONSTANTS.COLORS.SPELL_ROW_BACKGROUND))
 
-  -- warm near-black zebra striping (Quartermaster panel palette)
-  if math.fmod(position, 2) == 0 then
-    row:SetBackdropColor(0.14, 0.12, 0.09, .75)
-  else
-    row:SetBackdropColor(0.05, 0.04, 0.03, .9)
-  end
+  --[[
+    Category-colored wash on top of the warm near-black base, fading out towards the right
+    so the row does not compete with its controls. Tinted per category in
+    UpdateRowCategoryTint - rows are recycled across categories - where alternating its
+    alpha between odd and even rows produces the zebra striping (PVPWarn parity).
+  ]]--
+  row.position = position
+  row.categoryGradient = row:CreateTexture(nil, "BACKGROUND", nil, 1)
+  row.categoryGradient:SetColorTexture(1, 1, 1, 1)
+  row.categoryGradient:SetAllPoints(row)
 
   -- flat hover sheen over the collapsed header - signals the row itself is clickable
   local highlight = row:CreateTexture(nil, "HIGHLIGHT")
@@ -179,6 +237,27 @@ function me.CreateRuleRowFrame(frame, position)
 end
 
 --[[
+  Tint a row's gradient with its category color. Zebra striping is achieved by alternating
+  the gradients alpha between odd and even rows. Rows are shared across categories and thus
+  need to be retinted on every category switch.
+
+  @param {table} row
+  @param {string} categoryName
+]]--
+function me.UpdateRowCategoryTint(row, categoryName)
+  local color = mod.guiHelper.GetCategoryColor(categoryName)
+  local alpha = math.fmod(row.position, 2) == 0
+    and RGCW_CONSTANTS.SPELL_LIST_ROW_TINT_ALPHA_EVEN
+    or RGCW_CONSTANTS.SPELL_LIST_ROW_TINT_ALPHA_ODD
+
+  row.categoryGradient:SetGradient(
+    "HORIZONTAL",
+    CreateColor(color[1], color[2], color[3], alpha),
+    CreateColor(color[1], color[2], color[3], 0)
+  )
+end
+
+--[[
   Create the expand indicator in the collapsed header: a "slate key" button
   (Quartermaster stepper-key look); ApplyRowExpansionState swaps its glyph
   between + and - while the row is expanded.
@@ -196,10 +275,13 @@ function me.CreateExpandButton(row)
     "+",
     RGCW_CONSTANTS.SLATE_KEY_SIZE
   )
-  -- centered in the fixed-height collapsed header, not the (variable) row
+  --[[
+    Centered in the fixed-height collapsed header, not the (variable) row, and kept clear
+    of the scrollbar overlaying the right edge of the list
+  ]]--
   expandButton:SetPoint(
     "TOPRIGHT",
-    -10,
+    RGCW_CONSTANTS.SPELL_LIST_ROW_INSET_RIGHT * -1,
     -((RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT - RGCW_CONSTANTS.SLATE_KEY_SIZE) / 2)
   )
   expandButton:SetScript("OnClick", me.ExpandButtonOnClick)
@@ -227,10 +309,13 @@ function me.CreateExpansionStrip(row)
   expansion:SetPoint("TOPLEFT", row, 0, -RGCW_CONSTANTS.SPELL_LIST_ROW_HEIGHT)
   expansion:SetPoint("BOTTOMRIGHT", row)
 
-  -- hairline separator between the header and the unfolded options
+  --[[
+    Hairline separator between the header and the unfolded options. Its right end stops
+    where the row controls do so it does not run underneath the scrollbar.
+  ]]--
   local separator = expansion:CreateTexture(nil, "ARTWORK")
   separator:SetPoint("TOPLEFT", 8, 0)
-  separator:SetPoint("TOPRIGHT", -8, 0)
+  separator:SetPoint("TOPRIGHT", RGCW_CONSTANTS.SPELL_LIST_ROW_INSET_RIGHT * -1, 0)
   separator:SetHeight(1)
   separator:SetColorTexture(0.16, 0.13, 0.09, 1)
 
@@ -505,7 +590,9 @@ function me.RefreshSpellList(categoryName)
 
       me.UpdateCooldownUiState(row, cooldown, categoryName)
       row:ClearAllPoints()
+      --[[ anchored to both sides so the row follows the scroll childs width ]]--
       row:SetPoint("TOPLEFT", uiState.spellListContent, 0, -offsetY)
+      row:SetPoint("TOPRIGHT", uiState.spellListContent, 0, -offsetY)
       offsetY = offsetY + row:GetHeight()
     elseif row then
       row:Hide()
@@ -540,6 +627,7 @@ function me.UpdateCooldownUiState(row, cooldown, categoryName)
   row.cooldownIcon.iconHolder.spellId = cooldown.spellId
   row.cooldownIcon.iconHolder.itemId = cooldown.itemId
   row.cooldownIcon.iconHolder:SetBackdropBorderColor(unpack(mod.guiHelper.GetCategoryColor(categoryName)))
+  me.UpdateRowCategoryTint(row, categoryName)
   row.cooldownStatus.text:SetText(cooldown.name)
   row.cooldownValue:SetText(me.BuildCooldownValueText(cooldown))
 

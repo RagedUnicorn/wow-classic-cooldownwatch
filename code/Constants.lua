@@ -168,11 +168,34 @@ RGCW_CONSTANTS = {
   --[[
     Cooldown spellList frame
   ]]--
+  ELEMENT_CATEGORY_TITLE = "CW_CategoryTitle",
   ELEMENT_SPELL_LIST_CONTENT_FRAME = "$parent_CW_SpellListContentFrame",
+  --[[
+    Fallback width for the scroll child until the settings canvas reports a size - the
+    list stretches to the canvas from there on (see CooldownMenu.UpdateContentWidth)
+  ]]--
   SPELL_LIST_CONTENT_FRAME_WIDTH = 580,
-  SPELL_LIST_CONTENT_FRAME_HEIGHT = 552,
-  SPELL_LIST_MAX_ROWS = 9,
+  --[[
+    Insets of the content frame against the settings canvas. The top left corner is set
+    by the caller, the bottom right one always tracks the canvas
+  ]]--
+  SPELL_LIST_CONTENT_FRAME_INSET_RIGHT = 5,
+  SPELL_LIST_CONTENT_FRAME_INSET_BOTTOM = 10,
+  --[[
+    The scrollbar overlays the rows instead of sitting next to them so the row background
+    runs all the way to the border of the list. SPELL_LIST_ROW_INSET_RIGHT keeps the row
+    controls clear of it.
+  ]]--
+  SPELL_LIST_SCROLL_BAR_GAP = 6,
+  SPELL_LIST_ROW_INSET_RIGHT = 22,
   SPELL_LIST_ROW_HEIGHT = 50,
+  --[[
+    Alpha of the category-colored gradient laid over a row. Alternating the two
+    values between odd and even rows is what produces the zebra striping (PVPWarn
+    parity) - the base color underneath stays the same on every row.
+  ]]--
+  SPELL_LIST_ROW_TINT_ALPHA_ODD = 0.38,
+  SPELL_LIST_ROW_TINT_ALPHA_EVEN = 0.20,
   -- height of the options strip below an expanded row (expanded row = ROW_HEIGHT + this)
   SPELL_LIST_ROW_EXPANSION_HEIGHT = 40,
   --[[
@@ -234,6 +257,12 @@ RGCW_CONSTANTS = {
     VALUE_FIELD_ACTIVE = {1, 0.819, 0, 1},
     -- fallback for categories without a CATEGORY entry
     CATEGORY_NEUTRAL = {0.5, 0.5, 0.5, 1},
+    --[[
+      Uniform warm near-black base every spell list row is drawn on. The zebra
+      striping is not done here but through the category-tinted gradient on top of
+      it (see SPELL_ROW_TINT_ALPHA), so the base stays the same on every row.
+    ]]--
+    SPELL_ROW_BACKGROUND = {0.05, 0.04, 0.03, 0.9},
     --[[
       Spell icon border colors keyed by categoryName. Values mirror PVPWarn's
       RGPVPW_COLORS.CATEGORIES - the class categories carry the class colors.

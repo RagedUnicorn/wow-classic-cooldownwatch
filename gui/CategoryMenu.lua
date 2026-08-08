@@ -96,10 +96,17 @@ end
   If the user navigates back to a category that was already built the function will not run again.
 ]]--
 function me.CreateCategoryMenu(self)
+  mod.guiHelper.CreatePanelTitle(
+    self,
+    RGCW_CONSTANTS.ELEMENT_CATEGORY_TITLE .. self.categoryName,
+    rgcw.L[self.localizationKey]
+  )
+
+  --[[ the list starts below the panel title, which sits at -16 and is about 19px tall ]]--
   local spellContentFrame = me.CreateCategoryMenuContentFrame(
     self,
     RGCW_CONSTANTS.ELEMENT_SPELL_LIST_CONTENT_FRAME .. self.categoryName,
-    {"TOPLEFT", self, 5, -7}
+    {"TOPLEFT", self, 5, -46}
   )
 
   local category = {
@@ -111,19 +118,30 @@ function me.CreateCategoryMenu(self)
 end
 
 --[[
+  Create the content frame that hosts a category's spell list. The frame stretches to the
+  settings canvas it sits on instead of using a fixed box - the canvas size comes from the
+  SettingsPanel and varies with resolution and ui scale, so a hardcoded size either overflows
+  the panel or leaves a dead strip below and right of the list.
+
   @param {table} self
   @param {string} contentFrameName
   @param {table} position
+    An object containing configuration parameters for a SetPoint function call. Defines the
+    top left corner of the frame - the bottom right one always tracks the canvas
 
   @return {table}
 ]]--
 function me.CreateCategoryMenuContentFrame(self, contentFrameName, position)
-  local contentFrame = CreateFrame("Frame", contentFrameName, self, "BackdropTemplate")
+  local contentFrame = CreateFrame("Frame", contentFrameName, self)
 
   contentFrame:SetPoint(unpack(position))
-  contentFrame:SetBackdropColor(1, 0.37, 0.5, .7)
-  contentFrame:SetWidth(RGCW_CONSTANTS.SPELL_LIST_CONTENT_FRAME_WIDTH)
-  contentFrame:SetHeight(RGCW_CONSTANTS.SPELL_LIST_CONTENT_FRAME_HEIGHT)
+  contentFrame:SetPoint(
+    "BOTTOMRIGHT",
+    self,
+    "BOTTOMRIGHT",
+    RGCW_CONSTANTS.SPELL_LIST_CONTENT_FRAME_INSET_RIGHT * -1,
+    RGCW_CONSTANTS.SPELL_LIST_CONTENT_FRAME_INSET_BOTTOM
+  )
 
   return contentFrame
 end

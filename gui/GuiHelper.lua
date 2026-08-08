@@ -61,6 +61,25 @@ function me.ApplyBorderBackdrop(frame)
 end
 
 --[[
+  Create the gold panel title every configuration panel carries in its top left corner.
+
+  @param {table} parentFrame
+  @param {string} frameName
+  @param {string} text
+
+  @return {table}
+    The created fontstring
+]]--
+function me.CreatePanelTitle(parentFrame, frameName, text)
+  local titleFontString = parentFrame:CreateFontString(frameName, "OVERLAY", "GameFontNormalLarge")
+  titleFontString:SetPoint("TOPLEFT", 16, -16)
+  me.SetColor(titleFontString, RGCW_CONSTANTS.COLOR.TITLE_GOLD)
+  titleFontString:SetText(text)
+
+  return titleFontString
+end
+
+--[[
   Hide a scrollbar while its list fits into the visible area. Must be called after the scroll
   frame and its bar were wired up through ScrollUtil.InitScrollFrameWithScrollBar.
 

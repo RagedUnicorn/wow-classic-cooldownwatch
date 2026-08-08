@@ -85,11 +85,11 @@ function me.BuildUi(frame)
   if not builtMenu then
     SetupStaticPopups()
 
-    local titleFontString = frame:CreateFontString(
-      RGCW_CONSTANTS.ELEMENT_PROFILE_TITLE, "OVERLAY", "GameFontNormalLarge")
-    titleFontString:SetPoint("TOPLEFT", 16, -16)
-    mod.guiHelper.SetColor(titleFontString, RGCW_CONSTANTS.COLOR.TITLE_GOLD)
-    titleFontString:SetText(rgcw.L["profile_title"])
+    mod.guiHelper.CreatePanelTitle(
+      frame,
+      RGCW_CONSTANTS.ELEMENT_PROFILE_TITLE,
+      rgcw.L["profile_title"]
+    )
 
     local listLabel = frame:CreateFontString(nil, "OVERLAY")
     listLabel:SetFont(STANDARD_TEXT_FONT, 13)
