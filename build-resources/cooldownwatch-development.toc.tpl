@@ -5,6 +5,7 @@
 ## Version: ${addon.tag.version}
 ## SavedVariablesPerCharacter: ${addon.savedVariablesPerCharacter}
 ## IconTexture: Interface\AddOns\CooldownWatch\assets\cooldownwatch_icon
+## Category: RagedUnicorn
 ${addon.comment.generated.toc}
 
 # constant values
