@@ -92,9 +92,16 @@ function me.BuildUi(parentFrame, categoryName)
   scrollBar:SetPoint("TOPLEFT", spellListScrollFrame, "TOPRIGHT", 8, 0)
   scrollBar:SetPoint("BOTTOMLEFT", spellListScrollFrame, "BOTTOMRIGHT", 8, 0)
   ScrollUtil.InitScrollFrameWithScrollBar(spellListScrollFrame, scrollBar)
+  --[[ a category with fewer spells than fit must not show an inert bar ]]--
+  mod.guiHelper.EnableScrollBarAutoHide(spellListScrollFrame, scrollBar)
 
   local spellListContent = CreateFrame("Frame", nil, spellListScrollFrame)
-  spellListContent:SetSize(listWidth, listHeight)
+  --[[
+    Seed the content with no scrollable extent - RefreshSpellList sets the real height once
+    it knows its row count and the accordion state. Seeding the full listHeight would leave
+    the list scrollable and keep the scrollbar visible on a category that fits
+  ]]--
+  spellListContent:SetSize(listWidth, 1)
   spellListScrollFrame:SetScrollChild(spellListContent)
 
   uiState.spellListScrollFrame = spellListScrollFrame

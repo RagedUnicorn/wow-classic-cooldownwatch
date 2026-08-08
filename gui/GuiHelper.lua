@@ -61,6 +61,30 @@ function me.ApplyBorderBackdrop(frame)
 end
 
 --[[
+  Hide a scrollbar while its list fits into the visible area. Must be called after the scroll
+  frame and its bar were wired up through ScrollUtil.InitScrollFrameWithScrollBar.
+
+  @param {table} scrollFrame
+  @param {table} scrollBar
+]]--
+function me.EnableScrollBarAutoHide(scrollFrame, scrollBar)
+  if scrollBar.SetHideIfUnscrollable then
+    scrollBar:SetHideIfUnscrollable(true)
+
+    return
+  end
+
+  --[[
+    Classic Era did not backport ScrollBarMixin:SetHideIfUnscrollable - track the scroll
+    range manually instead
+  ]]--
+  scrollFrame:HookScript("OnScrollRangeChanged", function(_, _, yRange)
+    scrollBar:SetShown(yRange > 0)
+  end)
+  scrollBar:Hide()
+end
+
+--[[
   Create a configuration checkbox
 
   @param {string} frameName

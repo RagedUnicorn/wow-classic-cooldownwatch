@@ -40,9 +40,10 @@ me.selectedProfile = nil
 local builtMenu = false
 
 --[[
-  Scroll child holding the profile rows and the reusable row button pool
+  Scroll child holding the profile rows, its scrollbar and the reusable row button pool
 ]]--
 local profileListContent
+local profileListScrollBar
 local rows = {}
 
 --[[
@@ -133,13 +134,20 @@ function me.BuildProfileList(frame)
   scrollFrame:SetPoint("TOPLEFT", 6, -6)
   scrollFrame:SetPoint("BOTTOMRIGHT", -22, 6)
 
-  local scrollBar = CreateFrame("EventFrame", nil, listContainer, "MinimalScrollBar")
-  scrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 8, 0)
-  scrollBar:SetPoint("BOTTOMLEFT", scrollFrame, "BOTTOMRIGHT", 8, 0)
-  ScrollUtil.InitScrollFrameWithScrollBar(scrollFrame, scrollBar)
+  profileListScrollBar = CreateFrame("EventFrame", nil, listContainer, "MinimalScrollBar")
+  profileListScrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 8, 0)
+  profileListScrollBar:SetPoint("BOTTOMLEFT", scrollFrame, "BOTTOMRIGHT", 8, 0)
+  ScrollUtil.InitScrollFrameWithScrollBar(scrollFrame, profileListScrollBar)
+  --[[ a profile list that fits into the box must not show an inert bar ]]--
+  mod.guiHelper.EnableScrollBarAutoHide(scrollFrame, profileListScrollBar)
 
   profileListContent = CreateFrame("Frame", RGCW_CONSTANTS.ELEMENT_PROFILE_LIST_CONTENT_FRAME, scrollFrame)
-  profileListContent:SetSize(listWidth - 28, listHeight)
+  --[[
+    Seed the content with no scrollable extent - RefreshList sets the real height once it
+    knows its row count. Seeding the full listHeight would leave the list scrollable by the
+    viewport insets alone and keep the scrollbar visible on an empty list
+  ]]--
+  profileListContent:SetSize(listWidth - 28, 1)
   scrollFrame:SetScrollChild(profileListContent)
 end
 
