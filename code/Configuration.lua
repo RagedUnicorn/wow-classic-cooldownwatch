@@ -34,8 +34,8 @@ me.tag = "Configuration"
 --[[
   Declaration of the saved variable. WoW replaces this table with the saved one on load,
   so the values here only ever apply to a character that never saved a configuration -
-  every other backfill (upgrade, applied profile) goes through me.GetDefaults below,
-  which must stay in sync with the values declared here.
+  every other backfill (upgrade, applied profile) goes through me.GetDefaults below
+  via me.ReconcileWithDefaults, which must stay in sync with the values declared here.
 ]]--
 CooldownWatchConfiguration = {
   --[[
@@ -110,9 +110,14 @@ CooldownWatchConfiguration = {
 
 --[[
   The shipped default value of every configurable field - the single source of truth
-  for SetupConfiguration's nil-guards and for the frozen default profile
-  (see code/ConfigProfile.lua BuildDefaultSnapshot). addonVersion is deliberately
-  absent; it is stamped by SetAddonVersion.
+  for the schema SetupConfiguration reconciles the saved variables against and for
+  the frozen default profile (see code/ConfigProfile.lua BuildDefaultSnapshot).
+  addonVersion is deliberately absent; it is stamped by SetAddonVersion.
+
+  Every field a new addon version adds has to be declared here, otherwise the
+  reconcile cannot know about it. Nested tables are part of that schema: a key
+  added inside one of them is filled on upgraded characters just like a top level
+  field is.
 
   Returns a fresh table on every call: the two category-keyed maps are derived from
   the category catalog at call time and must never be shared between the live
@@ -133,15 +138,87 @@ function me.GetDefaults()
 end
 
 --[[
-  Set default values if property is nil. This might happen after an addon upgrade
+  Path of a field inside the configuration tree, used for log messages only.
+
+  @param {string | nil} path
+    the parent path, nil for a top level field
+  @param {any} key
+
+  @return {string}
 ]]--
-function me.SetupConfiguration()
-  for field, defaultValue in pairs(me.GetDefaults()) do
-    if CooldownWatchConfiguration[field] == nil then
-      mod.logger.LogInfo(me.tag, field .. " has unexpected nil value")
-      CooldownWatchConfiguration[field] = defaultValue
+local function FieldPath(path, key)
+  if path == nil then
+    return tostring(key)
+  end
+
+  return path .. "." .. tostring(key)
+end
+
+--[[
+  Recursively reconcile a saved configuration table against the shipped defaults.
+  Every key the defaults declare but the saved table is missing gets filled from
+  the defaults; every value the player actually configured is left untouched.
+  This is the addon's whole schema-evolution story for additive changes - a new
+  option field, a new category bucket inside cooldownConfiguration /
+  cooldownOverrides - and it runs unconditionally on every load rather than
+  behind a version check, so a downgrade-then-upgrade or a hand edited saved
+  variables file heals just the same.
+
+  Only two things can happen to a key that already exists:
+   - its value is a table on both sides: recurse into it. Category keyed maps of
+     player data (cooldownConfiguration.priest, frames, profiles) default to
+     empty tables, so recursion over them is a no-op and stored player data and
+     profile snapshots are never rewritten
+   - its type disagrees with the default: the saved value cannot be interpreted
+     under the current schema (corruption, or a reshape that a future migration
+     path should have handled), so it is reset to the default and logged
+
+  What this deliberately does NOT do is rename keys or reshape values - a
+  reconcile cannot tell a renamed field from a new one. That is what the
+  reserved me.MigrationPath hook in me.SetAddonVersion is for, and it stays
+  unwritten until such a change actually lands.
+
+  @param {table} saved
+    the table to fill in place, usually CooldownWatchConfiguration
+  @param {table} defaults
+    the shipped defaults to reconcile against, usually me.GetDefaults()
+  @param {string | nil} path
+    parent path of the reconciled table, used for log messages only
+
+  @return {table}
+    the passed saved table, reconciled in place
+]]--
+function me.ReconcileWithDefaults(saved, defaults, path)
+  if type(saved) ~= "table" or type(defaults) ~= "table" then
+    return saved
+  end
+
+  for key, defaultValue in pairs(defaults) do
+    local savedValue = saved[key]
+
+    if savedValue == nil then
+      mod.logger.LogInfo(me.tag, FieldPath(path, key) .. " is missing - filling in the default value")
+      saved[key] = mod.common.Clone(defaultValue)
+    elseif type(savedValue) ~= type(defaultValue) then
+      mod.logger.LogWarn(me.tag, FieldPath(path, key) .. " is a " .. type(savedValue)
+        .. " but the default is a " .. type(defaultValue) .. " - resetting it to the default value")
+      saved[key] = mod.common.Clone(defaultValue)
+    elseif type(defaultValue) == "table" then
+      me.ReconcileWithDefaults(savedValue, defaultValue, FieldPath(path, key))
     end
   end
+
+  return saved
+end
+
+--[[
+  Bring the saved configuration up to the current schema. Runs on every load
+  (see code/Core.lua Initialize) and after a profile was applied
+  (see code/ConfigProfile.lua ApplySnapshot), which is why it has to be
+  idempotent and cheap.
+]]--
+function me.SetupConfiguration()
+  me.ReconcileWithDefaults(CooldownWatchConfiguration, me.GetDefaults())
 
   --[[
     Set saved variables with addon version. This can be used later to determine whether
@@ -153,6 +230,13 @@ end
 --[[
   Set addon version on addon options. Before setting a new version make sure
   to run through migration paths.
+
+  Additive schema changes need no migration path - me.ReconcileWithDefaults
+  already covers them. The commented call below is the reserved hook for the
+  changes a reconcile cannot express (a renamed key, a reshaped value); wire it
+  up together with the first such change, comparing the stamped
+  CooldownWatchConfiguration.addonVersion against the current one via
+  me.IsVersionBefore.
 ]]--
 function me.SetAddonVersion()
   -- me.MigrationPath()

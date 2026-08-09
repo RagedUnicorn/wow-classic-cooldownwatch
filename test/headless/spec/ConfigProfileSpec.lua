@@ -118,8 +118,17 @@ describe("ConfigProfile", function()
 
     assert.is_false(CooldownWatchConfiguration.lockTargetCooldownBar)
     assert.is_true(CooldownWatchConfiguration.globalAssumeWorstCase)
-    assert.same({ rogue = { [2094] = true } }, CooldownWatchConfiguration.cooldownConfiguration)
-    -- absent fields are left alone (SetupConfiguration only backfills nil)
+    --[[
+      The applied bucket survives verbatim; the category buckets the older-schema profile
+      did not carry are filled empty by the reconcile inside SetupConfiguration.
+    ]]--
+    assert.same({ [2094] = true }, CooldownWatchConfiguration.cooldownConfiguration.rogue)
+
+    for _, category in ipairs(rgcw.categories.GetCategories()) do
+      assert.is_table(CooldownWatchConfiguration.cooldownConfiguration[category.categoryName])
+    end
+
+    -- present fields the profile omitted are left alone, the reconcile only fills what is nil
     assert.equal(liveOverrides, CooldownWatchConfiguration.cooldownOverrides)
     -- SetupConfiguration ran and restamped the addon version via the stub
     assert.equal("v9.9.9", CooldownWatchConfiguration.addonVersion)

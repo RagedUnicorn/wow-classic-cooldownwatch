@@ -25,8 +25,10 @@
 -- busted extends `assert` with .same / .equal / etc. at runtime; luacheck
 -- cannot verify those fields statically. Suppress warning 143 (accessing
 -- undefined field of a global variable) for this file.
--- luacheck: globals describe it before_each
+-- luacheck: globals describe it before_each after_each
 -- luacheck: ignore 143
+
+local wowStubs = require("WowStubs")
 
 describe("Configuration cooldown overrides", function()
   local configuration
@@ -287,5 +289,163 @@ describe("Configuration cooldown enabled state", function()
 
   it("a non-boolean catalog default is treated as disabled", function()
     assert.is_false(configuration.GetCooldownConfigurationState("priest", 10947, "yes"))
+  end)
+end)
+
+--[[
+  The schema-evolution story: ReconcileWithDefaults fills whatever the current defaults
+  declare and the saved table is missing, on every load, without touching configured
+  values. SetupConfiguration is its only production caller besides ConfigProfile.ApplySnapshot.
+]]--
+describe("Configuration schema reconcile", function()
+  local configuration
+  local restore
+
+  before_each(function()
+    configuration = rgcw.configuration
+    restore = nil
+  end)
+
+  after_each(function()
+    if restore ~= nil then restore() end
+  end)
+
+  --[[
+    Swap the SavedVariable for a throwaway table for the duration of one test. busted
+    insulates spec files, so a plain global assignment would be invisible to the
+    production code reading CooldownWatchConfiguration - it has to go through _G,
+    which is what wowStubs.install does.
+
+    @param {table} saved
+    @return {table}
+  ]]--
+  local function installSavedVariable(saved)
+    restore = wowStubs.install({
+      C_AddOns = wowStubs.stubs.C_AddOns({ Version = "1.2.0" }),
+      CooldownWatchConfiguration = saved
+    })
+
+    return saved
+  end
+
+  it("fills a top-level field the saved table is missing", function()
+    local saved = configuration.ReconcileWithDefaults({}, configuration.GetDefaults())
+
+    assert.equal("", saved.lastNotifiedVersion)
+    assert.is_false(saved.lockTargetCooldownBar)
+    assert.is_false(saved.globalAssumeWorstCase)
+    assert.same({}, saved.frames)
+    assert.same({}, saved.profiles)
+  end)
+
+  it("leaves configured values untouched, including a value equal to the default", function()
+    local saved = configuration.ReconcileWithDefaults(
+      { lockTargetCooldownBar = true, globalAssumeWorstCase = false, lastNotifiedVersion = "1.1.0" },
+      configuration.GetDefaults()
+    )
+
+    assert.is_true(saved.lockTargetCooldownBar)
+    assert.is_false(saved.globalAssumeWorstCase)
+    assert.equal("1.1.0", saved.lastNotifiedVersion)
+  end)
+
+  it("fills a category bucket added to the catalog since the configuration was saved", function()
+    --[[
+      The realistic additive change: a new category means a new bucket inside the two
+      category-keyed maps. Simulate the old saved shape by keeping exactly one bucket.
+    ]]--
+    local saved = configuration.ReconcileWithDefaults(
+      { cooldownConfiguration = { ["priest"] = { [10890] = false } }, cooldownOverrides = {} },
+      configuration.GetDefaults()
+    )
+
+    for _, category in ipairs(rgcw.categories.GetCategories()) do
+      assert.is_table(saved.cooldownConfiguration[category.categoryName])
+      assert.is_table(saved.cooldownOverrides[category.categoryName])
+    end
+
+    -- the pre-existing bucket keeps the player's explicit opt-out
+    assert.is_false(saved.cooldownConfiguration["priest"][10890])
+  end)
+
+  it("never rewrites player data living under a default-empty table", function()
+    local profiles = { ["Default"] = { lockTargetCooldownBar = true }, ["Pvp"] = { frames = {} } }
+
+    local saved = configuration.ReconcileWithDefaults(
+      { profiles = profiles, frames = { ["CW_TargetCooldownBarFrame"] = { posX = 10, posY = 20 } } },
+      configuration.GetDefaults()
+    )
+
+    assert.same({ ["Default"] = { lockTargetCooldownBar = true }, ["Pvp"] = { frames = {} } }, saved.profiles)
+    assert.same({ ["CW_TargetCooldownBarFrame"] = { posX = 10, posY = 20 } }, saved.frames)
+  end)
+
+  it("resets a saved value whose type disagrees with the default", function()
+    local saved = configuration.ReconcileWithDefaults(
+      { lockTargetCooldownBar = "yes", frames = 42 },
+      configuration.GetDefaults()
+    )
+
+    assert.is_false(saved.lockTargetCooldownBar)
+    assert.same({}, saved.frames)
+  end)
+
+  it("clones the defaults instead of sharing table references with them", function()
+    local defaults = configuration.GetDefaults()
+    local saved = configuration.ReconcileWithDefaults({}, defaults)
+
+    saved.cooldownConfiguration["priest"][10890] = true
+
+    assert.is_nil(defaults.cooldownConfiguration["priest"][10890])
+  end)
+
+  it("is idempotent - a second pass changes nothing", function()
+    local saved = configuration.ReconcileWithDefaults({ lockTargetCooldownBar = true }, configuration.GetDefaults())
+    local first = rgcw.common.Clone(saved)
+
+    configuration.ReconcileWithDefaults(saved, configuration.GetDefaults())
+
+    assert.same(first, saved)
+  end)
+
+  it("returns a non-table saved value untouched instead of raising", function()
+    assert.is_nil(configuration.ReconcileWithDefaults(nil, configuration.GetDefaults()))
+    assert.equal("corrupt", configuration.ReconcileWithDefaults("corrupt", configuration.GetDefaults()))
+  end)
+
+  it("GetDefaults deliberately omits addonVersion - it is bookkeeping, not a configurable field", function()
+    assert.is_nil(configuration.GetDefaults().addonVersion)
+  end)
+
+  it("SetupConfiguration initializes a wholesale-empty saved table", function()
+    local saved = installSavedVariable({})
+
+    configuration.SetupConfiguration()
+
+    for field, defaultValue in pairs(configuration.GetDefaults()) do
+      assert.same(defaultValue, saved[field])
+    end
+  end)
+
+  it("SetupConfiguration fills a partial saved table without discarding user values", function()
+    local saved = installSavedVariable({
+      lockTargetCooldownBar = true,
+      cooldownConfiguration = { ["priest"] = { [10890] = false } }
+    })
+
+    configuration.SetupConfiguration()
+
+    assert.is_true(saved.lockTargetCooldownBar)
+    assert.is_false(saved.cooldownConfiguration["priest"][10890])
+    assert.same({}, saved.frames)
+    assert.equal("", saved.lastNotifiedVersion)
+  end)
+
+  it("SetupConfiguration stamps the current addon version over a stale one", function()
+    local saved = installSavedVariable({ addonVersion = "1.0.0" })
+
+    configuration.SetupConfiguration()
+
+    assert.equal("1.2.0", saved.addonVersion)
   end)
 end)
