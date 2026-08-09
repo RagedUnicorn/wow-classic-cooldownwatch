@@ -32,7 +32,9 @@ docker compose run --rm busted
   pull request, so a red local run means a red PR.
 
 See [docs/TEST.md](docs/TEST.md) for the full testing surface, including the in-game test
-framework available in development builds.
+framework available in development builds. The manual test procedure that gates a release lives in
+[test/TESTING.md](test/TESTING.md) - contributors don't have to run it, but it is a good map of
+what a change is expected not to break.
 
 ## Contributing SpellMap entries
 

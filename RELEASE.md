@@ -2,6 +2,19 @@
 
 > This document explains how a new release is created for CooldownWatch
 
+## Pre-release testing
+
+Complete the test procedure in [test/TESTING.md](test/TESTING.md) before creating any deployment:
+
+* Automated gates - luacheck and busted must be green (locally and in CI)
+* The in-game suite (`/rgcw test all`) green on the dev checkout
+* Full manual test case catalog ([test/manual/](test/manual/)) on Classic Era
+* `TC-BD-01` against the packaged release build
+* `TC-VB-01` (version broadcast) if a second account/client is available
+* `TC-SOD-01` if a Season of Discovery character is available or season-gating code was touched
+
+## Deployment
+
 * Push all commits before proceeding
 * Make sure `build-resources/release-notes.md` are up-to-date
 * Create a GitHub deployment

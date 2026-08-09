@@ -1,5 +1,9 @@
 # Testing
 
+> This document describes the testing *surface* - how the harnesses work and how to extend them.
+> What has to be exercised before a release is the gate in [test/TESTING.md](../test/TESTING.md),
+> with one file per manual test case under [test/manual/](../test/manual/).
+
 CooldownWatch ships two test layers:
 
 - An **in-game test framework** that runs against the addon's real modules under WoW (loaded in development builds
