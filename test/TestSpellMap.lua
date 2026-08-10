@@ -164,8 +164,17 @@ function me.TestCooldownWorstCaseSane()
     function()
       return mod.spellMapValidation.ValidateCooldownWorstCaseSane(mod.spellMap.GetSpellMap())
     end,
-    "Every cooldownWorstCase is less than or equal to its base cooldown",
+    "Every cooldownWorstCase is strictly below its base cooldown",
     "cooldownWorstCase out-of-range failure(s)")
+end
+
+function me.TestCooldownsWithinLimit()
+  RunValidator("TestCooldownsWithinLimit",
+    function()
+      return mod.spellMapValidation.ValidateCooldownsWithinLimit(mod.spellMap.GetSpellMap())
+    end,
+    "Every cooldown and cooldownWorstCase is positive and at most 60 minutes",
+    "cooldown limit failure(s)")
 end
 
 function me.TestCooldownResetTargets()
@@ -251,6 +260,7 @@ function me.RunAllTests()
   me.TestUnknownCategoryReturnsEmpty()
   me.TestCategoriesMatchSpellMap()
   me.TestCooldownWorstCaseSane()
+  me.TestCooldownsWithinLimit()
   me.TestCooldownResetTargets()
   me.TestTrackedEventsSupported()
   me.TestItemIdSane()

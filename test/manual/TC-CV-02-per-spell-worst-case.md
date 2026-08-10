@@ -26,6 +26,15 @@
 - Step 4: A still runs worst case, B runs its base value despite the global default being on
 - The checkbox states shown after the reload match what was set (explicit `true`/`false` is stored
   per spell, it is not derived from the global default)
-- The gold field highlight in each row points at the value that will actually be used
+- The lit field border in each row points at the value that will actually be used, in that field's
+  own colour: gold on `Cooldown`, cyan on `Worst case`
+- **Collapse both rows.** The description line under each spell name reports the state without
+  needing the row open:
+  - A (toggle **on**): `20s worst case / 30s cooldown`, the worst-case segment in **cyan**. Not
+    gold: gold is reserved for a value typed into a field on this spell
+  - B (toggle **off**): `30s cooldown` only - the worst-case segment is **gone**, not dimmed. An
+    unticked checkbox means the worst case plays no part, and the line must say so
+  The line flips the moment the toggle is clicked - it must not need a category switch or a
+  `/reload` to catch up
 - Spells without a worst case show no toggle and no worst-case field at all
 - No Lua errors

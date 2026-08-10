@@ -474,56 +474,108 @@ function me.IsCooldownWorstCaseAssumed(categoryName, spellId)
 end
 
 --[[
-  Update the manual cooldown override for a spell in a certain category. The
-  manual value replaces the resolved cooldown entirely and beats both
-  worst-case settings (see CooldownQueue.ResolveCooldown).
+  Whether the worst case is assumed for a spell once the global default is
+  taken into account: an explicit per-spell toggle wins in both directions, and
+  a spell that was never configured follows the global option.
+
+  This is the rule ResolveCooldown applies and the one the config menu's
+  description line asks about, kept in one place so the two cannot disagree.
+  Not to be confused with IsCooldownWorstCaseAssumed, which collapses only the
+  per-spell tri-state and exists to drive the checkbox's own checked state -
+  that one must NOT fold in the global default, or ticking the global option
+  would make every checkbox appear individually set.
+
+  Says nothing about whether the worst case ends up *tracked*: a manual
+  override beats it (see CooldownQueue.ResolveCooldown).
+
+  @param {string} categoryName
+  @param {number} spellId
+
+  @return {boolean}
+]]--
+function me.IsWorstCaseEffective(categoryName, spellId)
+  local override = me.GetCooldownWorstCaseOverride(categoryName, spellId)
+
+  if override ~= nil then
+    return override
+  end
+
+  return me.IsGlobalWorstCaseAssumed()
+end
+
+--[[
+  Whether a player-entered override value is usable at all.
+
+  Deliberately NOT rejected: a value above the *catalog* cooldown for the spell.
+  The catalog is a best effort and the player watching the enemy may simply know
+  better (a rank the catalog does not carry, a season tweak, an unlisted set
+  bonus), so the override is free in both directions within the absolute limit.
+  Silently clamping to the catalog value would be worse than wrong: the field is
+  pre-filled with it, so a clamped commit re-renders the exact number that was
+  already there and is indistinguishable from the edit having been ignored.
+
+  Rejected is anything past RGCW_CONSTANTS.COOLDOWN_MAX_SECONDS — 60 minutes,
+  the same ceiling the catalog itself is held to. Past that a value is a typo,
+  not a cooldown, and it would sit on the bar for the rest of the session.
+
+  @param {any} value
+
+  @return {boolean}
+    true - The value can be stored as an override
+]]--
+local function IsValidOverrideValue(value)
+  return type(value) == "number"
+    and value == value      -- NaN is the only value not equal to itself
+    and value > 0
+    -- also excludes math.huge, which fails every finite comparison
+    and value <= RGCW_CONSTANTS.COOLDOWN_MAX_SECONDS
+end
+
+--[[
+  Write one numeric field of a spell's override entry. Shared by the cooldown
+  and the worst-case value so the two cannot drift apart in validation or in
+  their lazy table-chain handling.
 
   Validation lives here rather than in the GUI so it applies to every caller
   and is testable under the headless harness:
-   - nil clears the override (sibling fields on the entry survive)
-   - non-numbers, NaN and values <= 0 are rejected without touching the store
-   - values above the spell's base cooldown are capped at the base — the
-     override can only lower the tracked time. A genuinely longer cooldown is
-     a SpellMap data bug and should be fixed in the catalog instead
+   - nil clears the field (sibling fields on the entry survive)
+   - anything IsValidOverrideValue rejects leaves the store untouched
+   - clearing a spell that was never configured must not fabricate the chain
 
+  @param {string} fieldName
+    The key on the per-spell override entry ("value" or "worstCaseValue")
   @param {number | nil} value
     The override in seconds, or nil to clear it
   @param {string} categoryName
   @param {number} spellId
 
   @return {number | nil}
-    The value that was stored (after capping) — callers display this instead
-    of the raw input. nil when the override was cleared or rejected.
+    The value that was stored — callers display this instead of the raw input.
+    nil when the override was cleared or rejected.
 ]]--
-function me.UpdateCooldownManualOverride(value, categoryName, spellId)
+local function UpdateOverrideValue(fieldName, value, categoryName, spellId)
   local overrides = CooldownWatchConfiguration.cooldownOverrides
 
   if value == nil then
     if overrides and overrides[categoryName] and overrides[categoryName][spellId] then
-      overrides[categoryName][spellId].value = nil
-      mod.logger.LogDebug(me.tag, "Cleared manual cooldown override: " .. categoryName .. " - " .. spellId)
+      overrides[categoryName][spellId][fieldName] = nil
+      mod.logger.LogDebug(me.tag, "Cleared " .. fieldName .. " override: " .. categoryName .. " - " .. spellId)
     end
 
     return nil
   end
 
-  if type(value) ~= "number" or value ~= value or value <= 0 then
-    mod.logger.LogWarn(me.tag, "Rejected invalid manual cooldown override: "
+  if not IsValidOverrideValue(value) then
+    mod.logger.LogWarn(me.tag, "Rejected invalid " .. fieldName .. " override: "
       .. categoryName .. " - " .. spellId .. " - " .. tostring(value))
 
     return nil
   end
 
-  local _, _, spell = mod.spellMapHelper.GetSpellById(spellId)
-
-  if spell and value > spell.cooldown then
-    value = spell.cooldown
-  end
-
   --[[
     Lazily create the table chain: cooldownOverrides itself may be nil when
     SetupConfiguration never ran (headless test harness), and the per-spell
-    entry is table-valued so the worst-case toggle survives an override edit.
+    entry is table-valued so the worst-case toggle survives a value edit.
   ]]--
   if overrides == nil then
     overrides = {}
@@ -538,11 +590,47 @@ function me.UpdateCooldownManualOverride(value, categoryName, spellId)
     overrides[categoryName][spellId] = {}
   end
 
-  overrides[categoryName][spellId].value = value
-  mod.logger.LogDebug(me.tag, "Set manual cooldown override: "
+  overrides[categoryName][spellId][fieldName] = value
+  mod.logger.LogDebug(me.tag, "Set " .. fieldName .. " override: "
     .. categoryName .. " - " .. spellId .. " - " .. value)
 
   return value
+end
+
+--[[
+  Read one numeric field of a spell's override entry
+
+  @param {string} fieldName
+  @param {string} categoryName
+  @param {number} spellId
+
+  @return {number | nil}
+]]--
+local function GetOverrideValue(fieldName, categoryName, spellId)
+  local overrides = CooldownWatchConfiguration.cooldownOverrides
+
+  if overrides == nil or overrides[categoryName] == nil or overrides[categoryName][spellId] == nil then
+    return nil
+  end
+
+  return overrides[categoryName][spellId][fieldName]
+end
+
+--[[
+  Update the manual cooldown override for a spell in a certain category. The
+  manual value replaces the resolved cooldown entirely and beats both
+  worst-case settings (see CooldownQueue.ResolveCooldown).
+
+  @param {number | nil} value
+    The override in seconds, or nil to clear it
+  @param {string} categoryName
+  @param {number} spellId
+
+  @return {number | nil}
+    The value that was stored, nil when it was cleared or rejected
+]]--
+function me.UpdateCooldownManualOverride(value, categoryName, spellId)
+  return UpdateOverrideValue("value", value, categoryName, spellId)
 end
 
 --[[
@@ -556,13 +644,68 @@ end
     nil    - Never configured; the worst-case resolution applies
 ]]--
 function me.GetCooldownManualOverride(categoryName, spellId)
-  local overrides = CooldownWatchConfiguration.cooldownOverrides
+  return GetOverrideValue("value", categoryName, spellId)
+end
 
-  if overrides == nil or overrides[categoryName] == nil or overrides[categoryName][spellId] == nil then
-    return nil
+--[[
+  Update the per-spell worst-case cooldown value for a spell in a certain
+  category — the player's correction of the catalog's cooldownWorstCase.
+
+  This only replaces the *value*; whether the worst case is assumed at all
+  stays with the toggle (UpdateCooldownWorstCaseState) and the global default.
+  A stored value for a spell the catalog carries no worst case for is inert —
+  the catalog decides whether a spell has a worst case, the player only what it
+  is (see CooldownQueue.ResolveCooldown).
+
+  On top of the shared validation this enforces the one rule that makes a worst
+  case a worst case: it must be **strictly below** the spell's base cooldown. A
+  worst case at or above the base describes nothing — assuming it would make
+  the tracked cooldown longer than the spell can possibly have, and at exactly
+  the base the toggle would silently do nothing. The catalog is held to the
+  same rule by SpellMapValidation.ValidateCooldownWorstCaseSane.
+
+  The comparison is against the *catalog* cooldown, not a manual override: an
+  override replaces the resolution wholesale (worst-case settings included), so
+  it is not the thing this value is a worst case of. Spells unknown to SpellMap
+  have no base to compare against and skip the check.
+
+  @param {number | nil} value
+    The worst-case cooldown in seconds, or nil to fall back to the catalog
+  @param {string} categoryName
+  @param {number} spellId
+
+  @return {number | nil}
+    The value that was stored, nil when it was cleared or rejected
+]]--
+function me.UpdateCooldownWorstCaseValue(value, categoryName, spellId)
+  -- type-guarded: a non-number is not ordered against a number in Lua, it raises
+  if type(value) == "number" then
+    local _, _, spell = mod.spellMapHelper.GetSpellById(spellId)
+
+    if spell and value >= spell.cooldown then
+      mod.logger.LogWarn(me.tag, "Rejected worst-case value not below the base cooldown: "
+        .. categoryName .. " - " .. spellId .. " - " .. tostring(value)
+        .. " (base " .. tostring(spell.cooldown) .. ")")
+
+      return nil
+    end
   end
 
-  return overrides[categoryName][spellId].value
+  return UpdateOverrideValue("worstCaseValue", value, categoryName, spellId)
+end
+
+--[[
+  Get the per-spell worst-case cooldown value for a spell in a certain category
+
+  @param {string} categoryName
+  @param {number} spellId
+
+  @return {number | nil}
+    number - The player's worst-case value in seconds
+    nil    - Never configured; the catalog's cooldownWorstCase applies
+]]--
+function me.GetCooldownWorstCaseValue(categoryName, spellId)
+  return GetOverrideValue("worstCaseValue", categoryName, spellId)
 end
 
 --[[

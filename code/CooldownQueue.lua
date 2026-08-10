@@ -87,6 +87,13 @@ local cooldownQueue = {}
   3. Global default (GeneralMenu) — applies to spells the player never configured
   4. Base cooldown
 
+  Whether a spell has a worst case at all is the catalog's call; the player may
+  correct its *value* through the per-spell worst-case field. That correction
+  is applied to `cooldownWorstCase` up front, so it shows up both when the
+  worst case is assumed and when it is only rendered as the bar's hint timer. A
+  stored value for a spell the catalog carries no worst case for is stale data
+  and stays inert.
+
   When the manual override or the worst case applies its value is promoted into
   `cooldown` and `cooldownWorstCase` is cleared, so the bar shows a single
   authoritative timer (the small hint timer hides itself when the field is nil).
@@ -113,10 +120,11 @@ function me.ResolveCooldown(category, spellData)
 
   if spellData.cooldownWorstCase == nil then return end
 
-  local override = mod.configuration.GetCooldownWorstCaseOverride(category, spellData.spellId)
+  spellData.cooldownWorstCase =
+    mod.configuration.GetCooldownWorstCaseValue(category, spellData.spellId)
+    or spellData.cooldownWorstCase
 
-  if override == false then return end
-  if override == nil and not mod.configuration.IsGlobalWorstCaseAssumed() then return end
+  if not mod.configuration.IsWorstCaseEffective(category, spellData.spellId) then return end
 
   spellData.cooldown = spellData.cooldownWorstCase
   spellData.cooldownWorstCase = nil

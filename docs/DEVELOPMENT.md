@@ -194,22 +194,96 @@ all members share the same `cooldown`.
 
 `CooldownQueue.ResolveCooldown` decides once per enqueue which cooldown value a spell runs with. Resolution order:
 
-1. **Manual override** (`cooldownOverrides[category][spellId].value`, set via the numeric input in the cooldown
-   menu) — replaces the cooldown entirely and beats both worst-case settings. Validation lives in
-   `Configuration.UpdateCooldownManualOverride` (not the GUI) so it is headless-testable and applies to every
-   caller: non-numbers, NaN and values `<= 0` are rejected; values above the spell's base cooldown are capped at
-   the base — the override can only lower the tracked time, a genuinely longer cooldown is a SpellMap data bug.
+1. **Manual override** (`cooldownOverrides[category][spellId].value`, set via the `Cooldown` input in the cooldown
+   menu) — replaces the cooldown entirely and beats both worst-case settings.
 2. **Per-spell toggle** (`cooldownOverrides[category][spellId].worstCase`, set via the cooldown menu) — an explicit
    `true`/`false` always wins over the global default.
 3. **Global default** (`globalAssumeWorstCase`, set via the general menu) — applies to spells whose per-spell entry was
-   never configured (`worstCase == nil`). `Configuration.GetCooldownWorstCaseOverride` exposes this tri-state; the
-   boolean `IsCooldownWorstCaseAssumed` collapses it and is only suitable for UI checkbox state.
+   never configured (`worstCase == nil`). `Configuration.GetCooldownWorstCaseOverride` exposes this tri-state.
+   `IsWorstCaseEffective` folds steps 2 and 3 into the single "is the worst case switched on for this spell" answer and
+   is what both `ResolveCooldown` and the config menu's description line ask. The similarly-named
+   `IsCooldownWorstCaseAssumed` collapses only the per-spell tri-state and is suitable **only** for the checkbox's own
+   state — it must not fold in the global default, or ticking the global option would make every checkbox appear
+   individually set.
 4. **Base cooldown** — spells without a `cooldownWorstCase` value are never affected by the worst-case settings
    (the manual override applies to every spell).
+
+Whichever worst-case value is used comes from `cooldownOverrides[category][spellId].worstCaseValue` when the player
+set one (the `Worst case` input in the cooldown menu), and from the catalog's `cooldownWorstCase` otherwise. That
+substitution happens before the toggle is consulted, so a corrected value also shows up on the bar's hint timer while
+the worst case is *not* assumed. Whether a spell has a worst case at all stays the catalog's call — a stored
+`worstCaseValue` for a spell without a catalog `cooldownWorstCase` is stale data and stays inert.
 
 When the manual override or the worst case applies the value is promoted into `cooldown` and `cooldownWorstCase` is
 cleared, so the bar renders a single authoritative timer. Changing a setting only affects future casts — in-flight
 queue entries keep their resolved value.
+
+Both numeric fields share one store helper, so they cannot drift apart in validation: non-numbers, NaN, values `<= 0`
+and values above `RGCW_CONSTANTS.COOLDOWN_MAX_SECONDS` are rejected, `nil` clears the field, and nothing else is
+refused. Validation lives in `Configuration` (not the GUI) so it is headless-testable and applies to every caller.
+
+For the **cooldown** field, values above the catalog cooldown for the spell are **deliberately allowed** — the player
+watching the enemy may know better than the catalog, and a silent clamp re-renders the pre-filled catalog value, which
+is indistinguishable from the edit having been ignored.
+
+The **worst-case** field carries one extra rule on top (`UpdateCooldownWorstCaseValue`): it must be **strictly below**
+the spell's base cooldown. A worst case at or above the base describes nothing — assuming it would make the tracked
+cooldown longer than the spell can possibly have, and at exactly the base the toggle would silently do nothing. The
+comparison is against the *catalog* cooldown, never a manual override: an override replaces the resolution wholesale
+(worst-case settings included), so it is not the value this field is a worst case of. Spells unknown to SpellMap have
+no base to compare against and skip the check. `SpellMapValidation.ValidateCooldownWorstCaseSane` holds the catalog to
+the identical rule, so the catalog cannot ship a shape the UI would refuse for it.
+
+### The 60 minute cooldown limit
+
+`RGCW_CONSTANTS.COOLDOWN_MAX_SECONDS` (3600) is the ceiling for **any** cooldown in the addon, enforced in two places
+against the one constant so they cannot disagree:
+
+- **The catalog** — `SpellMapValidation.ValidateCooldownsWithinLimit` fails the suites on a primary whose `cooldown`
+  or `cooldownWorstCase` is not a positive number of at most 3600 seconds.
+- **Both per-spell overrides** — `Configuration.IsValidOverrideValue`.
+
+It is **inclusive**: paladin Lay on Hands sits exactly on the limit at 3600s, so a `>=` comparison would reject the
+spell's own catalog value. Nothing in Classic Era runs longer, so a value past it is a typo (wrong unit, stray digit)
+rather than a spell — and an accepted one would sit on the bar for the rest of the session.
+
+### Fractional cooldowns
+
+The catalog holds fractional values (priest Mind Blast `cooldownWorstCase = 5.5`, mage `6.5`) and typed overrides may
+be fractional too. Three places have to agree for that to work, and all three are exercised:
+
+- **Display** goes through one of the two formatters below, both of which keep fractions.
+- **Parsing** is `Common.ParseSeconds`, not a bare `tonumber`. `tonumber` accepts hex (`0x10` → 16) and scientific
+  notation (`1e5` → 100000), neither of which anyone types into a seconds box and both of which land far from what
+  the text looks like. It also normalizes a decimal comma (`12,5`) because the addon ships a deDE locale.
+
+`VALUE_FIELD_MAX_LETTERS` is sized for the longest input the limit allows plus two decimals (`3600.99`). This is not
+cosmetic: with a limit that only fit whole seconds, `120.5` was cut to `120.` and `tonumber` read that back as `120` —
+a silently wrong value the player had no way to notice.
+
+### Two cooldown formatters, two different constraints
+
+`Common` owns both. They are deliberately **not** one function — the difference is the space they render into, and
+collapsing them would force one of the two surfaces to accept a bad trade.
+
+| | `FormatCooldownTime` | `FormatCooldownDuration` |
+|---|---|---|
+| Renders into | a 60px bar slot at font size 17 | the description line under a spell name |
+| Optimised for | staying inside the slot | being read at a glance |
+| `>= 60s` | `60m` `30m` `2m` (ceil) | `1m 30s`, or `2m` on the dot |
+| `10s`–`59s` | `59` `10` | `30s` |
+| `< 10s` | `9.9` `0.4` | `5.5s` |
+| Longest output | 4 characters | — |
+
+The bar formatter's length bound is the actual fix for the overflow, and `CommonSpec` asserts it by walking every
+tenth of a second up to `COOLDOWN_MAX_SECONDS` rather than by spot-checking the values the catalog happens to hold
+today. The second half of the fix is in `TargetCooldownBarSlot.CreateBigTimerCooldown`: the font string spans the slot
+(`TARGET_COOLDOWN_TEXT_INSET` from both edges) and centers, replacing a left anchor at one of two hardcoded x offsets
+chosen by whether the value was above or below 10s. That was an approximation of centering that only held for the
+string lengths it was tuned against — `3600.0` blew straight past it into the neighbouring slot.
+
+The editable value fields in the options menu are the one place that stays raw seconds: they are inputs, and a unit
+suffix inside the box would have to be parsed back out.
 
 ## Configuration panel design (family convention)
 
@@ -227,9 +301,76 @@ The configuration panels follow the shared design of Pulse and GearMenu (derived
   (width-capped by `CHECK_OPTION_DESCRIPTION_WIDTH`) instead of a hover `GameTooltip`. `UICheckButtonTemplate` is not
   used anywhere in the family anymore. The description strings reuse the former `*_tooltip` localization keys; the key
   names are kept to avoid churning every locale.
-- **Space-constrained list rows** — the cooldown menu's per-spell worst-case toggle and manual-override input —
+- **Space-constrained list rows** — the cooldown menu's per-spell worst-case toggle and its two numeric inputs —
   deliberately keep their descriptions on hover tooltips: the rows have no vertical room for an extra line. They still
   build their checkboxes through `GuiHelper.CreateCheckBox` (label only, tooltip scripts re-attached after creation).
+- **Numeric value fields** in the cooldown menu's expansion strip are built by `CooldownMenu.CreateValueField`, which
+  wires one shared set of scripts; each caller points `GetOverride` / `SetOverride` / `GetCatalogValue` at its own
+  configuration field. Editing semantics are uniform and match ordinary form inputs: **Enter or leaving the box
+  applies**, Escape abandons, and an emptied box clears the override. Two rules keep that safe. Text identical to
+  `boundText` (what the field was last bound to) is a no-op, so clicking into an unconfigured field and back out
+  cannot turn the displayed catalog value into a stored override. And when the *addon* takes focus away rather than
+  the player — a recycled row rebinding onto another spell, a row being locked because the spell was untracked — the
+  commit is skipped via `DropFieldEdit`, never a plain `ClearFocus`.
+- **Two visual channels per value field** (`ApplySingleFieldHighlight`): the lit border marks the value the runtime
+  will actually use for the spell, while solid vs. dimmed text marks the player's own value vs. the catalog value
+  merely displayed in the box. The dimmed state reads as placeholder text, which is what it is — without it there is
+  no way to tell a configured spell from an untouched one.
+
+  The border lights in the field's **own** colour (`valueField.liveBorderColor`) — gold for the cooldown field, cyan
+  for the worst-case field — so it says *which kind* of value is live, not merely that one is. Lighting the worst-case
+  field gold would have it claim the player set a value on this spell when the global default may be what switched it
+  on. Same palette as the description line, and the same cyan as the bar's small worst-case timer.
+- **The collapsed row's description line** (`BuildCooldownValueSegments` / `UpdateCooldownValueLine`) lists **every**
+  value the spell has, worst case first, joined with ` / `:
+
+  | State | Line |
+  |---|---|
+  | plain | `30s cooldown` |
+  | "Use worst case" **on** | `20s worst case / 30s cooldown` |
+  | …and the cooldown overridden | `20s worst case / 15s override (base 30s)` |
+  | "Use worst case" **off** | `30s cooldown` |
+
+  The worst-case segment tracks the **toggle**, not the resolution: it appears whenever the worst case is switched on
+  for the spell (per-spell toggle, or the global default for a spell that was never configured) and disappears the
+  moment it is switched off. A cooldown override beats the worst case at resolution time but does **not** hide it here
+  — the two are independent settings, and an earlier version that hid the worst case whenever an override existed lost
+  information the player had put in.
+
+  Because segments need different colours in one font string, they are wrapped in inline escapes via
+  `Common.ColorText`; the font string's own colour (`SUBNOTE`) shows through on the separators. Colour says what kind
+  of value each segment is — `WORST_CASE` cyan for a worst case, `TITLE_GOLD` for a cooldown the player set on this
+  spell, `SUBNOTE` for an untouched catalog value.
+
+  So gold only ever means "the player set this value on **this** spell" and is never reached by the global worst-case
+  default; marking a spell as customized when the player never touched it is the confusion the line exists to remove.
+  The cyan is the one the bar's small worst-case timer and the strip's worst-case field border use, so worst case
+  keeps one hue across all three surfaces.
+
+  An untracked row emits its segments **without** escapes so `SetTextColor(DISABLED)` can dim the whole line — an
+  inline escape would survive it and leave a greyed-out row still showing live colours.
+
+  Whether the worst case is switched on comes from `Configuration.IsWorstCaseEffective`, which is the same accessor
+  `ResolveCooldown` uses, so the line and the runtime cannot disagree about it. (`IsCooldownWorstCaseAssumed` is its
+  deliberately different sibling: it collapses only the per-spell tri-state and drives the checkbox's own checked
+  state, which must *not* fold in the global default or ticking the global option would make every checkbox appear
+  individually set.) The gold border in the expansion strip still marks the truly-live value via a scratch
+  `ResolveCooldown`, so with an override set the line shows the worst case while the border sits on the cooldown
+  field — the line is an inventory of settings, the border marks the winner. The line is rebound from
+  `UpdateRowControlsState` (which covers the row rebind and the tracking checkbox), and from `RefreshRowResolvedState`
+  on the three paths that change the resolution without touching that checkbox (`WorstCaseToggleOnClick`,
+  `CommitValueField`, `ValueFieldResetOnClick`). Escape and a rejected value restore rather than change it, so they
+  deliberately do not refresh it.
+- **Per-field reset keys** (`CreateValueFieldResetButton`) sit right of each value field's unit suffix and are shown
+  only while that field carries an override, so their presence doubles as the answer to "did I override this one?".
+  Emptying the box and leaving it does the same thing, but that gesture is not discoverable by looking.
+
+  They are small `SLATE_KEY_SIZE_SMALL` keys rather than a labelled "Default" button because the strip's controls form
+  one left-to-right anchor chain that already runs close to the width of the settings canvas — a labelled button would
+  either push the chain past the edge or, right-aligned, collide with the worst-case toggle's label on a narrower
+  canvas. The elements after each key anchor **past** it rather than to the field's suffix, so the space is reserved
+  whether the key is shown or not and the strip does not shuffle sideways when a value is overridden. Their
+  `OnEnter`/`OnLeave` are `HookScript`ed, not `SetScript`ed — `CreateSlateKey` owns those for the hover glow.
 - **Scrollbars** are minimal: a bare `ScrollFrame` plus a `MinimalScrollBar` EventFrame anchored 8px to its right,
   wired with `ScrollUtil.InitScrollFrameWithScrollBar` (handles the wheel too). `UIPanelScrollFrameTemplate` and
   `FauxScrollFrameTemplate` are not used anymore — the spell list keeps one real row per spell in the scroll child

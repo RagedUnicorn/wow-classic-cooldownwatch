@@ -82,9 +82,13 @@ RGCW_CONSTANTS = {
   TARGET_COOLDOWN_ALERT_THRESHOLD = 20,
   --[[
     Positions
+
+    Horizontal inset the big timer keeps from both slot edges. It spans the
+    slot and centers itself (see TargetCooldownBarSlot.CreateBigTimerCooldown),
+    which replaced a pair of hardcoded left offsets that only approximated
+    centering for the string lengths they were tuned against.
   ]]--
-  TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_LOW = 17,
-  TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_HIGH = 12,
+  TARGET_COOLDOWN_TEXT_INSET = 4,
   --[[
     Addon configuration
   ]]--
@@ -106,7 +110,17 @@ RGCW_CONSTANTS = {
     SPELL_TITLE = { 0.95, 0.95, 0.95 },     -- #f2f2f2 spell names in the per-spell lists
     MUTED = { 0.541, 0.486, 0.392 },        -- #8a7c64 idle / dim text
     DISABLED = { 0.45, 0.41, 0.35 },        -- disabled control labels
-    SUBNOTE = { 0.66, 0.60, 0.50 }          -- #a89980 option descriptions (warm mid gray)
+    SUBNOTE = { 0.66, 0.60, 0.50 },         -- #a89980 option descriptions (warm mid gray)
+    REJECTED = { 1.0, 0.25, 0.20 },         -- value field holding input that could not be stored
+    --[[
+      A spell row whose description line reports the worst case being tracked.
+      Same cyan as the bar's small worst-case timer (COLORS.TIMER_SMALL_TEXT),
+      so "worst case" reads as one colour across both surfaces. Deliberately
+      NOT gold: gold is reserved for a value the player set on this one spell,
+      and the worst case can equally come from the global default, where gold
+      would falsely claim the spell had been customized.
+    ]]--
+    WORST_CASE = { 0.01, 0.66, 0.95 }
   },
   CHECK_OPTION_SIZE = 24,
   -- keeps option descriptions from running the full settings canvas width
@@ -206,6 +220,11 @@ RGCW_CONSTANTS = {
     glyph colour, and additive hover glow.
   ]]--
   SLATE_KEY_SIZE = 22,
+  --[[
+    Reset keys sit inline between the expansion strip's value fields, where the
+    full size would cost width the strip does not have to spare.
+  ]]--
+  SLATE_KEY_SIZE_SMALL = 18,
   SLATE_KEY_FONT = "Fonts\\FRIZQT__.TTF",
   SLATE_KEY = {
     -- expand/collapse: muted gold / brown face, frame-gold rim, BODY glyph
@@ -214,6 +233,14 @@ RGCW_CONSTANTS = {
       rim = { 0.435, 0.36, 0.21 },     -- frame gold #6f5c37
       glyph = { 0.91, 0.87, 0.80 },    -- COLOR.BODY
       glow = { 0.851, 0.647, 0.129 }   -- COLOR.SECTION_GOLD
+    },
+    -- reset to default: the same slate face pulled towards red, so clearing a
+    -- value reads as destructive without shouting on a list of quiet rows
+    reset = {
+      top = { 0.20, 0.12, 0.10 }, bot = { 0.08, 0.04, 0.03 },
+      rim = { 0.45, 0.25, 0.20 },
+      glyph = { 0.91, 0.87, 0.80 },    -- COLOR.BODY
+      glow = { 0.85, 0.35, 0.25 }
     }
   },
   --[[
@@ -232,13 +259,31 @@ RGCW_CONSTANTS = {
   ELEMENT_CATEGORY_COOLDOWN_SPELL_EXPAND_BUTTON = "$parentExpandButton",
   ELEMENT_CATEGORY_COOLDOWN_SPELL_EXPANSION = "$parentExpansion",
   ELEMENT_CATEGORY_COOLDOWN_SPELL_WORST_CASE_VALUE = "$parentWorstCaseValue",
+  ELEMENT_CATEGORY_COOLDOWN_SPELL_MANUAL_OVERRIDE_RESET = "$parentManualOverrideReset",
+  ELEMENT_CATEGORY_COOLDOWN_SPELL_WORST_CASE_VALUE_RESET = "$parentWorstCaseValueReset",
   CATEGORY_COOLDOWN_SPELL_ICON_SIZE = 32,
   -- used by the target cooldown bar slot overlay; the spell-list checkboxes size via CHECK_OPTION_SIZE
   COOLDOWN_SPELL_DEFAULT_SIZE = 32,
-  MANUAL_OVERRIDE_EDIT_BOX_WIDTH = 45,
-  MANUAL_OVERRIDE_EDIT_BOX_HEIGHT = 24,
-  -- longest catalog cooldowns are four digits (e.g. 1800s racials)
-  MANUAL_OVERRIDE_EDIT_BOX_MAX_LETTERS = 4,
+  --[[
+    Upper limit for any cooldown in seconds - 60 minutes. Enforced in three
+    places against this one constant: the catalog (ValidateCooldownsWithinLimit
+    fails the suites on a longer entry), and both per-spell value overrides
+    (Configuration.IsValidOverrideValue). Inclusive: paladin Lay on Hands sits
+    exactly on it at 3600s, so a `>=` comparison would reject its own base
+    value. Nothing in Classic Era has a longer cooldown; a value past it is a
+    data error or a typo, not a spell.
+  ]]--
+  COOLDOWN_MAX_SECONDS = 3600,
+  --[[
+    Shared by both value fields of a spell row's expansion strip. Sized for the
+    longest input the limit above allows plus two decimals ("3600.99") - the
+    catalog holds fractional cooldowns and the player may enter them too, so a
+    letter limit that only fits whole seconds would cut "120.5" down to "120."
+    and store a plausible wrong number.
+  ]]--
+  VALUE_FIELD_WIDTH = 58,
+  VALUE_FIELD_HEIGHT = 24,
+  VALUE_FIELD_MAX_LETTERS = 7,
   --[[
     Cooldown slot colors as {r, g, b, a} tuples for unpack() at the call sites
   ]]--
@@ -251,10 +296,21 @@ RGCW_CONSTANTS = {
     TIMER_BIG_TEXT = {1, 1, 0},
     -- small worst-case timer text (cyan)
     TIMER_SMALL_TEXT = {0.01, 0.66, 0.95, 1},
-    -- expansion strip value fields: flat dark box, 1px border, gold when live
+    --[[
+      Expansion strip value fields: flat dark box with a 1px border that turns
+      the field's own "live" colour while it holds the value being tracked.
+
+      The live colour differs per field on purpose and mirrors the description
+      line's palette: gold for the cooldown field (a value the player set on
+      this spell) and cyan for the worst-case field (the worst case is being
+      assumed - possibly from the global default, which is not customization).
+      The cyan is COLOR.WORST_CASE / COLORS.TIMER_SMALL_TEXT, so worst case
+      keeps one colour across the bar, the description line and the strip.
+    ]]--
     VALUE_FIELD_BG = {0.05, 0.04, 0.03, 1},
     VALUE_FIELD_BORDER = {0.29, 0.24, 0.17, 1},
     VALUE_FIELD_ACTIVE = {1, 0.819, 0, 1},
+    VALUE_FIELD_WORST_CASE = {0.01, 0.66, 0.95, 1},
     -- fallback for categories without a CATEGORY entry
     CATEGORY_NEUTRAL = {0.5, 0.5, 0.5, 1},
     --[[

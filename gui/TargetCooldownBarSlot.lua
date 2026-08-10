@@ -233,7 +233,19 @@ function me.CreateBigTimerCooldown(frame)
   local bigTimerFontString = frame:CreateFontString(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BIG_COOLDOWN_TEXT, "OVERLAY")
   bigTimerFontString:SetFont(STANDARD_TEXT_FONT, RGCW_CONSTANTS.TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_SIZE)
   bigTimerFontString:SetTextColor(unpack(RGCW_CONSTANTS.COLORS.TIMER_BIG_TEXT))
-  bigTimerFontString:SetJustifyH("LEFT")
+  --[[
+    Spanning the slot and centering is what actually keeps the timer inside it.
+    This used to be a left anchor at one of two hardcoded x offsets picked by
+    whether the value was above or below 10s - an approximation of centering
+    that only held for the string lengths those two cases produced, and that
+    let a longer one (Lay on Hands' "3600.0") run into the neighbouring slot.
+    Real centering handles every length, and Common.FormatCooldownTime keeps
+    the longest of them to three characters.
+  ]]--
+  bigTimerFontString:SetPoint("LEFT", frame, "LEFT", RGCW_CONSTANTS.TARGET_COOLDOWN_TEXT_INSET, 0)
+  bigTimerFontString:SetPoint("RIGHT", frame, "RIGHT", RGCW_CONSTANTS.TARGET_COOLDOWN_TEXT_INSET * -1, 0)
+  bigTimerFontString:SetJustifyH("CENTER")
+  bigTimerFontString:SetWordWrap(false)
 
   return bigTimerFontString
 end
@@ -292,7 +304,6 @@ function me.UpdateCooldownWatchSlot(cooldownWatchSlot, cooldown)
   me.CancelCooldownSlotFade(cooldownWatchSlot)
 
   me.UpdateCooldownSlotHighlightFrame(cooldownWatchSlot, cooldown.spellData.cooldown, timeLeftBig)
-  me.UpdateCooldownSlotBigCooldownTextPosition(cooldownWatchSlot, timeLeftBig)
   me.UpdateCooldownSlotCooldownText(cooldownWatchSlot, timeLeftBig, timeLeftSmall)
   me.UpdateCooldownSlotTexture(cooldownWatchSlot, cooldown.spellData)
 
@@ -339,43 +350,19 @@ function me.UpdateCooldownSlotHighlightFrame(cooldownWatchSlot, cooldownDuration
 end
 
 --[[
-  Update the cooldown text position of a cooldownWatchSlot. Position text based on its cooldown duration
-
-  @param {table} cooldownWatchSlot
-  @param {number} timeLeftBig
-]]--
-function me.UpdateCooldownSlotBigCooldownTextPosition(cooldownWatchSlot, timeLeftBig)
-  local position
-
-  if timeLeftBig >= 10 then
-    position = RGCW_CONSTANTS.TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_HIGH
-  else
-    position = RGCW_CONSTANTS.TARGET_COOLDOWN_BIG_COOLDOWN_TEXT_LOW
-  end
-
-  cooldownWatchSlot.targetSpellTimeBig:SetPoint(
-    "LEFT",
-    position,
-    0
-  )
-end
-
---[[
-  Update the cooldown text of a cooldownWatchSlot
+  Update the cooldown text of a cooldownWatchSlot. Both timers format through
+  Common.FormatCooldownTime, which keeps the string short enough to stay inside
+  the slot at any remaining time (see CreateBigTimerCooldown).
 
   @param {table} cooldownWatchSlot
   @param {number} timeLeftBig
   @param {number} timeLeftSmall
 ]]--
 function me.UpdateCooldownSlotCooldownText(cooldownWatchSlot, timeLeftBig, timeLeftSmall)
-  if timeLeftBig > 0 then
-    cooldownWatchSlot.targetSpellTimeBig:SetText(string.format("%.1f", timeLeftBig))
-  else
-    cooldownWatchSlot.targetSpellTimeBig:SetText("")
-  end
+  cooldownWatchSlot.targetSpellTimeBig:SetText(mod.common.FormatCooldownTime(timeLeftBig))
 
-  if timeLeftSmall ~= nil and timeLeftSmall >= 0 then
-    cooldownWatchSlot.targetSpellTimeSmall:SetText(string.format("%.1f", timeLeftSmall))
+  if timeLeftSmall ~= nil then
+    cooldownWatchSlot.targetSpellTimeSmall:SetText(mod.common.FormatCooldownTime(timeLeftSmall))
   else
     cooldownWatchSlot.targetSpellTimeSmall:SetText("")
   end

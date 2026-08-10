@@ -83,8 +83,12 @@ describe("SpellMap data integrity", function()
       rgcw.spellMapValidation.ValidateCategoriesMatchSpellMap(rgcw.categories.GetCategories(), spellMap))
   end)
 
-  it("every cooldownWorstCase is less than or equal to its base cooldown", function()
+  it("every cooldownWorstCase is strictly below its base cooldown", function()
     assert.same({}, rgcw.spellMapValidation.ValidateCooldownWorstCaseSane(spellMap))
+  end)
+
+  it("every cooldown and cooldownWorstCase is positive and at most 60 minutes", function()
+    assert.same({}, rgcw.spellMapValidation.ValidateCooldownsWithinLimit(spellMap))
   end)
 
   it("every itemId is a positive integer on a primary entry", function()
@@ -204,8 +208,12 @@ describe("SpellMap data integrity per assembled branch", function()
           rgcw.categories.GetCategories(), assembled))
       end)
 
-      it("every cooldownWorstCase is less than or equal to its base cooldown", function()
+      it("every cooldownWorstCase is strictly below its base cooldown", function()
         assert.same({}, rgcw.spellMapValidation.ValidateCooldownWorstCaseSane(assembled))
+      end)
+
+      it("every cooldown and cooldownWorstCase is positive and at most 60 minutes", function()
+        assert.same({}, rgcw.spellMapValidation.ValidateCooldownsWithinLimit(assembled))
       end)
 
       it("every cooldownResets target is a primary and not the trigger itself", function()

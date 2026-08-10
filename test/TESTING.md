@@ -138,6 +138,7 @@ battleground.
 | [TC-CV-02](manual/TC-CV-02-per-spell-worst-case.md)       | Per-spell worst case beats the global      |
 | [TC-CV-03](manual/TC-CV-03-manual-cooldown-override.md)   | Manual cooldown override                   |
 | [TC-CV-04](manual/TC-CV-04-change-applies-next-cast.md)   | Change applies from the next cast          |
+| [TC-CV-05](manual/TC-CV-05-worst-case-value-override.md)  | Per-spell worst case value override        |
 
 ### Options and spell list
 

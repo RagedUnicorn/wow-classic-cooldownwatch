@@ -153,7 +153,7 @@ describe("CooldownQueue", function()
 
   -- Manual override scenarios inject cooldownOverrides directly: these specs
   -- exercise ResolveCooldown's priority order, not the store's validation
-  -- (rejection and base-cooldown capping live in ConfigurationSpec).
+  -- (value rejection lives in ConfigurationSpec).
   it("ResolveCooldown lets a manual override beat the per-spell toggle and the global default", function()
     rgcw.configuration.UpdateGlobalWorstCaseState(true)
     rgcw.configuration.UpdateCooldownWorstCaseState(true, "priest", 10947)
@@ -185,6 +185,69 @@ describe("CooldownQueue", function()
     queue.ResolveCooldown("priest", spell)
 
     assert.equal(15, spell.cooldown)
+  end)
+
+  --[[
+    Worst-case value scenarios inject cooldownOverrides directly for the same
+    reason the manual override ones above do, with one extra: the store
+    validates a worst-case value against the *catalog* entry for the spellId
+    (Mind Blast's real 8s), while makeSpell hands ResolveCooldown a synthetic
+    30s spell. Going through the API here would test the store's range rule,
+    not the resolution these specs are about.
+  ]]--
+  local function SetWorstCaseValue(spellId, value)
+    CooldownWatchConfiguration.cooldownOverrides = CooldownWatchConfiguration.cooldownOverrides or {}
+    CooldownWatchConfiguration.cooldownOverrides["priest"] =
+      CooldownWatchConfiguration.cooldownOverrides["priest"] or {}
+    CooldownWatchConfiguration.cooldownOverrides["priest"][spellId] =
+      CooldownWatchConfiguration.cooldownOverrides["priest"][spellId] or {}
+    CooldownWatchConfiguration.cooldownOverrides["priest"][spellId].worstCaseValue = value
+  end
+
+  it("ResolveCooldown promotes the player's worst-case value over the catalog's when assumed", function()
+    rgcw.configuration.UpdateCooldownWorstCaseState(true, "priest", 10947)
+    SetWorstCaseValue(10947, 17)
+    local spell = makeSpell(10947, "Mind Blast", 100)
+
+    queue.ResolveCooldown("priest", spell)
+
+    assert.equal(17, spell.cooldown)
+    assert.is_nil(spell.cooldownWorstCase)
+  end)
+
+  it("ResolveCooldown surfaces the player's worst-case value on the hint timer when not assumed", function()
+    SetWorstCaseValue(10947, 17)
+    local spell = makeSpell(10947, "Mind Blast", 100)
+
+    queue.ResolveCooldown("priest", spell)
+
+    assert.equal(30, spell.cooldown)
+    assert.equal(17, spell.cooldownWorstCase)
+  end)
+
+  it("ResolveCooldown ignores a worst-case value for spells the catalog gives no worst case", function()
+    -- the catalog decides whether a spell has a worst case, the player only what it is
+    rgcw.configuration.UpdateCooldownWorstCaseState(true, "priest", 10947)
+    SetWorstCaseValue(10947, 17)
+    local spell = makeSpell(10947, "Mind Blast", 100)
+    spell.cooldownWorstCase = nil
+
+    queue.ResolveCooldown("priest", spell)
+
+    assert.equal(30, spell.cooldown)
+    assert.is_nil(spell.cooldownWorstCase)
+  end)
+
+  it("ResolveCooldown lets a manual override beat the player's worst-case value", function()
+    rgcw.configuration.UpdateCooldownWorstCaseState(true, "priest", 10947)
+    SetWorstCaseValue(10947, 17)
+    CooldownWatchConfiguration.cooldownOverrides["priest"][10947].value = 15
+    local spell = makeSpell(10947, "Mind Blast", 100)
+
+    queue.ResolveCooldown("priest", spell)
+
+    assert.equal(15, spell.cooldown)
+    assert.is_nil(spell.cooldownWorstCase)
   end)
 
   it("AddCooldown queues the manual override when set", function()

@@ -146,25 +146,17 @@ describe("Configuration cooldown overrides", function()
     assert.is_nil(configuration.GetCooldownManualOverride("paladin", 1022))
   end)
 
-  it("UpdateCooldownManualOverride rejects zero, negative and NaN values", function()
+  it("UpdateCooldownManualOverride rejects zero, negative, NaN and infinite values", function()
     assert.is_nil(configuration.UpdateCooldownManualOverride(0, "paladin", 1022))
     assert.is_nil(configuration.UpdateCooldownManualOverride(-30, "paladin", 1022))
     assert.is_nil(configuration.UpdateCooldownManualOverride(0 / 0, "paladin", 1022))
+    assert.is_nil(configuration.UpdateCooldownManualOverride(math.huge, "paladin", 1022))
 
     assert.is_nil(configuration.GetCooldownManualOverride("paladin", 1022))
   end)
 
-  it("UpdateCooldownManualOverride caps the value at the spell's base cooldown", function()
-    -- base cooldown read from SpellMap rather than restated (see CLAUDE.md)
-    local category, spellId, spell = rgcw.spellMapHelper.GetSpellById(RGCW_CONSTANTS.EXAMPLE_COOLDOWN_SPELL_ID)
-
-    local storedValue = configuration.UpdateCooldownManualOverride(spell.cooldown + 100, category, spellId)
-
-    assert.equal(spell.cooldown, storedValue)
-    assert.equal(spell.cooldown, configuration.GetCooldownManualOverride(category, spellId))
-  end)
-
   it("UpdateCooldownManualOverride stores a value below the base cooldown unchanged", function()
+    -- base cooldown read from SpellMap rather than restated (see CLAUDE.md)
     local category, spellId, spell = rgcw.spellMapHelper.GetSpellById(RGCW_CONSTANTS.EXAMPLE_COOLDOWN_SPELL_ID)
 
     local storedValue = configuration.UpdateCooldownManualOverride(spell.cooldown - 1, category, spellId)
@@ -172,10 +164,162 @@ describe("Configuration cooldown overrides", function()
     assert.equal(spell.cooldown - 1, storedValue)
   end)
 
-  it("UpdateCooldownManualOverride stores values uncapped for spells unknown to SpellMap", function()
-    local storedValue = configuration.UpdateCooldownManualOverride(9999, "paladin", 999999)
+  it("UpdateCooldownManualOverride stores a value above the base cooldown unchanged", function()
+    --[[
+      Deliberately uncapped: the player watching the enemy may know better than
+      the catalog, and a silent clamp re-renders the pre-filled catalog value,
+      which is indistinguishable from the edit having been ignored.
+    ]]--
+    local category, spellId, spell = rgcw.spellMapHelper.GetSpellById(RGCW_CONSTANTS.EXAMPLE_COOLDOWN_SPELL_ID)
 
-    assert.equal(9999, storedValue)
+    local storedValue = configuration.UpdateCooldownManualOverride(spell.cooldown + 100, category, spellId)
+
+    assert.equal(spell.cooldown + 100, storedValue)
+    assert.equal(spell.cooldown + 100, configuration.GetCooldownManualOverride(category, spellId))
+  end)
+
+  it("UpdateCooldownManualOverride stores a value for a spell unknown to SpellMap", function()
+    local storedValue = configuration.UpdateCooldownManualOverride(120, "paladin", 999999)
+
+    assert.equal(120, storedValue)
+  end)
+
+  it("UpdateCooldownManualOverride accepts a value exactly on the 60 minute limit", function()
+    --[[
+      Inclusive on purpose - paladin Lay on Hands sits exactly on the limit, so
+      an exclusive comparison would refuse the spell's own catalog cooldown.
+    ]]--
+    local limit = RGCW_CONSTANTS.COOLDOWN_MAX_SECONDS
+
+    assert.equal(limit, configuration.UpdateCooldownManualOverride(limit, "paladin", 1022))
+    assert.equal(limit, configuration.GetCooldownManualOverride("paladin", 1022))
+  end)
+
+  it("UpdateCooldownManualOverride rejects a value past the 60 minute limit", function()
+    local storedValue = configuration.UpdateCooldownManualOverride(
+      RGCW_CONSTANTS.COOLDOWN_MAX_SECONDS + 0.5, "paladin", 1022
+    )
+
+    assert.is_nil(storedValue)
+    assert.is_nil(configuration.GetCooldownManualOverride("paladin", 1022))
+  end)
+
+  it("UpdateCooldownManualOverride rejecting a value leaves an existing override intact", function()
+    configuration.UpdateCooldownManualOverride(42, "paladin", 1022)
+
+    assert.is_nil(configuration.UpdateCooldownManualOverride(99999, "paladin", 1022))
+    assert.is_nil(configuration.UpdateCooldownManualOverride("fast", "paladin", 1022))
+
+    assert.equal(42, configuration.GetCooldownManualOverride("paladin", 1022))
+  end)
+
+  it("UpdateCooldownManualOverride round-trips a fractional value", function()
+    -- the catalog itself holds fractional cooldowns, so overrides must carry them too
+    assert.equal(12.5, configuration.UpdateCooldownManualOverride(12.5, "paladin", 1022))
+    assert.equal(12.5, configuration.GetCooldownManualOverride("paladin", 1022))
+  end)
+
+  it("UpdateCooldownWorstCaseValue is held to the same limit and keeps fractions", function()
+    --[[
+      A spell unknown to SpellMap has no base cooldown to sit below, so it is
+      the only way to exercise the shared limit on this field in isolation.
+    ]]--
+    local limit = RGCW_CONSTANTS.COOLDOWN_MAX_SECONDS
+
+    assert.equal(limit, configuration.UpdateCooldownWorstCaseValue(limit, "paladin", 999999))
+    assert.is_nil(configuration.UpdateCooldownWorstCaseValue(limit + 1, "paladin", 999999))
+    assert.equal(12.5, configuration.UpdateCooldownWorstCaseValue(12.5, "paladin", 999999))
+    assert.equal(12.5, configuration.GetCooldownWorstCaseValue("paladin", 999999))
+  end)
+
+  it("UpdateCooldownWorstCaseValue rejects a value at or above the spell's base cooldown", function()
+    -- base cooldown read from SpellMap rather than restated (see CLAUDE.md)
+    local category, spellId, spell = rgcw.spellMapHelper.GetSpellById(RGCW_CONSTANTS.EXAMPLE_COOLDOWN_SPELL_ID)
+
+    assert.is_nil(configuration.UpdateCooldownWorstCaseValue(spell.cooldown, category, spellId))
+    assert.is_nil(configuration.UpdateCooldownWorstCaseValue(spell.cooldown + 1, category, spellId))
+    assert.is_nil(configuration.GetCooldownWorstCaseValue(category, spellId))
+
+    -- strictly below is what a worst case means, and is accepted
+    assert.equal(spell.cooldown - 0.5,
+      configuration.UpdateCooldownWorstCaseValue(spell.cooldown - 0.5, category, spellId))
+  end)
+
+  it("UpdateCooldownWorstCaseValue compares against the catalog cooldown, not a manual override", function()
+    --[[
+      A manual override replaces the resolution wholesale, worst-case settings
+      included, so it is not the value this field is a worst case of. Raising
+      the override must not widen the range the worst-case field accepts.
+    ]]--
+    local category, spellId, spell = rgcw.spellMapHelper.GetSpellById(RGCW_CONSTANTS.EXAMPLE_COOLDOWN_SPELL_ID)
+
+    configuration.UpdateCooldownManualOverride(spell.cooldown + 100, category, spellId)
+
+    assert.is_nil(configuration.UpdateCooldownWorstCaseValue(spell.cooldown + 50, category, spellId))
+  end)
+
+  it("UpdateCooldownWorstCaseValue rejecting a value leaves an existing one intact", function()
+    local category, spellId, spell = rgcw.spellMapHelper.GetSpellById(RGCW_CONSTANTS.EXAMPLE_COOLDOWN_SPELL_ID)
+
+    configuration.UpdateCooldownWorstCaseValue(spell.cooldown - 1, category, spellId)
+
+    assert.is_nil(configuration.UpdateCooldownWorstCaseValue(spell.cooldown, category, spellId))
+
+    assert.equal(spell.cooldown - 1, configuration.GetCooldownWorstCaseValue(category, spellId))
+  end)
+
+  it("GetCooldownWorstCaseValue is nil while cooldownOverrides is nil", function()
+    assert.is_nil(configuration.GetCooldownWorstCaseValue("paladin", 1022))
+  end)
+
+  it("GetCooldownWorstCaseValue is nil for a never-configured spell in a known category", function()
+    configuration.UpdateCooldownWorstCaseValue(42, "paladin", 1022)
+
+    assert.is_nil(configuration.GetCooldownWorstCaseValue("paladin", 853))
+  end)
+
+  it("UpdateCooldownWorstCaseValue round-trips a value and returns it", function()
+    local storedValue = configuration.UpdateCooldownWorstCaseValue(42, "paladin", 1022)
+
+    assert.equal(42, storedValue)
+    assert.equal(42, configuration.GetCooldownWorstCaseValue("paladin", 1022))
+  end)
+
+  it("UpdateCooldownWorstCaseValue clears the value when passed nil", function()
+    configuration.UpdateCooldownWorstCaseValue(42, "paladin", 1022)
+
+    local storedValue = configuration.UpdateCooldownWorstCaseValue(nil, "paladin", 1022)
+
+    assert.is_nil(storedValue)
+    assert.is_nil(configuration.GetCooldownWorstCaseValue("paladin", 1022))
+  end)
+
+  it("UpdateCooldownWorstCaseValue clearing a never-configured spell leaves the store untouched", function()
+    configuration.UpdateCooldownWorstCaseValue(nil, "paladin", 1022)
+
+    assert.is_nil(CooldownWatchConfiguration.cooldownOverrides)
+  end)
+
+  it("UpdateCooldownWorstCaseValue rejects invalid values without touching the store", function()
+    assert.is_nil(configuration.UpdateCooldownWorstCaseValue("fast", "paladin", 1022))
+    assert.is_nil(configuration.UpdateCooldownWorstCaseValue(0, "paladin", 1022))
+    assert.is_nil(configuration.UpdateCooldownWorstCaseValue(-30, "paladin", 1022))
+    assert.is_nil(configuration.UpdateCooldownWorstCaseValue(0 / 0, "paladin", 1022))
+    assert.is_nil(configuration.UpdateCooldownWorstCaseValue(math.huge, "paladin", 1022))
+
+    assert.is_nil(configuration.GetCooldownWorstCaseValue("paladin", 1022))
+  end)
+
+  it("the three per-spell override fields are independent", function()
+    configuration.UpdateCooldownWorstCaseState(true, "paladin", 1022)
+    configuration.UpdateCooldownManualOverride(42, "paladin", 1022)
+    configuration.UpdateCooldownWorstCaseValue(17, "paladin", 1022)
+
+    configuration.UpdateCooldownManualOverride(nil, "paladin", 1022)
+
+    assert.is_nil(configuration.GetCooldownManualOverride("paladin", 1022))
+    assert.equal(17, configuration.GetCooldownWorstCaseValue("paladin", 1022))
+    assert.is_true(configuration.GetCooldownWorstCaseOverride("paladin", 1022))
   end)
 
   it("UpdateCooldownManualOverride preserves the worst-case toggle on the per-spell entry", function()
@@ -194,6 +338,38 @@ describe("Configuration cooldown overrides", function()
     configuration.UpdateCooldownWorstCaseState(false, "paladin", 1022)
 
     assert.equal(42, configuration.GetCooldownManualOverride("paladin", 1022))
+  end)
+
+  it("IsWorstCaseEffective follows the global default for a never-configured spell", function()
+    assert.is_false(configuration.IsWorstCaseEffective("paladin", 1022))
+
+    configuration.UpdateGlobalWorstCaseState(true)
+
+    assert.is_true(configuration.IsWorstCaseEffective("paladin", 1022))
+  end)
+
+  it("IsWorstCaseEffective lets an explicit per-spell toggle win in both directions", function()
+    configuration.UpdateGlobalWorstCaseState(true)
+    configuration.UpdateCooldownWorstCaseState(false, "paladin", 1022)
+
+    assert.is_false(configuration.IsWorstCaseEffective("paladin", 1022))
+
+    configuration.UpdateGlobalWorstCaseState(false)
+    configuration.UpdateCooldownWorstCaseState(true, "paladin", 1022)
+
+    assert.is_true(configuration.IsWorstCaseEffective("paladin", 1022))
+  end)
+
+  it("IsWorstCaseEffective stays distinct from IsCooldownWorstCaseAssumed", function()
+    --[[
+      The checkbox's own state must not fold in the global default, or ticking
+      the global option would make every per-spell checkbox appear individually
+      set. Only the effective query does.
+    ]]--
+    configuration.UpdateGlobalWorstCaseState(true)
+
+    assert.is_true(configuration.IsWorstCaseEffective("paladin", 1022))
+    assert.is_false(configuration.IsCooldownWorstCaseAssumed("paladin", 1022))
   end)
 
   it("IsGlobalWorstCaseAssumed is false while globalAssumeWorstCase is nil", function()

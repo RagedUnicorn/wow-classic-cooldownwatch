@@ -432,11 +432,17 @@ function me.ValidateCategoriesMatchSpellMap(categories, spellMap)
 end
 
 --[[
-  Verify cooldownWorstCase, where present, never exceeds the base cooldown.
+  Verify cooldownWorstCase, where present, is strictly below the base cooldown.
   cooldownWorstCase represents the talent-reduced lower bound of a cooldown, so
-  logically it must be <= cooldown. A typo (e.g. cooldown = 5.5,
+  logically it must be < cooldown. A typo (e.g. cooldown = 5.5,
   cooldownWorstCase = 8) would otherwise surface only as confusing UI behaviour
-  (a timer running past the supposed worst case).
+  (a timer running past the supposed worst case), and an entry equal to the
+  base describes nothing - assuming it leaves the tracked time unchanged, so
+  the worst-case toggle silently does nothing for that spell.
+
+  The same rule is enforced against the player's per-spell worst-case value in
+  Configuration.UpdateCooldownWorstCaseValue, so the catalog cannot hold shapes
+  the UI refuses to accept for it.
 
   @param {table} spellMap
 
@@ -448,11 +454,54 @@ function me.ValidateCooldownWorstCaseSane(spellMap)
   for category, spells in pairs(spellMap) do
     for spellId, entry in pairs(spells) do
       if IsPrimary(entry) and entry.cooldownWorstCase ~= nil
-        and entry.cooldownWorstCase > entry.cooldown then
+        and entry.cooldownWorstCase >= entry.cooldown then
         table.insert(failures,
-          string.format("%s/%s ('%s'): cooldownWorstCase %s exceeds cooldown %s",
+          string.format("%s/%s ('%s'): cooldownWorstCase %s is not below cooldown %s",
             category, tostring(spellId), entry.name,
             tostring(entry.cooldownWorstCase), tostring(entry.cooldown)))
+      end
+    end
+  end
+
+  return failures
+end
+
+--[[
+  Verify every primary's cooldown - and its cooldownWorstCase where present -
+  is a positive finite number no longer than RGCW_CONSTANTS.COOLDOWN_MAX_SECONDS
+  (60 minutes).
+
+  The same ceiling the player's manual overrides are held to
+  (Configuration.IsValidOverrideValue), enforced here so the catalog cannot
+  disagree with the input the UI accepts for it. It is inclusive: paladin Lay on
+  Hands sits exactly on the limit at 3600s. Nothing in Classic Era runs longer,
+  so a value past it is a typo (a cooldown entered in the wrong unit, a stray
+  digit) and would otherwise show up only as a bar entry that never expires.
+
+  @param {table} spellMap
+
+  @return {table}
+]]--
+function me.ValidateCooldownsWithinLimit(spellMap)
+  local failures = {}
+  local limit = RGCW_CONSTANTS.COOLDOWN_MAX_SECONDS
+
+  local function CheckValue(category, spellId, entry, fieldName, value)
+    if type(value) ~= "number" or value ~= value or value <= 0 or value > limit then
+      table.insert(failures,
+        string.format("%s/%s ('%s'): %s %s is not a positive number of at most %s seconds",
+          category, tostring(spellId), tostring(entry.name), fieldName, tostring(value), tostring(limit)))
+    end
+  end
+
+  for category, spells in pairs(spellMap) do
+    for spellId, entry in pairs(spells) do
+      if IsPrimary(entry) then
+        CheckValue(category, spellId, entry, "cooldown", entry.cooldown)
+
+        if entry.cooldownWorstCase ~= nil then
+          CheckValue(category, spellId, entry, "cooldownWorstCase", entry.cooldownWorstCase)
+        end
       end
     end
   end
