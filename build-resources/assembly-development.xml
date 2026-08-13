@@ -24,6 +24,7 @@
         <include>test/category/*.lua</include>
         <include>test/debug/*.lua</include>
         <include>test/debug/*.xml</include>
+        <include>dev/*.lua</include>
         <include>assets/*.blp</include>
         <include>assets/*.tga</include>
         <include>localization/*.lua</include>

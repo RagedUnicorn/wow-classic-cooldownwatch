@@ -39,6 +39,17 @@ me.tag = "AddonConfiguration"
 local mainCategoryId
 
 --[[
+  Numeric ids of every registered category, keyed by a stable, locale independent key:
+  "main", "general", "profile" and one entry per catalog category (its categoryName, e.g.
+  "priest", "items"). Settings.OpenToCategory takes the numeric id only - passing a category
+  NAME errors in Classic Era ("outside of expected range") because the name is handed
+  straight to C_SettingsUtil.OpenSettingsPanel. Callers therefore resolve through
+  me.GetCategoryId instead of looking a category up by its displayed name.
+  {table}
+]]--
+local categoryIds = {}
+
+--[[
   Retrieve a reference to the main category of the addon
 
   @return {table | nil}
@@ -53,6 +64,19 @@ function me.GetMainCategory()
 end
 
 --[[
+  Retrieve the numeric id of a registered category for use with Settings.OpenToCategory
+
+  @param {string} key
+    "main", "general", "profile" or a catalog categoryName
+
+  @return {number | nil}
+    The category id or nil if no category is registered under that key
+]]--
+function me.GetCategoryId(key)
+  return categoryIds[key]
+end
+
+--[[
   Create addon configuration menu(s)
 ]]--
 function me.SetupAddonConfiguration()
@@ -61,19 +85,21 @@ function me.SetupAddonConfiguration()
   -- add about content into main category
   mod.aboutContent.BuildAboutContent(menu)
 
-  me.BuildCategory(
+  local generalCategory = me.BuildCategory(
     RGCW_CONSTANTS.ELEMENT_GENERAL_SUB_OPTION_FRAME,
     category,
     rgcw.L["options_category_name"],
     mod.generalMenu.BuildUi
   )
+  categoryIds.general = generalCategory.ID
 
-  me.BuildCategory(
+  local profileCategory = me.BuildCategory(
     RGCW_CONSTANTS.ELEMENT_PROFILE_SUB_OPTION_FRAME,
     category,
     rgcw.L["profile_category_name"],
     mod.profileMenu.BuildUi
   )
+  categoryIds.profile = profileCategory.ID
 
   me.BuildCooldownCategories(category)
 end
@@ -95,6 +121,7 @@ function me.BuildCategory(frameName, parent, panelText, onShowCallback)
     menu = CreateFrame("Frame", frameName)
     category = Settings.RegisterCanvasLayoutCategory(menu, panelText)
     mainCategoryId = category.ID
+    categoryIds.main = category.ID
     Settings.RegisterAddOnCategory(category)
   else
     menu = CreateFrame("Frame", frameName, nil)
@@ -134,6 +161,8 @@ function me.BuildCooldownCategories(parent)
 
     local subcategory = Settings.RegisterCanvasLayoutSubcategory(parent, menu, category.name)
     subcategory.name = rgcw.L[category.localizationKey]
+    -- keyed by the catalog categoryName so a caller never has to know the frame or panel title
+    categoryIds[category.categoryName] = subcategory.ID
 
     Settings.RegisterAddOnCategory(subcategory)
     menu:SetScript("OnShow", mod.categoryMenu.MenuOnShow)

@@ -56,6 +56,21 @@ local builtMenu = false
 local cachedCategoryData
 
 --[[
+  Retrieve a spell row by its position in the list. The rows hang from an anonymous
+  scroll child (see BuildUi), so `$parentRow<n>` resolves to no global and a caller
+  outside this module has no other way to reach one. Read-only accessor - returns the
+  live row, do not restructure it.
+
+  @param {number} position
+
+  @return {table | nil}
+    The row at that position, or nil while the list has not been built that far
+]]--
+function me.GetSpellRow(position)
+  return uiState.spellRows[position]
+end
+
+--[[
   @param {table} frame
   @param {string} categoryName
 ]]--

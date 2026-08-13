@@ -4,6 +4,7 @@
 ## Notes: ${addon.description}
 ## Version: ${addon.tag.version}
 ## SavedVariablesPerCharacter: ${addon.savedVariablesPerCharacter}
+## SavedVariables: CooldownWatchShotLog
 ## IconTexture: Interface\AddOns\CooldownWatch\assets\cooldownwatch_icon
 ## Category: RagedUnicorn
 ${addon.comment.generated.toc}
@@ -101,3 +102,7 @@ gui/AboutContent.lua
 gui/GeneralMenu.lua
 gui/ProfileMenu.lua
 gui/CooldownMenu.lua
+
+# dev - media capture (Development Only)
+dev/ShotManifest.lua
+dev/Capture.lua

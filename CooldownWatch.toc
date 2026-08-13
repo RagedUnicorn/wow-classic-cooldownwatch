@@ -4,6 +4,7 @@
 ## Notes: Addon that tracks cooldowns of enemy players
 ## Version: v1.0.0
 ## SavedVariablesPerCharacter: CooldownWatchConfiguration CooldownWatchTestLog CooldownWatchLogTracker
+## SavedVariables: CooldownWatchShotLog
 ## IconTexture: Interface\AddOns\CooldownWatch\assets\cooldownwatch_icon
 ## Category: RagedUnicorn
 # THIS FILE IS AUTO-GENERATED. ALL CHANGES ARE OVERWRITTEN
@@ -101,3 +102,7 @@ gui/AboutContent.lua
 gui/GeneralMenu.lua
 gui/ProfileMenu.lua
 gui/CooldownMenu.lua
+
+# dev - media capture (Development Only)
+dev/ShotManifest.lua
+dev/Capture.lua
