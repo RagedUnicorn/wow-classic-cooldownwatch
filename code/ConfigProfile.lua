@@ -62,7 +62,7 @@ local ADDON_TAG = "CooldownWatch"
   store itself (profiles).
 ]]--
 me.PROFILE_FIELDS = {
-  "lockTargetCooldownBar",
+  "targetCooldownBarScale",
   "globalAssumeWorstCase",
   "trackFriendlyCooldowns",
   "showFriendlyTargetCooldowns",

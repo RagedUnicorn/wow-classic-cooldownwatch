@@ -117,33 +117,47 @@ end
 ]]--
 function me.TargetCooldownBarUiUpdate()
   me.UpdateTargetBarFramePosition()
-  me.UpdateTargetBarLockedState()
+  me.UpdateTargetBarPlacementBackdrop()
+  me.UpdateTargetBarScale()
 end
 
 --[[
-  Update the locked/unlocked state of the targetBar
+  Update the placement backdrop of the targetBar. The backdrop is a
+  positioning aid, not part of the combat look - it shows only while the
+  example preview owns the slots (via /rgcw conf or the test/place mode, which
+  runs through the same preview), the single context in which the bar can move
+  at all (there is deliberately no lock option, proximity-window parity).
 ]]--
-function me.UpdateTargetBarLockedState()
-  if mod.configuration.IsTargetCooldownBarLocked() then
-    targetCooldownBarFrame:SetBackdrop(nil)
-  else
+function me.UpdateTargetBarPlacementBackdrop()
+  if mod.targetCooldownBarPreview.IsPreviewActive() then
     targetCooldownBarFrame:SetBackdrop({
       bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background"
     })
+  else
+    targetCooldownBarFrame:SetBackdrop(nil)
   end
 end
 
 --[[
-  Update the targetBars frame position
+  Update the render scale of the targetBar from its configured value
+]]--
+function me.UpdateTargetBarScale()
+  targetCooldownBarFrame:SetScale(mod.configuration.GetTargetCooldownBarScale())
+end
+
+--[[
+  Update the targetBars frame position. The points are always cleared first:
+  without a saved position (first use, or a settings reset that cleared it)
+  the fallback would otherwise pile its CENTER anchor on top of whatever
+  anchor a previous drag left behind.
 ]]--
 function me.UpdateTargetBarFramePosition()
   local framePosition =
     mod.configuration.GetUserPlacedFramePosition(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_FRAME)
-  --[[
-    Set user frame position if there is one saved
-  ]]--
+
+  targetCooldownBarFrame:ClearAllPoints() -- very important to clear all points first
+
   if framePosition ~= nil then
-    targetCooldownBarFrame:ClearAllPoints() -- very important to clear all points first
     targetCooldownBarFrame:SetPoint(
       framePosition.point,
       framePosition.relativeTo,
@@ -152,7 +166,7 @@ function me.UpdateTargetBarFramePosition()
       framePosition.posY
     )
   else
-    -- initial position for first time use
+    -- default position - first use, or a cleared saved position
     targetCooldownBarFrame:SetPoint("CENTER", 0, 0)
   end
 end
@@ -222,12 +236,14 @@ function me.SetupDragFrame(frame)
 end
 
 --[[
-  Frame callback to start moving the passed (self) frame
+  Frame callback to start moving the passed (self) frame. The bar only ever
+  moves while the example preview owns the slots (/rgcw conf or the
+  test/place mode) - there is no lock option to gate on.
 
   @param {table} self
 ]]--
 function me.StartDragFrame(self)
-  if mod.configuration.IsTargetCooldownBarLocked() then return end
+  if not mod.targetCooldownBarPreview.IsPreviewActive() then return end
 
   self:StartMoving()
 end
@@ -238,7 +254,7 @@ end
   @param {table} self
 ]]--
 function me.StopDragFrame(self)
-  if mod.configuration.IsTargetCooldownBarLocked() then return end
+  if not mod.targetCooldownBarPreview.IsPreviewActive() then return end
 
   self:StopMovingOrSizing()
 

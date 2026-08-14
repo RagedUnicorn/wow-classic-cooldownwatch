@@ -82,6 +82,9 @@ function me.ShowExampleTargetCooldownBar()
   end
 
   mod.targetCooldownBar.GetTargetCooldownBarFrame():Show()
+  --[[ the preview flag is up - the repaint turns the positioning backdrop on, which is also
+       the drag affordance (dragging is gated on the preview flag, there is no lock option) ]]--
+  mod.targetCooldownBar.TargetCooldownBarUiUpdate()
 
   mod.ticker.StartTickerTargetCooldownBarPreview()
 end
@@ -131,6 +134,9 @@ function me.HideExampleTargetCooldownBar()
   end
 
   exampleCooldowns = {}
+
+  -- the preview flag is down - the repaint turns the positioning backdrop off again
+  mod.targetCooldownBar.TargetCooldownBarUiUpdate()
 
   mod.targetCooldownBar.WakeRenderTicker() -- restart regular updates only if there is work
 end

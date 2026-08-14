@@ -34,10 +34,6 @@ me.tag = "GeneralMenu"
   description is rendered always-visible beneath the checkbox label
 ]]--
 local options = {
-  WindowLockTargetCooldownBar = {
-    label = rgcw.L["window_lock_target_cooldown_bar"],
-    description = rgcw.L["window_lock_target_cooldown_bar_tooltip"]
-  },
   GlobalAssumeWorstCase = {
     label = rgcw.L["option_global_assume_worst_case"],
     description = rgcw.L["option_global_assume_worst_case_tooltip"]
@@ -46,6 +42,15 @@ local options = {
 
 -- track whether the menu was already built
 local builtMenu = false
+--[[
+  References to the panel's option controls, kept so the defaults reset can
+  re-sync every control from the store without navigating away (checkboxes
+  re-read through their OnShow callbacks, the slider through UpdateSliderValue)
+]]--
+local optionControls = {
+  checkBoxes = {},
+  scaleSlider = nil
+}
 
 --[[
   Build the ui for the general menu
@@ -64,23 +69,113 @@ function me.BuildUi(frame)
 
   me.BuildCheckButtonOption(
     frame,
-    RGCW_CONSTANTS.ELEMENT_GENERAL_OPT_WINDOW_LOCK_TARGET_COOLDOWN_BAR,
-    20,
-    -52,
-    me.LockWindowTargetCooldownBarOnShow,
-    me.LockWindowTargetCooldownBarOnClick
-  )
-
-  me.BuildCheckButtonOption(
-    frame,
     RGCW_CONSTANTS.ELEMENT_GENERAL_OPT_GLOBAL_ASSUME_WORST_CASE,
     20,
-    -104,
+    -52,
     me.GlobalAssumeWorstCaseOnShow,
     me.GlobalAssumeWorstCaseOnClick
   )
 
+  optionControls.scaleSlider = mod.guiHelper.CreateSlider(
+    RGCW_CONSTANTS.ELEMENT_GENERAL_TARGET_BAR_SCALE_SLIDER,
+    frame,
+    {"TOPLEFT", 20, -131},
+    {
+      minValue = RGCW_CONSTANTS.TARGET_BAR_SCALE_SLIDER_MIN,
+      maxValue = RGCW_CONSTANTS.TARGET_BAR_SCALE_SLIDER_MAX,
+      stepSize = RGCW_CONSTANTS.TARGET_BAR_SCALE_SLIDER_STEP,
+      initialValue = mod.configuration.GetTargetCooldownBarScale()
+    },
+    rgcw.L["target_bar_scale_slider_title"],
+    rgcw.L["target_bar_scale_slider_tooltip"],
+    me.ScaleSliderOnValueChanged,
+    me.FormatScaleValue
+  )
+
+  local placeModeButton = mod.guiHelper.CreateTextButton(
+    RGCW_CONSTANTS.ELEMENT_GENERAL_OPT_PLACE_MODE_BUTTON,
+    frame,
+    {"TOPLEFT", 20, -236},
+    me.PlaceModeButtonOnClick,
+    rgcw.L["target_bar_place_mode_button"]
+  )
+
+  mod.guiHelper.CreateTextButton(
+    RGCW_CONSTANTS.ELEMENT_GENERAL_OPT_DEFAULTS_BUTTON,
+    frame,
+    {"LEFT", placeModeButton, "RIGHT", 10, 0},
+    me.DefaultsButtonOnClick,
+    rgcw.L["target_bar_defaults_button"]
+  )
+
   builtMenu = true
+end
+
+--[[
+  Format a scale slider value for its labels - one decimal, hiding the float
+  artifacts of the stepped slider
+
+  @param {number} value
+
+  @return {string}
+]]--
+function me.FormatScaleValue(value)
+  return string.format("%.1f", value)
+end
+
+--[[
+  OnValueChanged callback for the target cooldown bar scale slider
+
+  @param {table} self
+  @param {number} value
+]]--
+function me.ScaleSliderOnValueChanged(_, value)
+  -- snap the float artifacts of the stepped slider off before storing the value
+  local scale = math.floor(value * 10 + 0.5) / 10
+
+  if mod.configuration.UpdateTargetCooldownBarScale(scale) ~= nil then
+    mod.targetCooldownBar.TargetCooldownBarUiUpdate()
+  end
+end
+
+--[[
+  OnClick callback for the test/place mode button - hands off to the mode
+  lifecycle, which closes the Settings window
+]]--
+function me.PlaceModeButtonOnClick()
+  mod.targetCooldownBarPlaceMode.EnterPlaceMode()
+end
+
+--[[
+  OnClick callback for the defaults button. Resets the target cooldown bar's
+  settings to their shipped defaults - the lock flag, the scale and the saved
+  bar position (proximity-panel parity). globalAssumeWorstCase is deliberately
+  untouched: it governs cooldown resolution, not the bar (the friendly panel's
+  reset draws the same line around its detection flags).
+]]--
+function me.DefaultsButtonOnClick()
+  mod.configuration.ResetTargetCooldownBar()
+  mod.configuration.ClearUserPlacedFramePosition(RGCW_CONSTANTS.ELEMENT_TARGET_COOLDOWN_BAR_FRAME)
+  mod.targetCooldownBar.TargetCooldownBarUiUpdate()
+  me.RefreshOptionControls()
+end
+
+--[[
+  Re-read every panel control from the store after it changed through another
+  path (the defaults reset). Checkboxes re-run their OnShow callbacks; the
+  slider goes through UpdateSliderValue, which detaches the OnValueChanged
+  callback for the write - a plain SetValue would fire it and turn this
+  re-sync into a store write.
+]]--
+function me.RefreshOptionControls()
+  for _, checkBox in ipairs(optionControls.checkBoxes) do
+    checkBox:GetScript("OnShow")(checkBox)
+  end
+
+  mod.guiHelper.UpdateSliderValue(
+    optionControls.scaleSlider,
+    mod.configuration.GetTargetCooldownBarScale()
+  )
 end
 
 --[[
@@ -107,6 +202,8 @@ function me.BuildCheckButtonOption(parentFrame, optionFrameName, posX, posY, onS
 
   -- load initial state
   onShowCallback(checkButtonOptionFrame)
+  -- kept so the defaults reset can re-sync the checkbox without navigating away
+  table.insert(optionControls.checkBoxes, checkButtonOptionFrame)
 end
 
 --[[
@@ -124,34 +221,6 @@ function me.GetOptionData(frameName)
     if frameName == RGCW_CONSTANTS.ELEMENT_GENERAL_OPT .. optionKey then
       return optionData
     end
-  end
-end
-
---[[
-  OnShow callback for checkbuttons - window lock gearBar
-
-  @param {table} self
-]]--
-function me.LockWindowTargetCooldownBarOnShow(self)
-  if mod.configuration.IsTargetCooldownBarLocked() then
-    self:SetChecked(true)
-  else
-    self:SetChecked(false)
-  end
-end
-
---[[
-  OnClick callback for checkbuttons - window lock gearBar
-
-  @param {table} self
-]]--
-function me.LockWindowTargetCooldownBarOnClick(self)
-  local enabled = self:GetChecked()
-
-  if enabled then
-    mod.configuration.LockTargetCooldownBar()
-  else
-    mod.configuration.UnlockTargetCooldownBar()
   end
 end
 

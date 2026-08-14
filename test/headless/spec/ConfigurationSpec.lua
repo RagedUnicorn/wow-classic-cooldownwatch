@@ -508,7 +508,6 @@ describe("Configuration schema reconcile", function()
     local saved = configuration.ReconcileWithDefaults({}, configuration.GetDefaults())
 
     assert.equal("", saved.lastNotifiedVersion)
-    assert.is_false(saved.lockTargetCooldownBar)
     assert.is_false(saved.globalAssumeWorstCase)
     assert.same({}, saved.frames)
     assert.same({}, saved.profiles)
@@ -516,11 +515,11 @@ describe("Configuration schema reconcile", function()
 
   it("leaves configured values untouched, including a value equal to the default", function()
     local saved = configuration.ReconcileWithDefaults(
-      { lockTargetCooldownBar = true, globalAssumeWorstCase = false, lastNotifiedVersion = "1.1.0" },
+      { trackFriendlyCooldowns = true, globalAssumeWorstCase = false, lastNotifiedVersion = "1.1.0" },
       configuration.GetDefaults()
     )
 
-    assert.is_true(saved.lockTargetCooldownBar)
+    assert.is_true(saved.trackFriendlyCooldowns)
     assert.is_false(saved.globalAssumeWorstCase)
     assert.equal("1.1.0", saved.lastNotifiedVersion)
   end)
@@ -556,7 +555,7 @@ describe("Configuration schema reconcile", function()
   it("fills the whole proximityCooldowns block on an upgraded configuration", function()
     -- an older saved shape has no proximityCooldowns key at all
     local saved = configuration.ReconcileWithDefaults(
-      { lockTargetCooldownBar = true },
+      { globalAssumeWorstCase = true },
       configuration.GetDefaults()
     )
 
@@ -592,7 +591,7 @@ describe("Configuration schema reconcile", function()
 
   it("fills the whole friendlyProximityCooldowns block on an upgraded configuration", function()
     local saved = configuration.ReconcileWithDefaults(
-      { lockTargetCooldownBar = true },
+      { globalAssumeWorstCase = true },
       configuration.GetDefaults()
     )
 
@@ -611,24 +610,24 @@ describe("Configuration schema reconcile", function()
   end)
 
   it("never rewrites player data living under a default-empty table", function()
-    local profiles = { ["Default"] = { lockTargetCooldownBar = true }, ["Pvp"] = { frames = {} } }
+    local profiles = { ["Default"] = { globalAssumeWorstCase = true }, ["Pvp"] = { frames = {} } }
 
     local saved = configuration.ReconcileWithDefaults(
       { profiles = profiles, frames = { ["CW_TargetCooldownBarFrame"] = { posX = 10, posY = 20 } } },
       configuration.GetDefaults()
     )
 
-    assert.same({ ["Default"] = { lockTargetCooldownBar = true }, ["Pvp"] = { frames = {} } }, saved.profiles)
+    assert.same({ ["Default"] = { globalAssumeWorstCase = true }, ["Pvp"] = { frames = {} } }, saved.profiles)
     assert.same({ ["CW_TargetCooldownBarFrame"] = { posX = 10, posY = 20 } }, saved.frames)
   end)
 
   it("resets a saved value whose type disagrees with the default", function()
     local saved = configuration.ReconcileWithDefaults(
-      { lockTargetCooldownBar = "yes", frames = 42 },
+      { globalAssumeWorstCase = "yes", frames = 42 },
       configuration.GetDefaults()
     )
 
-    assert.is_false(saved.lockTargetCooldownBar)
+    assert.is_false(saved.globalAssumeWorstCase)
     assert.same({}, saved.frames)
   end)
 
@@ -642,7 +641,7 @@ describe("Configuration schema reconcile", function()
   end)
 
   it("is idempotent - a second pass changes nothing", function()
-    local saved = configuration.ReconcileWithDefaults({ lockTargetCooldownBar = true }, configuration.GetDefaults())
+    local saved = configuration.ReconcileWithDefaults({ globalAssumeWorstCase = true }, configuration.GetDefaults())
     local first = rgcw.common.Clone(saved)
 
     configuration.ReconcileWithDefaults(saved, configuration.GetDefaults())
@@ -671,13 +670,13 @@ describe("Configuration schema reconcile", function()
 
   it("SetupConfiguration fills a partial saved table without discarding user values", function()
     local saved = installSavedVariable({
-      lockTargetCooldownBar = true,
+      globalAssumeWorstCase = true,
       cooldownConfiguration = { ["priest"] = { [10890] = false } }
     })
 
     configuration.SetupConfiguration()
 
-    assert.is_true(saved.lockTargetCooldownBar)
+    assert.is_true(saved.globalAssumeWorstCase)
     assert.is_false(saved.cooldownConfiguration["priest"][10890])
     assert.same({}, saved.frames)
     assert.equal("", saved.lastNotifiedVersion)
@@ -864,6 +863,61 @@ describe("Configuration per-side stores", function()
     configuration.UpdateShowFriendlyTargetCooldownsState(true)
 
     assert.is_false(configuration.IsTrackFriendlyCooldownsEnabled())
+  end)
+end)
+
+describe("Configuration target cooldown bar scale", function()
+  local configuration
+
+  before_each(function()
+    configuration = rgcw.configuration
+  end)
+
+  after_each(function()
+    -- restore the shipped default for later spec files
+    CooldownWatchConfiguration.targetCooldownBarScale = 1.0
+  end)
+
+  it("resolves a missing field to the shipped default", function()
+    -- an older saved shape before the reconcile ran
+    CooldownWatchConfiguration.targetCooldownBarScale = nil
+
+    assert.equal(1.0, configuration.GetTargetCooldownBarScale())
+  end)
+
+  it("ships the scale default in GetDefaults so the reconcile backfills it", function()
+    assert.equal(1.0, configuration.GetDefaults().targetCooldownBarScale)
+  end)
+
+  it("round-trips a fractional scale and returns it", function()
+    assert.equal(1.5, configuration.UpdateTargetCooldownBarScale(1.5))
+    assert.equal(1.5, configuration.GetTargetCooldownBarScale())
+  end)
+
+  it("rejects a non-positive, NaN, infinite or non-numeric scale without touching the store", function()
+    configuration.UpdateTargetCooldownBarScale(1.5)
+
+    assert.is_nil(configuration.UpdateTargetCooldownBarScale(0))
+    assert.is_nil(configuration.UpdateTargetCooldownBarScale(-1))
+    assert.is_nil(configuration.UpdateTargetCooldownBarScale(0 / 0))
+    assert.is_nil(configuration.UpdateTargetCooldownBarScale(math.huge))
+    assert.is_nil(configuration.UpdateTargetCooldownBarScale("1.5"))
+    assert.is_nil(configuration.UpdateTargetCooldownBarScale(nil))
+
+    assert.equal(1.5, configuration.GetTargetCooldownBarScale())
+  end)
+
+  it("resets the bar options to defaults without touching globalAssumeWorstCase", function()
+    configuration.UpdateTargetCooldownBarScale(1.5)
+    configuration.UpdateGlobalWorstCaseState(true)
+
+    configuration.ResetTargetCooldownBar()
+
+    assert.equal(1.0, configuration.GetTargetCooldownBarScale())
+    -- resolution behavior is not the bar's setting - the reset leaves it alone
+    assert.is_true(configuration.IsGlobalWorstCaseAssumed())
+
+    configuration.UpdateGlobalWorstCaseState(false)
   end)
 end)
 

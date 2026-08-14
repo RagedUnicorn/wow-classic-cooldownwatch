@@ -27,8 +27,8 @@
   Test/place mode of the FRIENDLY proximity cooldown window. All machinery
   lives in the shared builder (gui/ProximityPlaceMode.lua) - this module only
   supplies what makes the mode the friendly one: the friendly window wrapper,
-  the friendly preview ticker pair, the save button identity, the friendly
-  settings category the save button returns to, and the friendly marker on the
+  the friendly preview ticker pair, the apply button identity, the friendly
+  settings category the apply button returns to, and the friendly marker on the
   example entries so they resolve caster-relative icons (own-faction insignia,
   see GuiHelper.GetIconId) exactly like the window's live entries. The scope
   filter deliberately does not apply to the preview - the example casters are
@@ -45,8 +45,8 @@ me.tag = "FriendlyProximityCooldownBarPreview"
 local instance = mod.proximityPlaceMode.CreateInstance({
   tag = me.tag,
   bar = mod.friendlyProximityCooldownBar,
-  saveButtonName = RGCW_CONSTANTS.ELEMENT_FRIENDLY_PROXIMITY_PLACE_MODE_SAVE_BUTTON,
-  saveButtonLabel = rgcw.L["friendly_place_mode_save_button"],
+  applyButtonName = RGCW_CONSTANTS.ELEMENT_FRIENDLY_PROXIMITY_PLACE_MODE_APPLY_BUTTON,
+  applyButtonLabel = rgcw.L["friendly_place_mode_apply_button"],
   settingsCategoryKey = "friendly",
   StartPreviewTicker = function() mod.ticker.StartTickerFriendlyProximityCooldownBarPreview() end,
   StopPreviewTicker = function() mod.ticker.StopTickerFriendlyProximityCooldownBarPreview() end,

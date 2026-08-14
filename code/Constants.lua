@@ -182,8 +182,20 @@ RGCW_CONSTANTS = {
   ELEMENT_GENERAL_SUB_OPTION_FRAME = "CW_GeneralMenuOptionsFrame",
   ELEMENT_GENERAL_OPT = "CW_Opt",
   ELEMENT_GENERAL_TITLE = "CW_GeneralTitle",
-  ELEMENT_GENERAL_OPT_WINDOW_LOCK_TARGET_COOLDOWN_BAR = "CW_OptWindowLockTargetCooldownBar",
   ELEMENT_GENERAL_OPT_GLOBAL_ASSUME_WORST_CASE = "CW_OptGlobalAssumeWorstCase",
+  ELEMENT_GENERAL_TARGET_BAR_SCALE_SLIDER = "CW_TargetBarScaleSlider",
+  ELEMENT_GENERAL_OPT_PLACE_MODE_BUTTON = "CW_TargetBarPlaceModeButton",
+  ELEMENT_GENERAL_OPT_DEFAULTS_BUTTON = "CW_TargetBarDefaultsButton",
+  -- floating finish control of the target cooldown bar's test/place mode
+  ELEMENT_TARGET_BAR_PLACE_MODE_APPLY_BUTTON = "CW_TargetBarPlaceModeApplyButton",
+  --[[
+    Target cooldown bar scale slider bounds. Deliberately separate constants
+    from the PROXIMITY_SCALE_SLIDER_* set - the bar is not built by the
+    proximity window builder, so its sensible range can diverge independently.
+  ]]--
+  TARGET_BAR_SCALE_SLIDER_MIN = 0.5,
+  TARGET_BAR_SCALE_SLIDER_MAX = 2,
+  TARGET_BAR_SCALE_SLIDER_STEP = 0.1,
   --[[
     ProximityMenu (options panel of the proximity cooldown window)
   ]]--
@@ -196,7 +208,7 @@ RGCW_CONSTANTS = {
   ELEMENT_PROXIMITY_OPT_PLACE_MODE_BUTTON = "CW_ProximityPlaceModeButton",
   ELEMENT_PROXIMITY_OPT_DEFAULTS_BUTTON = "CW_ProximityDefaultsButton",
   -- floating finish control of the proximity window's test/place mode
-  ELEMENT_PROXIMITY_PLACE_MODE_SAVE_BUTTON = "CW_ProximityPlaceModeSaveButton",
+  ELEMENT_PROXIMITY_PLACE_MODE_APPLY_BUTTON = "CW_ProximityPlaceModeApplyButton",
   --[[
     Auto-sizing text buttons (GuiHelper.CreateTextButton, PVPWarn parity)
   ]]--
@@ -234,7 +246,7 @@ RGCW_CONSTANTS = {
   ELEMENT_FRIENDLY_OPT_PLACE_MODE_BUTTON = "CW_FriendlyPlaceModeButton",
   ELEMENT_FRIENDLY_OPT_DEFAULTS_BUTTON = "CW_FriendlyDefaultsButton",
   -- floating finish control of the friendly proximity window's test/place mode
-  ELEMENT_FRIENDLY_PROXIMITY_PLACE_MODE_SAVE_BUTTON = "CW_FriendlyProximityPlaceModeSaveButton",
+  ELEMENT_FRIENDLY_PROXIMITY_PLACE_MODE_APPLY_BUTTON = "CW_FriendlyProximityPlaceModeApplyButton",
   -- width of a configuration dropdown (WowStyle2DropdownTemplate, see GuiHelper.CreateSettingsDropdown)
   OPTION_DROPDOWN_WIDTH = 180,
   --[[

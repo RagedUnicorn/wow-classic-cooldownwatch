@@ -100,6 +100,8 @@ gui/TargetCooldownBarPreview.lua
 gui/ProximityWindow.lua
 gui/ProximityCooldownBar.lua
 gui/FriendlyProximityCooldownBar.lua
+gui/PlaceMode.lua
+gui/TargetCooldownBarPlaceMode.lua
 gui/ProximityPlaceMode.lua
 gui/ProximityCooldownBarPreview.lua
 gui/FriendlyProximityCooldownBarPreview.lua

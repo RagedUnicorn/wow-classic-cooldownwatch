@@ -88,11 +88,15 @@ end
   every other backfill (upgrade, applied profile) goes through me.GetDefaults below
   via me.ReconcileWithDefaults, which must stay in sync with the values declared here.
 ]]--
+-- default render scale of the target cooldown bar - the single value source for
+-- the saved-variable declaration, GetDefaults and the accessor fallback below
+local TARGET_COOLDOWN_BAR_DEFAULT_SCALE = 1.0
+
 CooldownWatchConfiguration = {
   --[[
-    Whether the targetCooldownBar is locked from moving or not
+    Render scale of the targetCooldownBar
   ]]--
-  ["lockTargetCooldownBar"] = false,
+  ["targetCooldownBarScale"] = TARGET_COOLDOWN_BAR_DEFAULT_SCALE,
   --[[
     Initial addon version
   ]]--
@@ -226,7 +230,7 @@ CooldownWatchConfiguration = {
 ]]--
 function me.GetDefaults()
   return {
-    ["lockTargetCooldownBar"] = false,
+    ["targetCooldownBarScale"] = TARGET_COOLDOWN_BAR_DEFAULT_SCALE,
     ["cooldownConfiguration"] = mod.profile.GetDefaultProfile(),
     ["cooldownOverrides"] = mod.profile.GetDefaultCooldownOverrides(),
     ["friendlyCooldownConfiguration"] = mod.profile.GetDefaultProfile(),
@@ -377,28 +381,55 @@ function me.IsVersionBefore(version, otherVersion)
 end
 
 --[[
-  Enable moving of targetCooldownBar window
+  Update the render scale of the target cooldown bar. Only basic sanity is
+  enforced here - a positive finite number. The slider bounds belong to the
+  options ui, which is the sole producer of player-entered values. The live
+  application (SetScale) stays with the caller through
+  TargetCooldownBar.TargetCooldownBarUiUpdate - proximity-scale parity.
+
+  @param {number} scale
+
+  @return {number | nil}
+    The value that was stored, nil when it was rejected
 ]]--
-function me.UnlockTargetCooldownBar()
-  CooldownWatchConfiguration.lockTargetCooldownBar = false
-  mod.targetCooldownBar.TargetCooldownBarUiUpdate()
+function me.UpdateTargetCooldownBarScale(scale)
+  if type(scale) ~= "number"
+    or scale ~= scale -- NaN is the only value not equal to itself
+    or scale <= 0
+    or scale == math.huge then
+    mod.logger.LogWarn(me.tag, "Rejected invalid target cooldown bar scale: " .. tostring(scale))
+
+    return nil
+  end
+
+  CooldownWatchConfiguration.targetCooldownBarScale = scale
+
+  return scale
 end
 
 --[[
-  Disable moving of targetCooldownBar window
+  @return {number}
+    The render scale of the target cooldown bar. A missing field (an older
+    saved shape before the reconcile ran, or headless) resolves to the shipped
+    default.
 ]]--
-function me.LockTargetCooldownBar()
-  CooldownWatchConfiguration.lockTargetCooldownBar = true
-  mod.targetCooldownBar.TargetCooldownBarUiUpdate()
+function me.GetTargetCooldownBarScale()
+  return CooldownWatchConfiguration.targetCooldownBarScale or TARGET_COOLDOWN_BAR_DEFAULT_SCALE
 end
 
 --[[
-  @return {boolean}
-    true - if the targetCooldownBar is locked
-    false - if the targetCooldownBar is not locked
+  Reset the target cooldown bar's options to their shipped defaults - the
+  render scale, read from GetDefaults so no default is restated. The bar's
+  saved position is not covered - a caller resetting "everything" clears it
+  separately via ClearUserPlacedFramePosition - and neither is
+  globalAssumeWorstCase: it governs cooldown resolution, not the bar (the
+  friendly panel's reset draws the same line around its detection flags). The
+  live application stays with the caller, matching ResetProximityCooldowns.
 ]]--
-function me.IsTargetCooldownBarLocked()
-  return CooldownWatchConfiguration.lockTargetCooldownBar
+function me.ResetTargetCooldownBar()
+  CooldownWatchConfiguration.targetCooldownBarScale = me.GetDefaults().targetCooldownBarScale
+
+  mod.logger.LogDebug(me.tag, "Reset target cooldown bar options to their shipped defaults")
 end
 
 --[[

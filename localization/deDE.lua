@@ -13,7 +13,7 @@ if (GetLocale() == "deDE") then
   rgcw.L["reload"] = "|cFFFFC300reload|r - UI neu laden"
   rgcw.L["opt"] = "|cFFFFC300opt|r - Zeige Optionsmenu an"
   rgcw.L["conf"] = "|cFFFFC300conf enable||disable|r - Zeigt oder versteckt die Beispiel-Ziel-Cooldown-Leiste "
-    .. "zum Positionieren (bei entsperrter Leiste verschiebbar)"
+    .. "zum Positionieren (solange sichtbar verschiebbar)"
   rgcw.L["test"] = "|cFFFFFF00test|r - Test-Befehle (nutze |cFFFFC300/rgcw test|r für das vollständige Menü)"
   rgcw.L["info_title"] = "|cFF00FFB0CooldownWatch:|r"
   rgcw.L["invalid_argument"] = "Ungültiges Argument übergeben"
@@ -28,12 +28,15 @@ if (GetLocale() == "deDE") then
   -- options
   rgcw.L["options_category_name"] = "Optionen"
   rgcw.L["options_title"] = "Optionen"
-  rgcw.L["window_lock_target_cooldown_bar"] = "Sperre Zielabklingzeitenbalken"
-  rgcw.L["window_lock_target_cooldown_bar_tooltip"] = "Verhindert das bewegen des Zielabklingzeitenbalken"
   rgcw.L["option_global_assume_worst_case"] = "Worst Case für alle Abklingzeiten annehmen"
   rgcw.L["option_global_assume_worst_case_tooltip"] = "Nimmt an, dass jeder Gegner Talente oder Ausrüstung "
     .. "besitzt, die seine Abklingzeiten verkürzen. Worst-Case-Einstellungen einzelner Abklingzeiten "
     .. "haben weiterhin Vorrang."
+  rgcw.L["target_bar_scale_slider_title"] = "Leistenskalierung"
+  rgcw.L["target_bar_scale_slider_tooltip"] = "Passt die Grösse des Zielabklingzeitenbalken an"
+  rgcw.L["target_bar_place_mode_button"] = "Leiste positionieren"
+  rgcw.L["target_bar_place_mode_apply_button"] = "Übernehmen"
+  rgcw.L["target_bar_defaults_button"] = "Auf Standard zurücksetzen"
 
   -- proximity cooldowns
   rgcw.L["proximity_category_name"] = "Abklingzeiten in der Nähe"
@@ -52,7 +55,7 @@ if (GetLocale() == "deDE") then
   rgcw.L["proximity_max_displayed_slider_tooltip"] = "Wie viele Abklingzeiten das Fenster gleichzeitig "
     .. "anzeigt. Die zuletzt erkannten Abklingzeiten werden zuerst angezeigt."
   rgcw.L["proximity_place_mode_button"] = "Fenster positionieren"
-  rgcw.L["proximity_place_mode_save_button"] = "Speichern"
+  rgcw.L["proximity_place_mode_apply_button"] = "Übernehmen"
   rgcw.L["proximity_defaults_button"] = "Auf Standard zurücksetzen"
 
   -- friendly cooldowns
@@ -84,7 +87,7 @@ if (GetLocale() == "deDE") then
   rgcw.L["friendly_max_displayed_slider_tooltip"] = "Wie viele Abklingzeiten das Fenster "
     .. "gleichzeitig anzeigt"
   rgcw.L["friendly_place_mode_button"] = "Fenster positionieren"
-  rgcw.L["friendly_place_mode_save_button"] = "Speichern"
+  rgcw.L["friendly_place_mode_apply_button"] = "Übernehmen"
   rgcw.L["friendly_defaults_button"] = "Auf Standard zurücksetzen"
 
   -- profiles

@@ -24,32 +24,33 @@
 ]]--
 
 --[[
-  Test/place mode of the ENEMY proximity cooldown window. All machinery lives
-  in the shared builder (gui/ProximityPlaceMode.lua) - this module only
-  supplies what makes the mode the enemy one: the enemy window wrapper, the
-  enemy preview ticker pair, the apply button identity and the proximity
-  settings category the apply button returns to.
+  Test/place mode of the TARGET COOLDOWN BAR. The mode shell lives in
+  gui/PlaceMode.lua; the preview content is the bar's existing example mode
+  (gui/TargetCooldownBarPreview.lua, also reachable via /rgcw conf) - this
+  module only ties the two together. The preview itself owns the positioning
+  look: its show/hide repaint the backdrop and dragging is gated on the
+  preview flag (there is deliberately no lock option, proximity-window
+  parity), so the shell's StartPreview/StopPreview need nothing beyond the
+  example mode's own entry points.
 ]]--
 
 local mod = rgcw
 local me = {}
 
-mod.proximityCooldownBarPreview = me
+mod.targetCooldownBarPlaceMode = me
 
-me.tag = "ProximityCooldownBarPreview"
+me.tag = "TargetCooldownBarPlaceMode"
 
-local instance = mod.proximityPlaceMode.CreateInstance({
+local instance = mod.placeMode.CreateInstance({
   tag = me.tag,
-  bar = mod.proximityCooldownBar,
-  applyButtonName = RGCW_CONSTANTS.ELEMENT_PROXIMITY_PLACE_MODE_APPLY_BUTTON,
-  applyButtonLabel = rgcw.L["proximity_place_mode_apply_button"],
-  settingsCategoryKey = "proximity",
-  StartPreviewTicker = function() mod.ticker.StartTickerProximityCooldownBarPreview() end,
-  StopPreviewTicker = function() mod.ticker.StopTickerProximityCooldownBarPreview() end,
-  flagFriendly = false
+  GetAnchorFrame = function() return mod.targetCooldownBar.GetTargetCooldownBarFrame() end,
+  applyButtonName = RGCW_CONSTANTS.ELEMENT_TARGET_BAR_PLACE_MODE_APPLY_BUTTON,
+  applyButtonLabel = rgcw.L["target_bar_place_mode_apply_button"],
+  settingsCategoryKey = "general",
+  StartPreview = function() mod.targetCooldownBarPreview.ShowExampleTargetCooldownBar() end,
+  StopPreview = function() mod.targetCooldownBarPreview.HideExampleTargetCooldownBar() end
 })
 
 me.IsPlaceModeActive = instance.IsPlaceModeActive
 me.EnterPlaceMode = instance.EnterPlaceMode
 me.FinishPlaceMode = instance.FinishPlaceMode
-me.ProximityCooldownBarPreviewOnUpdate = instance.OnUpdate

@@ -42,7 +42,7 @@ describe("ConfigProfile", function()
     field is saved and restored around every test.
   ]]--
   local MANAGED_FIELDS = {
-    "lockTargetCooldownBar",
+    "targetCooldownBarScale",
     "globalAssumeWorstCase",
     "trackFriendlyCooldowns",
     "showFriendlyTargetCooldowns",
@@ -74,7 +74,7 @@ describe("ConfigProfile", function()
       savedFields[field] = CooldownWatchConfiguration[field]
     end
 
-    CooldownWatchConfiguration.lockTargetCooldownBar = true
+    CooldownWatchConfiguration.targetCooldownBarScale = 1.3
     CooldownWatchConfiguration.globalAssumeWorstCase = false
     CooldownWatchConfiguration.trackFriendlyCooldowns = true
     CooldownWatchConfiguration.showFriendlyTargetCooldowns = true
@@ -124,7 +124,7 @@ describe("ConfigProfile", function()
 
   it("ApplySnapshot writes the profile fields and backfills missing ones", function()
     local payload = {
-      lockTargetCooldownBar = false,
+      targetCooldownBarScale = 0.8,
       globalAssumeWorstCase = true,
       cooldownConfiguration = { rogue = { [2094] = true } }
       -- cooldownOverrides and frames deliberately absent (older-schema profile)
@@ -133,7 +133,7 @@ describe("ConfigProfile", function()
 
     configProfile.ApplySnapshot(payload)
 
-    assert.is_false(CooldownWatchConfiguration.lockTargetCooldownBar)
+    assert.equal(0.8, CooldownWatchConfiguration.targetCooldownBarScale)
     assert.is_true(CooldownWatchConfiguration.globalAssumeWorstCase)
     --[[
       The applied bucket survives verbatim; the category buckets the older-schema profile
@@ -191,7 +191,7 @@ describe("ConfigProfile", function()
       configProfile.ApplySnapshot("not a table")
     end)
 
-    assert.is_true(CooldownWatchConfiguration.lockTargetCooldownBar)
+    assert.equal(1.3, CooldownWatchConfiguration.targetCooldownBarScale)
   end)
 
   it("round-trips a snapshot through export and import", function()
@@ -307,12 +307,12 @@ describe("ConfigProfile", function()
     assert.same({}, configProfile.ListProfiles())
     assert.is_false(configProfile.ProfileExists("Raid"))
 
-    configProfile.SaveProfile("Raid", { lockTargetCooldownBar = true })
-    configProfile.SaveProfile("Arena", { lockTargetCooldownBar = false })
+    configProfile.SaveProfile("Raid", { globalAssumeWorstCase = true })
+    configProfile.SaveProfile("Arena", { globalAssumeWorstCase = false })
 
     assert.same({ "Arena", "Raid" }, configProfile.ListProfiles())
     assert.is_true(configProfile.ProfileExists("Raid"))
-    assert.same({ lockTargetCooldownBar = false }, configProfile.GetProfile("Arena"))
+    assert.same({ globalAssumeWorstCase = false }, configProfile.GetProfile("Arena"))
 
     configProfile.DeleteProfile("Raid")
 
@@ -330,7 +330,7 @@ describe("ConfigProfile", function()
   end)
 
   it("renames a stored profile and reports a missing source", function()
-    configProfile.SaveProfile("Old", { lockTargetCooldownBar = true })
+    configProfile.SaveProfile("Old", { globalAssumeWorstCase = true })
 
     assert.is_true(configProfile.RenameProfile("Old", "New"))
     assert.same({ "New" }, configProfile.ListProfiles())
@@ -385,7 +385,8 @@ describe("ConfigProfile", function()
 
       local payload = configProfile.GetProfile(defaultName)
 
-      assert.is_false(payload.lockTargetCooldownBar)
+      -- the fixture scales the live bar to 1.3; the factory baseline keeps the default
+      assert.equal(1.0, payload.targetCooldownBarScale)
       assert.is_false(payload.globalAssumeWorstCase)
       -- the fixture enables friendly tracking and display; the factory baseline keeps both off
       assert.is_false(payload.trackFriendlyCooldowns)
@@ -442,8 +443,8 @@ describe("ConfigProfile", function()
       configProfile.EnsureDefaultProfile()
 
       assert.is_false(configProfile.SaveProfile(defaultName, configProfile.BuildSnapshot()))
-      -- the live config the fixture set up has the bar locked; the baseline must not
-      assert.is_false(configProfile.GetProfile(defaultName).lockTargetCooldownBar)
+      -- the live config the fixture set up scales the bar; the baseline must not
+      assert.equal(1.0, configProfile.GetProfile(defaultName).targetCooldownBarScale)
     end)
 
     it("still saves, renames and deletes user created profiles", function()

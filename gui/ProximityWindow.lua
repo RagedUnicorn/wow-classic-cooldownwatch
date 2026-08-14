@@ -499,7 +499,7 @@ function me.CreateInstance(spec)
   --[[
     @return {table | nil}
       The window frame, or nil before BuildUi ran. Read-only accessor for
-      callers that anchor to the window (the place mode's floating save button).
+      callers that anchor to the window (the place mode's floating apply button).
   ]]--
   function instance.GetWindowFrame()
     return window
