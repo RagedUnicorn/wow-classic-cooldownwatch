@@ -52,8 +52,9 @@ describe("CooldownQueue", function()
     -- starts from an empty queue.
     queue.ClearCooldownQueue()
     -- AddCooldown resolves against the worst-case toggles and the global
-    -- default; reset both so no scenario inherits another's configuration.
+    -- default; reset both sides so no scenario inherits another's configuration.
     CooldownWatchConfiguration.cooldownOverrides = nil
+    CooldownWatchConfiguration.friendlyCooldownOverrides = nil
     CooldownWatchConfiguration.globalAssumeWorstCase = nil
   end)
 
@@ -248,6 +249,74 @@ describe("CooldownQueue", function()
 
     assert.equal(15, spell.cooldown)
     assert.is_nil(spell.cooldownWorstCase)
+  end)
+
+  --[[
+    Per-side resolution: the entry's friendly marker routes ResolveCooldown to
+    the friendly-side stores, so an override tuned for enemies never rewrites
+    what a teammate's cooldown shows (and vice versa).
+  ]]--
+  it("ResolveCooldown resolves a friendly entry against the friendly-side manual override", function()
+    rgcw.configuration.UpdateCooldownManualOverride(15, "priest", 10947)
+    rgcw.configuration.UpdateCooldownManualOverride(25, "priest", 10947, true)
+
+    local friendlySpell = makeSpell(10947, "Mind Blast", 100)
+    friendlySpell.friendly = true
+
+    queue.ResolveCooldown("priest", friendlySpell)
+
+    assert.equal(25, friendlySpell.cooldown)
+  end)
+
+  it("ResolveCooldown ignores an enemy-side manual override for a friendly entry", function()
+    rgcw.configuration.UpdateCooldownManualOverride(15, "priest", 10947)
+
+    local friendlySpell = makeSpell(10947, "Mind Blast", 100)
+    friendlySpell.friendly = true
+
+    queue.ResolveCooldown("priest", friendlySpell)
+
+    -- the friendly side is never configured, so the catalog values stand
+    assert.equal(30, friendlySpell.cooldown)
+    assert.equal(20, friendlySpell.cooldownWorstCase)
+  end)
+
+  it("ResolveCooldown ignores a friendly-side manual override for a hostile entry", function()
+    rgcw.configuration.UpdateCooldownManualOverride(25, "priest", 10947, true)
+
+    local spell = makeSpell(10947, "Mind Blast", 100)
+
+    queue.ResolveCooldown("priest", spell)
+
+    assert.equal(30, spell.cooldown)
+  end)
+
+  it("ResolveCooldown promotes the worst case per side by each side's own toggle", function()
+    rgcw.configuration.UpdateCooldownWorstCaseState(true, "priest", 10947, true)
+
+    local friendlySpell = makeSpell(10947, "Mind Blast", 100)
+    friendlySpell.friendly = true
+    local hostileSpell = makeSpell(10947, "Mind Blast", 100)
+
+    queue.ResolveCooldown("priest", friendlySpell)
+    queue.ResolveCooldown("priest", hostileSpell)
+
+    assert.equal(20, friendlySpell.cooldown)
+    assert.is_nil(friendlySpell.cooldownWorstCase)
+    assert.equal(30, hostileSpell.cooldown)
+    assert.equal(20, hostileSpell.cooldownWorstCase)
+  end)
+
+  it("ResolveCooldown applies the shared global default to a friendly entry", function()
+    rgcw.configuration.UpdateGlobalWorstCaseState(true)
+
+    local friendlySpell = makeSpell(10947, "Mind Blast", 100)
+    friendlySpell.friendly = true
+
+    queue.ResolveCooldown("priest", friendlySpell)
+
+    assert.equal(20, friendlySpell.cooldown)
+    assert.is_nil(friendlySpell.cooldownWorstCase)
   end)
 
   it("AddCooldown queues the manual override when set", function()

@@ -284,13 +284,24 @@ end
   icon itself - entries carrying an itemId resolve through GetItemIcon, all
   others through GetSpellInfo.
 
+  Faction-mirrored items (the PvP insignias) resolve caster-relative: a
+  friendly queue entry carrying a friendlyItemId shows the player's own
+  faction's item, every other entry the opposing faction's itemId (see the
+  insignia block in code/spellmap/base/Items.lua).
+
   @param {table} spellEntry
-    Any table with a spellId and an optional itemId (see SpellMap entry shape)
+    Any table with a spellId and an optional itemId / friendlyItemId, plus the
+    queue entry's optional friendly marker (see SpellMap entry shape and the
+    CooldownQueue storage layout)
 
   @return {number}
     The iconId for the spellEntry
 ]]--
 function me.GetIconId(spellEntry)
+  if spellEntry.friendly and spellEntry.friendlyItemId ~= nil then
+    return GetItemIcon(spellEntry.friendlyItemId)
+  end
+
   if spellEntry.itemId ~= nil then
     return GetItemIcon(spellEntry.itemId)
   end

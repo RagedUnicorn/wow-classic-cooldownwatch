@@ -25,6 +25,7 @@
 
 -- luacheck: globals CombatLog_Object_IsA COMBATLOG_FILTER_HOSTILE_PLAYERS GetTime bit
 -- luacheck: globals COMBATLOG_OBJECT_TYPE_PET COMBATLOG_OBJECT_CONTROL_PLAYER COMBATLOG_OBJECT_REACTION_HOSTILE
+-- luacheck: globals COMBATLOG_OBJECT_TYPE_PLAYER COMBATLOG_OBJECT_REACTION_FRIENDLY
 
 local mod = rgcw
 local me = {}
@@ -82,6 +83,40 @@ local function IsHostilePlayerPet(unitFlags)
 end
 
 --[[
+  Whether the acting unit's flags describe a friendly player. Built from the
+  raw object flags because Blizzard ships no COMBATLOG_FILTER_FRIENDLY_PLAYERS
+  counterpart to the hostile filter (COMBATLOG_FILTER_FRIENDLY_UNITS matches
+  npcs and pets too). The reaction flags are the per-event truth - a duel
+  opponent flags hostile for its duration and is tracked as an enemy, which is
+  what the player fighting them wants. No affiliation filter: the player's own
+  casts pass too, the queue simply keys them under the player's guid.
+
+  @param {number} unitFlags
+
+  @return {boolean}
+]]--
+local function IsFriendlyPlayer(unitFlags)
+  return bit.band(unitFlags, COMBATLOG_OBJECT_TYPE_PLAYER) > 0
+    and bit.band(unitFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0
+    and bit.band(unitFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) > 0
+end
+
+--[[
+  Whether the acting unit's flags describe a friendly player's pet - the
+  friendly twin of IsHostilePlayerPet, with the same totem/guardian/wild-npc
+  exclusions.
+
+  @param {number} unitFlags
+
+  @return {boolean}
+]]--
+local function IsFriendlyPlayerPet(unitFlags)
+  return bit.band(unitFlags, COMBATLOG_OBJECT_TYPE_PET) > 0
+    and bit.band(unitFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0
+    and bit.band(unitFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) > 0
+end
+
+--[[
   Processing the details of the current combat log event. Invoked when 'COMBAT_LOG_EVENT_UNFILTERED' is fired
 
   @param {vararg} ...
@@ -111,29 +146,44 @@ function me.ProcessUnfilteredCombatLogEvent(...)
     Filter for hostile player events - and their pets, whose casts are
     attributed to the owning player (petCast entries). Aura events are
     attributed to the dest unit (the buff owner); cast events to the source unit.
+
+    The friendly branches mirror the hostile pair and only exist behind the
+    trackFriendlyCooldowns option: with it off (the default) a non-hostile
+    line costs exactly one extra boolean check, and the hostile path is
+    untouched either way.
   ]]--
   local unitFlags = eventProperties.useDestUnit and destFlags or sourceFlags
 
   if CombatLog_Object_IsA(unitFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS) then
-    me.ProcessNormal(event, eventProperties, false, ...)
+    me.ProcessNormal(event, eventProperties, false, false, ...)
   elseif IsHostilePlayerPet(unitFlags) then
-    me.ProcessNormal(event, eventProperties, true, ...)
+    me.ProcessNormal(event, eventProperties, true, false, ...)
+  elseif mod.configuration.IsTrackFriendlyCooldownsEnabled() then
+    if IsFriendlyPlayer(unitFlags) then
+      me.ProcessNormal(event, eventProperties, false, true, ...)
+    elseif IsFriendlyPlayerPet(unitFlags) then
+      me.ProcessNormal(event, eventProperties, true, true, ...)
+    end
   end
-  -- TODO [FEATURE]: We could track friendly cooldowns as well and put it behind a configuration flag
 end
 
 --[[
   Record the pet -> owner mapping a SPELL_SUMMON event reveals (source is the
-  summoning owner, dest the freshly summoned unit). Only hostile player sources
-  matter, and only actual pets - totems and guardian npcs arrive with
-  Creature- guids and are not queue keys.
+  summoning owner, dest the freshly summoned unit). Hostile player sources
+  always matter; friendly player sources only while friendly tracking is on
+  (keeping the default behavior byte-identical). Only actual pets qualify -
+  totems and guardian npcs arrive with Creature- guids and are not queue keys.
 
   @param {vararg} ...
 ]]--
 function me.ProcessSummon(...)
   local _, _, _, sourceGuid, sourceName, sourceFlags, _, destGuid = ...
 
-  if not CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS) then return end
+  if not CombatLog_Object_IsA(sourceFlags, COMBATLOG_FILTER_HOSTILE_PLAYERS)
+    and not (mod.configuration.IsTrackFriendlyCooldownsEnabled() and IsFriendlyPlayer(sourceFlags)) then
+    return
+  end
+
   if type(destGuid) ~= "string" or string.find(destGuid, "^Pet%-") == nil then return end
 
   mod.petOwner.RecordSummon(destGuid, sourceGuid, sourceName)
@@ -145,10 +195,13 @@ end
     The supportedEvents entry for the event; useDestUnit picks which unit
     triple the acting player is read from.
   @param {boolean} isPetSource
-    Whether the acting unit is a hostile player's pet rather than the player.
+    Whether the acting unit is a player's pet rather than the player.
+  @param {boolean} friendly
+    Whether the acting unit is friendly rather than hostile. Gates against the
+    friendly-side per-spell state and stamps the queue entry's friendly marker.
   @param {vararg} ...
 ]]--
-function me.ProcessNormal(event, eventProperties, isPetSource, ...)
+function me.ProcessNormal(event, eventProperties, isPetSource, friendly, ...)
   if RGCW_ENVIRONMENT.DEBUG then
     mod.debug.TrackLogNormalEvent(...)
   end
@@ -195,11 +248,21 @@ function me.ProcessNormal(event, eventProperties, isPetSource, ...)
     The enabled state is keyed by the PRIMARY spellId (the config ui only ever
     writes primaries) - gate on realSpellId so a lower-rank cast of an enabled
     spell tracks like its max rank. Spells the player never configured fall
-    back to the catalog's `active` default.
+    back to the catalog's `active` default - per side: enemy and friendly
+    casts gate against their own store.
   ]]--
-  if not me.IsCooldownTracked(category, realSpellId, spell.active) then
+  if not me.IsCooldownTracked(category, realSpellId, spell.active, friendly) then
     mod.logger.LogDebug(me.tag, "Spell is not enabled - aborting...")
     return
+  end
+
+  --[[
+    The friendly marker rides on the cloned spellData so it survives every
+    downstream path unchanged - pet-cast parking (PetOwner), shared-cooldown
+    fan-out and the queue entry itself. Hostile entries carry no field.
+  ]]--
+  if friendly then
+    spell.friendly = true
   end
 
   if spell.petCast then
@@ -238,19 +301,22 @@ end
   @param {boolean} defaultState
     Optional. The spell's catalog `active` flag - the tracked state that
     applies while the player never configured the spell
+  @param {boolean} friendly
+    Optional. true resolves against the friendly-side per-spell state; the
+    catalog default applies per side independently
 
   @return {boolean}
     true  - If the cooldown is enabled
     false - If the cooldown is disabled
 ]]--
-function me.IsCooldownTracked(category, spellId, defaultState)
+function me.IsCooldownTracked(category, spellId, defaultState, friendly)
   assert(type(category) == "string",
     string.format("bad argument #1 to `IsCooldownTracked` (expected string got %s)", type(category)))
 
   assert(type(spellId) == "number",
     string.format("bad argument #2 to `IsCooldownTracked` (expected number got %s)", type(spellId)))
 
-  return mod.configuration.GetCooldownConfigurationState(category, spellId, defaultState)
+  return mod.configuration.GetCooldownConfigurationState(category, spellId, defaultState, friendly)
 end
 
 --[[
@@ -304,6 +370,8 @@ function me.TrackSharedCooldownSiblings(sourceGuid, sourceName, originalSpell, c
 
       if siblingSpell then
         siblingSpell.castTime = castTime
+        -- the sibling clone must land on the same side as the spell that fired
+        siblingSpell.friendly = originalSpell.friendly
         mod.cooldownQueue.AddCooldown(sourceGuid, sourceName, category, siblingSpell)
       end
     end

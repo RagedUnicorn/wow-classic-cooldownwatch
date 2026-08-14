@@ -578,26 +578,31 @@ function me.ValidateCooldownResetTargets(spellMap)
 end
 
 --[[
-  Check a single entry's itemId. Part of ValidateItemIdSane.
+  Check one item-id field of a single entry. Part of ValidateItemIdSane, which
+  applies the same rules to itemId and its caster-relative friendly twin.
 
   @param {string} category
   @param {number} spellId
   @param {table} entry
+  @param {string} fieldName
+    "itemId" or "friendlyItemId"
 
   @return {string|nil}
-    A failure description, or nil if the entry has no itemId or a valid one
+    A failure description, or nil if the entry has no such field or a valid one
 ]]--
-GetItemIdFailure = function(category, spellId, entry)
-  if entry.itemId == nil then return nil end
+GetItemIdFailure = function(category, spellId, entry, fieldName)
+  local itemId = entry[fieldName]
+
+  if itemId == nil then return nil end
 
   if not IsPrimary(entry) then
-    return string.format("%s/%s: itemId %s on alias entry is ignored - move it to the primary",
-      category, tostring(spellId), tostring(entry.itemId))
+    return string.format("%s/%s: %s %s on alias entry is ignored - move it to the primary",
+      category, tostring(spellId), fieldName, tostring(itemId))
   end
 
-  if type(entry.itemId) ~= "number" or entry.itemId <= 0 or entry.itemId % 1 ~= 0 then
-    return string.format("%s/%s ('%s'): itemId %s is not a positive integer",
-      category, tostring(spellId), entry.name, tostring(entry.itemId))
+  if type(itemId) ~= "number" or itemId <= 0 or itemId % 1 ~= 0 then
+    return string.format("%s/%s ('%s'): %s %s is not a positive integer",
+      category, tostring(spellId), entry.name, fieldName, tostring(itemId))
   end
 
   return nil
@@ -643,11 +648,16 @@ function me.ValidateTrackedEventsSupported(spellMap, supportedEvents)
 end
 
 --[[
-  Verify itemId, where present, is a positive integer and sits on a primary
-  entry. itemId points at the item whose "Use" effect casts the tracked spell
-  so the ui can show the recognizable item icon (GuiHelper.GetIconId). An
-  itemId on an alias entry would be silently ignored (lookups resolve to the
-  primary), and a non-numeric or non-positive value would break GetItemIcon.
+  Verify itemId and friendlyItemId, where present, are positive integers and
+  sit on a primary entry. itemId points at the item whose "Use" effect casts
+  the tracked spell so the ui can show the recognizable item icon
+  (GuiHelper.GetIconId); friendlyItemId is its caster-relative twin for
+  faction-mirrored items (the friendly caster pressed the player's own
+  faction's item). An id on an alias entry would be silently ignored (lookups
+  resolve to the primary), and a non-numeric or non-positive value would break
+  GetItemIcon. friendlyItemId without itemId is rejected too: the icon only
+  branches by side for entries that resolve through an item at all, so the
+  friendly twin alone would never be read.
 
   @param {table} spellMap
 
@@ -658,10 +668,18 @@ function me.ValidateItemIdSane(spellMap)
 
   for category, spells in pairs(spellMap) do
     for spellId, entry in pairs(spells) do
-      local failure = GetItemIdFailure(category, spellId, entry)
+      for _, fieldName in ipairs({ "itemId", "friendlyItemId" }) do
+        local failure = GetItemIdFailure(category, spellId, entry, fieldName)
 
-      if failure ~= nil then
-        table.insert(failures, failure)
+        if failure ~= nil then
+          table.insert(failures, failure)
+        end
+      end
+
+      if type(entry) == "table" and entry.friendlyItemId ~= nil and entry.itemId == nil then
+        table.insert(failures,
+          string.format("%s/%s: friendlyItemId without itemId is never read - add the hostile-side itemId",
+            category, tostring(spellId)))
       end
     end
   end

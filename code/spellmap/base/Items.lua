@@ -36,12 +36,12 @@ mod.spellMapBaseClasses = mod.spellMapBaseClasses or {}
 
 --[[
   Resolve the insignia itemId for the OPPOSING faction. Each PvP insignia
-  Use-effect spell is cast by two faction-mirrored items; CooldownWatch tracks
-  enemy cooldowns, so the insignia a tracked opponent presses is always the
-  opposing faction's item - showing the player's own variant would misrepresent
-  what the enemy actually used. Mirrors PVPWarn's insignia handling. Parameters
-  are named for the actual faction of the item they carry. Resolved once at
-  file load - faction never changes within a session.
+  Use-effect spell is cast by two faction-mirrored items; a tracked HOSTILE
+  caster always pressed the opposing faction's item - showing the player's own
+  variant would misrepresent what the enemy actually used. Mirrors PVPWarn's
+  insignia handling. Parameters are named for the actual faction of the item
+  they carry. Resolved once at file load - faction never changes within a
+  session.
 
   @param {number} allianceItemId
   @param {number} hordeItemId
@@ -54,6 +54,26 @@ local function OpposingInsigniaItemId(allianceItemId, hordeItemId)
   end
 
   return hordeItemId
+end
+
+--[[
+  Resolve the insignia itemId for the player's OWN faction - the friendly
+  counterpart of OpposingInsigniaItemId. A tracked FRIENDLY caster is a
+  teammate and pressed the player's own faction's trinket, so insignia entries
+  carry both resolutions and the icon picks by the queue entry's side
+  (friendlyItemId, see GuiHelper.GetIconId).
+
+  @param {number} allianceItemId
+  @param {number} hordeItemId
+
+  @return {number}
+]]--
+local function OwnInsigniaItemId(allianceItemId, hordeItemId)
+  if UnitFactionGroup(RGCW_CONSTANTS.UNIT_ID_PLAYER) == "Horde" then
+    return hordeItemId
+  end
+
+  return allianceItemId
 end
 
 --[[
@@ -164,15 +184,17 @@ mod.spellMapBaseClasses["items"] = {
     PvP insignia trinkets (Insignia of the Alliance / Horde). One Use-effect
     spell per class group, shared by both factions' items; the spell names
     are the real GetSpellInfo names and describe which effects each class's
-    insignia dispels. Icon resolves to the OPPOSING faction's item via
-    OpposingInsigniaItemId - tracked cooldowns belong to enemies, so the icon
-    depicts the trinket the enemy actually used.
+    insignia dispels. Icon resolution is caster-relative: a HOSTILE caster
+    pressed the opposing faction's item (itemId via OpposingInsigniaItemId),
+    a FRIENDLY caster the player's own faction's (friendlyItemId via
+    OwnInsigniaItemId) - GuiHelper.GetIconId picks by the queue entry's side.
   ]]--
   [5579] = {
     name = "Immune Root/Snare/Stun", -- warrior / hunter / shaman insignia
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
     itemId = OpposingInsigniaItemId(18854, 18834),
+    friendlyItemId = OwnInsigniaItemId(18854, 18834),
     active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
@@ -186,6 +208,7 @@ mod.spellMapBaseClasses["items"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
     itemId = OpposingInsigniaItemId(18858, 18852),
+    friendlyItemId = OwnInsigniaItemId(18858, 18852),
     active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
@@ -199,6 +222,7 @@ mod.spellMapBaseClasses["items"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
     itemId = OpposingInsigniaItemId(18859, 18850),
+    friendlyItemId = OwnInsigniaItemId(18859, 18850),
     active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
@@ -212,6 +236,7 @@ mod.spellMapBaseClasses["items"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
     itemId = OpposingInsigniaItemId(18862, 18851),
+    friendlyItemId = OwnInsigniaItemId(18862, 18851),
     active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
@@ -225,6 +250,7 @@ mod.spellMapBaseClasses["items"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
     itemId = OpposingInsigniaItemId(18863, 18853),
+    friendlyItemId = OwnInsigniaItemId(18863, 18853),
     active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",

@@ -44,8 +44,11 @@ describe("ConfigProfile", function()
   local MANAGED_FIELDS = {
     "lockTargetCooldownBar",
     "globalAssumeWorstCase",
+    "trackFriendlyCooldowns",
     "cooldownConfiguration",
     "cooldownOverrides",
+    "friendlyCooldownConfiguration",
+    "friendlyCooldownOverrides",
     "proximityCooldowns",
     "frames",
     "addonVersion",
@@ -71,8 +74,11 @@ describe("ConfigProfile", function()
 
     CooldownWatchConfiguration.lockTargetCooldownBar = true
     CooldownWatchConfiguration.globalAssumeWorstCase = false
+    CooldownWatchConfiguration.trackFriendlyCooldowns = true
     CooldownWatchConfiguration.cooldownConfiguration = { priest = { [10890] = true } }
     CooldownWatchConfiguration.cooldownOverrides = { priest = { [10890] = { worstCase = true, value = 20 } } }
+    CooldownWatchConfiguration.friendlyCooldownConfiguration = { priest = { [10890] = false } }
+    CooldownWatchConfiguration.friendlyCooldownOverrides = { priest = { [10890] = { value = 12 } } }
     CooldownWatchConfiguration.proximityCooldowns = {
       enabled = true, locked = true, scale = 1.5, maxDisplayedCooldowns = 5, hideLongCooldowns = false
     }
@@ -361,9 +367,13 @@ describe("ConfigProfile", function()
 
       assert.is_false(payload.lockTargetCooldownBar)
       assert.is_false(payload.globalAssumeWorstCase)
+      -- the fixture enables friendly tracking; the factory baseline keeps it off
+      assert.is_false(payload.trackFriendlyCooldowns)
       assert.same({}, payload.frames)
       assert.same(rgcw.profile.GetDefaultProfile(), payload.cooldownConfiguration)
       assert.same(rgcw.profile.GetDefaultCooldownOverrides(), payload.cooldownOverrides)
+      assert.same(rgcw.profile.GetDefaultProfile(), payload.friendlyCooldownConfiguration)
+      assert.same(rgcw.profile.GetDefaultCooldownOverrides(), payload.friendlyCooldownOverrides)
       -- the fixture's customized proximity block must not bleed into the baseline
       assert.is_false(payload.proximityCooldowns.enabled)
       assert.same(rgcw.configuration.GetDefaults().proximityCooldowns, payload.proximityCooldowns)

@@ -33,11 +33,14 @@ mod.petOwner = me
 me.tag = "PetOwner"
 
 --[[
-  Pet-cast cooldown attribution. Spells cast by an enemy player's pet (felhunter
+  Pet-cast cooldown attribution. Spells cast by a player's pet (felhunter
   Spell Lock) arrive in the combat log with the PET's guid as source, while the
   cooldown queue keys everything by the owning player's guid - pet guids change
   on every resummon, so the owner guid is the only stable key, and it is what
-  the player actually targets.
+  the player actually targets. The resolution layers are side-agnostic: while
+  friendly tracking is enabled, CombatLog feeds friendly summons and player
+  sightings through the same paths, and a parked cast keeps its side because
+  the friendly marker rides on the parked spellData itself.
 
   Owner resolution is layered, most authoritative first:
 
@@ -60,11 +63,12 @@ me.tag = "PetOwner"
 -- ownerGuid is nil while the mapping is name-grade (tooltip scan only)
 local petOwners = {}
 --[[
-  Directory of hostile players seen in the combat log, name -> guid. Fed by
-  every hostile player event (NotePlayer) so a tooltip-scanned owner name can be
-  promoted to a guid without the owner ever being targeted. Combat-log names
-  carry a "-Realm" suffix for cross-realm players while tooltip lines may not -
-  a mismatch just delays promotion until the pet is sighted.
+  Directory of players seen in the combat log, name -> guid. Fed by every
+  hostile player event - and friendly ones while friendly tracking is on
+  (NotePlayer) - so a tooltip-scanned owner name can be promoted to a guid
+  without the owner ever being targeted. Combat-log names carry a "-Realm"
+  suffix for cross-realm players while tooltip lines may not - a mismatch just
+  delays promotion until the pet is sighted.
 ]]--
 local playerGuidByName = {}
 -- pendingCooldowns[petGuid] = array of { category, spellData } parked casts
@@ -143,7 +147,7 @@ local function ParkPending(petGuid, category, spellData)
 end
 
 --[[
-  Record a hostile player seen in the combat log. First sight of a name promotes
+  Record a player seen in the combat log. First sight of a name promotes
   every name-grade pet mapping waiting on it and flushes the parked casts. Called
   on the combat-log hot path: repeat sightings return after two table reads.
 

@@ -660,6 +660,160 @@ describe("Configuration schema reconcile", function()
   end)
 end)
 
+--[[
+  Per-side (enemy/friendly) configuration: every per-spell accessor takes an
+  optional trailing friendly flag that routes it to the friendly twin store
+  (friendlyCooldownConfiguration / friendlyCooldownOverrides). The two sides
+  must never share state - tracking a spell for enemies and for friendlies are
+  independent decisions, and an override tuned for enemies must not rewrite
+  what a teammate's cooldown shows.
+]]--
+describe("Configuration per-side stores", function()
+  local configuration
+
+  before_each(function()
+    configuration = rgcw.configuration
+    -- SetupConfiguration never runs headless; both sides' stores start nil
+    CooldownWatchConfiguration.cooldownConfiguration = nil
+    CooldownWatchConfiguration.cooldownOverrides = nil
+    CooldownWatchConfiguration.friendlyCooldownConfiguration = nil
+    CooldownWatchConfiguration.friendlyCooldownOverrides = nil
+    CooldownWatchConfiguration.globalAssumeWorstCase = nil
+    CooldownWatchConfiguration.trackFriendlyCooldowns = nil
+  end)
+
+  after_each(function()
+    -- never leak friendly-side state into later spec files
+    CooldownWatchConfiguration.friendlyCooldownConfiguration = nil
+    CooldownWatchConfiguration.friendlyCooldownOverrides = nil
+    CooldownWatchConfiguration.trackFriendlyCooldowns = nil
+  end)
+
+  it("keeps the tracking state independent per side in both directions", function()
+    configuration.UpdateCooldownConfigurationState(false, "priest", 10890, true)
+
+    -- enemy side never configured: the catalog default still decides there
+    assert.is_true(configuration.GetCooldownConfigurationState("priest", 10890, true))
+    assert.is_false(configuration.GetCooldownConfigurationState("priest", 10890, true, true))
+
+    configuration.UpdateCooldownConfigurationState(false, "priest", 10890)
+    configuration.UpdateCooldownConfigurationState(true, "priest", 10890, true)
+
+    assert.is_false(configuration.GetCooldownConfigurationState("priest", 10890, true))
+    assert.is_true(configuration.GetCooldownConfigurationState("priest", 10890, false, true))
+  end)
+
+  it("applies the catalog default per side independently", function()
+    -- a spell only ever configured for enemies is still never-configured on the friendly side
+    configuration.UpdateCooldownConfigurationState(false, "priest", 10890)
+
+    assert.is_true(configuration.GetCooldownConfigurationState("priest", 10890, true, true))
+    assert.is_false(configuration.GetCooldownConfigurationState("priest", 10890, false, true))
+  end)
+
+  it("writes friendly tracking state into the friendly store, not the enemy one", function()
+    configuration.UpdateCooldownConfigurationState(true, "priest", 10890, true)
+
+    assert.is_true(CooldownWatchConfiguration.friendlyCooldownConfiguration["priest"][10890])
+    assert.is_nil(CooldownWatchConfiguration.cooldownConfiguration)
+  end)
+
+  it("keeps the worst-case toggle independent per side", function()
+    configuration.UpdateCooldownWorstCaseState(true, "paladin", 1022)
+
+    assert.is_true(configuration.GetCooldownWorstCaseOverride("paladin", 1022))
+    assert.is_nil(configuration.GetCooldownWorstCaseOverride("paladin", 1022, true))
+
+    configuration.UpdateCooldownWorstCaseState(false, "paladin", 1022, true)
+
+    assert.is_true(configuration.GetCooldownWorstCaseOverride("paladin", 1022))
+    assert.is_false(configuration.GetCooldownWorstCaseOverride("paladin", 1022, true))
+    assert.is_false(configuration.IsCooldownWorstCaseAssumed("paladin", 1022, true))
+  end)
+
+  it("keeps the manual override independent per side", function()
+    configuration.UpdateCooldownManualOverride(42, "paladin", 1022)
+    configuration.UpdateCooldownManualOverride(17, "paladin", 1022, true)
+
+    assert.equal(42, configuration.GetCooldownManualOverride("paladin", 1022))
+    assert.equal(17, configuration.GetCooldownManualOverride("paladin", 1022, true))
+
+    configuration.UpdateCooldownManualOverride(nil, "paladin", 1022, true)
+
+    assert.equal(42, configuration.GetCooldownManualOverride("paladin", 1022))
+    assert.is_nil(configuration.GetCooldownManualOverride("paladin", 1022, true))
+  end)
+
+  it("keeps the worst-case value independent per side", function()
+    -- a spell unknown to SpellMap has no base cooldown, isolating the store split
+    configuration.UpdateCooldownWorstCaseValue(42, "paladin", 999999)
+    configuration.UpdateCooldownWorstCaseValue(17, "paladin", 999999, true)
+
+    assert.equal(42, configuration.GetCooldownWorstCaseValue("paladin", 999999))
+    assert.equal(17, configuration.GetCooldownWorstCaseValue("paladin", 999999, true))
+  end)
+
+  it("holds the friendly-side worst-case value to the same below-base rule", function()
+    local category, spellId, spell = rgcw.spellMapHelper.GetSpellById(RGCW_CONSTANTS.EXAMPLE_COOLDOWN_SPELL_ID)
+
+    assert.is_nil(configuration.UpdateCooldownWorstCaseValue(spell.cooldown, category, spellId, true))
+    assert.equal(spell.cooldown - 1,
+      configuration.UpdateCooldownWorstCaseValue(spell.cooldown - 1, category, spellId, true))
+  end)
+
+  it("IsWorstCaseEffective folds the shared global default into each side's own toggle", function()
+    configuration.UpdateGlobalWorstCaseState(true)
+
+    -- both sides never configured: the single shared global applies to each
+    assert.is_true(configuration.IsWorstCaseEffective("paladin", 1022))
+    assert.is_true(configuration.IsWorstCaseEffective("paladin", 1022, true))
+
+    -- an explicit friendly-side opt-out wins there and only there
+    configuration.UpdateCooldownWorstCaseState(false, "paladin", 1022, true)
+
+    assert.is_true(configuration.IsWorstCaseEffective("paladin", 1022))
+    assert.is_false(configuration.IsWorstCaseEffective("paladin", 1022, true))
+  end)
+
+  it("GetDefaults ships both friendly stores with one empty bucket per category", function()
+    local defaults = configuration.GetDefaults()
+
+    for _, category in ipairs(rgcw.categories.GetCategories()) do
+      assert.same({}, defaults.friendlyCooldownConfiguration[category.categoryName])
+      assert.same({}, defaults.friendlyCooldownOverrides[category.categoryName])
+    end
+  end)
+
+  it("the reconcile backfills the friendly stores on an upgraded configuration", function()
+    -- an older saved shape carries only the enemy-side stores
+    local saved = configuration.ReconcileWithDefaults(
+      { cooldownConfiguration = { ["priest"] = { [10890] = false } } },
+      configuration.GetDefaults()
+    )
+
+    for _, category in ipairs(rgcw.categories.GetCategories()) do
+      assert.is_table(saved.friendlyCooldownConfiguration[category.categoryName])
+      assert.is_table(saved.friendlyCooldownOverrides[category.categoryName])
+    end
+
+    -- the enemy-side player data survives untouched
+    assert.is_false(saved.cooldownConfiguration["priest"][10890])
+    assert.is_false(saved.trackFriendlyCooldowns)
+  end)
+
+  it("IsTrackFriendlyCooldownsEnabled is false while the flag is nil - friendly tracking is opt-in", function()
+    assert.is_false(configuration.IsTrackFriendlyCooldownsEnabled())
+  end)
+
+  it("UpdateTrackFriendlyCooldownsState round-trips the flag in both directions", function()
+    configuration.UpdateTrackFriendlyCooldownsState(true)
+    assert.is_true(configuration.IsTrackFriendlyCooldownsEnabled())
+
+    configuration.UpdateTrackFriendlyCooldownsState(false)
+    assert.is_false(configuration.IsTrackFriendlyCooldownsEnabled())
+  end)
+end)
+
 describe("Configuration proximity cooldowns", function()
   local configuration
 

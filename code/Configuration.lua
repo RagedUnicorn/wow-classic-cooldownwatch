@@ -102,10 +102,33 @@ CooldownWatchConfiguration = {
   ]]--
   ["cooldownOverrides"] = nil,
   --[[
+    FRIENDLY-side twin of cooldownConfiguration. Tracking a spell for enemies
+    and for friendly casters are independent decisions, so the friendly side
+    keeps its own per-spell state instead of sharing the enemy store. Seeded by
+    SetupConfiguration like its enemy twin. Declared here for visibility only.
+  ]]--
+  ["friendlyCooldownConfiguration"] = nil,
+  --[[
+    FRIENDLY-side twin of cooldownOverrides (same per-spell entry shape). Split
+    deliberately: worst case models the ENEMY's assumed gear/talents, and a
+    manual override tuned for enemies should not silently rewrite what a known
+    teammate's cooldown shows. Seeded by SetupConfiguration like its enemy twin.
+    Declared here for visibility only.
+  ]]--
+  ["friendlyCooldownOverrides"] = nil,
+  --[[
+    Whether cooldowns cast by FRIENDLY players (and their pets) are tracked at
+    all - the master switch in front of the per-spell friendly-side state.
+    Opt-in: enemy tracking is the addon's core job, friendly tracking an extra.
+  ]]--
+  ["trackFriendlyCooldowns"] = false,
+  --[[
     Global default for the worst-case cooldown assumption. When enabled, every
     spell with a cooldownWorstCase value resolves to it unless the player set a
     per-spell override — the per-spell toggle wins in both directions
-    (see CooldownQueue.ResolveCooldown).
+    (see CooldownQueue.ResolveCooldown). Deliberately a single global shared by
+    both caster sides - per-side globals are not worth their surface until
+    friendly tracking proves the shared default noisy.
   ]]--
   ["globalAssumeWorstCase"] = false,
   --[[
@@ -165,6 +188,9 @@ function me.GetDefaults()
     ["lockTargetCooldownBar"] = false,
     ["cooldownConfiguration"] = mod.profile.GetDefaultProfile(),
     ["cooldownOverrides"] = mod.profile.GetDefaultCooldownOverrides(),
+    ["friendlyCooldownConfiguration"] = mod.profile.GetDefaultProfile(),
+    ["friendlyCooldownOverrides"] = mod.profile.GetDefaultCooldownOverrides(),
+    ["trackFriendlyCooldowns"] = false,
     ["globalAssumeWorstCase"] = false,
     ["frames"] = {},
     ["proximityCooldowns"] = GetProximityCooldownsDefaults(),
@@ -377,15 +403,57 @@ function me.GetUserPlacedFramePosition(frameName)
 end
 
 --[[
+  Every per-spell accessor below takes an optional trailing `friendly` flag
+  that routes the read or write to the FRIENDLY-side twin store instead of the
+  enemy store. Omitting it (every historical call site) keeps the enemy-side
+  behavior bit-for-bit; the two sides never share state, so a spell's tracking
+  decision and override values are fully independent per side. The two helpers
+  are the single place the side -> store-field mapping lives.
+
+  @param {boolean} friendly
+    Optional. true routes to the friendly-side store
+
+  @return {string}
+    The CooldownWatchConfiguration field name of the selected store
+]]--
+local function TrackingStoreField(friendly)
+  if friendly then
+    return "friendlyCooldownConfiguration"
+  end
+
+  return "cooldownConfiguration"
+end
+
+local function OverridesStoreField(friendly)
+  if friendly then
+    return "friendlyCooldownOverrides"
+  end
+
+  return "cooldownOverrides"
+end
+
+--[[
   Update the tracking state of a cooldown spell for a certain category
 
   @param {boolean} enabled
     Whether the configuration should be enabled or disabled
   @param {number} categoryName
   @param {number} spellId
+  @param {boolean} friendly
+    Optional. true writes the FRIENDLY-side state (see TrackingStoreField)
 ]]--
-function me.UpdateCooldownConfigurationState(enabled, categoryName, spellId)
-  local config = CooldownWatchConfiguration.cooldownConfiguration
+function me.UpdateCooldownConfigurationState(enabled, categoryName, spellId, friendly)
+  local storeField = TrackingStoreField(friendly)
+
+  --[[
+    Lazily create the store: it may be nil when SetupConfiguration never ran
+    (headless test harness)
+  ]]--
+  if CooldownWatchConfiguration[storeField] == nil then
+    CooldownWatchConfiguration[storeField] = {}
+  end
+
+  local config = CooldownWatchConfiguration[storeField]
 
   if config[categoryName] == nil then
     config[categoryName] = {}
@@ -393,10 +461,10 @@ function me.UpdateCooldownConfigurationState(enabled, categoryName, spellId)
 
   if enabled then
     config[categoryName][spellId] = true
-    mod.logger.LogDebug(me.tag, "Enabled cooldown: " .. categoryName .. " - " .. spellId)
+    mod.logger.LogDebug(me.tag, "Enabled cooldown (" .. storeField .. "): " .. categoryName .. " - " .. spellId)
   else
     config[categoryName][spellId] = false
-    mod.logger.LogDebug(me.tag, "Disabled cooldown: " .. categoryName .. " - " .. spellId)
+    mod.logger.LogDebug(me.tag, "Disabled cooldown (" .. storeField .. "): " .. categoryName .. " - " .. spellId)
   end
 end
 
@@ -413,6 +481,10 @@ end
     Optional. The spell's catalog `active` flag - the tracked state that
     applies while the player never configured the spell. Omitting it keeps
     the pure config read (never-configured resolves to false).
+  @param {boolean} friendly
+    Optional. true reads the FRIENDLY-side state (see TrackingStoreField).
+    The catalog default applies per side independently - a spell the player
+    only ever configured for enemies is still never-configured here.
 
   @return {boolean}
     true  - If the cooldown is tracked (enabled explicitly, or never
@@ -420,8 +492,8 @@ end
     false - Otherwise (disabled explicitly, or never configured without a
             true defaultState)
 ]]--
-function me.GetCooldownConfigurationState(categoryName, spellId, defaultState)
-  local config = CooldownWatchConfiguration.cooldownConfiguration
+function me.GetCooldownConfigurationState(categoryName, spellId, defaultState, friendly)
+  local config = CooldownWatchConfiguration[TrackingStoreField(friendly)]
   local categoryConfig = config and config[categoryName]
   local state = categoryConfig and categoryConfig[spellId]
 
@@ -440,18 +512,22 @@ end
     Whether the worst-case cooldown should be assumed or not
   @param {string} categoryName
   @param {number} spellId
+  @param {boolean} friendly
+    Optional. true writes the FRIENDLY-side toggle (see OverridesStoreField)
 ]]--
-function me.UpdateCooldownWorstCaseState(assumed, categoryName, spellId)
+function me.UpdateCooldownWorstCaseState(assumed, categoryName, spellId, friendly)
+  local storeField = OverridesStoreField(friendly)
+
   --[[
-    Lazily create the table chain: cooldownOverrides itself may be nil when
+    Lazily create the table chain: the store itself may be nil when
     SetupConfiguration never ran (headless test harness), and the per-spell
     entry is table-valued so future override fields survive a toggle.
   ]]--
-  if CooldownWatchConfiguration.cooldownOverrides == nil then
-    CooldownWatchConfiguration.cooldownOverrides = {}
+  if CooldownWatchConfiguration[storeField] == nil then
+    CooldownWatchConfiguration[storeField] = {}
   end
 
-  local overrides = CooldownWatchConfiguration.cooldownOverrides
+  local overrides = CooldownWatchConfiguration[storeField]
 
   if overrides[categoryName] == nil then
     overrides[categoryName] = {}
@@ -463,10 +539,12 @@ function me.UpdateCooldownWorstCaseState(assumed, categoryName, spellId)
 
   if assumed then
     overrides[categoryName][spellId].worstCase = true
-    mod.logger.LogDebug(me.tag, "Enabled worst-case cooldown: " .. categoryName .. " - " .. spellId)
+    mod.logger.LogDebug(me.tag, "Enabled worst-case cooldown (" .. storeField .. "): "
+      .. categoryName .. " - " .. spellId)
   else
     overrides[categoryName][spellId].worstCase = false
-    mod.logger.LogDebug(me.tag, "Disabled worst-case cooldown: " .. categoryName .. " - " .. spellId)
+    mod.logger.LogDebug(me.tag, "Disabled worst-case cooldown (" .. storeField .. "): "
+      .. categoryName .. " - " .. spellId)
   end
 end
 
@@ -478,14 +556,16 @@ end
 
   @param {string} categoryName
   @param {number} spellId
+  @param {boolean} friendly
+    Optional. true reads the FRIENDLY-side toggle (see OverridesStoreField)
 
   @return {boolean | nil}
     true  - The player explicitly opted into the worst-case cooldown
     false - The player explicitly opted out
     nil   - Never configured; the global default applies
 ]]--
-function me.GetCooldownWorstCaseOverride(categoryName, spellId)
-  local overrides = CooldownWatchConfiguration.cooldownOverrides
+function me.GetCooldownWorstCaseOverride(categoryName, spellId, friendly)
+  local overrides = CooldownWatchConfiguration[OverridesStoreField(friendly)]
 
   if overrides == nil or overrides[categoryName] == nil or overrides[categoryName][spellId] == nil then
     return nil
@@ -500,13 +580,15 @@ end
 
   @param {string} categoryName
   @param {number} spellId
+  @param {boolean} friendly
+    Optional. true reads the FRIENDLY-side toggle
 
   @return {boolean}
     true  - If the worst-case cooldown should be assumed
     false - Otherwise (disabled, or never configured)
 ]]--
-function me.IsCooldownWorstCaseAssumed(categoryName, spellId)
-  return me.GetCooldownWorstCaseOverride(categoryName, spellId) == true
+function me.IsCooldownWorstCaseAssumed(categoryName, spellId, friendly)
+  return me.GetCooldownWorstCaseOverride(categoryName, spellId, friendly) == true
 end
 
 --[[
@@ -526,11 +608,14 @@ end
 
   @param {string} categoryName
   @param {number} spellId
+  @param {boolean} friendly
+    Optional. true resolves against the FRIENDLY-side toggle. The global
+    default is deliberately shared by both sides (see globalAssumeWorstCase)
 
   @return {boolean}
 ]]--
-function me.IsWorstCaseEffective(categoryName, spellId)
-  local override = me.GetCooldownWorstCaseOverride(categoryName, spellId)
+function me.IsWorstCaseEffective(categoryName, spellId, friendly)
+  local override = me.GetCooldownWorstCaseOverride(categoryName, spellId, friendly)
 
   if override ~= nil then
     return override
@@ -584,18 +669,22 @@ end
     The override in seconds, or nil to clear it
   @param {string} categoryName
   @param {number} spellId
+  @param {boolean} friendly
+    Optional. true writes the FRIENDLY-side store (see OverridesStoreField)
 
   @return {number | nil}
     The value that was stored — callers display this instead of the raw input.
     nil when the override was cleared or rejected.
 ]]--
-local function UpdateOverrideValue(fieldName, value, categoryName, spellId)
-  local overrides = CooldownWatchConfiguration.cooldownOverrides
+local function UpdateOverrideValue(fieldName, value, categoryName, spellId, friendly)
+  local storeField = OverridesStoreField(friendly)
+  local overrides = CooldownWatchConfiguration[storeField]
 
   if value == nil then
     if overrides and overrides[categoryName] and overrides[categoryName][spellId] then
       overrides[categoryName][spellId][fieldName] = nil
-      mod.logger.LogDebug(me.tag, "Cleared " .. fieldName .. " override: " .. categoryName .. " - " .. spellId)
+      mod.logger.LogDebug(me.tag, "Cleared " .. fieldName .. " override (" .. storeField .. "): "
+        .. categoryName .. " - " .. spellId)
     end
 
     return nil
@@ -609,13 +698,13 @@ local function UpdateOverrideValue(fieldName, value, categoryName, spellId)
   end
 
   --[[
-    Lazily create the table chain: cooldownOverrides itself may be nil when
+    Lazily create the table chain: the store itself may be nil when
     SetupConfiguration never ran (headless test harness), and the per-spell
     entry is table-valued so the worst-case toggle survives a value edit.
   ]]--
   if overrides == nil then
     overrides = {}
-    CooldownWatchConfiguration.cooldownOverrides = overrides
+    CooldownWatchConfiguration[storeField] = overrides
   end
 
   if overrides[categoryName] == nil then
@@ -627,7 +716,7 @@ local function UpdateOverrideValue(fieldName, value, categoryName, spellId)
   end
 
   overrides[categoryName][spellId][fieldName] = value
-  mod.logger.LogDebug(me.tag, "Set " .. fieldName .. " override: "
+  mod.logger.LogDebug(me.tag, "Set " .. fieldName .. " override (" .. storeField .. "): "
     .. categoryName .. " - " .. spellId .. " - " .. value)
 
   return value
@@ -639,11 +728,13 @@ end
   @param {string} fieldName
   @param {string} categoryName
   @param {number} spellId
+  @param {boolean} friendly
+    Optional. true reads the FRIENDLY-side store (see OverridesStoreField)
 
   @return {number | nil}
 ]]--
-local function GetOverrideValue(fieldName, categoryName, spellId)
-  local overrides = CooldownWatchConfiguration.cooldownOverrides
+local function GetOverrideValue(fieldName, categoryName, spellId, friendly)
+  local overrides = CooldownWatchConfiguration[OverridesStoreField(friendly)]
 
   if overrides == nil or overrides[categoryName] == nil or overrides[categoryName][spellId] == nil then
     return nil
@@ -661,12 +752,14 @@ end
     The override in seconds, or nil to clear it
   @param {string} categoryName
   @param {number} spellId
+  @param {boolean} friendly
+    Optional. true writes the FRIENDLY-side override
 
   @return {number | nil}
     The value that was stored, nil when it was cleared or rejected
 ]]--
-function me.UpdateCooldownManualOverride(value, categoryName, spellId)
-  return UpdateOverrideValue("value", value, categoryName, spellId)
+function me.UpdateCooldownManualOverride(value, categoryName, spellId, friendly)
+  return UpdateOverrideValue("value", value, categoryName, spellId, friendly)
 end
 
 --[[
@@ -674,13 +767,15 @@ end
 
   @param {string} categoryName
   @param {number} spellId
+  @param {boolean} friendly
+    Optional. true reads the FRIENDLY-side override
 
   @return {number | nil}
     number - The override in seconds
     nil    - Never configured; the worst-case resolution applies
 ]]--
-function me.GetCooldownManualOverride(categoryName, spellId)
-  return GetOverrideValue("value", categoryName, spellId)
+function me.GetCooldownManualOverride(categoryName, spellId, friendly)
+  return GetOverrideValue("value", categoryName, spellId, friendly)
 end
 
 --[[
@@ -709,11 +804,15 @@ end
     The worst-case cooldown in seconds, or nil to fall back to the catalog
   @param {string} categoryName
   @param {number} spellId
+  @param {boolean} friendly
+    Optional. true writes the FRIENDLY-side value. The below-base-cooldown
+    rule is the same on both sides - it is a property of the catalog entry,
+    not of the store the value lands in
 
   @return {number | nil}
     The value that was stored, nil when it was cleared or rejected
 ]]--
-function me.UpdateCooldownWorstCaseValue(value, categoryName, spellId)
+function me.UpdateCooldownWorstCaseValue(value, categoryName, spellId, friendly)
   -- type-guarded: a non-number is not ordered against a number in Lua, it raises
   if type(value) == "number" then
     local _, _, spell = mod.spellMapHelper.GetSpellById(spellId)
@@ -727,7 +826,7 @@ function me.UpdateCooldownWorstCaseValue(value, categoryName, spellId)
     end
   end
 
-  return UpdateOverrideValue("worstCaseValue", value, categoryName, spellId)
+  return UpdateOverrideValue("worstCaseValue", value, categoryName, spellId, friendly)
 end
 
 --[[
@@ -735,13 +834,15 @@ end
 
   @param {string} categoryName
   @param {number} spellId
+  @param {boolean} friendly
+    Optional. true reads the FRIENDLY-side value
 
   @return {number | nil}
     number - The player's worst-case value in seconds
     nil    - Never configured; the catalog's cooldownWorstCase applies
 ]]--
-function me.GetCooldownWorstCaseValue(categoryName, spellId)
-  return GetOverrideValue("worstCaseValue", categoryName, spellId)
+function me.GetCooldownWorstCaseValue(categoryName, spellId, friendly)
+  return GetOverrideValue("worstCaseValue", categoryName, spellId, friendly)
 end
 
 --[[
@@ -768,6 +869,34 @@ end
 ]]--
 function me.IsGlobalWorstCaseAssumed()
   return CooldownWatchConfiguration.globalAssumeWorstCase == true
+end
+
+--[[
+  Update whether cooldowns cast by FRIENDLY players (and their pets) are
+  tracked at all. The master switch in front of the per-spell friendly-side
+  state - with it off, CombatLog never enters the friendly branch.
+
+  @param {boolean} enabled
+    Whether friendly cooldown tracking should be enabled
+]]--
+function me.UpdateTrackFriendlyCooldownsState(enabled)
+  if enabled then
+    CooldownWatchConfiguration.trackFriendlyCooldowns = true
+    mod.logger.LogDebug(me.tag, "Enabled friendly cooldown tracking")
+  else
+    CooldownWatchConfiguration.trackFriendlyCooldowns = false
+    mod.logger.LogDebug(me.tag, "Disabled friendly cooldown tracking")
+  end
+end
+
+--[[
+  @return {boolean}
+    true  - If cooldowns of friendly players are tracked
+    false - Otherwise (disabled, or never configured - friendly tracking is
+            opt-in)
+]]--
+function me.IsTrackFriendlyCooldownsEnabled()
+  return CooldownWatchConfiguration.trackFriendlyCooldowns == true
 end
 
 --[[

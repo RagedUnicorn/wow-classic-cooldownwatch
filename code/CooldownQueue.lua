@@ -67,6 +67,11 @@ me.tag = "CooldownQueue"
       ["itemId"] = itemId,
         - {number} Optional, item-triggered cooldowns only. The item whose "Use" effect
         casts the tracked spell; the ui resolves the icon through it (GuiHelper.GetIconId)
+      ["friendly"] = friendly,
+        - {boolean} Optional, stamped by CombatLog on casts of FRIENDLY casters while
+        friendly tracking is enabled. Hostile entries never carry the field. Selects
+        which per-side configuration ResolveCooldown resolves against and lets display
+        surfaces separate the sides; both sides share one caster-keyed queue
       ["active"] = boolean
         - {boolean} The catalog's intended default tracked state. Not read on
         the queue path - the enabled authority is the player's
@@ -103,13 +108,19 @@ local cooldownQueue = {}
   Resolution happens once per enqueue: toggling a setting off leaves in-flight
   entries untouched and takes effect on the next cast.
 
+  The entry's friendly marker picks the store side: a friendly cast resolves
+  against the friendly-side overrides only, so an override tuned for enemies
+  never rewrites what a teammate's cooldown shows (and vice versa). The
+  resolution rules themselves are identical per side.
+
   @param {string} category
     The category the spell belongs to
   @param {table} spellData
     A spellData with all its relevant information
 ]]--
 function me.ResolveCooldown(category, spellData)
-  local manualCooldown = mod.configuration.GetCooldownManualOverride(category, spellData.spellId)
+  local friendly = spellData.friendly == true
+  local manualCooldown = mod.configuration.GetCooldownManualOverride(category, spellData.spellId, friendly)
 
   if manualCooldown ~= nil then
     spellData.cooldown = manualCooldown
@@ -121,10 +132,10 @@ function me.ResolveCooldown(category, spellData)
   if spellData.cooldownWorstCase == nil then return end
 
   spellData.cooldownWorstCase =
-    mod.configuration.GetCooldownWorstCaseValue(category, spellData.spellId)
+    mod.configuration.GetCooldownWorstCaseValue(category, spellData.spellId, friendly)
     or spellData.cooldownWorstCase
 
-  if not mod.configuration.IsWorstCaseEffective(category, spellData.spellId) then return end
+  if not mod.configuration.IsWorstCaseEffective(category, spellData.spellId, friendly) then return end
 
   spellData.cooldown = spellData.cooldownWorstCase
   spellData.cooldownWorstCase = nil

@@ -64,8 +64,11 @@ local ADDON_TAG = "CooldownWatch"
 me.PROFILE_FIELDS = {
   "lockTargetCooldownBar",
   "globalAssumeWorstCase",
+  "trackFriendlyCooldowns",
   "cooldownConfiguration",
   "cooldownOverrides",
+  "friendlyCooldownConfiguration",
+  "friendlyCooldownOverrides",
   "proximityCooldowns",
   "frames"
 }
