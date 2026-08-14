@@ -48,8 +48,6 @@ local function GetProximityCooldownsDefaults()
   return {
     -- whether the proximity cooldown window renders at all - opt-in
     ["enabled"] = false,
-    -- whether the window is locked from moving
-    ["locked"] = false,
     -- render scale of the window
     ["scale"] = 1.0,
     -- upper bound of cooldowns the window displays at once
@@ -426,6 +424,18 @@ function me.SaveUserPlacedFramePosition(frameName, point, relativeTo, relativePo
 
   mod.logger.LogDebug(me.tag, "Saved frame position for - " .. frameName
     .. " - new pos: posX " .. posX .. " posY " .. posY .. " point " .. point)
+end
+
+--[[
+  Remove the saved position of a frame. The next position update falls back to
+  the frame's default position - the position counterpart of a settings reset.
+
+  @param {string} frameName
+]]--
+function me.ClearUserPlacedFramePosition(frameName)
+  CooldownWatchConfiguration.frames[frameName] = nil
+
+  mod.logger.LogDebug(me.tag, "Cleared saved frame position for - " .. frameName)
 end
 
 --[[
@@ -1060,6 +1070,26 @@ local function UpdateProximityCooldownField(fieldName, value, friendly)
 end
 
 --[[
+  Reset every option of a proximity cooldowns block to its shipped defaults.
+  Copies the side's defaults over the block field by field, so the defaults
+  builder stays the single value source and no default is restated here. The
+  window's saved position is not part of the block - a caller resetting
+  "everything" clears it separately via ClearUserPlacedFramePosition.
+
+  @param {boolean} friendly
+    Optional. true resets the friendly window's block
+]]--
+function me.ResetProximityCooldowns(friendly)
+  local proximityCooldowns = GetProximityCooldowns(friendly)
+
+  for fieldName, value in pairs(GetProximityDefaultsForSide(friendly)) do
+    proximityCooldowns[fieldName] = value
+  end
+
+  mod.logger.LogDebug(me.tag, "Reset " .. ProximityStoreField(friendly) .. " to its shipped defaults")
+end
+
+--[[
   Update whether the proximity cooldown window is enabled at all
 
   @param {boolean} enabled
@@ -1080,29 +1110,6 @@ end
 ]]--
 function me.IsProximityCooldownsEnabled(friendly)
   return GetProximityCooldownField("enabled", friendly) == true
-end
-
---[[
-  Update whether the proximity cooldown window is locked from moving
-
-  @param {boolean} locked
-  @param {boolean} friendly
-    Optional. true writes the friendly window's option
-]]--
-function me.UpdateProximityCooldownsLocked(locked, friendly)
-  UpdateProximityCooldownField("locked", locked == true, friendly)
-end
-
---[[
-  @param {boolean} friendly
-    Optional. true reads the friendly window's option
-
-  @return {boolean}
-    true  - If the proximity cooldown window is locked
-    false - If the proximity cooldown window is not locked
-]]--
-function me.IsProximityCooldownsLocked(friendly)
-  return GetProximityCooldownField("locked", friendly) == true
 end
 
 --[[

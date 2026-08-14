@@ -70,10 +70,14 @@ describe("ProximityCooldownBar render policy", function()
       StartTickerProximityCooldownBar = function()
         rgcw.ticker.startCalls = rgcw.ticker.startCalls + 1
       end,
+      -- entering preview mode stops the live ticker - a no-op suffices here
+      StopTickerProximityCooldownBar = function() end,
     }
   end)
 
   after_each(function()
+    -- the preview flag lives on the module-level instance - never leak it across tests
+    proximityCooldownBar.HidePreview()
     rgcw.ticker = originalTicker
     CooldownWatchConfiguration.proximityCooldowns = nil
     rgcw.cooldownQueue.ClearCooldownQueue()
@@ -167,6 +171,29 @@ describe("ProximityCooldownBar render policy", function()
       proximityCooldownBar.WakeRenderTicker()
 
       assert.equal(0, rgcw.ticker.startCalls)
+    end)
+
+    it("never starts the ticker while preview mode owns the rows - live enqueues keep arriving", function()
+      rgcw.configuration.UpdateProximityCooldownsEnabled(true)
+      enqueueOne()
+      proximityCooldownBar.ShowPreview()
+
+      proximityCooldownBar.WakeRenderTicker()
+
+      assert.is_true(proximityCooldownBar.IsPreviewActive())
+      assert.equal(0, rgcw.ticker.startCalls)
+    end)
+
+    it("wakes again once preview mode handed the rows back", function()
+      rgcw.configuration.UpdateProximityCooldownsEnabled(true)
+      enqueueOne()
+      proximityCooldownBar.ShowPreview()
+      proximityCooldownBar.HidePreview()
+
+      proximityCooldownBar.WakeRenderTicker()
+
+      assert.is_false(proximityCooldownBar.IsPreviewActive())
+      assert.equal(1, rgcw.ticker.startCalls)
     end)
   end)
 end)

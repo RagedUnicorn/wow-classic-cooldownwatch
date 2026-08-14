@@ -63,7 +63,6 @@ me.tag = "FriendlyProximityCooldownBar"
 local instance = mod.proximityWindow.CreateInstance({
   frameName = RGCW_CONSTANTS.ELEMENT_FRIENDLY_PROXIMITY_COOLDOWN_WINDOW_FRAME,
   IsEnabled = function() return mod.configuration.IsProximityCooldownsEnabled(true) end,
-  IsLocked = function() return mod.configuration.IsProximityCooldownsLocked(true) end,
   GetScale = function() return mod.configuration.GetProximityCooldownsScale(true) end,
   GetMaxDisplayed = function() return mod.configuration.GetProximityCooldownsMaxDisplayed(true) end,
   IsHideLongEnabled = function() return mod.configuration.IsProximityCooldownsHideLongEnabled(true) end,
@@ -85,3 +84,9 @@ me.FriendlyProximityCooldownBarUiUpdate = instance.UiUpdate
 me.WakeRenderTicker = instance.WakeRenderTicker
 me.FriendlyProximityCooldownBarOnUpdate = instance.OnUpdate
 me.IsRenderableCooldown = instance.IsRenderableCooldown
+-- preview seam consumed by the test/place mode (gui/FriendlyProximityCooldownBarPreview.lua)
+me.IsPreviewActive = instance.IsPreviewActive
+me.ShowPreview = instance.ShowPreview
+me.RenderPreviewEntries = instance.RenderPreviewEntries
+me.HidePreview = instance.HidePreview
+me.GetWindowFrame = instance.GetWindowFrame

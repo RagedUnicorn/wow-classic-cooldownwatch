@@ -34,10 +34,10 @@
     friendly target already in the crosshairs appears (or vanishes) at once
     instead of waiting for the next target change
   - the window controls invoke FriendlyProximityCooldownBarUiUpdate, which
-    owns the live application (show/hide, lock backdrop, SetScale) and
-    re-wakes the render ticker when a filter change makes queued cooldowns
-    renderable again - the max-displayed, hide-long and scope options are
-    additionally re-read by every render pass either way
+    owns the live application (show/hide, SetScale) and re-wakes the render
+    ticker when a filter change makes queued cooldowns renderable again - the
+    max-displayed, hide-long and scope options are additionally re-read by
+    every render pass either way
 ]]--
 
 local mod = rgcw
@@ -64,10 +64,6 @@ local options = {
     label = rgcw.L["option_enable_friendly_proximity_cooldown_window"],
     description = rgcw.L["option_enable_friendly_proximity_cooldown_window_tooltip"]
   },
-  [RGCW_CONSTANTS.ELEMENT_FRIENDLY_OPT_WINDOW_LOCK_FRIENDLY_PROXIMITY_COOLDOWN_WINDOW] = {
-    label = rgcw.L["window_lock_friendly_proximity_cooldown_window"],
-    description = rgcw.L["window_lock_friendly_proximity_cooldown_window_tooltip"]
-  },
   [RGCW_CONSTANTS.ELEMENT_FRIENDLY_OPT_HIDE_LONG_FRIENDLY_PROXIMITY_COOLDOWNS] = {
     label = rgcw.L["option_hide_long_friendly_proximity_cooldowns"],
     description = string.format(
@@ -79,6 +75,28 @@ local options = {
 
 -- track whether the menu was already built
 local builtMenu = false
+--[[
+  References to the panel's option controls, kept for two consumers: the
+  defaults reset re-syncs every control from the store without navigating away
+  (checkboxes re-read through their OnShow callbacks, sliders through
+  UpdateSliderValue, the scope dropdown through GenerateMenu), and the
+  two-level gate enables/disables the sub-options (see UpdateSubOptionsState).
+  The checkBoxes list drives the reset re-sync; the named checkbox fields are
+  the same frames again, spelled out because the gate treats each level
+  differently - trackingCheckBox is the master the gate never touches.
+]]--
+local optionControls = {
+  checkBoxes = {},
+  trackingCheckBox = nil,
+  showTargetCheckBox = nil,
+  windowEnableCheckBox = nil,
+  hideLongCheckBox = nil,
+  scopeDropdown = nil,
+  scaleSlider = nil,
+  maxDisplayedSlider = nil,
+  placeModeButton = nil,
+  defaultsButton = nil
+}
 
 --[[
   Build the ui for the friendly cooldowns menu
@@ -95,7 +113,7 @@ function me.BuildUi(frame)
     rgcw.L["friendly_title"]
   )
 
-  me.BuildCheckButtonOption(
+  optionControls.trackingCheckBox = me.BuildCheckButtonOption(
     frame,
     RGCW_CONSTANTS.ELEMENT_FRIENDLY_OPT_TRACK_FRIENDLY_COOLDOWNS,
     20,
@@ -104,7 +122,7 @@ function me.BuildUi(frame)
     me.TrackFriendlyCooldownsOnClick
   )
 
-  me.BuildCheckButtonOption(
+  optionControls.showTargetCheckBox = me.BuildCheckButtonOption(
     frame,
     RGCW_CONSTANTS.ELEMENT_FRIENDLY_OPT_SHOW_FRIENDLY_TARGET_COOLDOWNS,
     20,
@@ -113,7 +131,7 @@ function me.BuildUi(frame)
     me.ShowFriendlyTargetCooldownsOnClick
   )
 
-  me.BuildCheckButtonOption(
+  optionControls.windowEnableCheckBox = me.BuildCheckButtonOption(
     frame,
     RGCW_CONSTANTS.ELEMENT_FRIENDLY_OPT_ENABLE_FRIENDLY_PROXIMITY_COOLDOWN_WINDOW,
     20,
@@ -122,38 +140,29 @@ function me.BuildUi(frame)
     me.EnableFriendlyProximityWindowOnClick
   )
 
-  me.BuildCheckButtonOption(
-    frame,
-    RGCW_CONSTANTS.ELEMENT_FRIENDLY_OPT_WINDOW_LOCK_FRIENDLY_PROXIMITY_COOLDOWN_WINDOW,
-    20,
-    -208,
-    me.LockWindowFriendlyProximityCooldownWindowOnShow,
-    me.LockWindowFriendlyProximityCooldownWindowOnClick
-  )
-
-  me.BuildCheckButtonOption(
+  optionControls.hideLongCheckBox = me.BuildCheckButtonOption(
     frame,
     RGCW_CONSTANTS.ELEMENT_FRIENDLY_OPT_HIDE_LONG_FRIENDLY_PROXIMITY_COOLDOWNS,
     20,
-    -260,
+    -208,
     me.HideLongCooldownsOnShow,
     me.HideLongCooldownsOnClick
   )
 
-  mod.guiHelper.CreateSettingsDropdown(
+  optionControls.scopeDropdown = mod.guiHelper.CreateSettingsDropdown(
     RGCW_CONSTANTS.ELEMENT_FRIENDLY_PROXIMITY_SCOPE_DROPDOWN,
     frame,
-    {"TOPLEFT", 20, -350},
+    {"TOPLEFT", 20, -298},
     RGCW_CONSTANTS.OPTION_DROPDOWN_WIDTH,
     rgcw.L["friendly_proximity_scope_title"],
     rgcw.L["friendly_proximity_scope_tooltip"],
     me.BuildScopeRadios
   )
 
-  mod.guiHelper.CreateSlider(
+  optionControls.scaleSlider = mod.guiHelper.CreateSlider(
     RGCW_CONSTANTS.ELEMENT_FRIENDLY_PROXIMITY_SCALE_SLIDER,
     frame,
-    {"TOPLEFT", 20, -424},
+    {"TOPLEFT", 20, -372},
     {
       minValue = RGCW_CONSTANTS.PROXIMITY_SCALE_SLIDER_MIN,
       maxValue = RGCW_CONSTANTS.PROXIMITY_SCALE_SLIDER_MAX,
@@ -166,10 +175,10 @@ function me.BuildUi(frame)
     me.FormatScaleValue
   )
 
-  mod.guiHelper.CreateSlider(
+  optionControls.maxDisplayedSlider = mod.guiHelper.CreateSlider(
     RGCW_CONSTANTS.ELEMENT_FRIENDLY_PROXIMITY_MAX_DISPLAYED_SLIDER,
     frame,
-    {"TOPLEFT", 20, -500},
+    {"TOPLEFT", 20, -448},
     {
       minValue = RGCW_CONSTANTS.PROXIMITY_MAX_DISPLAYED_SLIDER_MIN,
       -- the render layer's fixed row pool is the ceiling; a larger range would be dead travel
@@ -182,7 +191,113 @@ function me.BuildUi(frame)
     me.MaxDisplayedSliderOnValueChanged
   )
 
+  optionControls.placeModeButton = mod.guiHelper.CreateTextButton(
+    RGCW_CONSTANTS.ELEMENT_FRIENDLY_OPT_PLACE_MODE_BUTTON,
+    frame,
+    {"TOPLEFT", 20, -553},
+    me.PlaceModeButtonOnClick,
+    rgcw.L["friendly_place_mode_button"]
+  )
+
+  optionControls.defaultsButton = mod.guiHelper.CreateTextButton(
+    RGCW_CONSTANTS.ELEMENT_FRIENDLY_OPT_DEFAULTS_BUTTON,
+    frame,
+    {"LEFT", optionControls.placeModeButton, "RIGHT", 10, 0},
+    me.DefaultsButtonOnClick,
+    rgcw.L["friendly_defaults_button"]
+  )
+
   builtMenu = true
+
+  -- every control exists now - apply the master-flag gate to the initial state
+  me.UpdateSubOptionsState()
+end
+
+--[[
+  Enable or disable the sub-options on a two-level gate. Level one is the
+  tracking master flag: with tracking off nothing on the panel has any effect
+  - the queue holds no friendly entries - so everything below the master is
+  disabled. Level two is the window-enable checkbox: the window controls
+  (hide-long, scope, sliders, buttons) configure the window, which does
+  nothing while the window itself is off, so they additionally require it
+  (the enemy panel's enable-flag gate, applied inside this panel's hierarchy).
+  The target-bar toggle sits on level one only - it has nothing to do with
+  the window.
+
+  The stored values are untouched: the gate is a ui affordance, the flags
+  stay independent in the store (the CWI-0062 independence convention), so
+  re-enabling a flag brings its dependents back exactly as configured.
+
+  Runs on panel build, on every master and window-enable toggle, and on every
+  panel show (the master checkbox's OnShow callback), so the gate can never
+  go stale.
+]]--
+function me.UpdateSubOptionsState()
+  -- during the initial build the master's OnShow fires before the other
+  -- controls exist - BuildUi applies the gate once everything is built
+  if not builtMenu then return end
+
+  local trackingEnabled = mod.configuration.IsTrackFriendlyCooldownsEnabled()
+  local windowControlsEnabled = trackingEnabled
+    and mod.configuration.IsProximityCooldownsEnabled(true)
+
+  mod.guiHelper.SetCheckBoxEnabled(optionControls.showTargetCheckBox, trackingEnabled)
+  mod.guiHelper.SetCheckBoxEnabled(optionControls.windowEnableCheckBox, trackingEnabled)
+  mod.guiHelper.SetCheckBoxEnabled(optionControls.hideLongCheckBox, windowControlsEnabled)
+  mod.guiHelper.SetSettingsDropdownEnabled(optionControls.scopeDropdown, windowControlsEnabled)
+  -- the slider template grays its own labels (see GuiHelper.SetSettingsDropdownEnabled)
+  optionControls.scaleSlider:SetEnabled(windowControlsEnabled)
+  optionControls.maxDisplayedSlider:SetEnabled(windowControlsEnabled)
+  optionControls.placeModeButton:SetEnabled(windowControlsEnabled)
+  optionControls.defaultsButton:SetEnabled(windowControlsEnabled)
+end
+
+--[[
+  OnClick callback for the test/place mode button - hands off to the mode
+  lifecycle, which closes the Settings window
+]]--
+function me.PlaceModeButtonOnClick()
+  mod.friendlyProximityCooldownBarPreview.EnterPlaceMode()
+end
+
+--[[
+  OnClick callback for the defaults button. Resets every friendly WINDOW
+  setting - the friendlyProximityCooldowns block including the scope, plus the
+  saved window position (enemy-panel parity) - and re-syncs the panel controls
+  in place. The tracking master flag and the target bar display flag are
+  deliberately untouched: they govern detection and the target bar, not the
+  window this button sits under, and silently switching detection off would be
+  far more surprising than a window snapping back to center.
+]]--
+function me.DefaultsButtonOnClick()
+  mod.configuration.ResetProximityCooldowns(true)
+  mod.configuration.ClearUserPlacedFramePosition(RGCW_CONSTANTS.ELEMENT_FRIENDLY_PROXIMITY_COOLDOWN_WINDOW_FRAME)
+  mod.friendlyProximityCooldownBar.FriendlyProximityCooldownBarUiUpdate()
+  me.RefreshOptionControls()
+end
+
+--[[
+  Re-read every panel control from the store after it changed through another
+  path (the defaults reset). Checkboxes re-run their OnShow scripts (the two
+  non-window flags simply re-read their unchanged state); the sliders go
+  through UpdateSliderValue, which detaches the OnValueChanged callback for
+  the write; the scope dropdown regenerates so its radios re-evaluate.
+]]--
+function me.RefreshOptionControls()
+  for _, checkBox in ipairs(optionControls.checkBoxes) do
+    checkBox:GetScript("OnShow")(checkBox)
+  end
+
+  optionControls.scopeDropdown:GenerateMenu()
+
+  mod.guiHelper.UpdateSliderValue(
+    optionControls.scaleSlider,
+    mod.configuration.GetProximityCooldownsScale(true)
+  )
+  mod.guiHelper.UpdateSliderValue(
+    optionControls.maxDisplayedSlider,
+    mod.configuration.GetProximityCooldownsMaxDisplayed(true)
+  )
 end
 
 --[[
@@ -194,6 +309,9 @@ end
   @param {number} posY
   @param {function} onShowCallback
   @param {function} onClickCallback
+
+  @return {table}
+    The created checkbox
 ]]--
 function me.BuildCheckButtonOption(parentFrame, optionFrameName, posX, posY, onShowCallback, onClickCallback)
   local optionData = options[optionFrameName]
@@ -209,10 +327,16 @@ function me.BuildCheckButtonOption(parentFrame, optionFrameName, posX, posY, onS
 
   -- load initial state
   onShowCallback(checkButtonOptionFrame)
+  -- kept so the defaults reset can re-sync the checkbox without navigating away
+  table.insert(optionControls.checkBoxes, checkButtonOptionFrame)
+
+  return checkButtonOptionFrame
 end
 
 --[[
-  OnShow callback for checkbuttons - track friendly cooldowns
+  OnShow callback for checkbuttons - track friendly cooldowns. Also re-applies
+  the sub-option gate so a panel revisit reflects a flag that changed through
+  another path in the meantime.
 
   @param {table} self
 ]]--
@@ -222,16 +346,20 @@ function me.TrackFriendlyCooldownsOnShow(self)
   else
     self:SetChecked(false)
   end
+
+  me.UpdateSubOptionsState()
 end
 
 --[[
   OnClick callback for checkbuttons - track friendly cooldowns. The flag is
-  re-read by CombatLog on every event, so detection follows it immediately.
+  re-read by CombatLog on every event, so detection follows it immediately;
+  the panel's sub-options follow it just as immediately through the gate.
 
   @param {table} self
 ]]--
 function me.TrackFriendlyCooldownsOnClick(self)
   mod.configuration.UpdateTrackFriendlyCooldownsState(self:GetChecked() == true)
+  me.UpdateSubOptionsState()
 end
 
 --[[
@@ -280,36 +408,16 @@ function me.EnableFriendlyProximityWindowOnShow(self)
 end
 
 --[[
-  OnClick callback for checkbuttons - enable friendly proximity cooldown window
+  OnClick callback for checkbuttons - enable friendly proximity cooldown
+  window. The window controls follow the flag immediately through the
+  two-level gate.
 
   @param {table} self
 ]]--
 function me.EnableFriendlyProximityWindowOnClick(self)
   mod.configuration.UpdateProximityCooldownsEnabled(self:GetChecked() == true, true)
   mod.friendlyProximityCooldownBar.FriendlyProximityCooldownBarUiUpdate()
-end
-
---[[
-  OnShow callback for checkbuttons - window lock friendly proximity cooldown window
-
-  @param {table} self
-]]--
-function me.LockWindowFriendlyProximityCooldownWindowOnShow(self)
-  if mod.configuration.IsProximityCooldownsLocked(true) then
-    self:SetChecked(true)
-  else
-    self:SetChecked(false)
-  end
-end
-
---[[
-  OnClick callback for checkbuttons - window lock friendly proximity cooldown window
-
-  @param {table} self
-]]--
-function me.LockWindowFriendlyProximityCooldownWindowOnClick(self)
-  mod.configuration.UpdateProximityCooldownsLocked(self:GetChecked() == true, true)
-  mod.friendlyProximityCooldownBar.FriendlyProximityCooldownBarUiUpdate()
+  me.UpdateSubOptionsState()
 end
 
 --[[

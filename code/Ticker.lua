@@ -35,7 +35,9 @@ me.tag = "Ticker"
 local targetCooldownBarTicker
 local targetCooldownBarPreviewTicker
 local proximityCooldownBarTicker
+local proximityCooldownBarPreviewTicker
 local friendlyProximityCooldownBarTicker
+local friendlyProximityCooldownBarPreviewTicker
 
 --[[
   Start the repeating update ticker for targetCastBar
@@ -132,5 +134,53 @@ function me.StopTickerTargetCooldownBarPreview()
     targetCooldownBarPreviewTicker:Cancel()
     targetCooldownBarPreviewTicker = nil
     mod.logger.LogInfo(me.tag, "Stopped 'TargetCooldownBarPreviewTicker'")
+  end
+end
+
+--[[
+  Start the repeating update ticker for the proximityCooldownBar test/place mode. Runs at
+  the same interval as the live ticker so the preview animates exactly like the live window.
+]]--
+function me.StartTickerProximityCooldownBarPreview()
+  if proximityCooldownBarPreviewTicker == nil or proximityCooldownBarPreviewTicker:IsCancelled() then
+    proximityCooldownBarPreviewTicker = C_Timer.NewTicker(
+      RGCW_CONSTANTS.PROXIMITY_COOLDOWN_WINDOW_UPDATE_INTERVAL,
+      mod.proximityCooldownBarPreview.ProximityCooldownBarPreviewOnUpdate)
+      mod.logger.LogInfo(me.tag, "Started 'ProximityCooldownBarPreviewTicker'")
+  end
+end
+
+--[[
+  Stop the repeating update ticker for the proximityCooldownBar test/place mode
+]]--
+function me.StopTickerProximityCooldownBarPreview()
+  if proximityCooldownBarPreviewTicker then
+    proximityCooldownBarPreviewTicker:Cancel()
+    proximityCooldownBarPreviewTicker = nil
+    mod.logger.LogInfo(me.tag, "Stopped 'ProximityCooldownBarPreviewTicker'")
+  end
+end
+
+--[[
+  Start the repeating update ticker for the friendlyProximityCooldownBar test/place mode. Runs
+  at the same interval as the live ticker so the preview animates exactly like the live window.
+]]--
+function me.StartTickerFriendlyProximityCooldownBarPreview()
+  if friendlyProximityCooldownBarPreviewTicker == nil or friendlyProximityCooldownBarPreviewTicker:IsCancelled() then
+    friendlyProximityCooldownBarPreviewTicker = C_Timer.NewTicker(
+      RGCW_CONSTANTS.PROXIMITY_COOLDOWN_WINDOW_UPDATE_INTERVAL,
+      mod.friendlyProximityCooldownBarPreview.FriendlyProximityCooldownBarPreviewOnUpdate)
+      mod.logger.LogInfo(me.tag, "Started 'FriendlyProximityCooldownBarPreviewTicker'")
+  end
+end
+
+--[[
+  Stop the repeating update ticker for the friendlyProximityCooldownBar test/place mode
+]]--
+function me.StopTickerFriendlyProximityCooldownBarPreview()
+  if friendlyProximityCooldownBarPreviewTicker then
+    friendlyProximityCooldownBarPreviewTicker:Cancel()
+    friendlyProximityCooldownBarPreviewTicker = nil
+    mod.logger.LogInfo(me.tag, "Stopped 'FriendlyProximityCooldownBarPreviewTicker'")
   end
 end

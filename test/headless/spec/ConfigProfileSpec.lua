@@ -83,10 +83,10 @@ describe("ConfigProfile", function()
     CooldownWatchConfiguration.friendlyCooldownConfiguration = { priest = { [10890] = false } }
     CooldownWatchConfiguration.friendlyCooldownOverrides = { priest = { [10890] = { value = 12 } } }
     CooldownWatchConfiguration.proximityCooldowns = {
-      enabled = true, locked = true, scale = 1.5, maxDisplayedCooldowns = 5, hideLongCooldowns = false
+      enabled = true, scale = 1.5, maxDisplayedCooldowns = 5, hideLongCooldowns = false
     }
     CooldownWatchConfiguration.friendlyProximityCooldowns = {
-      enabled = true, locked = true, scale = 0.7, maxDisplayedCooldowns = 3,
+      enabled = true, scale = 0.7, maxDisplayedCooldowns = 3,
       hideLongCooldowns = true, scope = "group"
     }
     CooldownWatchConfiguration.frames = { CW_TargetCooldownWatchBar = { posX = 10, posY = -20, point = "CENTER" } }
@@ -154,7 +154,7 @@ describe("ConfigProfile", function()
   it("ApplySnapshot restores a stored proximityCooldowns block", function()
     local payload = {
       proximityCooldowns = {
-        enabled = false, locked = false, scale = 0.8, maxDisplayedCooldowns = 3, hideLongCooldowns = true
+        enabled = false, scale = 0.8, maxDisplayedCooldowns = 3, hideLongCooldowns = true
       }
     }
 
@@ -166,7 +166,7 @@ describe("ConfigProfile", function()
   it("ApplySnapshot restores a stored friendlyProximityCooldowns block, scope included", function()
     local payload = {
       friendlyProximityCooldowns = {
-        enabled = true, locked = false, scale = 1.2, maxDisplayedCooldowns = 8,
+        enabled = true, scale = 1.2, maxDisplayedCooldowns = 8,
         hideLongCooldowns = false, scope = "raid"
       }
     }

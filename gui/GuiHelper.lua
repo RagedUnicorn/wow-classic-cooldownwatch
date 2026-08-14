@@ -267,12 +267,120 @@ function me.CreateSlider(frameName, parent, position, sliderValues, title, descr
   )
 
   if onValueChangedCallback ~= nil then
+    -- kept on the frame so UpdateSliderValue can detach and reattach it
+    sliderFrame.onValueChangedCallback = onValueChangedCallback
     sliderFrame:RegisterCallback("OnValueChanged", onValueChangedCallback, sliderFrame)
   end
 
   CreateSliderDescription(sliderFrame, description)
 
   return sliderFrame
+end
+
+--[[
+  Set a slider's value without invoking its OnValueChanged callback - the
+  programmatic counterpart to player interaction. Used when the store changed
+  through another path (a settings reset, an applied profile) and the slider
+  has to follow the store rather than drive it: going through SetValue directly
+  would fire the callback and turn the re-sync into a store write.
+
+  @param {table} sliderFrame
+    A slider created by me.CreateSlider
+  @param {number} value
+]]--
+function me.UpdateSliderValue(sliderFrame, value)
+  if sliderFrame.onValueChangedCallback ~= nil then
+    sliderFrame:UnregisterCallback("OnValueChanged", sliderFrame)
+  end
+
+  sliderFrame:SetValue(value)
+
+  if sliderFrame.onValueChangedCallback ~= nil then
+    sliderFrame:RegisterCallback("OnValueChanged", sliderFrame.onValueChangedCallback, sliderFrame)
+  end
+end
+
+--[[
+  Enable or disable a checkbox created by me.CreateCheckBox, graying its label
+  with it - the label is this helper's own fontstring, so the template's
+  enable/disable knows nothing about it (PVPWarn's Enable/DisableCheckButton
+  precedent folded into one function).
+
+  @param {table} checkBoxFrame
+  @param {boolean} enabled
+]]--
+function me.SetCheckBoxEnabled(checkBoxFrame, enabled)
+  if enabled then
+    checkBoxFrame:Enable()
+    me.SetColor(checkBoxFrame.text, RGCW_CONSTANTS.COLOR.BODY)
+  else
+    checkBoxFrame:Disable()
+    me.SetColor(checkBoxFrame.text, RGCW_CONSTANTS.COLOR.DISABLED)
+  end
+end
+
+--[[
+  Enable or disable a dropdown created by me.CreateSettingsDropdown, graying
+  its title with it - the title is this helper's own fontstring, the template
+  grays only its own button face. Sliders need no counterpart:
+  MinimalSliderWithSteppersMixin:SetEnabled grays every one of its labels
+  itself.
+
+  @param {table} dropdownFrame
+  @param {boolean} enabled
+]]--
+function me.SetSettingsDropdownEnabled(dropdownFrame, enabled)
+  dropdownFrame:SetEnabled(enabled)
+  me.SetColor(
+    dropdownFrame.title,
+    enabled and RGCW_CONSTANTS.COLOR.BODY or RGCW_CONSTANTS.COLOR.DISABLED
+  )
+end
+
+--[[
+  Create a generic text button whose width auto-sizes to its text. Port of
+  PVPWarn's GuiHelper.CreateTextButton (family convention - when the mechanism
+  changes, change it in the whole family).
+
+  @param {string} frameName
+  @param {table} parent
+  @param {table} position
+    An object containing configuration parameters for a SetPoint function call
+  @param {function} callback
+    Click callback function for the created button
+  @param {string} text
+
+  @return {table}
+    The created button
+]]--
+function me.CreateTextButton(frameName, parent, position, callback, text)
+  local textButton = CreateFrame(
+    "Button",
+    frameName,
+    parent,
+    "UIPanelButtonTemplate"
+  )
+
+  textButton:SetHeight(RGCW_CONSTANTS.BUTTON_DEFAULT_HEIGHT)
+  textButton:SetText(text)
+  textButton:SetPoint(unpack(position))
+  textButton:SetScript("OnClick", callback)
+  me.ResizeButtonToText(textButton)
+
+  return textButton
+end
+
+--[[
+  Resize button width to the size of its text
+
+  @param {table} button
+]]--
+function me.ResizeButtonToText(button)
+  local buttonFontString = button:GetFontString()
+
+  button:SetWidth(
+    buttonFontString:GetStringWidth() + RGCW_CONSTANTS.BUTTON_DEFAULT_PADDING
+  )
 end
 
 --[[

@@ -41,9 +41,6 @@ if (GetLocale() == "deDE") then
   rgcw.L["option_enable_proximity_cooldown_window"] = "Fenster für Abklingzeiten in der Nähe aktivieren"
   rgcw.L["option_enable_proximity_cooldown_window_tooltip"] = "Zeigt ein bewegliches Fenster mit den "
     .. "laufenden Abklingzeiten von Gegnern in der Nähe, die nicht dein aktuelles Ziel sind"
-  rgcw.L["window_lock_proximity_cooldown_window"] = "Sperre Fenster für Abklingzeiten in der Nähe"
-  rgcw.L["window_lock_proximity_cooldown_window_tooltip"] = "Verhindert das Bewegen des Fensters für "
-    .. "Abklingzeiten in der Nähe"
   rgcw.L["option_hide_long_proximity_cooldowns"] = "Lange Abklingzeiten ausblenden"
   rgcw.L["option_hide_long_proximity_cooldowns_tooltip"] = "Blendet Abklingzeiten über %d Sekunden aus "
     .. "dem Fenster aus. Lange Abklingzeiten entscheiden selten den nächsten Kampf und würden die "
@@ -54,6 +51,9 @@ if (GetLocale() == "deDE") then
   rgcw.L["proximity_max_displayed_slider_title"] = "Maximal angezeigte Abklingzeiten"
   rgcw.L["proximity_max_displayed_slider_tooltip"] = "Wie viele Abklingzeiten das Fenster gleichzeitig "
     .. "anzeigt. Die zuletzt erkannten Abklingzeiten werden zuerst angezeigt."
+  rgcw.L["proximity_place_mode_button"] = "Fenster positionieren"
+  rgcw.L["proximity_place_mode_save_button"] = "Speichern"
+  rgcw.L["proximity_defaults_button"] = "Auf Standard zurücksetzen"
 
   -- friendly cooldowns
   rgcw.L["friendly_category_name"] = "Verbündete Abklingzeiten"
@@ -68,10 +68,6 @@ if (GetLocale() == "deDE") then
     .. "in der Nähe aktivieren"
   rgcw.L["option_enable_friendly_proximity_cooldown_window_tooltip"] = "Zeigt ein bewegliches Fenster "
     .. "mit den laufenden Abklingzeiten verbündeter Spieler"
-  rgcw.L["window_lock_friendly_proximity_cooldown_window"] = "Sperre Fenster für verbündete "
-    .. "Abklingzeiten in der Nähe"
-  rgcw.L["window_lock_friendly_proximity_cooldown_window_tooltip"] = "Verhindert das Bewegen des "
-    .. "Fensters für verbündete Abklingzeiten in der Nähe"
   rgcw.L["option_hide_long_friendly_proximity_cooldowns"] = "Lange Abklingzeiten ausblenden"
   rgcw.L["option_hide_long_friendly_proximity_cooldowns_tooltip"] = "Blendet Abklingzeiten über "
     .. "%d Sekunden aus dem Fenster aus"
@@ -87,6 +83,9 @@ if (GetLocale() == "deDE") then
   rgcw.L["friendly_max_displayed_slider_title"] = "Maximal angezeigte Abklingzeiten"
   rgcw.L["friendly_max_displayed_slider_tooltip"] = "Wie viele Abklingzeiten das Fenster "
     .. "gleichzeitig anzeigt"
+  rgcw.L["friendly_place_mode_button"] = "Fenster positionieren"
+  rgcw.L["friendly_place_mode_save_button"] = "Speichern"
+  rgcw.L["friendly_defaults_button"] = "Auf Standard zurücksetzen"
 
   -- profiles
   rgcw.L["profile_category_name"] = "Profile"

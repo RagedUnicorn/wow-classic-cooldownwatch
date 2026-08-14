@@ -190,10 +190,18 @@ RGCW_CONSTANTS = {
   ELEMENT_PROXIMITY_SUB_OPTION_FRAME = "CW_ProximityMenuOptionsFrame",
   ELEMENT_PROXIMITY_TITLE = "CW_ProximityTitle",
   ELEMENT_PROXIMITY_OPT_ENABLE_PROXIMITY_COOLDOWN_WINDOW = "CW_OptEnableProximityCooldownWindow",
-  ELEMENT_PROXIMITY_OPT_WINDOW_LOCK_PROXIMITY_COOLDOWN_WINDOW = "CW_OptWindowLockProximityCooldownWindow",
   ELEMENT_PROXIMITY_OPT_HIDE_LONG_PROXIMITY_COOLDOWNS = "CW_OptHideLongProximityCooldowns",
   ELEMENT_PROXIMITY_SCALE_SLIDER = "CW_ProximityScaleSlider",
   ELEMENT_PROXIMITY_MAX_DISPLAYED_SLIDER = "CW_ProximityMaxDisplayedSlider",
+  ELEMENT_PROXIMITY_OPT_PLACE_MODE_BUTTON = "CW_ProximityPlaceModeButton",
+  ELEMENT_PROXIMITY_OPT_DEFAULTS_BUTTON = "CW_ProximityDefaultsButton",
+  -- floating finish control of the proximity window's test/place mode
+  ELEMENT_PROXIMITY_PLACE_MODE_SAVE_BUTTON = "CW_ProximityPlaceModeSaveButton",
+  --[[
+    Auto-sizing text buttons (GuiHelper.CreateTextButton, PVPWarn parity)
+  ]]--
+  BUTTON_DEFAULT_HEIGHT = 25,
+  BUTTON_DEFAULT_PADDING = 15,
   -- width of a configuration slider (MinimalSliderWithSteppersTemplate, see GuiHelper.CreateSlider)
   OPTION_SLIDER_WIDTH = 260,
   PROXIMITY_SCALE_SLIDER_MIN = 0.5,
@@ -219,12 +227,14 @@ RGCW_CONSTANTS = {
   ELEMENT_FRIENDLY_OPT_TRACK_FRIENDLY_COOLDOWNS = "CW_OptTrackFriendlyCooldowns",
   ELEMENT_FRIENDLY_OPT_SHOW_FRIENDLY_TARGET_COOLDOWNS = "CW_OptShowFriendlyTargetCooldowns",
   ELEMENT_FRIENDLY_OPT_ENABLE_FRIENDLY_PROXIMITY_COOLDOWN_WINDOW = "CW_OptEnableFriendlyProximityCooldownWindow",
-  ELEMENT_FRIENDLY_OPT_WINDOW_LOCK_FRIENDLY_PROXIMITY_COOLDOWN_WINDOW
-    = "CW_OptWindowLockFriendlyProximityCooldownWindow",
   ELEMENT_FRIENDLY_OPT_HIDE_LONG_FRIENDLY_PROXIMITY_COOLDOWNS = "CW_OptHideLongFriendlyProximityCooldowns",
   ELEMENT_FRIENDLY_PROXIMITY_SCOPE_DROPDOWN = "CW_FriendlyProximityScopeDropdown",
   ELEMENT_FRIENDLY_PROXIMITY_SCALE_SLIDER = "CW_FriendlyProximityScaleSlider",
   ELEMENT_FRIENDLY_PROXIMITY_MAX_DISPLAYED_SLIDER = "CW_FriendlyProximityMaxDisplayedSlider",
+  ELEMENT_FRIENDLY_OPT_PLACE_MODE_BUTTON = "CW_FriendlyPlaceModeButton",
+  ELEMENT_FRIENDLY_OPT_DEFAULTS_BUTTON = "CW_FriendlyDefaultsButton",
+  -- floating finish control of the friendly proximity window's test/place mode
+  ELEMENT_FRIENDLY_PROXIMITY_PLACE_MODE_SAVE_BUTTON = "CW_FriendlyProximityPlaceModeSaveButton",
   -- width of a configuration dropdown (WowStyle2DropdownTemplate, see GuiHelper.CreateSettingsDropdown)
   OPTION_DROPDOWN_WIDTH = 180,
   --[[

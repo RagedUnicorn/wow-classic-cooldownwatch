@@ -65,8 +65,6 @@ me.tag = "ProximityWindow"
       persists under
     IsEnabled {function -> boolean}
       Whether the window renders at all (the opt-in option)
-    IsLocked {function -> boolean}
-      Whether the window is locked from moving
     GetScale {function -> number}
       Render scale of the window
     GetMaxDisplayed {function -> number}
@@ -89,7 +87,8 @@ me.tag = "ProximityWindow"
 
   @return {table}
     The window instance: BuildUi, UiUpdate, WakeRenderTicker, OnUpdate,
-    IsRenderableCooldown
+    IsRenderableCooldown, plus the preview seam (IsPreviewActive, ShowPreview,
+    RenderPreviewEntries, HidePreview) and GetWindowFrame
 ]]--
 function me.CreateInstance(spec)
   local instance = {}
@@ -102,6 +101,17 @@ function me.CreateInstance(spec)
     Read from the hot OnUpdate path instead of allocating per tick.
   ]]--
   local rows = {}
+  --[[
+    Whether preview ("test/place") mode currently owns the rows. While true the
+    live render ticker must stay down: combat log events keep enqueueing during
+    the preview, and their wake edge (CooldownQueue.AddCooldown ->
+    WakeRenderTicker) would otherwise bring the live ticker up to fight the
+    preview ticker over the rows. The flag is also the single thing that
+    enables dragging and the positioning backdrop - outside the place mode the
+    window never moves (there is deliberately no separate lock option). Never
+    persisted; the mode lifecycle is owned by the wrapper's preview module.
+  ]]--
+  local previewActive = false
 
   --[[
     Create the window frame. It starts hidden - whether it shows is the
@@ -265,28 +275,32 @@ function me.CreateInstance(spec)
   end
 
   --[[
-    Update the locked/unlocked state of the window. Like the target bar the
-    backdrop only shows while the window is unlocked - a positioning aid, not
-    part of the combat look.
+    Update the placement backdrop of the window. The backdrop is a positioning
+    aid, not part of the combat look - it shows only while the test/place mode
+    owns the window, the single context in which the window can move at all.
   ]]--
-  local function UpdateLockedState()
-    if spec.IsLocked() then
-      window:SetBackdrop(nil)
-    else
+  local function UpdatePlacementBackdrop()
+    if previewActive then
       window:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background"
       })
+    else
+      window:SetBackdrop(nil)
     end
   end
 
   --[[
-    Update the window frame position from its persisted frames-map entry
+    Update the window frame position from its persisted frames-map entry. The
+    points are always cleared first: without a saved position (first use, or a
+    settings reset that cleared it) the fallback would otherwise pile its CENTER
+    anchor on top of whatever anchor a previous drag left behind.
   ]]--
   local function UpdatePosition()
     local framePosition = mod.configuration.GetUserPlacedFramePosition(spec.frameName)
 
+    window:ClearAllPoints() -- very important to clear all points first
+
     if framePosition ~= nil then
-      window:ClearAllPoints() -- very important to clear all points first
       window:SetPoint(
         framePosition.point,
         framePosition.relativeTo,
@@ -295,18 +309,19 @@ function me.CreateInstance(spec)
         framePosition.posY
       )
     else
-      -- initial position for first time use
+      -- default position - first use, or a cleared saved position
       window:SetPoint("CENTER", 0, 0)
     end
   end
 
   --[[
-    Frame callback to start moving the passed (self) frame
+    Frame callback to start moving the passed (self) frame. The window only
+    ever moves inside the test/place mode - there is no lock option to gate on.
 
     @param {table} self
   ]]--
   local function StartDragFrame(self)
-    if spec.IsLocked() then return end
+    if not previewActive then return end
 
     self:StartMoving()
   end
@@ -317,7 +332,7 @@ function me.CreateInstance(spec)
     @param {table} self
   ]]--
   local function StopDragFrame(self)
-    if spec.IsLocked() then return end
+    if not previewActive then return end
 
     self:StopMovingOrSizing()
 
@@ -358,7 +373,7 @@ function me.CreateInstance(spec)
   ]]--
   function instance.UiUpdate()
     UpdatePosition()
-    UpdateLockedState()
+    UpdatePlacementBackdrop()
     window:SetScale(spec.GetScale())
 
     if spec.IsEnabled() then
@@ -392,11 +407,102 @@ function me.CreateInstance(spec)
     stopped ticker implies cleared rows.
   ]]--
   function instance.WakeRenderTicker()
+    --[[
+      Preview mode owns the rows - live enqueues keep arriving while it runs
+      and must not start the live ticker against the preview ticker. This flag
+      guard, not caller discipline, is what upholds that (target bar parity).
+    ]]--
+    if previewActive then return end
     if not spec.IsEnabled() then return end
 
     if mod.cooldownQueue.HasAnyCooldowns() then
       spec.StartTicker()
     end
+  end
+
+  --[[
+    @return {boolean}
+      Whether preview ("test/place") mode currently owns the rows
+  ]]--
+  function instance.IsPreviewActive()
+    return previewActive
+  end
+
+  --[[
+    Hand the rows to preview mode: stop the live ticker and show the window in
+    its positioning look (backdrop on, dragging allowed) regardless of the
+    enabled option - the option is not written, the mode is purely transient.
+    The caller renders synthetic entries through RenderPreviewEntries and ends
+    the mode with HidePreview.
+  ]]--
+  function instance.ShowPreview()
+    previewActive = true
+    spec.StopTicker()
+
+    -- headless specs create instances without BuildUi - only the flag matters there
+    if window == nil then return end
+
+    UpdatePosition()
+    UpdatePlacementBackdrop()
+    window:SetScale(spec.GetScale())
+    window:Show()
+  end
+
+  --[[
+    Bind a synthetic entry list to the rows - the preview counterpart of the
+    live OnUpdate pass. Deliberately applies none of the per-row filters
+    (eligibility, hide-long, expired): the entries exist to show the window,
+    not to survive a tracking decision. The max-displayed option still caps the
+    rows so the preview shows the layout the player configured.
+
+    @param {table} previewEntries
+      Array of queue-entry-shaped tables (see the CooldownQueue storage layout)
+  ]]--
+  function instance.RenderPreviewEntries(previewEntries)
+    if not previewActive or window == nil then return end
+
+    local shownRows = 0
+    local maxRows = math.min(
+      RGCW_CONSTANTS.PROXIMITY_COOLDOWN_ROW_AMOUNT,
+      spec.GetMaxDisplayed()
+    )
+
+    for i = 1, #previewEntries do
+      if shownRows >= maxRows then break end
+
+      shownRows = shownRows + 1
+      UpdateRow(rows[shownRows], previewEntries[i])
+    end
+
+    for i = shownRows + 1, RGCW_CONSTANTS.PROXIMITY_COOLDOWN_ROW_AMOUNT do
+      ClearRow(rows[i])
+    end
+  end
+
+  --[[
+    Hand the rows back to the live render lifecycle: clear every row, then let
+    UiUpdate restore whatever the options say (hidden while disabled, live
+    rendering - via the wake edge - while enabled).
+  ]]--
+  function instance.HidePreview()
+    previewActive = false
+
+    if window == nil then return end
+
+    for i = 1, RGCW_CONSTANTS.PROXIMITY_COOLDOWN_ROW_AMOUNT do
+      ClearRow(rows[i])
+    end
+
+    instance.UiUpdate()
+  end
+
+  --[[
+    @return {table | nil}
+      The window frame, or nil before BuildUi ran. Read-only accessor for
+      callers that anchor to the window (the place mode's floating save button).
+  ]]--
+  function instance.GetWindowFrame()
+    return window
   end
 
   --[[

@@ -46,10 +46,6 @@ local options = {
     label = rgcw.L["option_enable_proximity_cooldown_window"],
     description = rgcw.L["option_enable_proximity_cooldown_window_tooltip"]
   },
-  [RGCW_CONSTANTS.ELEMENT_PROXIMITY_OPT_WINDOW_LOCK_PROXIMITY_COOLDOWN_WINDOW] = {
-    label = rgcw.L["window_lock_proximity_cooldown_window"],
-    description = rgcw.L["window_lock_proximity_cooldown_window_tooltip"]
-  },
   [RGCW_CONSTANTS.ELEMENT_PROXIMITY_OPT_HIDE_LONG_PROXIMITY_COOLDOWNS] = {
     label = rgcw.L["option_hide_long_proximity_cooldowns"],
     description = string.format(
@@ -61,6 +57,23 @@ local options = {
 
 -- track whether the menu was already built
 local builtMenu = false
+--[[
+  References to the panel's option controls, kept for two consumers: the
+  defaults reset re-syncs every control from the store without navigating away
+  (checkboxes re-read through their OnShow callbacks, sliders through
+  UpdateSliderValue), and the enable-flag gate disables every sub-option below
+  the window-enable checkbox (see UpdateSubOptionsState). enableCheckBox marks
+  that master inside the checkBoxes list - it is the one control the gate
+  never touches.
+]]--
+local optionControls = {
+  checkBoxes = {},
+  enableCheckBox = nil,
+  scaleSlider = nil,
+  maxDisplayedSlider = nil,
+  placeModeButton = nil,
+  defaultsButton = nil
+}
 
 --[[
   Build the ui for the proximity cooldowns menu
@@ -77,7 +90,7 @@ function me.BuildUi(frame)
     rgcw.L["proximity_title"]
   )
 
-  me.BuildCheckButtonOption(
+  optionControls.enableCheckBox = me.BuildCheckButtonOption(
     frame,
     RGCW_CONSTANTS.ELEMENT_PROXIMITY_OPT_ENABLE_PROXIMITY_COOLDOWN_WINDOW,
     20,
@@ -88,26 +101,17 @@ function me.BuildUi(frame)
 
   me.BuildCheckButtonOption(
     frame,
-    RGCW_CONSTANTS.ELEMENT_PROXIMITY_OPT_WINDOW_LOCK_PROXIMITY_COOLDOWN_WINDOW,
-    20,
-    -104,
-    me.LockWindowProximityCooldownWindowOnShow,
-    me.LockWindowProximityCooldownWindowOnClick
-  )
-
-  me.BuildCheckButtonOption(
-    frame,
     RGCW_CONSTANTS.ELEMENT_PROXIMITY_OPT_HIDE_LONG_PROXIMITY_COOLDOWNS,
     20,
-    -156,
+    -104,
     me.HideLongCooldownsOnShow,
     me.HideLongCooldownsOnClick
   )
 
-  mod.guiHelper.CreateSlider(
+  optionControls.scaleSlider = mod.guiHelper.CreateSlider(
     RGCW_CONSTANTS.ELEMENT_PROXIMITY_SCALE_SLIDER,
     frame,
-    {"TOPLEFT", 20, -235},
+    {"TOPLEFT", 20, -183},
     {
       minValue = RGCW_CONSTANTS.PROXIMITY_SCALE_SLIDER_MIN,
       maxValue = RGCW_CONSTANTS.PROXIMITY_SCALE_SLIDER_MAX,
@@ -120,10 +124,10 @@ function me.BuildUi(frame)
     me.FormatScaleValue
   )
 
-  mod.guiHelper.CreateSlider(
+  optionControls.maxDisplayedSlider = mod.guiHelper.CreateSlider(
     RGCW_CONSTANTS.ELEMENT_PROXIMITY_MAX_DISPLAYED_SLIDER,
     frame,
-    {"TOPLEFT", 20, -315},
+    {"TOPLEFT", 20, -263},
     {
       minValue = RGCW_CONSTANTS.PROXIMITY_MAX_DISPLAYED_SLIDER_MIN,
       -- the render layer's fixed row pool is the ceiling; a larger range would be dead travel
@@ -136,7 +140,103 @@ function me.BuildUi(frame)
     me.MaxDisplayedSliderOnValueChanged
   )
 
+  optionControls.placeModeButton = mod.guiHelper.CreateTextButton(
+    RGCW_CONSTANTS.ELEMENT_PROXIMITY_OPT_PLACE_MODE_BUTTON,
+    frame,
+    {"TOPLEFT", 20, -368},
+    me.PlaceModeButtonOnClick,
+    rgcw.L["proximity_place_mode_button"]
+  )
+
+  optionControls.defaultsButton = mod.guiHelper.CreateTextButton(
+    RGCW_CONSTANTS.ELEMENT_PROXIMITY_OPT_DEFAULTS_BUTTON,
+    frame,
+    {"LEFT", optionControls.placeModeButton, "RIGHT", 10, 0},
+    me.DefaultsButtonOnClick,
+    rgcw.L["proximity_defaults_button"]
+  )
+
   builtMenu = true
+
+  -- every control exists now - apply the enable-flag gate to the initial state
+  me.UpdateSubOptionsState()
+end
+
+--[[
+  Enable or disable every sub-option below the window-enable checkbox. With
+  the window disabled nothing below it has any effect, so the panel body reads
+  as inert instead of inviting configuration that appears to do nothing
+  (FriendlyCooldownMenu master-flag parity). The stored values are untouched -
+  the gate is a ui affordance only, so re-enabling the window brings every
+  sub-option back exactly as configured.
+
+  Runs on panel build, on every enable toggle, and on every panel show (the
+  enable checkbox's OnShow callback), so the gate can never go stale - the
+  defaults reset in particular re-applies it for free, since RefreshOptionControls
+  re-runs the enable checkbox's OnShow after the reset switched the window off.
+]]--
+function me.UpdateSubOptionsState()
+  -- during the initial build the enable checkbox's OnShow fires before the
+  -- other controls exist - BuildUi applies the gate once everything is built
+  if not builtMenu then return end
+
+  local enabled = mod.configuration.IsProximityCooldownsEnabled()
+
+  for _, checkBox in ipairs(optionControls.checkBoxes) do
+    if checkBox ~= optionControls.enableCheckBox then
+      mod.guiHelper.SetCheckBoxEnabled(checkBox, enabled)
+    end
+  end
+
+  -- the slider template grays its own labels (see GuiHelper.SetSettingsDropdownEnabled)
+  optionControls.scaleSlider:SetEnabled(enabled)
+  optionControls.maxDisplayedSlider:SetEnabled(enabled)
+  optionControls.placeModeButton:SetEnabled(enabled)
+  optionControls.defaultsButton:SetEnabled(enabled)
+end
+
+--[[
+  OnClick callback for the test/place mode button - hands off to the mode
+  lifecycle, which closes the Settings window
+]]--
+function me.PlaceModeButtonOnClick()
+  mod.proximityCooldownBarPreview.EnterPlaceMode()
+end
+
+--[[
+  OnClick callback for the defaults button. Resets every proximity-window
+  setting to its shipped defaults, including the saved window position ("all
+  settings" deliberately covers the position - unlike the PVPWarn precedent,
+  which splits the anchor reset into its own button), applies the reset to the
+  live window and re-syncs the panel controls in place.
+]]--
+function me.DefaultsButtonOnClick()
+  mod.configuration.ResetProximityCooldowns()
+  mod.configuration.ClearUserPlacedFramePosition(RGCW_CONSTANTS.ELEMENT_PROXIMITY_COOLDOWN_WINDOW_FRAME)
+  mod.proximityCooldownBar.ProximityCooldownBarUiUpdate()
+  me.RefreshOptionControls()
+end
+
+--[[
+  Re-read every panel control from the store after it changed through another
+  path (the defaults reset). Checkboxes re-run their OnShow callbacks; the
+  sliders go through UpdateSliderValue, which detaches the OnValueChanged
+  callback for the write - a plain SetValue would fire it and turn this
+  re-sync into a store write.
+]]--
+function me.RefreshOptionControls()
+  for _, checkBox in ipairs(optionControls.checkBoxes) do
+    checkBox:GetScript("OnShow")(checkBox)
+  end
+
+  mod.guiHelper.UpdateSliderValue(
+    optionControls.scaleSlider,
+    mod.configuration.GetProximityCooldownsScale()
+  )
+  mod.guiHelper.UpdateSliderValue(
+    optionControls.maxDisplayedSlider,
+    mod.configuration.GetProximityCooldownsMaxDisplayed()
+  )
 end
 
 --[[
@@ -163,10 +263,16 @@ function me.BuildCheckButtonOption(parentFrame, optionFrameName, posX, posY, onS
 
   -- load initial state
   onShowCallback(checkButtonOptionFrame)
+  -- kept so the defaults reset can re-sync the checkbox without navigating away
+  table.insert(optionControls.checkBoxes, checkButtonOptionFrame)
+
+  return checkButtonOptionFrame
 end
 
 --[[
-  OnShow callback for checkbuttons - enable proximity cooldown window
+  OnShow callback for checkbuttons - enable proximity cooldown window. Also
+  re-applies the sub-option gate so a panel revisit reflects a flag that
+  changed through another path in the meantime.
 
   @param {table} self
 ]]--
@@ -176,39 +282,20 @@ function me.EnableProximityWindowOnShow(self)
   else
     self:SetChecked(false)
   end
+
+  me.UpdateSubOptionsState()
 end
 
 --[[
-  OnClick callback for checkbuttons - enable proximity cooldown window
+  OnClick callback for checkbuttons - enable proximity cooldown window. The
+  panel's sub-options follow the flag immediately through the gate.
 
   @param {table} self
 ]]--
 function me.EnableProximityWindowOnClick(self)
   mod.configuration.UpdateProximityCooldownsEnabled(self:GetChecked() == true)
   mod.proximityCooldownBar.ProximityCooldownBarUiUpdate()
-end
-
---[[
-  OnShow callback for checkbuttons - window lock proximity cooldown window
-
-  @param {table} self
-]]--
-function me.LockWindowProximityCooldownWindowOnShow(self)
-  if mod.configuration.IsProximityCooldownsLocked() then
-    self:SetChecked(true)
-  else
-    self:SetChecked(false)
-  end
-end
-
---[[
-  OnClick callback for checkbuttons - window lock proximity cooldown window
-
-  @param {table} self
-]]--
-function me.LockWindowProximityCooldownWindowOnClick(self)
-  mod.configuration.UpdateProximityCooldownsLocked(self:GetChecked() == true)
-  mod.proximityCooldownBar.ProximityCooldownBarUiUpdate()
+  me.UpdateSubOptionsState()
 end
 
 --[[

@@ -548,7 +548,6 @@ describe("Configuration schema reconcile", function()
     local defaults = configuration.GetDefaults().proximityCooldowns
 
     assert.is_false(defaults.enabled)
-    assert.is_false(defaults.locked)
     assert.equal(1.0, defaults.scale)
     assert.equal(10, defaults.maxDisplayedCooldowns)
     assert.is_true(defaults.hideLongCooldowns)
@@ -573,7 +572,6 @@ describe("Configuration schema reconcile", function()
     -- the configured values survive, the missing keys come from the defaults
     assert.is_true(saved.proximityCooldowns.enabled)
     assert.equal(1.5, saved.proximityCooldowns.scale)
-    assert.is_false(saved.proximityCooldowns.locked)
     assert.equal(10, saved.proximityCooldowns.maxDisplayedCooldowns)
     assert.is_true(saved.proximityCooldowns.hideLongCooldowns)
   end)
@@ -582,7 +580,6 @@ describe("Configuration schema reconcile", function()
     local defaults = configuration.GetDefaults().friendlyProximityCooldowns
 
     assert.is_false(defaults.enabled)
-    assert.is_false(defaults.locked)
     assert.equal(1.0, defaults.scale)
     assert.equal(10, defaults.maxDisplayedCooldowns)
     --[[
@@ -610,7 +607,6 @@ describe("Configuration schema reconcile", function()
 
     assert.is_true(saved.friendlyProximityCooldowns.enabled)
     assert.is_true(saved.friendlyProximityCooldowns.hideLongCooldowns)
-    assert.is_false(saved.friendlyProximityCooldowns.locked)
     assert.equal(RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_ALL, saved.friendlyProximityCooldowns.scope)
   end)
 
@@ -890,7 +886,6 @@ describe("Configuration proximity cooldowns", function()
 
   it("reads resolve to the shipped defaults while proximityCooldowns is nil", function()
     assert.is_false(configuration.IsProximityCooldownsEnabled())
-    assert.is_false(configuration.IsProximityCooldownsLocked())
     assert.equal(1.0, configuration.GetProximityCooldownsScale())
     assert.equal(10, configuration.GetProximityCooldownsMaxDisplayed())
     assert.is_true(configuration.IsProximityCooldownsHideLongEnabled())
@@ -910,14 +905,6 @@ describe("Configuration proximity cooldowns", function()
 
     configuration.UpdateProximityCooldownsEnabled(false)
     assert.is_false(configuration.IsProximityCooldownsEnabled())
-  end)
-
-  it("round-trips the locked toggle in both directions", function()
-    configuration.UpdateProximityCooldownsLocked(true)
-    assert.is_true(configuration.IsProximityCooldownsLocked())
-
-    configuration.UpdateProximityCooldownsLocked(false)
-    assert.is_false(configuration.IsProximityCooldownsLocked())
   end)
 
   it("round-trips the hide-long toggle in both directions", function()
@@ -977,7 +964,6 @@ describe("Configuration proximity cooldowns", function()
 
     assert.equal(0.8, proximityCooldowns.scale)
     assert.is_false(proximityCooldowns.enabled)
-    assert.is_false(proximityCooldowns.locked)
     assert.equal(10, proximityCooldowns.maxDisplayedCooldowns)
     assert.is_true(proximityCooldowns.hideLongCooldowns)
   end)
@@ -1012,7 +998,6 @@ describe("Configuration friendly proximity cooldowns", function()
 
   it("reads resolve to the friendly defaults while the block is nil - long cooldowns shown", function()
     assert.is_false(configuration.IsProximityCooldownsEnabled(true))
-    assert.is_false(configuration.IsProximityCooldownsLocked(true))
     assert.equal(1.0, configuration.GetProximityCooldownsScale(true))
     assert.equal(10, configuration.GetProximityCooldownsMaxDisplayed(true))
     assert.is_false(configuration.IsProximityCooldownsHideLongEnabled(true))
