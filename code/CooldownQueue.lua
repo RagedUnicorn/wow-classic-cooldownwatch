@@ -356,6 +356,18 @@ function me.HasCooldowns(sourceGuid)
 end
 
 --[[
+  Whether any cooldown is queued for any caster. O(1) for the same reason
+  HasCooldowns is: emptied caster buckets are removed eagerly, so the presence
+  of any bucket implies at least one entry. The cross-caster start edge for a
+  render ticker, mirroring HasCooldowns' role for the target bar.
+
+  @return {boolean}
+]]--
+function me.HasAnyCooldowns()
+  return next(cooldownQueue) ~= nil
+end
+
+--[[
   Build a single synthetic cooldown entry for the configuration preview
   (`/rgcw conf enable` -> TargetCooldownBar.ShowExampleTargetCooldownBar).
 
@@ -452,4 +464,79 @@ function me.GetCooldownsByTarget(sourceGuid)
   table.sort(cooldownSnapshot, CompareCooldowns)
 
   return cooldownSnapshot
+end
+
+--[[
+  Comparator for GetAllCooldowns: newest detection first (castTime descending), so
+  the most recent enemy activity leads the list. Distinct from the target bar's
+  soonest-ready-first CompareCooldowns on purpose - a cross-caster overview is
+  about what just happened, not about which single threat comes back first.
+
+  Like CompareCooldowns the order must be a function of the entries themselves,
+  never of Lua hash order. Entries from different casters can share both castTime
+  and spellId (two rogues Kick in the same combat-log tick), so the tiebreak
+  chain ends on sourceGuid to stay fully deterministic.
+]]--
+local function CompareCooldownsNewestFirst(a, b)
+  if a.spellData.castTime ~= b.spellData.castTime then
+    return a.spellData.castTime > b.spellData.castTime
+  end
+
+  if a.spellData.spellId ~= b.spellData.spellId then
+    return a.spellData.spellId < b.spellData.spellId
+  end
+
+  return a.sourceGuid < b.sourceGuid
+end
+
+--[[
+  Reused snapshot array for GetAllCooldowns - the same render-path allocation
+  argument as cooldownSnapshot. Deliberately a separate scratch array: both
+  accessors can be consumed by concurrently running render tickers, and sharing
+  one array would let either caller invalidate the other's snapshot mid-pass.
+]]--
+local allCooldownsSnapshot = {}
+
+--[[
+  Retrieve the active cooldowns of every tracked caster - one entry per
+  (sourceGuid, spellId) pair - ordered newest detection first (see
+  CompareCooldownsNewestFirst). Each entry carries the caster identity
+  (sourceGuid / sourceName) for attribution. No size cap: like the target bar,
+  the render layer truncates to its slot count.
+
+  The exclusion is evaluated against the passed guid on every call, so a caller
+  excluding the current target needs no target-change handling: the next call
+  after a target change hides the new target's entries and surfaces the previous
+  target's again by itself.
+
+  @param {string} excludeGuid
+    Optional. A caster whose entries are omitted from the snapshot (the proximity
+    window passes the current target's guid - the target bar already shows it)
+
+  @return {table}
+    The cooldown entries found across all casters
+    Note: May be an empty table
+    Note: A module-owned scratch array rebuilt on every call - only valid until
+    the next call; do not retain or mutate it
+]]--
+function me.GetAllCooldowns(excludeGuid)
+  local count = 0
+
+  for sourceGuid, casterBucket in pairs(cooldownQueue) do
+    if sourceGuid ~= excludeGuid then
+      for _, cooldownEvent in pairs(casterBucket) do
+        count = count + 1
+        allCooldownsSnapshot[count] = cooldownEvent
+      end
+    end
+  end
+
+  -- truncate entries left over from a previous, larger snapshot
+  for i = #allCooldownsSnapshot, count + 1, -1 do
+    allCooldownsSnapshot[i] = nil
+  end
+
+  table.sort(allCooldownsSnapshot, CompareCooldownsNewestFirst)
+
+  return allCooldownsSnapshot
 end
