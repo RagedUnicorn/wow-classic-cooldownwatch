@@ -32,6 +32,34 @@ mod.configuration = me
 me.tag = "Configuration"
 
 --[[
+  Shipped defaults of the proximity cooldown window options, built fresh on every
+  call so the saved-variable declaration below, me.GetDefaults and the accessor
+  fallbacks never share one table. Single source for these values - the three
+  consumers restating them would be exactly the drift the reconcile exists to
+  prevent.
+
+  maxDisplayedCooldowns mirrors the target cooldown bar's ten slots until the
+  window layout settles on its own number; scale bounds are an options-ui
+  concern and deliberately not enforced here beyond basic sanity.
+
+  @return {table}
+]]--
+local function GetProximityCooldownsDefaults()
+  return {
+    -- whether the proximity cooldown window renders at all - opt-in
+    ["enabled"] = false,
+    -- whether the window is locked from moving
+    ["locked"] = false,
+    -- render scale of the window
+    ["scale"] = 1.0,
+    -- upper bound of cooldowns the window displays at once
+    ["maxDisplayedCooldowns"] = 10,
+    -- hide cooldowns above RGCW_CONSTANTS.PROXIMITY_LONG_COOLDOWN_THRESHOLD
+    ["hideLongCooldowns"] = true
+  }
+end
+
+--[[
   Declaration of the saved variable. WoW replaces this table with the saved one on load,
   so the values here only ever apply to a character that never saved a configuration -
   every other backfill (upgrade, applied profile) goes through me.GetDefaults below
@@ -94,6 +122,13 @@ CooldownWatchConfiguration = {
   ]]--
   ["frames"] = {},
   --[[
+    Options of the proximity cooldown window - the cross-caster window fed by
+    CooldownQueue.GetAllCooldowns. Shape and defaults come from
+    GetProximityCooldownsDefaults above; the window position lives in frames
+    like every other movable frame.
+  ]]--
+  ["proximityCooldowns"] = GetProximityCooldownsDefaults(),
+  --[[
     Named configuration profiles managed by rgcw.configProfile
     profiles = {
       [profileName] = {snapshot of the PROFILE_FIELDS}
@@ -132,6 +167,7 @@ function me.GetDefaults()
     ["cooldownOverrides"] = mod.profile.GetDefaultCooldownOverrides(),
     ["globalAssumeWorstCase"] = false,
     ["frames"] = {},
+    ["proximityCooldowns"] = GetProximityCooldownsDefaults(),
     ["profiles"] = {},
     ["lastNotifiedVersion"] = ""
   }
@@ -732,4 +768,174 @@ end
 ]]--
 function me.IsGlobalWorstCaseAssumed()
   return CooldownWatchConfiguration.globalAssumeWorstCase == true
+end
+
+--[[
+  Lazily access the proximityCooldowns block. It may be nil when
+  SetupConfiguration never ran (headless test harness), in which case it is
+  seeded from the shipped defaults - identical to what the reconcile would
+  have filled in.
+
+  @return {table}
+]]--
+local function GetProximityCooldowns()
+  if CooldownWatchConfiguration.proximityCooldowns == nil then
+    CooldownWatchConfiguration.proximityCooldowns = GetProximityCooldownsDefaults()
+  end
+
+  return CooldownWatchConfiguration.proximityCooldowns
+end
+
+--[[
+  Read one field of the proximityCooldowns block. A field an older saved shape
+  is missing resolves to its shipped default, the same value the reconcile
+  would fill in on the next load.
+
+  @param {string} fieldName
+  @return {any}
+]]--
+local function GetProximityCooldownField(fieldName)
+  local value = GetProximityCooldowns()[fieldName]
+
+  if value == nil then
+    return GetProximityCooldownsDefaults()[fieldName]
+  end
+
+  return value
+end
+
+--[[
+  Write one field of the proximityCooldowns block. Validation stays with the
+  public accessors - this only owns the lazy block creation and the logging.
+
+  @param {string} fieldName
+  @param {any} value
+]]--
+local function UpdateProximityCooldownField(fieldName, value)
+  GetProximityCooldowns()[fieldName] = value
+  mod.logger.LogDebug(me.tag, "Set proximityCooldowns." .. fieldName .. " - " .. tostring(value))
+end
+
+--[[
+  Update whether the proximity cooldown window is enabled at all
+
+  @param {boolean} enabled
+]]--
+function me.UpdateProximityCooldownsEnabled(enabled)
+  UpdateProximityCooldownField("enabled", enabled == true)
+end
+
+--[[
+  @return {boolean}
+    true  - If the proximity cooldown window is enabled
+    false - Otherwise (disabled, or never configured - the window is opt-in)
+]]--
+function me.IsProximityCooldownsEnabled()
+  return GetProximityCooldownField("enabled") == true
+end
+
+--[[
+  Update whether the proximity cooldown window is locked from moving
+
+  @param {boolean} locked
+]]--
+function me.UpdateProximityCooldownsLocked(locked)
+  UpdateProximityCooldownField("locked", locked == true)
+end
+
+--[[
+  @return {boolean}
+    true  - If the proximity cooldown window is locked
+    false - If the proximity cooldown window is not locked
+]]--
+function me.IsProximityCooldownsLocked()
+  return GetProximityCooldownField("locked") == true
+end
+
+--[[
+  Update the render scale of the proximity cooldown window. Only basic sanity
+  is enforced here - a positive finite number. The slider bounds belong to the
+  options ui, which is the sole producer of player-entered values.
+
+  @param {number} scale
+
+  @return {number | nil}
+    The value that was stored, nil when it was rejected
+]]--
+function me.UpdateProximityCooldownsScale(scale)
+  if type(scale) ~= "number"
+    or scale ~= scale -- NaN is the only value not equal to itself
+    or scale <= 0
+    or scale == math.huge then
+    mod.logger.LogWarn(me.tag, "Rejected invalid proximity window scale: " .. tostring(scale))
+
+    return nil
+  end
+
+  UpdateProximityCooldownField("scale", scale)
+
+  return scale
+end
+
+--[[
+  @return {number}
+    The render scale of the proximity cooldown window
+]]--
+function me.GetProximityCooldownsScale()
+  return GetProximityCooldownField("scale")
+end
+
+--[[
+  Update how many cooldowns the proximity cooldown window displays at once.
+  Must be a positive integer - there is no upper bound here, the render layer
+  truncates to its slot count either way.
+
+  @param {number} maxDisplayedCooldowns
+
+  @return {number | nil}
+    The value that was stored, nil when it was rejected
+]]--
+function me.UpdateProximityCooldownsMaxDisplayed(maxDisplayedCooldowns)
+  if type(maxDisplayedCooldowns) ~= "number"
+    or maxDisplayedCooldowns ~= maxDisplayedCooldowns -- NaN
+    or maxDisplayedCooldowns <= 0
+    or maxDisplayedCooldowns == math.huge
+    or maxDisplayedCooldowns ~= math.floor(maxDisplayedCooldowns) then
+    mod.logger.LogWarn(me.tag, "Rejected invalid proximity window display count: "
+      .. tostring(maxDisplayedCooldowns))
+
+    return nil
+  end
+
+  UpdateProximityCooldownField("maxDisplayedCooldowns", maxDisplayedCooldowns)
+
+  return maxDisplayedCooldowns
+end
+
+--[[
+  @return {number}
+    How many cooldowns the proximity cooldown window displays at once
+]]--
+function me.GetProximityCooldownsMaxDisplayed()
+  return GetProximityCooldownField("maxDisplayedCooldowns")
+end
+
+--[[
+  Update whether cooldowns above RGCW_CONSTANTS.PROXIMITY_LONG_COOLDOWN_THRESHOLD
+  are hidden from the proximity cooldown window
+
+  @param {boolean} hideLongCooldowns
+]]--
+function me.UpdateProximityCooldownsHideLong(hideLongCooldowns)
+  UpdateProximityCooldownField("hideLongCooldowns", hideLongCooldowns == true)
+end
+
+--[[
+  @return {boolean}
+    true  - If cooldowns above the threshold are hidden from the proximity
+            cooldown window (the shipped default)
+    false - If every tracked cooldown is shown
+]]--
+function me.IsProximityCooldownsHideLongEnabled()
+  return GetProximityCooldownField("hideLongCooldowns") == true
 end

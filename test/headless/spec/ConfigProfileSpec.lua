@@ -46,6 +46,7 @@ describe("ConfigProfile", function()
     "globalAssumeWorstCase",
     "cooldownConfiguration",
     "cooldownOverrides",
+    "proximityCooldowns",
     "frames",
     "addonVersion",
     "profiles"
@@ -72,6 +73,9 @@ describe("ConfigProfile", function()
     CooldownWatchConfiguration.globalAssumeWorstCase = false
     CooldownWatchConfiguration.cooldownConfiguration = { priest = { [10890] = true } }
     CooldownWatchConfiguration.cooldownOverrides = { priest = { [10890] = { worstCase = true, value = 20 } } }
+    CooldownWatchConfiguration.proximityCooldowns = {
+      enabled = true, locked = true, scale = 1.5, maxDisplayedCooldowns = 5, hideLongCooldowns = false
+    }
     CooldownWatchConfiguration.frames = { CW_TargetCooldownWatchBar = { posX = 10, posY = -20, point = "CENTER" } }
     CooldownWatchConfiguration.addonVersion = "vLive"
     CooldownWatchConfiguration.profiles = {}
@@ -132,6 +136,18 @@ describe("ConfigProfile", function()
     assert.equal(liveOverrides, CooldownWatchConfiguration.cooldownOverrides)
     -- SetupConfiguration ran and restamped the addon version via the stub
     assert.equal("v9.9.9", CooldownWatchConfiguration.addonVersion)
+  end)
+
+  it("ApplySnapshot restores a stored proximityCooldowns block", function()
+    local payload = {
+      proximityCooldowns = {
+        enabled = false, locked = false, scale = 0.8, maxDisplayedCooldowns = 3, hideLongCooldowns = true
+      }
+    }
+
+    configProfile.ApplySnapshot(payload)
+
+    assert.same(payload.proximityCooldowns, CooldownWatchConfiguration.proximityCooldowns)
   end)
 
   it("ApplySnapshot deep-copies so a stored profile never aliases the live config", function()
@@ -348,6 +364,9 @@ describe("ConfigProfile", function()
       assert.same({}, payload.frames)
       assert.same(rgcw.profile.GetDefaultProfile(), payload.cooldownConfiguration)
       assert.same(rgcw.profile.GetDefaultCooldownOverrides(), payload.cooldownOverrides)
+      -- the fixture's customized proximity block must not bleed into the baseline
+      assert.is_false(payload.proximityCooldowns.enabled)
+      assert.same(rgcw.configuration.GetDefaults().proximityCooldowns, payload.proximityCooldowns)
     end)
 
     it("leaves an already seeded default untouched on a second call", function()

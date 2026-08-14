@@ -90,6 +90,18 @@ RGCW_CONSTANTS = {
   ]]--
   TARGET_COOLDOWN_TEXT_INSET = 4,
   --[[
+    ProximityCooldownWindow (cross-caster cooldown window, fed by
+    CooldownQueue.GetAllCooldowns)
+  ]]--
+  ELEMENT_PROXIMITY_COOLDOWN_WINDOW_FRAME = "CW_ProximityCooldownWindow",
+  --[[
+    Cooldowns above this many seconds are hidden from the proximity cooldown
+    window while the hideLongCooldowns option is enabled (the shipped default) -
+    long cooldowns rarely decide the next engagement and would crowd out the
+    short ones the window exists for. The target cooldown bar is not affected.
+  ]]--
+  PROXIMITY_LONG_COOLDOWN_THRESHOLD = 60,
+  --[[
     Addon configuration
   ]]--
   ELEMENT_ADDON_PANEL = "CW_AddonPanel",

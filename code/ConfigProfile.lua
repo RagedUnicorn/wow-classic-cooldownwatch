@@ -66,6 +66,7 @@ me.PROFILE_FIELDS = {
   "globalAssumeWorstCase",
   "cooldownConfiguration",
   "cooldownOverrides",
+  "proximityCooldowns",
   "frames"
 }
 

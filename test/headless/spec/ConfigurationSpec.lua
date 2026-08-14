@@ -544,6 +544,40 @@ describe("Configuration schema reconcile", function()
     assert.is_false(saved.cooldownConfiguration["priest"][10890])
   end)
 
+  it("ships the proximity window defaults: window disabled, long cooldowns hidden", function()
+    local defaults = configuration.GetDefaults().proximityCooldowns
+
+    assert.is_false(defaults.enabled)
+    assert.is_false(defaults.locked)
+    assert.equal(1.0, defaults.scale)
+    assert.equal(10, defaults.maxDisplayedCooldowns)
+    assert.is_true(defaults.hideLongCooldowns)
+  end)
+
+  it("fills the whole proximityCooldowns block on an upgraded configuration", function()
+    -- an older saved shape has no proximityCooldowns key at all
+    local saved = configuration.ReconcileWithDefaults(
+      { lockTargetCooldownBar = true },
+      configuration.GetDefaults()
+    )
+
+    assert.same(configuration.GetDefaults().proximityCooldowns, saved.proximityCooldowns)
+  end)
+
+  it("backfills keys missing inside a partial proximityCooldowns block", function()
+    local saved = configuration.ReconcileWithDefaults(
+      { proximityCooldowns = { enabled = true, scale = 1.5 } },
+      configuration.GetDefaults()
+    )
+
+    -- the configured values survive, the missing keys come from the defaults
+    assert.is_true(saved.proximityCooldowns.enabled)
+    assert.equal(1.5, saved.proximityCooldowns.scale)
+    assert.is_false(saved.proximityCooldowns.locked)
+    assert.equal(10, saved.proximityCooldowns.maxDisplayedCooldowns)
+    assert.is_true(saved.proximityCooldowns.hideLongCooldowns)
+  end)
+
   it("never rewrites player data living under a default-empty table", function()
     local profiles = { ["Default"] = { lockTargetCooldownBar = true }, ["Pvp"] = { frames = {} } }
 
@@ -623,5 +657,123 @@ describe("Configuration schema reconcile", function()
     configuration.SetupConfiguration()
 
     assert.equal("1.2.0", saved.addonVersion)
+  end)
+end)
+
+describe("Configuration proximity cooldowns", function()
+  local configuration
+
+  before_each(function()
+    configuration = rgcw.configuration
+    --[[
+      SetupConfiguration never runs headless, so proximityCooldowns starts nil -
+      the exact state the accessors must survive. Reset between scenarios.
+    ]]--
+    CooldownWatchConfiguration.proximityCooldowns = nil
+  end)
+
+  it("reads resolve to the shipped defaults while proximityCooldowns is nil", function()
+    assert.is_false(configuration.IsProximityCooldownsEnabled())
+    assert.is_false(configuration.IsProximityCooldownsLocked())
+    assert.equal(1.0, configuration.GetProximityCooldownsScale())
+    assert.equal(10, configuration.GetProximityCooldownsMaxDisplayed())
+    assert.is_true(configuration.IsProximityCooldownsHideLongEnabled())
+  end)
+
+  it("a field an older saved shape is missing resolves to its shipped default", function()
+    CooldownWatchConfiguration.proximityCooldowns = { enabled = true }
+
+    assert.is_true(configuration.IsProximityCooldownsEnabled())
+    assert.equal(1.0, configuration.GetProximityCooldownsScale())
+    assert.is_true(configuration.IsProximityCooldownsHideLongEnabled())
+  end)
+
+  it("round-trips the enabled toggle in both directions", function()
+    configuration.UpdateProximityCooldownsEnabled(true)
+    assert.is_true(configuration.IsProximityCooldownsEnabled())
+
+    configuration.UpdateProximityCooldownsEnabled(false)
+    assert.is_false(configuration.IsProximityCooldownsEnabled())
+  end)
+
+  it("round-trips the locked toggle in both directions", function()
+    configuration.UpdateProximityCooldownsLocked(true)
+    assert.is_true(configuration.IsProximityCooldownsLocked())
+
+    configuration.UpdateProximityCooldownsLocked(false)
+    assert.is_false(configuration.IsProximityCooldownsLocked())
+  end)
+
+  it("round-trips the hide-long toggle in both directions", function()
+    configuration.UpdateProximityCooldownsHideLong(false)
+    assert.is_false(configuration.IsProximityCooldownsHideLongEnabled())
+
+    configuration.UpdateProximityCooldownsHideLong(true)
+    assert.is_true(configuration.IsProximityCooldownsHideLongEnabled())
+  end)
+
+  it("stores only booleans on the toggles - a truthy non-boolean writes false", function()
+    configuration.UpdateProximityCooldownsEnabled("yes")
+
+    assert.is_false(configuration.IsProximityCooldownsEnabled())
+  end)
+
+  it("round-trips a fractional scale and returns it", function()
+    assert.equal(1.5, configuration.UpdateProximityCooldownsScale(1.5))
+    assert.equal(1.5, configuration.GetProximityCooldownsScale())
+  end)
+
+  it("rejects a non-positive, NaN, infinite or non-numeric scale without touching the store", function()
+    configuration.UpdateProximityCooldownsScale(1.5)
+
+    assert.is_nil(configuration.UpdateProximityCooldownsScale(0))
+    assert.is_nil(configuration.UpdateProximityCooldownsScale(-1))
+    assert.is_nil(configuration.UpdateProximityCooldownsScale(0 / 0))
+    assert.is_nil(configuration.UpdateProximityCooldownsScale(math.huge))
+    assert.is_nil(configuration.UpdateProximityCooldownsScale("1.5"))
+    assert.is_nil(configuration.UpdateProximityCooldownsScale(nil))
+
+    assert.equal(1.5, configuration.GetProximityCooldownsScale())
+  end)
+
+  it("round-trips the display count and returns it", function()
+    assert.equal(5, configuration.UpdateProximityCooldownsMaxDisplayed(5))
+    assert.equal(5, configuration.GetProximityCooldownsMaxDisplayed())
+  end)
+
+  it("rejects a fractional, non-positive, NaN, infinite or non-numeric display count", function()
+    configuration.UpdateProximityCooldownsMaxDisplayed(5)
+
+    assert.is_nil(configuration.UpdateProximityCooldownsMaxDisplayed(2.5))
+    assert.is_nil(configuration.UpdateProximityCooldownsMaxDisplayed(0))
+    assert.is_nil(configuration.UpdateProximityCooldownsMaxDisplayed(-3))
+    assert.is_nil(configuration.UpdateProximityCooldownsMaxDisplayed(0 / 0))
+    assert.is_nil(configuration.UpdateProximityCooldownsMaxDisplayed(math.huge))
+    assert.is_nil(configuration.UpdateProximityCooldownsMaxDisplayed("5"))
+
+    assert.equal(5, configuration.GetProximityCooldownsMaxDisplayed())
+  end)
+
+  it("a write seeds the missing block without clobbering the other defaults", function()
+    configuration.UpdateProximityCooldownsScale(0.8)
+
+    local proximityCooldowns = CooldownWatchConfiguration.proximityCooldowns
+
+    assert.equal(0.8, proximityCooldowns.scale)
+    assert.is_false(proximityCooldowns.enabled)
+    assert.is_false(proximityCooldowns.locked)
+    assert.equal(10, proximityCooldowns.maxDisplayedCooldowns)
+    assert.is_true(proximityCooldowns.hideLongCooldowns)
+  end)
+
+  it("writes are independent - one field never clobbers a configured sibling", function()
+    configuration.UpdateProximityCooldownsEnabled(true)
+    configuration.UpdateProximityCooldownsScale(1.5)
+    configuration.UpdateProximityCooldownsHideLong(false)
+
+    assert.is_true(configuration.IsProximityCooldownsEnabled())
+    assert.equal(1.5, configuration.GetProximityCooldownsScale())
+    assert.is_false(configuration.IsProximityCooldownsHideLongEnabled())
+    assert.equal(10, configuration.GetProximityCooldownsMaxDisplayed())
   end)
 end)
