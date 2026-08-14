@@ -40,7 +40,7 @@ local mainCategoryId
 
 --[[
   Numeric ids of every registered category, keyed by a stable, locale independent key:
-  "main", "general", "profile" and one entry per catalog category (its categoryName, e.g.
+  "main", "general", "proximity", "profile" and one entry per catalog category (its categoryName, e.g.
   "priest", "items"). Settings.OpenToCategory takes the numeric id only - passing a category
   NAME errors in Classic Era ("outside of expected range") because the name is handed
   straight to C_SettingsUtil.OpenSettingsPanel. Callers therefore resolve through
@@ -92,6 +92,14 @@ function me.SetupAddonConfiguration()
     mod.generalMenu.BuildUi
   )
   categoryIds.general = generalCategory.ID
+
+  local proximityCategory = me.BuildCategory(
+    RGCW_CONSTANTS.ELEMENT_PROXIMITY_SUB_OPTION_FRAME,
+    category,
+    rgcw.L["proximity_category_name"],
+    mod.proximityMenu.BuildUi
+  )
+  categoryIds.proximity = proximityCategory.ID
 
   local profileCategory = me.BuildCategory(
     RGCW_CONSTANTS.ELEMENT_PROFILE_SUB_OPTION_FRAME,

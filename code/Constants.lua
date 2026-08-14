@@ -167,6 +167,29 @@ RGCW_CONSTANTS = {
   ELEMENT_GENERAL_OPT_WINDOW_LOCK_TARGET_COOLDOWN_BAR = "CW_OptWindowLockTargetCooldownBar",
   ELEMENT_GENERAL_OPT_GLOBAL_ASSUME_WORST_CASE = "CW_OptGlobalAssumeWorstCase",
   --[[
+    ProximityMenu (options panel of the proximity cooldown window)
+  ]]--
+  ELEMENT_PROXIMITY_SUB_OPTION_FRAME = "CW_ProximityMenuOptionsFrame",
+  ELEMENT_PROXIMITY_TITLE = "CW_ProximityTitle",
+  ELEMENT_PROXIMITY_OPT_ENABLE_PROXIMITY_COOLDOWN_WINDOW = "CW_OptEnableProximityCooldownWindow",
+  ELEMENT_PROXIMITY_OPT_WINDOW_LOCK_PROXIMITY_COOLDOWN_WINDOW = "CW_OptWindowLockProximityCooldownWindow",
+  ELEMENT_PROXIMITY_OPT_HIDE_LONG_PROXIMITY_COOLDOWNS = "CW_OptHideLongProximityCooldowns",
+  ELEMENT_PROXIMITY_SCALE_SLIDER = "CW_ProximityScaleSlider",
+  ELEMENT_PROXIMITY_MAX_DISPLAYED_SLIDER = "CW_ProximityMaxDisplayedSlider",
+  -- width of a configuration slider (MinimalSliderWithSteppersTemplate, see GuiHelper.CreateSlider)
+  OPTION_SLIDER_WIDTH = 260,
+  PROXIMITY_SCALE_SLIDER_MIN = 0.5,
+  PROXIMITY_SCALE_SLIDER_MAX = 2,
+  PROXIMITY_SCALE_SLIDER_STEP = 0.1,
+  --[[
+    The max-displayed slider's upper bound is PROXIMITY_COOLDOWN_ROW_AMOUNT - the render
+    layer's fixed row pool. The configuration store accepts any positive integer, but a
+    slider range past the pool would be dead travel (the render pass takes the minimum
+    of both), so the options ui does not offer it.
+  ]]--
+  PROXIMITY_MAX_DISPLAYED_SLIDER_MIN = 1,
+  PROXIMITY_MAX_DISPLAYED_SLIDER_STEP = 1,
+  --[[
     Profile (import/export and named profiles)
   ]]--
   --[[

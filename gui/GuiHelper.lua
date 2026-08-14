@@ -23,6 +23,7 @@
 ]]--
 
 -- luacheck: globals GetSpellInfo GetItemIcon CreateFrame CreateColor STANDARD_TEXT_FONT
+-- luacheck: globals Settings MinimalSliderWithSteppersMixin
 
 local mod = rgcw
 local me = {}
@@ -166,6 +167,112 @@ function me.CreateCheckBox(frameName, parent, position, onClickCallback, onShowC
   checkBoxFrame:SetScript("OnShow", onShowCallback)
 
   return checkBoxFrame
+end
+
+--[[
+  Create the slider options consumed by a MinimalSliderWithSteppersTemplate frame
+
+  @param {number} minValue
+  @param {number} maxValue
+  @param {number} stepSize
+  @param {string} title
+  @param {function} formatValue
+    Formats a value for the current-value label and the min/max labels
+
+  @return {table}
+    The created slider options
+]]--
+local function CreateSliderOptions(minValue, maxValue, stepSize, title, formatValue)
+  local sliderOptions = Settings.CreateSliderOptions(minValue, maxValue, stepSize)
+
+  sliderOptions:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, formatValue)
+  sliderOptions:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Max, function() return formatValue(maxValue) end)
+  sliderOptions:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Min, function() return formatValue(minValue) end)
+  sliderOptions:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Top, function() return title end)
+
+  return sliderOptions
+end
+
+--[[
+  Create an always-visible gray description below a slider - the slider counterpart
+  to the checkbox description in CreateCheckBox
+
+  @param {table} sliderFrame
+  @param {string} description
+]]--
+local function CreateSliderDescription(sliderFrame, description)
+  local descriptionFontString = sliderFrame:CreateFontString(nil, "OVERLAY")
+  descriptionFontString:SetFont(STANDARD_TEXT_FONT, 12)
+  me.SetColor(descriptionFontString, RGCW_CONSTANTS.COLOR.SUBNOTE)
+  -- the template renders its min/max value labels below the frame - keep clear of them
+  descriptionFontString:SetPoint("TOPLEFT", sliderFrame, "BOTTOMLEFT", 4, -16)
+  descriptionFontString:SetWidth(RGCW_CONSTANTS.CHECK_OPTION_DESCRIPTION_WIDTH)
+  descriptionFontString:SetJustifyH("LEFT")
+  descriptionFontString:SetText(description)
+  sliderFrame.description = descriptionFontString
+end
+
+--[[
+  Create a configuration slider: a MinimalSliderWithSteppersTemplate frame with the
+  title above it, the current value beside it and an always-visible description below.
+  Port of GearMenu's UiHelper.CreateSizeSlider (family convention - when the mechanism
+  changes, change it in the whole family).
+
+  The callback is registered after Init, so it only ever fires for player interaction,
+  never for the initial value.
+
+  @param {string} frameName
+  @param {table} parent
+  @param {table} position
+    An object containing configuration parameters for a SetPoint function call
+  @param {table} sliderValues
+    minValue, maxValue, stepSize and initialValue of the slider
+  @param {string} title
+  @param {string} description
+  @param {function} onValueChangedCallback
+    Invoked with (owner, value) whenever the player moves the slider
+  @param {function} formatValue
+    Optional formatter for the displayed value labels - defaults to the raw value.
+    Sliders with fractional steps should pass one to hide float artifacts.
+
+  @return {table}
+    The created slider frame
+]]--
+function me.CreateSlider(frameName, parent, position, sliderValues, title, description,
+    onValueChangedCallback, formatValue)
+  formatValue = formatValue or function(value) return value end
+
+  local sliderOptions = CreateSliderOptions(
+    sliderValues.minValue,
+    sliderValues.maxValue,
+    sliderValues.stepSize,
+    title,
+    formatValue
+  )
+
+  local sliderFrame = CreateFrame(
+    "Frame",
+    frameName,
+    parent,
+    "MinimalSliderWithSteppersTemplate"
+  )
+  sliderFrame:SetWidth(RGCW_CONSTANTS.OPTION_SLIDER_WIDTH)
+  sliderFrame:SetPoint(unpack(position))
+  sliderFrame:Init(
+    sliderValues.initialValue,
+    sliderOptions.minValue,
+    sliderOptions.maxValue,
+    sliderOptions.steps,
+    sliderOptions.formatters
+  )
+
+  if onValueChangedCallback ~= nil then
+    sliderFrame:RegisterCallback("OnValueChanged", onValueChangedCallback, sliderFrame)
+  end
+
+  CreateSliderDescription(sliderFrame, description)
+
+  return sliderFrame
 end
 
 --[[

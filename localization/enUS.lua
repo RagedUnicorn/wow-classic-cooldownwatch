@@ -32,6 +32,24 @@ rgcw.L["option_global_assume_worst_case"] = "Assume worst case for all cooldowns
 rgcw.L["option_global_assume_worst_case_tooltip"] = "Assume every enemy has talents or gear reducing "
   .. "their cooldowns. Worst case settings on individual cooldowns still take precedence."
 
+-- proximity cooldowns
+rgcw.L["proximity_category_name"] = "Proximity Cooldowns"
+rgcw.L["proximity_title"] = "Proximity Cooldowns"
+rgcw.L["option_enable_proximity_cooldown_window"] = "Enable Proximity Cooldown Window"
+rgcw.L["option_enable_proximity_cooldown_window_tooltip"] = "Show a movable window listing the active "
+  .. "cooldowns of nearby enemies other than your current target"
+rgcw.L["window_lock_proximity_cooldown_window"] = "Lock Proximity Cooldown Window"
+rgcw.L["window_lock_proximity_cooldown_window_tooltip"] = "Prevents Proximity Cooldown Window frame "
+  .. "from being moved"
+rgcw.L["option_hide_long_proximity_cooldowns"] = "Hide long cooldowns"
+rgcw.L["option_hide_long_proximity_cooldowns_tooltip"] = "Hide cooldowns longer than %d seconds from "
+  .. "the window. Long cooldowns rarely decide the next engagement and would crowd out the short ones."
+rgcw.L["proximity_scale_slider_title"] = "Window scale"
+rgcw.L["proximity_scale_slider_tooltip"] = "Adjust the size of the Proximity Cooldown Window"
+rgcw.L["proximity_max_displayed_slider_title"] = "Maximum displayed cooldowns"
+rgcw.L["proximity_max_displayed_slider_tooltip"] = "How many cooldowns the window displays at once. "
+  .. "The most recently detected cooldowns are shown first."
+
 -- profiles
 rgcw.L["profile_category_name"] = "Profiles"
 rgcw.L["profile_title"] = "Profiles"

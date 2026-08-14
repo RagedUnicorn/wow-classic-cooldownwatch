@@ -35,6 +35,26 @@ if (GetLocale() == "deDE") then
     .. "besitzt, die seine Abklingzeiten verkürzen. Worst-Case-Einstellungen einzelner Abklingzeiten "
     .. "haben weiterhin Vorrang."
 
+  -- proximity cooldowns
+  rgcw.L["proximity_category_name"] = "Abklingzeiten in der Nähe"
+  rgcw.L["proximity_title"] = "Abklingzeiten in der Nähe"
+  rgcw.L["option_enable_proximity_cooldown_window"] = "Fenster für Abklingzeiten in der Nähe aktivieren"
+  rgcw.L["option_enable_proximity_cooldown_window_tooltip"] = "Zeigt ein bewegliches Fenster mit den "
+    .. "laufenden Abklingzeiten von Gegnern in der Nähe, die nicht dein aktuelles Ziel sind"
+  rgcw.L["window_lock_proximity_cooldown_window"] = "Sperre Fenster für Abklingzeiten in der Nähe"
+  rgcw.L["window_lock_proximity_cooldown_window_tooltip"] = "Verhindert das Bewegen des Fensters für "
+    .. "Abklingzeiten in der Nähe"
+  rgcw.L["option_hide_long_proximity_cooldowns"] = "Lange Abklingzeiten ausblenden"
+  rgcw.L["option_hide_long_proximity_cooldowns_tooltip"] = "Blendet Abklingzeiten über %d Sekunden aus "
+    .. "dem Fenster aus. Lange Abklingzeiten entscheiden selten den nächsten Kampf und würden die "
+    .. "kurzen verdrängen."
+  rgcw.L["proximity_scale_slider_title"] = "Fensterskalierung"
+  rgcw.L["proximity_scale_slider_tooltip"] = "Passt die Grösse des Fensters für Abklingzeiten "
+    .. "in der Nähe an"
+  rgcw.L["proximity_max_displayed_slider_title"] = "Maximal angezeigte Abklingzeiten"
+  rgcw.L["proximity_max_displayed_slider_tooltip"] = "Wie viele Abklingzeiten das Fenster gleichzeitig "
+    .. "anzeigt. Die zuletzt erkannten Abklingzeiten werden zuerst angezeigt."
+
   -- profiles
   rgcw.L["profile_category_name"] = "Profile"
   rgcw.L["profile_title"] = "Profile"
