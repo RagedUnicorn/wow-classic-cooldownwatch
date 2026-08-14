@@ -680,6 +680,7 @@ describe("Configuration per-side stores", function()
     CooldownWatchConfiguration.friendlyCooldownOverrides = nil
     CooldownWatchConfiguration.globalAssumeWorstCase = nil
     CooldownWatchConfiguration.trackFriendlyCooldowns = nil
+    CooldownWatchConfiguration.showFriendlyTargetCooldowns = nil
   end)
 
   after_each(function()
@@ -687,6 +688,7 @@ describe("Configuration per-side stores", function()
     CooldownWatchConfiguration.friendlyCooldownConfiguration = nil
     CooldownWatchConfiguration.friendlyCooldownOverrides = nil
     CooldownWatchConfiguration.trackFriendlyCooldowns = nil
+    CooldownWatchConfiguration.showFriendlyTargetCooldowns = nil
   end)
 
   it("keeps the tracking state independent per side in both directions", function()
@@ -799,6 +801,7 @@ describe("Configuration per-side stores", function()
     -- the enemy-side player data survives untouched
     assert.is_false(saved.cooldownConfiguration["priest"][10890])
     assert.is_false(saved.trackFriendlyCooldowns)
+    assert.is_false(saved.showFriendlyTargetCooldowns)
   end)
 
   it("IsTrackFriendlyCooldownsEnabled is false while the flag is nil - friendly tracking is opt-in", function()
@@ -810,6 +813,24 @@ describe("Configuration per-side stores", function()
     assert.is_true(configuration.IsTrackFriendlyCooldownsEnabled())
 
     configuration.UpdateTrackFriendlyCooldownsState(false)
+    assert.is_false(configuration.IsTrackFriendlyCooldownsEnabled())
+  end)
+
+  it("IsShowFriendlyTargetCooldownsEnabled is false while the flag is nil - the display is opt-in", function()
+    assert.is_false(configuration.IsShowFriendlyTargetCooldownsEnabled())
+  end)
+
+  it("UpdateShowFriendlyTargetCooldownsState round-trips the flag in both directions", function()
+    configuration.UpdateShowFriendlyTargetCooldownsState(true)
+    assert.is_true(configuration.IsShowFriendlyTargetCooldownsEnabled())
+
+    configuration.UpdateShowFriendlyTargetCooldownsState(false)
+    assert.is_false(configuration.IsShowFriendlyTargetCooldownsEnabled())
+  end)
+
+  it("the display flag never writes the tracking flag - the two are independent", function()
+    configuration.UpdateShowFriendlyTargetCooldownsState(true)
+
     assert.is_false(configuration.IsTrackFriendlyCooldownsEnabled())
   end)
 end)

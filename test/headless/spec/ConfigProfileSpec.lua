@@ -45,6 +45,7 @@ describe("ConfigProfile", function()
     "lockTargetCooldownBar",
     "globalAssumeWorstCase",
     "trackFriendlyCooldowns",
+    "showFriendlyTargetCooldowns",
     "cooldownConfiguration",
     "cooldownOverrides",
     "friendlyCooldownConfiguration",
@@ -75,6 +76,7 @@ describe("ConfigProfile", function()
     CooldownWatchConfiguration.lockTargetCooldownBar = true
     CooldownWatchConfiguration.globalAssumeWorstCase = false
     CooldownWatchConfiguration.trackFriendlyCooldowns = true
+    CooldownWatchConfiguration.showFriendlyTargetCooldowns = true
     CooldownWatchConfiguration.cooldownConfiguration = { priest = { [10890] = true } }
     CooldownWatchConfiguration.cooldownOverrides = { priest = { [10890] = { worstCase = true, value = 20 } } }
     CooldownWatchConfiguration.friendlyCooldownConfiguration = { priest = { [10890] = false } }
@@ -367,8 +369,9 @@ describe("ConfigProfile", function()
 
       assert.is_false(payload.lockTargetCooldownBar)
       assert.is_false(payload.globalAssumeWorstCase)
-      -- the fixture enables friendly tracking; the factory baseline keeps it off
+      -- the fixture enables friendly tracking and display; the factory baseline keeps both off
       assert.is_false(payload.trackFriendlyCooldowns)
+      assert.is_false(payload.showFriendlyTargetCooldowns)
       assert.same({}, payload.frames)
       assert.same(rgcw.profile.GetDefaultProfile(), payload.cooldownConfiguration)
       assert.same(rgcw.profile.GetDefaultCooldownOverrides(), payload.cooldownOverrides)

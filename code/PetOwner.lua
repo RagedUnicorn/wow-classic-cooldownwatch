@@ -47,7 +47,7 @@ me.tag = "PetOwner"
   1. SPELL_SUMMON bookkeeping (RecordSummon): the summon event carries the owner
      as source and the pet as dest - exact guids, but only for summons that
      happen within combat-log range.
-  2. Sightings (RecordSighting): when the player targets a hostile pet, the
+  2. Sightings (RecordSighting): when the player targets a player pet, the
      owner guid is read off the unit (UnitOwnerGUID) and recorded here.
   3. Tooltip scan at cast time (ScanOwnerName): resolves the owner's NAME for
      any pet guid the client knows. The name is matched against a directory of
@@ -185,7 +185,7 @@ end
 
 --[[
   Record a pet -> owner mapping read off a visible unit (Target.UpdateCurrentTarget
-  resolves a targeted hostile pet via UnitOwnerGUID). ownerName is optional -
+  resolves a targeted player pet via UnitOwnerGUID). ownerName is optional -
   the unit api may not know the owner's name when the owner was never seen.
 
   @param {string} petGuid

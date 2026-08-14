@@ -23,7 +23,8 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals UnitIsEnemy UnitGUID UnitName UnitPlayerControlled UnitOwnerGUID GetPlayerInfoByGUID
+-- luacheck: globals UnitIsEnemy UnitIsFriend UnitGUID UnitName UnitPlayerControlled UnitOwnerGUID
+-- luacheck: globals GetPlayerInfoByGUID
 
 local mod = rgcw
 local me = {}
@@ -36,11 +37,13 @@ local currentTargetGuid = ""
 local currentTargetName = ""
 
 --[[
-  Resolve a targeted hostile player pet to its owning player. Cooldowns are
-  keyed by the owner's guid (pet guids change on every resummon), so targeting
-  the pet renders the owner's full cooldown bucket - which includes the
-  pet-cast entries the pet itself queued (see PetOwner). The sighting is
-  recorded either way, flushing any casts parked while the owner was unknown.
+  Resolve a targeted player pet to its owning player. Cooldowns are keyed by
+  the owner's guid (pet guids change on every resummon), so targeting the pet
+  renders the owner's full cooldown bucket - which includes the pet-cast
+  entries the pet itself queued (see PetOwner). The sighting is recorded
+  either way, flushing any casts parked while the owner was unknown.
+  Side-agnostic: hostile pets arrive via the enemy gate, friendly pets via the
+  showFriendlyTargetCooldowns gate in UpdateCurrentTarget.
 
   @param {string} targetId
   @param {string} targetName
@@ -93,16 +96,44 @@ function me.GetCurrentTargetName()
 end
 
 --[[
-  Get players current target (if enemy) in the form of the targets unique id and update the currentTarget.
+  Whether the current target is a friendly unit whose cooldowns should show on
+  the target bar: the opt-in showFriendlyTargetCooldowns flag must be on and
+  the target must be player-controlled - a friendly player or a friendly
+  player's pet (ResolvePetTarget redirects the pet to its owner), never an
+  npc. Deliberately independent of trackFriendlyCooldowns: with tracking off
+  the queue holds no friendly entries and the bar simply stays empty.
+
+  @return {boolean}
+]]--
+local function IsShowableFriendlyTarget()
+  if not mod.configuration.IsShowFriendlyTargetCooldownsEnabled() then
+    return false
+  end
+
+  -- truthiness, not `== true`: robust should a client return the legacy 1/nil
+  if UnitIsFriend(RGCW_CONSTANTS.UNIT_ID_PLAYER, RGCW_CONSTANTS.UNIT_ID_TARGET)
+    and UnitPlayerControlled(RGCW_CONSTANTS.UNIT_ID_TARGET) then
+    return true
+  end
+
+  return false
+end
+
+--[[
+  Get players current target (if enemy, or friendly behind the
+  showFriendlyTargetCooldowns flag) in the form of the targets unique id and
+  update the currentTarget.
 ]]--
 function me.UpdateCurrentTarget()
   local targetId
   local targetName
 
   --[[
-    For debugging purpose allow friendly target in debug mode
+    For debugging purpose allow any target in debug mode
   ]]--
-  if UnitIsEnemy(RGCW_CONSTANTS.UNIT_ID_PLAYER, RGCW_CONSTANTS.UNIT_ID_TARGET) or RGCW_ENVIRONMENT.DEBUG then
+  if UnitIsEnemy(RGCW_CONSTANTS.UNIT_ID_PLAYER, RGCW_CONSTANTS.UNIT_ID_TARGET)
+    or IsShowableFriendlyTarget()
+    or RGCW_ENVIRONMENT.DEBUG then
     targetId = UnitGUID(RGCW_CONSTANTS.UNIT_ID_TARGET)
     targetName = UnitName(RGCW_CONSTANTS.UNIT_ID_TARGET)
     targetId, targetName = ResolvePetTarget(targetId, targetName)

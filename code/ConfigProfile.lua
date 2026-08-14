@@ -65,6 +65,7 @@ me.PROFILE_FIELDS = {
   "lockTargetCooldownBar",
   "globalAssumeWorstCase",
   "trackFriendlyCooldowns",
+  "showFriendlyTargetCooldowns",
   "cooldownConfiguration",
   "cooldownOverrides",
   "friendlyCooldownConfiguration",

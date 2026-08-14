@@ -123,6 +123,15 @@ CooldownWatchConfiguration = {
   ]]--
   ["trackFriendlyCooldowns"] = false,
   --[[
+    Whether targeting a FRIENDLY player (or their pet - the target layer
+    redirects pets to their owner) shows that player's tracked cooldowns on
+    the target cooldown bar. Deliberately independent of
+    trackFriendlyCooldowns: with tracking off the queue holds no friendly
+    entries and the bar simply stays empty - enabling display never silently
+    writes the tracking flag.
+  ]]--
+  ["showFriendlyTargetCooldowns"] = false,
+  --[[
     Global default for the worst-case cooldown assumption. When enabled, every
     spell with a cooldownWorstCase value resolves to it unless the player set a
     per-spell override — the per-spell toggle wins in both directions
@@ -191,6 +200,7 @@ function me.GetDefaults()
     ["friendlyCooldownConfiguration"] = mod.profile.GetDefaultProfile(),
     ["friendlyCooldownOverrides"] = mod.profile.GetDefaultCooldownOverrides(),
     ["trackFriendlyCooldowns"] = false,
+    ["showFriendlyTargetCooldowns"] = false,
     ["globalAssumeWorstCase"] = false,
     ["frames"] = {},
     ["proximityCooldowns"] = GetProximityCooldownsDefaults(),
@@ -897,6 +907,35 @@ end
 ]]--
 function me.IsTrackFriendlyCooldownsEnabled()
   return CooldownWatchConfiguration.trackFriendlyCooldowns == true
+end
+
+--[[
+  Update whether targeting a FRIENDLY player (or their pet) shows that player's
+  tracked cooldowns on the target cooldown bar. Deliberately does NOT touch
+  trackFriendlyCooldowns - the two flags are independent, and with tracking off
+  the bar simply stays empty for friendly targets.
+
+  @param {boolean} enabled
+    Whether friendly targets should show their cooldowns on the target bar
+]]--
+function me.UpdateShowFriendlyTargetCooldownsState(enabled)
+  if enabled then
+    CooldownWatchConfiguration.showFriendlyTargetCooldowns = true
+    mod.logger.LogDebug(me.tag, "Enabled friendly target cooldown display")
+  else
+    CooldownWatchConfiguration.showFriendlyTargetCooldowns = false
+    mod.logger.LogDebug(me.tag, "Disabled friendly target cooldown display")
+  end
+end
+
+--[[
+  @return {boolean}
+    true  - If targeting a friendly player shows their cooldowns on the
+            target cooldown bar
+    false - Otherwise (disabled, or never configured - the display is opt-in)
+]]--
+function me.IsShowFriendlyTargetCooldownsEnabled()
+  return CooldownWatchConfiguration.showFriendlyTargetCooldowns == true
 end
 
 --[[
