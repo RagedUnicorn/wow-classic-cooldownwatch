@@ -54,6 +54,13 @@ local builtMenu = false
   when the category changes
 ]]--
 local cachedCategoryData
+--[[
+  Which caster side the spell list currently edits. Set by the category panel's tab
+  strip (CategoryMenu.ActivateTab) before the list is (re)built; the rows themselves
+  are side-agnostic - each one gets the side bound alongside its spell identity
+  (see UpdateCooldownUiState) and every store read and write routes through it.
+]]--
+local friendlySideActive = false
 
 --[[
   Retrieve a spell row by its position in the list. The rows hang from an anonymous
@@ -68,6 +75,20 @@ local cachedCategoryData
 ]]--
 function me.GetSpellRow(position)
   return uiState.spellRows[position]
+end
+
+--[[
+  Point the spell list at a caster side's stores: the enemy pair
+  (cooldownConfiguration/cooldownOverrides) or their friendly twins. Takes effect on the
+  next list refresh - the category panel's tab strip calls this right before it rebuilds
+  the list (CategoryMenu.ActivateTab).
+
+  @param {boolean} friendly
+    true - the spell list edits the friendly-side stores
+    false - the spell list edits the enemy-side stores
+]]--
+function me.SetFriendlySideActive(friendly)
+  friendlySideActive = friendly == true
 end
 
 --[[
@@ -652,10 +673,11 @@ function me.CreateWorstCaseValueField(row)
   worstCaseValueInput:SetPoint("LEFT", worstCaseValueInput.label, "RIGHT", 10, 0)
 
   worstCaseValueInput.GetOverride = function(fieldRow)
-    return mod.configuration.GetCooldownWorstCaseValue(fieldRow.categoryName, fieldRow.spellId)
+    return mod.configuration.GetCooldownWorstCaseValue(fieldRow.categoryName, fieldRow.spellId, fieldRow.friendly)
   end
   worstCaseValueInput.SetOverride = function(fieldRow, value)
-    return mod.configuration.UpdateCooldownWorstCaseValue(value, fieldRow.categoryName, fieldRow.spellId)
+    return mod.configuration.UpdateCooldownWorstCaseValue(
+      value, fieldRow.categoryName, fieldRow.spellId, fieldRow.friendly)
   end
   worstCaseValueInput.GetCatalogValue = function(fieldRow)
     return fieldRow.worstCaseCooldown
@@ -720,10 +742,11 @@ function me.CreateManualOverrideInput(row)
   manualOverrideInput:SetPoint("LEFT", manualOverrideInput.label, "RIGHT", 10, 0)
 
   manualOverrideInput.GetOverride = function(fieldRow)
-    return mod.configuration.GetCooldownManualOverride(fieldRow.categoryName, fieldRow.spellId)
+    return mod.configuration.GetCooldownManualOverride(fieldRow.categoryName, fieldRow.spellId, fieldRow.friendly)
   end
   manualOverrideInput.SetOverride = function(fieldRow, value)
-    return mod.configuration.UpdateCooldownManualOverride(value, fieldRow.categoryName, fieldRow.spellId)
+    return mod.configuration.UpdateCooldownManualOverride(
+      value, fieldRow.categoryName, fieldRow.spellId, fieldRow.friendly)
   end
   manualOverrideInput.GetCatalogValue = function(fieldRow)
     return fieldRow.baseCooldown
@@ -784,7 +807,8 @@ end
   @param {string} categoryName
 ]]--
 function me.UpdateCooldownUiState(row, cooldown, categoryName)
-  local enabled = mod.configuration.GetCooldownConfigurationState(categoryName, cooldown.spellId, cooldown.active)
+  local enabled = mod.configuration.GetCooldownConfigurationState(
+    categoryName, cooldown.spellId, cooldown.active, friendlySideActive)
 
   --[[
     Drop an in-progress edit *before* the identity below is rebound. Leaving a
@@ -797,10 +821,12 @@ function me.UpdateCooldownUiState(row, cooldown, categoryName)
   --[[
     Bind the new spell identity next - every control update below reads it: the
     fields rebind their text through the store accessors and the highlight
-    resolves the live value against it.
+    resolves the live value against it. The caster side is part of that identity:
+    it picks the store pair every one of those accessors hits.
   ]]--
   row.spellId = cooldown.spellId
   row.categoryName = categoryName
+  row.friendly = friendlySideActive
   row.baseCooldown = cooldown.cooldown
   row.worstCaseCooldown = cooldown.cooldownWorstCase
 
@@ -928,12 +954,12 @@ end
 ]]--
 function me.BuildCooldownValueSegments(row)
   local segments = {}
-  local override = mod.configuration.GetCooldownManualOverride(row.categoryName, row.spellId)
+  local override = mod.configuration.GetCooldownManualOverride(row.categoryName, row.spellId, row.friendly)
 
   if row.worstCaseCooldown ~= nil
-    and mod.configuration.IsWorstCaseEffective(row.categoryName, row.spellId) then
+    and mod.configuration.IsWorstCaseEffective(row.categoryName, row.spellId, row.friendly) then
     -- the player's corrected value when there is one, the catalog's otherwise
-    local worstCase = mod.configuration.GetCooldownWorstCaseValue(row.categoryName, row.spellId)
+    local worstCase = mod.configuration.GetCooldownWorstCaseValue(row.categoryName, row.spellId, row.friendly)
       or row.worstCaseCooldown
 
     table.insert(segments, {
@@ -1022,7 +1048,7 @@ function me.UpdateWorstCaseToggleState(row, cooldown, categoryName)
   end
 
   row.worstCaseToggle:SetChecked(
-    mod.configuration.IsCooldownWorstCaseAssumed(categoryName, cooldown.spellId)
+    mod.configuration.IsCooldownWorstCaseAssumed(categoryName, cooldown.spellId, row.friendly)
   )
   row.worstCaseToggle:Show()
   worstCaseValueInput:Show()
@@ -1037,9 +1063,10 @@ end
 ]]--
 function me.CooldownEntryOnClick(self)
   local enabled = self:GetChecked()
+  local row = self:GetParent()
 
-  mod.configuration.UpdateCooldownConfigurationState(enabled, self:GetParent().categoryName, self:GetParent().spellId)
-  me.UpdateRowControlsState(self:GetParent(), enabled)
+  mod.configuration.UpdateCooldownConfigurationState(enabled, row.categoryName, row.spellId, row.friendly)
+  me.UpdateRowControlsState(row, enabled)
 end
 
 --[[
@@ -1112,11 +1139,13 @@ end
   @param {table} row
 ]]--
 function me.ApplyValueFieldHighlight(row)
-  local override = mod.configuration.GetCooldownManualOverride(row.categoryName, row.spellId)
+  local override = mod.configuration.GetCooldownManualOverride(row.categoryName, row.spellId, row.friendly)
   local resolved = {
     spellId = row.spellId,
     cooldown = row.baseCooldown,
     cooldownWorstCase = row.worstCaseCooldown,
+    -- ResolveCooldown picks the store side off the entry's friendly marker
+    friendly = row.friendly,
   }
   mod.cooldownQueue.ResolveCooldown(row.categoryName, resolved)
 
@@ -1171,7 +1200,7 @@ function me.WorstCaseToggleOnClick(self)
   local assumed = self:GetChecked()
 
   -- self.row, not GetParent() - the toggle lives in the row's expansion strip
-  mod.configuration.UpdateCooldownWorstCaseState(assumed, self.row.categoryName, self.row.spellId)
+  mod.configuration.UpdateCooldownWorstCaseState(assumed, self.row.categoryName, self.row.spellId, self.row.friendly)
   -- the live value may have moved between the two fields
   me.ApplyValueFieldHighlight(self.row)
   me.RefreshRowResolvedState(self.row)

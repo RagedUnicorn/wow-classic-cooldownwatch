@@ -269,6 +269,8 @@ RGCW_CONSTANTS = {
     Cooldown spellList frame
   ]]--
   ELEMENT_CATEGORY_TITLE = "CW_CategoryTitle",
+  -- caster-side tabs on every category panel; the tab id (enemy 1 / friendly 2) is appended
+  ELEMENT_CATEGORY_TAB_BUTTON = "$parent_CW_CategoryTabButton",
   ELEMENT_SPELL_LIST_CONTENT_FRAME = "$parent_CW_SpellListContentFrame",
   --[[
     Fallback width for the scroll child until the settings canvas reports a size - the

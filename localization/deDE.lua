@@ -124,6 +124,8 @@ if (GetLocale() == "deDE") then
   rgcw.L["profile_error_default_cannot_be_overwritten"] = "Das Profil \"%s\" kann nicht überschrieben werden"
 
   -- cooldown menu
+  rgcw.L["tab_button_enemy"] = "Gegner"
+  rgcw.L["tab_button_friendly"] = "Verbündete"
   rgcw.L["category_priest"] = "Priester"
   rgcw.L["category_rogue"] = "Schurke"
   rgcw.L["category_mage"] = "Magier"

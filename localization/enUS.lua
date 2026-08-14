@@ -112,6 +112,8 @@ rgcw.L["profile_error_default_cannot_be_renamed"] = "The \"%s\" profile cannot b
 rgcw.L["profile_error_default_cannot_be_overwritten"] = "The \"%s\" profile cannot be overwritten"
 
 -- cooldown menu
+rgcw.L["tab_button_enemy"] = "Enemy"
+rgcw.L["tab_button_friendly"] = "Friendly"
 rgcw.L["category_priest"] = "Priest"
 rgcw.L["category_rogue"] = "Rogue"
 rgcw.L["category_mage"] = "Mage"

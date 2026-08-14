@@ -36,6 +36,20 @@ me.tag = "CategoryMenu"
 ]]--
 local categoryName
 --[[
+  Identifiers for the two caster-side tabs on every category panel. Unlike the PVPWarn
+  precedent the tabs do not switch content frames - both sides render the same spell
+  list - they switch which side's stores the rows read and write
+  (see CooldownMenu.SetFriendlySideActive).
+]]--
+local enemyTab = 1
+local friendlyTab = 2
+--[[
+  Reference to the currently active tab
+
+  One of enemyTab(1) or friendlyTab(2)
+]]--
+local activeTab
+--[[
   Track whether the tab containers for a certain category were already built and store all relevant ui
   elements for the category
 ]]--
@@ -55,7 +69,8 @@ function me.MenuOnShow(self)
     me.CreateCategoryMenu(self)
   end
 
-  me.ActivateCooldownMenu()
+  me.ResetNavigation()
+  me.ActivateTab(enemyTab) -- the enemy side is the default on every visit
 end
 
 --[[
@@ -102,19 +117,116 @@ function me.CreateCategoryMenu(self)
     rgcw.L[self.localizationKey]
   )
 
-  --[[ the list starts below the panel title, which sits at -16 and is about 19px tall ]]--
+  --[[ the tabs start below the panel title, which sits at -16 and is about 19px tall ]]--
+  local enemyTabButton = me.CreateTabButton(
+    self,
+    RGCW_CONSTANTS.ELEMENT_CATEGORY_TAB_BUTTON .. enemyTab,
+    {"TOPLEFT", 5, -44},
+    rgcw.L["tab_button_enemy"],
+    enemyTab
+  )
+
+  local friendlyTabButton = me.CreateTabButton(
+    self,
+    RGCW_CONSTANTS.ELEMENT_CATEGORY_TAB_BUTTON .. friendlyTab,
+    {"LEFT", enemyTabButton, "RIGHT", 5, 0},
+    rgcw.L["tab_button_friendly"],
+    friendlyTab
+  )
+
+  --[[ the list sits directly below the 37px tall tabs so the active tab art connects to it ]]--
   local spellContentFrame = me.CreateCategoryMenuContentFrame(
     self,
     RGCW_CONSTANTS.ELEMENT_SPELL_LIST_CONTENT_FRAME .. self.categoryName,
-    {"TOPLEFT", self, 5, -46}
+    {"TOPLEFT", self, 5, -81}
   )
 
   local category = {
     name = self.categoryName,
-    spellContentFrame = spellContentFrame
+    spellContentFrame = spellContentFrame,
+    enemyTabButton = enemyTabButton,
+    friendlyTabButton = friendlyTabButton
   }
 
   table.insert(categoriesBuilt, category)
+end
+
+--[[
+  @param {table} parentFrame
+  @param {string} tabButtonName
+  @param {table} position
+  @param {string} text
+  @param {number} id
+
+  @return {table}
+]]--
+function me.CreateTabButton(parentFrame, tabButtonName, position, text, id)
+  local tabButton = CreateFrame("Button", tabButtonName, parentFrame, "MinimalTabTemplate")
+
+  tabButton.id = id
+  tabButton:SetPoint(unpack(position))
+  --[[ the template reads its text from an xml keyvalue which CreateFrame cannot pass -
+       assign it after the fact and redo the mixin's width calculation ]]--
+  tabButton.Text:SetText(text)
+  tabButton:SetWidth(tabButton.Text:GetStringWidth() + 40)
+  tabButton:SetScript("OnClick", me.TabNavigationButtonOnClick)
+
+  return tabButton
+end
+
+--[[
+  @param {table} self
+]]--
+function me.TabNavigationButtonOnClick(self)
+  if activeTab == self.id then
+    mod.logger.LogDebug(me.tag, "Tab is already active - skipping...")
+
+    return
+  end
+
+  me.ResetNavigation()
+  me.ActivateTab(self.id)
+end
+
+--[[
+  Reset navigation - deselect both side tabs. There is no content frame to hide here:
+  both sides share one spell list, only the stores behind it differ.
+]]--
+function me.ResetNavigation()
+  mod.logger.LogDebug(me.tag, "Resetting navigation")
+
+  local category = me.GetCategoryContainerReference(categoryName)
+
+  category.enemyTabButton:SetSelected(false)
+  category.friendlyTabButton:SetSelected(false)
+
+  activeTab = nil
+end
+
+--[[
+  Activate a caster-side tab: mark its button selected, point the spell list at that
+  side's stores and rebuild the list so every row re-reads its state from them. Called
+  by the tab buttons and initially by MenuOnShow, which defaults to the enemy tab.
+
+  @param {number} position enemyTab or friendlyTab
+]]--
+function me.ActivateTab(position)
+  mod.logger.LogDebug(me.tag, "Activating tab position " .. position)
+
+  local category = me.GetCategoryContainerReference(categoryName)
+
+  if position == enemyTab then
+    category.enemyTabButton:SetSelected(true)
+  elseif position == friendlyTab then
+    category.friendlyTabButton:SetSelected(true)
+  else
+    return
+  end
+
+  activeTab = position
+
+  mod.cooldownMenu.SetFriendlySideActive(position == friendlyTab)
+  me.ActivateCooldownMenu()
 end
 
 --[[
