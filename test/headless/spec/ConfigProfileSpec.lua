@@ -51,6 +51,7 @@ describe("ConfigProfile", function()
     "friendlyCooldownConfiguration",
     "friendlyCooldownOverrides",
     "proximityCooldowns",
+    "friendlyProximityCooldowns",
     "frames",
     "addonVersion",
     "profiles"
@@ -83,6 +84,10 @@ describe("ConfigProfile", function()
     CooldownWatchConfiguration.friendlyCooldownOverrides = { priest = { [10890] = { value = 12 } } }
     CooldownWatchConfiguration.proximityCooldowns = {
       enabled = true, locked = true, scale = 1.5, maxDisplayedCooldowns = 5, hideLongCooldowns = false
+    }
+    CooldownWatchConfiguration.friendlyProximityCooldowns = {
+      enabled = true, locked = true, scale = 0.7, maxDisplayedCooldowns = 3,
+      hideLongCooldowns = true, scope = "group"
     }
     CooldownWatchConfiguration.frames = { CW_TargetCooldownWatchBar = { posX = 10, posY = -20, point = "CENTER" } }
     CooldownWatchConfiguration.addonVersion = "vLive"
@@ -156,6 +161,19 @@ describe("ConfigProfile", function()
     configProfile.ApplySnapshot(payload)
 
     assert.same(payload.proximityCooldowns, CooldownWatchConfiguration.proximityCooldowns)
+  end)
+
+  it("ApplySnapshot restores a stored friendlyProximityCooldowns block, scope included", function()
+    local payload = {
+      friendlyProximityCooldowns = {
+        enabled = true, locked = false, scale = 1.2, maxDisplayedCooldowns = 8,
+        hideLongCooldowns = false, scope = "raid"
+      }
+    }
+
+    configProfile.ApplySnapshot(payload)
+
+    assert.same(payload.friendlyProximityCooldowns, CooldownWatchConfiguration.friendlyProximityCooldowns)
   end)
 
   it("ApplySnapshot deep-copies so a stored profile never aliases the live config", function()
@@ -377,9 +395,14 @@ describe("ConfigProfile", function()
       assert.same(rgcw.profile.GetDefaultCooldownOverrides(), payload.cooldownOverrides)
       assert.same(rgcw.profile.GetDefaultProfile(), payload.friendlyCooldownConfiguration)
       assert.same(rgcw.profile.GetDefaultCooldownOverrides(), payload.friendlyCooldownOverrides)
-      -- the fixture's customized proximity block must not bleed into the baseline
+      -- the fixture's customized proximity blocks must not bleed into the baseline
       assert.is_false(payload.proximityCooldowns.enabled)
       assert.same(rgcw.configuration.GetDefaults().proximityCooldowns, payload.proximityCooldowns)
+      assert.is_false(payload.friendlyProximityCooldowns.enabled)
+      assert.same(
+        rgcw.configuration.GetDefaults().friendlyProximityCooldowns,
+        payload.friendlyProximityCooldowns
+      )
     end)
 
     it("leaves an already seeded default untouched on a second call", function()

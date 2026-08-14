@@ -89,6 +89,29 @@ function M.stubs.GetLocale(locale)
 end
 
 --[[
+  Unit APIs behind GroupRoster.RefreshRoster: UnitGUID(unitId) resolved from the passed map and
+  IsInRaid() from the flag. Returns a stub MAP for install() rather than a single value, because
+  the two globals only make sense together.
+
+  @param {table} unitGuids
+    map of unitId ("player", "party1", "raid7", ...) to guid; unmapped unit ids resolve to nil
+    like an empty unit does in-game
+  @param {boolean} inRaid
+  @return {table}
+    map of global name -> stub, pass straight to install()
+]]--
+function M.stubs.GroupRosterUnits(unitGuids, inRaid)
+  return {
+    UnitGUID = function(unitId)
+      return unitGuids[unitId]
+    end,
+    IsInRaid = function()
+      return inRaid == true
+    end
+  }
+end
+
+--[[
   C_AddOns namespace with GetAddOnMetadata(addonName, key) -> string (the localization files call
   it for their `version` string, Logger for the addon title). `metadata` maps the requested key
   (e.g. "Version") to the value to return.

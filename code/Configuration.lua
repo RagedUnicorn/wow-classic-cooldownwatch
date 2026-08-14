@@ -60,6 +60,31 @@ local function GetProximityCooldownsDefaults()
 end
 
 --[[
+  Shipped defaults of the FRIENDLY proximity cooldown window options - derived
+  from the enemy window's defaults so the shared fields can never drift, with
+  the two deliberate divergences spelled out here:
+
+  hideLongCooldowns defaults OFF: the friendly cooldowns worth watching -
+  insignias, the big defensives - mostly sit above the threshold, so the
+  enemy window's default would hide exactly what a friendly window exists to
+  show.
+
+  scope restricts which friendly casters render ("group" / "raid" / "all",
+  see RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_*) and exists on this side
+  only - the enemy window has no roster to scope against.
+
+  @return {table}
+]]--
+local function GetFriendlyProximityCooldownsDefaults()
+  local defaults = GetProximityCooldownsDefaults()
+
+  defaults.hideLongCooldowns = false
+  defaults.scope = RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_ALL
+
+  return defaults
+end
+
+--[[
   Declaration of the saved variable. WoW replaces this table with the saved one on load,
   so the values here only ever apply to a character that never saved a configuration -
   every other backfill (upgrade, applied profile) goes through me.GetDefaults below
@@ -161,6 +186,15 @@ CooldownWatchConfiguration = {
   ]]--
   ["proximityCooldowns"] = GetProximityCooldownsDefaults(),
   --[[
+    Options of the FRIENDLY proximity cooldown window - the second, separate
+    window rendering the active cooldowns of nearby friendly casters. Same
+    shape as proximityCooldowns plus the scope selector; shape and defaults
+    come from GetFriendlyProximityCooldownsDefaults above. Deliberately its
+    own block: enabling, placing and filtering the friendly window are
+    decisions independent of the enemy window's.
+  ]]--
+  ["friendlyProximityCooldowns"] = GetFriendlyProximityCooldownsDefaults(),
+  --[[
     Named configuration profiles managed by rgcw.configProfile
     profiles = {
       [profileName] = {snapshot of the PROFILE_FIELDS}
@@ -204,6 +238,7 @@ function me.GetDefaults()
     ["globalAssumeWorstCase"] = false,
     ["frames"] = {},
     ["proximityCooldowns"] = GetProximityCooldownsDefaults(),
+    ["friendlyProximityCooldowns"] = GetFriendlyProximityCooldownsDefaults(),
     ["profiles"] = {},
     ["lastNotifiedVersion"] = ""
   }
@@ -939,85 +974,135 @@ function me.IsShowFriendlyTargetCooldownsEnabled()
 end
 
 --[[
-  Lazily access the proximityCooldowns block. It may be nil when
+  Every proximity accessor below takes an optional trailing `friendly` flag
+  that routes the read or write to the FRIENDLY proximity window's block
+  instead of the enemy window's - the same convention the per-spell accessors
+  above follow. Omitting it (every historical call site) keeps the enemy-side
+  behavior bit-for-bit. The two helpers are the single place the side ->
+  block-field / block-defaults mapping lives.
+
+  @param {boolean} friendly
+    Optional. true routes to the friendly window's block
+
+  @return {string}
+    The CooldownWatchConfiguration field name of the selected block
+]]--
+local function ProximityStoreField(friendly)
+  if friendly then
+    return "friendlyProximityCooldowns"
+  end
+
+  return "proximityCooldowns"
+end
+
+local function GetProximityDefaultsForSide(friendly)
+  if friendly then
+    return GetFriendlyProximityCooldownsDefaults()
+  end
+
+  return GetProximityCooldownsDefaults()
+end
+
+--[[
+  Lazily access a proximity cooldowns block. It may be nil when
   SetupConfiguration never ran (headless test harness), in which case it is
   seeded from the shipped defaults - identical to what the reconcile would
   have filled in.
 
+  @param {boolean} friendly
+    Optional. true accesses the friendly window's block
+
   @return {table}
 ]]--
-local function GetProximityCooldowns()
-  if CooldownWatchConfiguration.proximityCooldowns == nil then
-    CooldownWatchConfiguration.proximityCooldowns = GetProximityCooldownsDefaults()
+local function GetProximityCooldowns(friendly)
+  local storeField = ProximityStoreField(friendly)
+
+  if CooldownWatchConfiguration[storeField] == nil then
+    CooldownWatchConfiguration[storeField] = GetProximityDefaultsForSide(friendly)
   end
 
-  return CooldownWatchConfiguration.proximityCooldowns
+  return CooldownWatchConfiguration[storeField]
 end
 
 --[[
-  Read one field of the proximityCooldowns block. A field an older saved shape
+  Read one field of a proximity cooldowns block. A field an older saved shape
   is missing resolves to its shipped default, the same value the reconcile
   would fill in on the next load.
 
   @param {string} fieldName
+  @param {boolean} friendly
+    Optional. true reads the friendly window's block
   @return {any}
 ]]--
-local function GetProximityCooldownField(fieldName)
-  local value = GetProximityCooldowns()[fieldName]
+local function GetProximityCooldownField(fieldName, friendly)
+  local value = GetProximityCooldowns(friendly)[fieldName]
 
   if value == nil then
-    return GetProximityCooldownsDefaults()[fieldName]
+    return GetProximityDefaultsForSide(friendly)[fieldName]
   end
 
   return value
 end
 
 --[[
-  Write one field of the proximityCooldowns block. Validation stays with the
+  Write one field of a proximity cooldowns block. Validation stays with the
   public accessors - this only owns the lazy block creation and the logging.
 
   @param {string} fieldName
   @param {any} value
+  @param {boolean} friendly
+    Optional. true writes the friendly window's block
 ]]--
-local function UpdateProximityCooldownField(fieldName, value)
-  GetProximityCooldowns()[fieldName] = value
-  mod.logger.LogDebug(me.tag, "Set proximityCooldowns." .. fieldName .. " - " .. tostring(value))
+local function UpdateProximityCooldownField(fieldName, value, friendly)
+  GetProximityCooldowns(friendly)[fieldName] = value
+  mod.logger.LogDebug(me.tag, "Set " .. ProximityStoreField(friendly) .. "."
+    .. fieldName .. " - " .. tostring(value))
 end
 
 --[[
   Update whether the proximity cooldown window is enabled at all
 
   @param {boolean} enabled
+  @param {boolean} friendly
+    Optional. true writes the friendly window's option
 ]]--
-function me.UpdateProximityCooldownsEnabled(enabled)
-  UpdateProximityCooldownField("enabled", enabled == true)
+function me.UpdateProximityCooldownsEnabled(enabled, friendly)
+  UpdateProximityCooldownField("enabled", enabled == true, friendly)
 end
 
 --[[
+  @param {boolean} friendly
+    Optional. true reads the friendly window's option
+
   @return {boolean}
     true  - If the proximity cooldown window is enabled
     false - Otherwise (disabled, or never configured - the window is opt-in)
 ]]--
-function me.IsProximityCooldownsEnabled()
-  return GetProximityCooldownField("enabled") == true
+function me.IsProximityCooldownsEnabled(friendly)
+  return GetProximityCooldownField("enabled", friendly) == true
 end
 
 --[[
   Update whether the proximity cooldown window is locked from moving
 
   @param {boolean} locked
+  @param {boolean} friendly
+    Optional. true writes the friendly window's option
 ]]--
-function me.UpdateProximityCooldownsLocked(locked)
-  UpdateProximityCooldownField("locked", locked == true)
+function me.UpdateProximityCooldownsLocked(locked, friendly)
+  UpdateProximityCooldownField("locked", locked == true, friendly)
 end
 
 --[[
+  @param {boolean} friendly
+    Optional. true reads the friendly window's option
+
   @return {boolean}
     true  - If the proximity cooldown window is locked
     false - If the proximity cooldown window is not locked
 ]]--
-function me.IsProximityCooldownsLocked()
-  return GetProximityCooldownField("locked") == true
+function me.IsProximityCooldownsLocked(friendly)
+  return GetProximityCooldownField("locked", friendly) == true
 end
 
 --[[
@@ -1026,11 +1111,13 @@ end
   options ui, which is the sole producer of player-entered values.
 
   @param {number} scale
+  @param {boolean} friendly
+    Optional. true writes the friendly window's option
 
   @return {number | nil}
     The value that was stored, nil when it was rejected
 ]]--
-function me.UpdateProximityCooldownsScale(scale)
+function me.UpdateProximityCooldownsScale(scale, friendly)
   if type(scale) ~= "number"
     or scale ~= scale -- NaN is the only value not equal to itself
     or scale <= 0
@@ -1040,17 +1127,20 @@ function me.UpdateProximityCooldownsScale(scale)
     return nil
   end
 
-  UpdateProximityCooldownField("scale", scale)
+  UpdateProximityCooldownField("scale", scale, friendly)
 
   return scale
 end
 
 --[[
+  @param {boolean} friendly
+    Optional. true reads the friendly window's option
+
   @return {number}
     The render scale of the proximity cooldown window
 ]]--
-function me.GetProximityCooldownsScale()
-  return GetProximityCooldownField("scale")
+function me.GetProximityCooldownsScale(friendly)
+  return GetProximityCooldownField("scale", friendly)
 end
 
 --[[
@@ -1059,11 +1149,13 @@ end
   truncates to its slot count either way.
 
   @param {number} maxDisplayedCooldowns
+  @param {boolean} friendly
+    Optional. true writes the friendly window's option
 
   @return {number | nil}
     The value that was stored, nil when it was rejected
 ]]--
-function me.UpdateProximityCooldownsMaxDisplayed(maxDisplayedCooldowns)
+function me.UpdateProximityCooldownsMaxDisplayed(maxDisplayedCooldowns, friendly)
   if type(maxDisplayedCooldowns) ~= "number"
     or maxDisplayedCooldowns ~= maxDisplayedCooldowns -- NaN
     or maxDisplayedCooldowns <= 0
@@ -1075,17 +1167,20 @@ function me.UpdateProximityCooldownsMaxDisplayed(maxDisplayedCooldowns)
     return nil
   end
 
-  UpdateProximityCooldownField("maxDisplayedCooldowns", maxDisplayedCooldowns)
+  UpdateProximityCooldownField("maxDisplayedCooldowns", maxDisplayedCooldowns, friendly)
 
   return maxDisplayedCooldowns
 end
 
 --[[
+  @param {boolean} friendly
+    Optional. true reads the friendly window's option
+
   @return {number}
     How many cooldowns the proximity cooldown window displays at once
 ]]--
-function me.GetProximityCooldownsMaxDisplayed()
-  return GetProximityCooldownField("maxDisplayedCooldowns")
+function me.GetProximityCooldownsMaxDisplayed(friendly)
+  return GetProximityCooldownField("maxDisplayedCooldowns", friendly)
 end
 
 --[[
@@ -1093,17 +1188,66 @@ end
   are hidden from the proximity cooldown window
 
   @param {boolean} hideLongCooldowns
+  @param {boolean} friendly
+    Optional. true writes the friendly window's option
 ]]--
-function me.UpdateProximityCooldownsHideLong(hideLongCooldowns)
-  UpdateProximityCooldownField("hideLongCooldowns", hideLongCooldowns == true)
+function me.UpdateProximityCooldownsHideLong(hideLongCooldowns, friendly)
+  UpdateProximityCooldownField("hideLongCooldowns", hideLongCooldowns == true, friendly)
 end
 
 --[[
+  @param {boolean} friendly
+    Optional. true reads the friendly window's option (which defaults to
+    showing long cooldowns - see GetFriendlyProximityCooldownsDefaults)
+
   @return {boolean}
     true  - If cooldowns above the threshold are hidden from the proximity
-            cooldown window (the shipped default)
+            cooldown window
     false - If every tracked cooldown is shown
 ]]--
-function me.IsProximityCooldownsHideLongEnabled()
-  return GetProximityCooldownField("hideLongCooldowns") == true
+function me.IsProximityCooldownsHideLongEnabled(friendly)
+  return GetProximityCooldownField("hideLongCooldowns", friendly) == true
+end
+
+--[[
+  The scope values the friendly proximity window accepts. Anything else is a
+  typo or a foreign import and is rejected rather than stored - an unknown
+  scope would silently render like "all" (see GroupRoster.IsGuidInScope).
+]]--
+local VALID_PROXIMITY_SCOPES = {
+  [RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_GROUP] = true,
+  [RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_RAID] = true,
+  [RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_ALL] = true
+}
+
+--[[
+  Update which friendly casters the friendly proximity window renders. The
+  scope exists on the friendly side only, so unlike the shared accessors above
+  there is no trailing flag to pass.
+
+  @param {string} scope
+    One of RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_GROUP / _RAID / _ALL
+
+  @return {string | nil}
+    The value that was stored, nil when it was rejected
+]]--
+function me.UpdateFriendlyProximityCooldownsScope(scope)
+  if VALID_PROXIMITY_SCOPES[scope] ~= true then
+    mod.logger.LogWarn(me.tag, "Rejected invalid friendly proximity scope: " .. tostring(scope))
+
+    return nil
+  end
+
+  UpdateProximityCooldownField("scope", scope, true)
+
+  return scope
+end
+
+--[[
+  @return {string}
+    Which friendly casters the friendly proximity window renders (one of
+    RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_GROUP / _RAID / _ALL)
+]]--
+function me.GetFriendlyProximityCooldownsScope()
+  return GetProximityCooldownField("scope", true)
 end

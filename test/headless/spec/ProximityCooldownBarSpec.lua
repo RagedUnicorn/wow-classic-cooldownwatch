@@ -35,9 +35,10 @@
   gate, and those carry the feature's behavioral contract: the opt-in gate,
   the hide-long threshold semantics and the expired-entry exclusion.
 
-  gui/ProximityCooldownBar.lua is load-safe headless (all WoW API usage lives
-  inside functions), but dofile-ing it replaces the no-op WakeRenderTicker stub
-  Bootstrap installed for every other spec - the teardown puts the stub back.
+  gui/ProximityWindow.lua and gui/ProximityCooldownBar.lua are load-safe
+  headless (all WoW API usage lives inside functions), but dofile-ing the bar
+  replaces the no-op WakeRenderTicker stub Bootstrap installed for every other
+  spec - the teardown puts the stub back.
 ]]--
 describe("ProximityCooldownBar render policy", function()
   local proximityCooldownBar
@@ -47,6 +48,7 @@ describe("ProximityCooldownBar render policy", function()
   setup(function()
     originalProximityCooldownBar = rgcw.proximityCooldownBar
 
+    dofile("gui/ProximityWindow.lua")
     dofile("gui/ProximityCooldownBar.lua")
     proximityCooldownBar = rgcw.proximityCooldownBar
   end)
@@ -118,6 +120,14 @@ describe("ProximityCooldownBar render policy", function()
     it("never renders an expired-flagged entry, filter on or off", function()
       assert.is_false(proximityCooldownBar.IsRenderableCooldown(makeEntry(30, true), true))
       assert.is_false(proximityCooldownBar.IsRenderableCooldown(makeEntry(30, true), false))
+    end)
+
+    it("never renders a friendly-flagged entry - those belong to the friendly window", function()
+      local friendlyEntry = makeEntry(30)
+      friendlyEntry.spellData.friendly = true
+
+      assert.is_false(proximityCooldownBar.IsRenderableCooldown(friendlyEntry, true))
+      assert.is_false(proximityCooldownBar.IsRenderableCooldown(friendlyEntry, false))
     end)
   end)
 

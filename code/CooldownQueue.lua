@@ -253,12 +253,13 @@ function me.AddCooldown(sourceGuid, sourceName, category, spellData)
 
   --[[
     The render tickers only run while there is something to render. An enqueue is a
-    start edge for both surfaces: the target bar if the cooldown belongs to the current
-    target while the bar is idle, the proximity window for any caster while the feature
-    is enabled (each WakeRenderTicker no-ops in every other situation).
+    start edge for every surface: the target bar if the cooldown belongs to the current
+    target while the bar is idle, the two proximity windows for any caster while their
+    feature is enabled (each WakeRenderTicker no-ops in every other situation).
   ]]--
   mod.targetCooldownBar.WakeRenderTicker()
   mod.proximityCooldownBar.WakeRenderTicker()
+  mod.friendlyProximityCooldownBar.WakeRenderTicker()
 end
 
 --[[

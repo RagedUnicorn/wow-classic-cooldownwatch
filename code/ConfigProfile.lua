@@ -71,6 +71,7 @@ me.PROFILE_FIELDS = {
   "friendlyCooldownConfiguration",
   "friendlyCooldownOverrides",
   "proximityCooldowns",
+  "friendlyProximityCooldowns",
   "frames"
 }
 

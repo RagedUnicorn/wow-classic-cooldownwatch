@@ -34,6 +34,7 @@ me.tag = "Core"
 local OnPlayerLogin
 local OnCombatLog
 local OnTargetChanged
+local OnRosterChanged
 local Initialize
 local ShowWelcomeMessage
 local InitializeTestFramework
@@ -67,8 +68,8 @@ end
   has queued cooldowns. Losing the target needs no action here - the running
   ticker sees the empty target itself, clears the bar and stops.
 
-  A target change is a start edge for the proximity window too: entries move
-  INTO its list when their caster stops being the current target, and the
+  A target change is a start edge for the proximity windows too: entries move
+  INTO their lists when their caster stops being the current target, and a
   window's ticker may have stopped while every queued cooldown belonged to the
   target it was excluding.
 ]]--
@@ -77,6 +78,18 @@ OnTargetChanged = function()
   me.cooldownQueue.PruneExpiredCooldowns(GetTime())
   me.targetCooldownBar.WakeRenderTicker()
   me.proximityCooldownBar.WakeRenderTicker()
+  me.friendlyProximityCooldownBar.WakeRenderTicker()
+end
+
+--[[
+  Composite handler for the roster edges: the event bus holds one handler per
+  event, and both consumers want the same two events - the group roster guid
+  sets behind the friendly proximity window's scope filter, and the version
+  broadcast of the update notifier.
+]]--
+OnRosterChanged = function()
+  me.groupRoster.RefreshRoster()
+  me.comm.BroadcastVersion()
 end
 
 --[[
@@ -97,11 +110,12 @@ function me.OnLoad(self)
   me.event.Register("COMBAT_LOG_EVENT_UNFILTERED", OnCombatLog, { gated = true })
   -- Register to the event that fires when the players target changes
   me.event.Register("PLAYER_TARGET_CHANGED", OnTargetChanged)
-  -- Version broadcast: receive other players' versions and announce our own on roster edges
+  -- Version broadcast: receive other players' versions on the addon channel
   me.event.Register("CHAT_MSG_ADDON", me.comm.OnChatMsgAddon, { gated = true })
+  -- Roster edges: refresh the group roster guid sets and announce our version
   me.event.Register(
     { "PLAYER_ENTERING_WORLD", "GROUP_ROSTER_UPDATE" },
-    me.comm.BroadcastVersion,
+    OnRosterChanged,
     { gated = true }
   )
 
@@ -131,14 +145,17 @@ Initialize = function()
   me.targetCooldownBar.BuildUi()
   -- build ui for proximitycooldownbar
   me.proximityCooldownBar.BuildUi()
+  -- build ui for friendlyproximitycooldownbar
+  me.friendlyProximityCooldownBar.BuildUi()
   -- load addon variables
   me.configuration.SetupConfiguration()
   -- guarantee the undeletable default profile exists (needs the defaults applied above)
   me.configProfile.EnsureDefaultProfile()
   -- update initial view of gearBars after addon initialization
   me.targetCooldownBar.TargetCooldownBarUiUpdate()
-  -- apply the proximity window's saved state
+  -- apply the proximity windows' saved state
   me.proximityCooldownBar.ProximityCooldownBarUiUpdate()
+  me.friendlyProximityCooldownBar.FriendlyProximityCooldownBarUiUpdate()
   -- register addon message prefix for the version broadcast
   me.comm.Initialize()
   -- initialize test commands and logger (debug mode only)

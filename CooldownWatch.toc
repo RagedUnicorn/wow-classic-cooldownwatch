@@ -48,6 +48,7 @@ code/spellmap/Assemble.lua
 code/SpellMap.lua
 code/CooldownQueue.lua
 code/Target.lua
+code/GroupRoster.lua
 code/Ticker.lua
 code/Tooltip.lua
 code/Configuration.lua
@@ -96,7 +97,9 @@ gui/GuiHelper.lua
 gui/TargetCooldownBar.lua
 gui/TargetCooldownBarSlot.lua
 gui/TargetCooldownBarPreview.lua
+gui/ProximityWindow.lua
 gui/ProximityCooldownBar.lua
+gui/FriendlyProximityCooldownBar.lua
 gui/CategoryMenu.lua
 gui/AddonConfiguration.lua
 gui/AboutContent.lua

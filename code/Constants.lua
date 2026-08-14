@@ -95,6 +95,8 @@ RGCW_CONSTANTS = {
     CooldownQueue.GetAllCooldowns)
   ]]--
   ELEMENT_PROXIMITY_COOLDOWN_WINDOW_FRAME = "CW_ProximityCooldownWindow",
+  ELEMENT_FRIENDLY_PROXIMITY_COOLDOWN_WINDOW_FRAME = "CW_FriendlyProximityCooldownWindow",
+  -- parent-relative, so both proximity windows share it (resolves against their own frame name)
   ELEMENT_PROXIMITY_COOLDOWN_ROW = "$parentRow_",
   PROXIMITY_COOLDOWN_WINDOW_WIDTH = 260,
   --[[
@@ -114,6 +116,22 @@ RGCW_CONSTANTS = {
     short ones the window exists for. The target cooldown bar is not affected.
   ]]--
   PROXIMITY_LONG_COOLDOWN_THRESHOLD = 60,
+  --[[
+    Scope values of the friendly proximity cooldown window - which friendly
+    casters render (stored in friendlyProximityCooldowns.scope, resolved
+    against the roster guid sets in code/GroupRoster.lua): the player's party
+    (in a raid: their subgroup), the whole raid, or every tracked friendly.
+  ]]--
+  PROXIMITY_COOLDOWN_SCOPE_GROUP = "group",
+  PROXIMITY_COOLDOWN_SCOPE_RAID = "raid",
+  PROXIMITY_COOLDOWN_SCOPE_ALL = "all",
+  --[[
+    Unit-id walk bounds for the roster guid sets (see code/GroupRoster.lua).
+    Mirror Blizzard's MAX_PARTY_MEMBERS / MAX_RAID_MEMBERS FrameXML globals,
+    which are not guaranteed to exist headless.
+  ]]--
+  MAX_PARTY_MEMBERS = 4,
+  MAX_RAID_MEMBERS = 40,
   --[[
     Addon configuration
   ]]--

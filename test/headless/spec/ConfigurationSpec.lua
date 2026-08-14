@@ -578,6 +578,42 @@ describe("Configuration schema reconcile", function()
     assert.is_true(saved.proximityCooldowns.hideLongCooldowns)
   end)
 
+  it("ships the friendly proximity window defaults: disabled, long cooldowns SHOWN, scope all", function()
+    local defaults = configuration.GetDefaults().friendlyProximityCooldowns
+
+    assert.is_false(defaults.enabled)
+    assert.is_false(defaults.locked)
+    assert.equal(1.0, defaults.scale)
+    assert.equal(10, defaults.maxDisplayedCooldowns)
+    --[[
+      Deliberate divergence from the enemy window: the friendly cooldowns worth
+      watching (insignias, big defensives) mostly sit above the threshold
+    ]]--
+    assert.is_false(defaults.hideLongCooldowns)
+    assert.equal(RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_ALL, defaults.scope)
+  end)
+
+  it("fills the whole friendlyProximityCooldowns block on an upgraded configuration", function()
+    local saved = configuration.ReconcileWithDefaults(
+      { lockTargetCooldownBar = true },
+      configuration.GetDefaults()
+    )
+
+    assert.same(configuration.GetDefaults().friendlyProximityCooldowns, saved.friendlyProximityCooldowns)
+  end)
+
+  it("backfills keys missing inside a partial friendlyProximityCooldowns block", function()
+    local saved = configuration.ReconcileWithDefaults(
+      { friendlyProximityCooldowns = { enabled = true, hideLongCooldowns = true } },
+      configuration.GetDefaults()
+    )
+
+    assert.is_true(saved.friendlyProximityCooldowns.enabled)
+    assert.is_true(saved.friendlyProximityCooldowns.hideLongCooldowns)
+    assert.is_false(saved.friendlyProximityCooldowns.locked)
+    assert.equal(RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_ALL, saved.friendlyProximityCooldowns.scope)
+  end)
+
   it("never rewrites player data living under a default-empty table", function()
     local profiles = { ["Default"] = { lockTargetCooldownBar = true }, ["Pvp"] = { frames = {} } }
 
@@ -955,5 +991,95 @@ describe("Configuration proximity cooldowns", function()
     assert.equal(1.5, configuration.GetProximityCooldownsScale())
     assert.is_false(configuration.IsProximityCooldownsHideLongEnabled())
     assert.equal(10, configuration.GetProximityCooldownsMaxDisplayed())
+  end)
+end)
+
+describe("Configuration friendly proximity cooldowns", function()
+  local configuration
+
+  before_each(function()
+    configuration = rgcw.configuration
+    -- start both blocks from the never-configured state (see the enemy block above)
+    CooldownWatchConfiguration.proximityCooldowns = nil
+    CooldownWatchConfiguration.friendlyProximityCooldowns = nil
+  end)
+
+  after_each(function()
+    -- never leak an enabled proximity window into later spec files
+    CooldownWatchConfiguration.proximityCooldowns = nil
+    CooldownWatchConfiguration.friendlyProximityCooldowns = nil
+  end)
+
+  it("reads resolve to the friendly defaults while the block is nil - long cooldowns shown", function()
+    assert.is_false(configuration.IsProximityCooldownsEnabled(true))
+    assert.is_false(configuration.IsProximityCooldownsLocked(true))
+    assert.equal(1.0, configuration.GetProximityCooldownsScale(true))
+    assert.equal(10, configuration.GetProximityCooldownsMaxDisplayed(true))
+    assert.is_false(configuration.IsProximityCooldownsHideLongEnabled(true))
+    assert.equal(RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_ALL, configuration.GetFriendlyProximityCooldownsScope())
+  end)
+
+  it("the trailing friendly flag routes writes to the friendly block only", function()
+    configuration.UpdateProximityCooldownsEnabled(true, true)
+    configuration.UpdateProximityCooldownsScale(1.5, true)
+
+    assert.is_true(configuration.IsProximityCooldownsEnabled(true))
+    assert.equal(1.5, configuration.GetProximityCooldownsScale(true))
+    -- the enemy window is untouched
+    assert.is_false(configuration.IsProximityCooldownsEnabled())
+    assert.equal(1.0, configuration.GetProximityCooldownsScale())
+  end)
+
+  it("an enemy-side write never bleeds into the friendly block", function()
+    configuration.UpdateProximityCooldownsEnabled(true)
+    configuration.UpdateProximityCooldownsHideLong(true)
+
+    assert.is_false(configuration.IsProximityCooldownsEnabled(true))
+    assert.is_false(configuration.IsProximityCooldownsHideLongEnabled(true))
+  end)
+
+  it("the hide-long toggle round-trips per side with the sides' distinct defaults", function()
+    configuration.UpdateProximityCooldownsHideLong(true, true)
+    assert.is_true(configuration.IsProximityCooldownsHideLongEnabled(true))
+
+    configuration.UpdateProximityCooldownsHideLong(false, true)
+    assert.is_false(configuration.IsProximityCooldownsHideLongEnabled(true))
+    -- the enemy side keeps its own default in both directions
+    assert.is_true(configuration.IsProximityCooldownsHideLongEnabled())
+  end)
+
+  it("round-trips every valid scope and returns it", function()
+    for _, scope in ipairs({
+      RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_GROUP,
+      RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_RAID,
+      RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_ALL
+    }) do
+      assert.equal(scope, configuration.UpdateFriendlyProximityCooldownsScope(scope))
+      assert.equal(scope, configuration.GetFriendlyProximityCooldownsScope())
+    end
+  end)
+
+  it("rejects an unknown scope without touching the store", function()
+    configuration.UpdateFriendlyProximityCooldownsScope(RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_GROUP)
+
+    assert.is_nil(configuration.UpdateFriendlyProximityCooldownsScope("party"))
+    assert.is_nil(configuration.UpdateFriendlyProximityCooldownsScope(nil))
+    assert.is_nil(configuration.UpdateFriendlyProximityCooldownsScope(5))
+
+    assert.equal(
+      RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_GROUP,
+      configuration.GetFriendlyProximityCooldownsScope()
+    )
+  end)
+
+  it("a friendly write seeds the missing block with the friendly defaults", function()
+    configuration.UpdateProximityCooldownsScale(0.8, true)
+
+    local friendlyProximityCooldowns = CooldownWatchConfiguration.friendlyProximityCooldowns
+
+    assert.equal(0.8, friendlyProximityCooldowns.scale)
+    assert.is_false(friendlyProximityCooldowns.enabled)
+    assert.is_false(friendlyProximityCooldowns.hideLongCooldowns)
+    assert.equal(RGCW_CONSTANTS.PROXIMITY_COOLDOWN_SCOPE_ALL, friendlyProximityCooldowns.scope)
   end)
 end)

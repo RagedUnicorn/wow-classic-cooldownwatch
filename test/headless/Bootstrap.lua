@@ -86,13 +86,17 @@ rgcw.season = {
 }
 
 -- CooldownQueue.AddCooldown wakes the render tickers on enqueue; the gui layer that
--- owns the real edge checks (gui/TargetCooldownBar.lua, gui/ProximityCooldownBar.lua)
--- is not loaded headless
+-- owns the real edge checks (gui/TargetCooldownBar.lua, gui/ProximityCooldownBar.lua,
+-- gui/FriendlyProximityCooldownBar.lua) is not loaded headless
 rgcw.targetCooldownBar = {
   WakeRenderTicker = function() end,
 }
 
 rgcw.proximityCooldownBar = {
+  WakeRenderTicker = function() end,
+}
+
+rgcw.friendlyProximityCooldownBar = {
   WakeRenderTicker = function() end,
 }
 
@@ -145,6 +149,7 @@ dofile("code/spellmap/Assemble.lua")
 dofile("code/SpellMap.lua")
 dofile("code/SpellMapHelper.lua")
 dofile("code/CooldownQueue.lua")
+dofile("code/GroupRoster.lua")
 dofile("code/PetOwner.lua")
 dofile("code/CombatLog.lua")
 dofile("test/SpellMapValidation.lua")
