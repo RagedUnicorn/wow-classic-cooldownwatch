@@ -276,6 +276,59 @@ function me.CreateSlider(frameName, parent, position, sliderValues, title, descr
 end
 
 --[[
+  Create a configuration dropdown in the dark style of the stock configuration
+  menus (WowStyle2, without the stepper buttons the settings panel adds around
+  some of its dropdowns), with the title above it and an always-visible
+  description below - the dropdown counterpart to CreateCheckBox/CreateSlider.
+  Port of GearMenu's UiHelper.CreateSettingsDropdown (family convention - when
+  the mechanism changes, change it in the whole family).
+
+  @param {string} frameName
+  @param {table} parent
+  @param {table} position
+    An object containing configuration parameters for a SetPoint function call
+  @param {number} width
+  @param {string} title
+  @param {string} description
+  @param {function} menuGenerator
+    Menu generator passed to SetupMenu - receives (dropdown, rootDescription)
+
+  @return {table}
+    The created dropdown
+]]--
+function me.CreateSettingsDropdown(frameName, parent, position, width, title, description, menuGenerator)
+  local dropdownFrame = CreateFrame("DropdownButton", frameName, parent, "WowStyle2DropdownTemplate")
+  dropdownFrame:SetPoint(unpack(position))
+  dropdownFrame:SetWidth(width)
+  dropdownFrame:SetupMenu(menuGenerator)
+  -- generate once so the button shows the current selection before the menu was ever opened
+  dropdownFrame:GenerateMenu()
+  --[[ regenerate on every show so the button reflects a selection that changed
+       elsewhere (an applied profile) while the panel was hidden ]]--
+  dropdownFrame:HookScript("OnShow", function(self)
+    self:GenerateMenu()
+  end)
+
+  local titleFontString = dropdownFrame:CreateFontString(nil, "OVERLAY")
+  titleFontString:SetFont(STANDARD_TEXT_FONT, 15)
+  me.SetColor(titleFontString, RGCW_CONSTANTS.COLOR.BODY)
+  titleFontString:SetPoint("BOTTOMLEFT", dropdownFrame, "TOPLEFT", 0, 6)
+  titleFontString:SetText(title)
+  dropdownFrame.title = titleFontString
+
+  local descriptionFontString = dropdownFrame:CreateFontString(nil, "OVERLAY")
+  descriptionFontString:SetFont(STANDARD_TEXT_FONT, 12)
+  me.SetColor(descriptionFontString, RGCW_CONSTANTS.COLOR.SUBNOTE)
+  descriptionFontString:SetPoint("TOPLEFT", dropdownFrame, "BOTTOMLEFT", 4, -6)
+  descriptionFontString:SetWidth(RGCW_CONSTANTS.CHECK_OPTION_DESCRIPTION_WIDTH)
+  descriptionFontString:SetJustifyH("LEFT")
+  descriptionFontString:SetText(description)
+  dropdownFrame.description = descriptionFontString
+
+  return dropdownFrame
+end
+
+--[[
   Resolve the icon for a spellMap-derived entry (a config-menu row or a queue
   entry's spellData).
 

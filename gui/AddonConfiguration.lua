@@ -40,7 +40,7 @@ local mainCategoryId
 
 --[[
   Numeric ids of every registered category, keyed by a stable, locale independent key:
-  "main", "general", "proximity", "profile" and one entry per catalog category (its categoryName, e.g.
+  "main", "general", "proximity", "friendly", "profile" and one entry per catalog category (its categoryName, e.g.
   "priest", "items"). Settings.OpenToCategory takes the numeric id only - passing a category
   NAME errors in Classic Era ("outside of expected range") because the name is handed
   straight to C_SettingsUtil.OpenSettingsPanel. Callers therefore resolve through
@@ -67,7 +67,7 @@ end
   Retrieve the numeric id of a registered category for use with Settings.OpenToCategory
 
   @param {string} key
-    "main", "general", "profile" or a catalog categoryName
+    "main", "general", "proximity", "friendly", "profile" or a catalog categoryName
 
   @return {number | nil}
     The category id or nil if no category is registered under that key
@@ -100,6 +100,14 @@ function me.SetupAddonConfiguration()
     mod.proximityMenu.BuildUi
   )
   categoryIds.proximity = proximityCategory.ID
+
+  local friendlyCategory = me.BuildCategory(
+    RGCW_CONSTANTS.ELEMENT_FRIENDLY_SUB_OPTION_FRAME,
+    category,
+    rgcw.L["friendly_category_name"],
+    mod.friendlyCooldownMenu.BuildUi
+  )
+  categoryIds.friendly = friendlyCategory.ID
 
   local profileCategory = me.BuildCategory(
     RGCW_CONSTANTS.ELEMENT_PROFILE_SUB_OPTION_FRAME,

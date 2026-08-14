@@ -208,6 +208,26 @@ RGCW_CONSTANTS = {
   PROXIMITY_MAX_DISPLAYED_SLIDER_MIN = 1,
   PROXIMITY_MAX_DISPLAYED_SLIDER_STEP = 1,
   --[[
+    FriendlyCooldownMenu (options panel of the friendly cooldown features: the
+    tracking master flag, the friendly target bar display and the friendly
+    proximity cooldown window). The friendly window's sliders share the enemy
+    window's PROXIMITY_*_SLIDER bounds above - both windows render through the
+    same builder, so the sensible ranges are the same.
+  ]]--
+  ELEMENT_FRIENDLY_SUB_OPTION_FRAME = "CW_FriendlyMenuOptionsFrame",
+  ELEMENT_FRIENDLY_TITLE = "CW_FriendlyTitle",
+  ELEMENT_FRIENDLY_OPT_TRACK_FRIENDLY_COOLDOWNS = "CW_OptTrackFriendlyCooldowns",
+  ELEMENT_FRIENDLY_OPT_SHOW_FRIENDLY_TARGET_COOLDOWNS = "CW_OptShowFriendlyTargetCooldowns",
+  ELEMENT_FRIENDLY_OPT_ENABLE_FRIENDLY_PROXIMITY_COOLDOWN_WINDOW = "CW_OptEnableFriendlyProximityCooldownWindow",
+  ELEMENT_FRIENDLY_OPT_WINDOW_LOCK_FRIENDLY_PROXIMITY_COOLDOWN_WINDOW
+    = "CW_OptWindowLockFriendlyProximityCooldownWindow",
+  ELEMENT_FRIENDLY_OPT_HIDE_LONG_FRIENDLY_PROXIMITY_COOLDOWNS = "CW_OptHideLongFriendlyProximityCooldowns",
+  ELEMENT_FRIENDLY_PROXIMITY_SCOPE_DROPDOWN = "CW_FriendlyProximityScopeDropdown",
+  ELEMENT_FRIENDLY_PROXIMITY_SCALE_SLIDER = "CW_FriendlyProximityScaleSlider",
+  ELEMENT_FRIENDLY_PROXIMITY_MAX_DISPLAYED_SLIDER = "CW_FriendlyProximityMaxDisplayedSlider",
+  -- width of a configuration dropdown (WowStyle2DropdownTemplate, see GuiHelper.CreateSettingsDropdown)
+  OPTION_DROPDOWN_WIDTH = 180,
+  --[[
     Profile (import/export and named profiles)
   ]]--
   --[[

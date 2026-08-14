@@ -105,6 +105,7 @@ gui/AddonConfiguration.lua
 gui/AboutContent.lua
 gui/GeneralMenu.lua
 gui/ProximityMenu.lua
+gui/FriendlyCooldownMenu.lua
 gui/ProfileMenu.lua
 gui/CooldownMenu.lua
 
