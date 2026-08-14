@@ -47,6 +47,7 @@ RGCW_CONSTANTS = {
     Update Intervals for tickers
   ]]--
   TARGET_COOLDOWN_BAR_UPDATE_INTERVAL = 0.05,
+  PROXIMITY_COOLDOWN_WINDOW_UPDATE_INTERVAL = 0.05,
   --[[
     TargetCooldownFrame
   ]]--
@@ -94,6 +95,18 @@ RGCW_CONSTANTS = {
     CooldownQueue.GetAllCooldowns)
   ]]--
   ELEMENT_PROXIMITY_COOLDOWN_WINDOW_FRAME = "CW_ProximityCooldownWindow",
+  ELEMENT_PROXIMITY_COOLDOWN_ROW = "$parentRow_",
+  PROXIMITY_COOLDOWN_WINDOW_WIDTH = 260,
+  --[[
+    Fixed row pool size - the render layer's hard ceiling. The configurable
+    maxDisplayedCooldowns constrains further below it but can never exceed it
+    (the render pass takes the minimum of the two).
+  ]]--
+  PROXIMITY_COOLDOWN_ROW_AMOUNT = 10,
+  PROXIMITY_COOLDOWN_ROW_HEIGHT = 24,
+  PROXIMITY_COOLDOWN_ROW_SPACING = 2,
+  PROXIMITY_COOLDOWN_WINDOW_PADDING = 5,
+  PROXIMITY_COOLDOWN_ROW_TEXT_SIZE = 12,
   --[[
     Cooldowns above this many seconds are hidden from the proximity cooldown
     window while the hideLongCooldowns option is enabled (the shipped default) -

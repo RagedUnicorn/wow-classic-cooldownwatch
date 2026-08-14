@@ -672,6 +672,11 @@ describe("Configuration proximity cooldowns", function()
     CooldownWatchConfiguration.proximityCooldowns = nil
   end)
 
+  after_each(function()
+    -- never leak an enabled proximity window into later spec files
+    CooldownWatchConfiguration.proximityCooldowns = nil
+  end)
+
   it("reads resolve to the shipped defaults while proximityCooldowns is nil", function()
     assert.is_false(configuration.IsProximityCooldownsEnabled())
     assert.is_false(configuration.IsProximityCooldownsLocked())

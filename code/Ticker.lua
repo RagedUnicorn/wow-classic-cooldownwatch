@@ -34,6 +34,7 @@ me.tag = "Ticker"
 
 local targetCooldownBarTicker
 local targetCooldownBarPreviewTicker
+local proximityCooldownBarTicker
 
 --[[
   Start the repeating update ticker for targetCastBar
@@ -54,6 +55,32 @@ function me.StopTickerTargetCooldownBar()
     targetCooldownBarTicker:Cancel()
     targetCooldownBarTicker = nil
     mod.logger.LogInfo(me.tag, "Stopped 'TargetCooldownBarTicker'")
+  end
+end
+
+--[[
+  Start the repeating update ticker for the proximityCooldownBar. Started exclusively
+  through mod.proximityCooldownBar.WakeRenderTicker, which owns the something-to-render
+  check; stops itself after a render pass that found nothing
+  (see ProximityCooldownBarOnUpdate)
+]]--
+function me.StartTickerProximityCooldownBar()
+  if proximityCooldownBarTicker == nil or proximityCooldownBarTicker:IsCancelled() then
+    proximityCooldownBarTicker = C_Timer.NewTicker(
+      RGCW_CONSTANTS.PROXIMITY_COOLDOWN_WINDOW_UPDATE_INTERVAL,
+      mod.proximityCooldownBar.ProximityCooldownBarOnUpdate)
+      mod.logger.LogInfo(me.tag, "Started 'ProximityCooldownBarTicker'")
+  end
+end
+
+--[[
+  Stop the repeating update ticker for the proximityCooldownBar
+]]--
+function me.StopTickerProximityCooldownBar()
+  if proximityCooldownBarTicker then
+    proximityCooldownBarTicker:Cancel()
+    proximityCooldownBarTicker = nil
+    mod.logger.LogInfo(me.tag, "Stopped 'ProximityCooldownBarTicker'")
   end
 end
 

@@ -307,6 +307,20 @@ describe("CooldownQueue", function()
     assert.equal(3, wakeCalls)
   end)
 
+  it("AddCooldown wakes the proximity render ticker on add and refresh", function()
+    local wakeCalls = 0
+    local originalWake = rgcw.proximityCooldownBar.WakeRenderTicker
+    rgcw.proximityCooldownBar.WakeRenderTicker = function() wakeCalls = wakeCalls + 1 end
+
+    queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
+    queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 250))
+    queue.AddCooldown("guid-2", "Bob", "rogue", makeSpell(1766, "Kick", 100))
+
+    rgcw.proximityCooldownBar.WakeRenderTicker = originalWake
+
+    assert.equal(3, wakeCalls)
+  end)
+
   it("HasCooldowns reflects bucket presence through add, remove and prune", function()
     assert.is_false(queue.HasCooldowns("guid-1"))
 

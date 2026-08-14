@@ -85,9 +85,14 @@ rgcw.season = {
   IsTbcActive = function() return false end,
 }
 
--- CooldownQueue.AddCooldown wakes the render ticker on enqueue; the gui layer that
--- owns the real edge check (gui/TargetCooldownBar.lua) is not loaded headless
+-- CooldownQueue.AddCooldown wakes the render tickers on enqueue; the gui layer that
+-- owns the real edge checks (gui/TargetCooldownBar.lua, gui/ProximityCooldownBar.lua)
+-- is not loaded headless
 rgcw.targetCooldownBar = {
+  WakeRenderTicker = function() end,
+}
+
+rgcw.proximityCooldownBar = {
   WakeRenderTicker = function() end,
 }
 

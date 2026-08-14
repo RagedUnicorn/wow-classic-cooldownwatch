@@ -66,11 +66,17 @@ end
   sweep, so a fully expired bucket no longer counts as work) when the new target
   has queued cooldowns. Losing the target needs no action here - the running
   ticker sees the empty target itself, clears the bar and stops.
+
+  A target change is a start edge for the proximity window too: entries move
+  INTO its list when their caster stops being the current target, and the
+  window's ticker may have stopped while every queued cooldown belonged to the
+  target it was excluding.
 ]]--
 OnTargetChanged = function()
   me.target.UpdateCurrentTarget()
   me.cooldownQueue.PruneExpiredCooldowns(GetTime())
   me.targetCooldownBar.WakeRenderTicker()
+  me.proximityCooldownBar.WakeRenderTicker()
 end
 
 --[[
@@ -123,12 +129,16 @@ Initialize = function()
   me.addonConfiguration.SetupAddonConfiguration()
   -- build ui for targetcooldownbar
   me.targetCooldownBar.BuildUi()
+  -- build ui for proximitycooldownbar
+  me.proximityCooldownBar.BuildUi()
   -- load addon variables
   me.configuration.SetupConfiguration()
   -- guarantee the undeletable default profile exists (needs the defaults applied above)
   me.configProfile.EnsureDefaultProfile()
   -- update initial view of gearBars after addon initialization
   me.targetCooldownBar.TargetCooldownBarUiUpdate()
+  -- apply the proximity window's saved state
+  me.proximityCooldownBar.ProximityCooldownBarUiUpdate()
   -- register addon message prefix for the version broadcast
   me.comm.Initialize()
   -- initialize test commands and logger (debug mode only)
