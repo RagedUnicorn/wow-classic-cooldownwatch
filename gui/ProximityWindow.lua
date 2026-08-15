@@ -173,7 +173,7 @@ function me.CreateInstance(spec)
     row.statusBar = CreateFrame("StatusBar", nil, row)
     row.statusBar:SetPoint("TOPLEFT", row.iconTexture, "TOPRIGHT", 2, 0)
     row.statusBar:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", 0, 0)
-    row.statusBar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+    row.statusBar:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
     row.statusBar:SetMinMaxValues(0, 1)
     row.statusBar:SetValue(0)
 
