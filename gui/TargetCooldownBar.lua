@@ -122,14 +122,21 @@ function me.TargetCooldownBarUiUpdate()
 end
 
 --[[
-  Update the placement backdrop of the targetBar. The backdrop is a
-  positioning aid, not part of the combat look - it shows only while the
-  example preview owns the slots (via /rgcw conf or the test/place mode, which
-  runs through the same preview), the single context in which the bar can move
-  at all (there is deliberately no lock option, proximity-window parity).
+  Update the placement affordances of the targetBar: the backdrop and mouse
+  interactivity. Both are positioning aids, not part of the combat look - they
+  apply only while the example preview owns the slots (via /rgcw conf or the
+  test/place mode, which runs through the same preview), the single context in
+  which the bar can move at all (there is deliberately no lock option,
+  proximity-window parity). Outside the preview the mouse is disabled so the
+  bar never swallows clicks meant for the world behind it (right-click camera
+  drag above all).
 ]]--
 function me.UpdateTargetBarPlacementBackdrop()
-  if mod.targetCooldownBarPreview.IsPreviewActive() then
+  local previewActive = mod.targetCooldownBarPreview.IsPreviewActive()
+
+  targetCooldownBarFrame:EnableMouse(previewActive)
+
+  if previewActive then
     targetCooldownBarFrame:SetBackdrop({
       bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background"
     })
@@ -233,6 +240,13 @@ end
 function me.SetupDragFrame(frame)
   frame:SetScript("OnMouseDown", me.StartDragFrame)
   frame:SetScript("OnMouseUp", me.StopDragFrame)
+  --[[
+    Setting mouse scripts implicitly mouse-enables the frame, which would
+    block clicks (right-click camera drag) on the world behind it. Disabled
+    again right away - UpdateTargetBarPlacementBackdrop enables the mouse
+    exactly while the example preview owns the slots.
+  ]]--
+  frame:EnableMouse(false)
 end
 
 --[[

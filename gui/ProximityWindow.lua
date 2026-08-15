@@ -275,11 +275,16 @@ function me.CreateInstance(spec)
   end
 
   --[[
-    Update the placement backdrop of the window. The backdrop is a positioning
-    aid, not part of the combat look - it shows only while the test/place mode
-    owns the window, the single context in which the window can move at all.
+    Update the placement affordances of the window: the backdrop and mouse
+    interactivity. Both are positioning aids, not part of the combat look -
+    they apply only while the test/place mode owns the window, the single
+    context in which the window can move at all. Outside the mode the mouse is
+    disabled so the window never swallows clicks meant for the world behind it
+    (right-click camera drag above all).
   ]]--
   local function UpdatePlacementBackdrop()
+    window:EnableMouse(previewActive)
+
     if previewActive then
       window:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background"
@@ -355,6 +360,13 @@ function me.CreateInstance(spec)
     window = CreateWindow()
     window:SetScript("OnMouseDown", StartDragFrame)
     window:SetScript("OnMouseUp", StopDragFrame)
+    --[[
+      Setting mouse scripts implicitly mouse-enables the frame, which would
+      block clicks (right-click camera drag) on the world behind it. Disabled
+      again right away - UpdatePlacementBackdrop enables the mouse exactly
+      while the test/place mode owns the window.
+    ]]--
+    window:EnableMouse(false)
 
     for i = 1, RGCW_CONSTANTS.PROXIMITY_COOLDOWN_ROW_AMOUNT do
       rows[i] = CreateRow(window, i)
