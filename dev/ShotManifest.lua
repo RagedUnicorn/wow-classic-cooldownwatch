@@ -38,36 +38,57 @@ RGCW_SHOTS = {
     frame = "CW_TargetCooldownWatchBar",
     setup = { "closeSettings", "previewTargetCooldownBar" },
     includeFrames = { "TargetFrame" },
+    hideFrames = { "CW_ProximityCooldownWindow" },
     hideChrome = true,
     padding = 120,
     shows = "The target cooldown bar with ten enemy cooldowns counting down, the shortest-remaining ones glowing in their warn and alert states"
+  },
+  {
+    name = "cooldownwatch_proximity_cooldown_window",
+    shot = "proximity_cooldown_window",
+    frame = "CW_ProximityCooldownWindow",
+    setup = { "closeSettings", "previewProximityWindow" },
+    hideFrames = { "CW_TargetCooldownWatchBar" },
+    hideChrome = true,
+    padding = 120,
+    shows = "The proximity cooldown window in the world: class-tinted rows with spell icon and name on the left, the caster's name right-aligned beside the remaining time, one row per nearby enemy cooldown"
   },
   {
     name = "cooldownwatch_cooldown_selection",
     shot = "cooldown_selection",
     frame = "SettingsPanel",
     setup = { "openCategory:priest", "collapseSpellRows" },
-    hideFrames = { "CW_TargetCooldownWatchBar" },
+    hideFrames = { "CW_TargetCooldownWatchBar", "CW_ProximityCooldownWindow" },
     hideChrome = true,
     padding = 0,
-    shows = "The Priest category panel: the per-spell list with checkboxes, class-tinted rows, spell icons and the resolved cooldown value line"
+    shows = "The Priest category panel: the Enemy | Friendly tab strip over the per-spell list with checkboxes, class-tinted rows, spell icons and the resolved cooldown value line"
   },
   {
     name = "cooldownwatch_worst_case_override",
     shot = "worst_case_override",
     frame = "SettingsPanel",
     setup = { "openCategory:priest", "expandSpellRow:5" },
-    hideFrames = { "CW_TargetCooldownWatchBar" },
+    hideFrames = { "CW_TargetCooldownWatchBar", "CW_ProximityCooldownWindow" },
     hideChrome = true,
     padding = 0,
     shows = "The same Priest panel with Mind Blast's options strip unfolded, showing the Use worst case toggle, its value field and the manual cooldown override"
+  },
+  {
+    name = "cooldownwatch_friendly_cooldowns",
+    shot = "friendly_cooldowns",
+    frame = "SettingsPanel",
+    setup = { "openCategory:friendly" },
+    hideFrames = { "CW_TargetCooldownWatchBar", "CW_ProximityCooldownWindow" },
+    hideChrome = true,
+    padding = 0,
+    shows = "The Friendly Cooldowns options panel: the tracking master toggle, the friendly target bar toggle, and the friendly window's enable, hide-long, scope, scale and max-displayed controls, all enabled"
   },
   {
     name = "cooldownwatch_profile_configuration",
     shot = "profile_configuration",
     frame = "SettingsPanel",
     setup = { "openCategory:profile" },
-    hideFrames = { "CW_TargetCooldownWatchBar" },
+    hideFrames = { "CW_TargetCooldownWatchBar", "CW_ProximityCooldownWindow" },
     hideChrome = true,
     padding = 0,
     shows = "The Profiles panel with the named-profile list, the Default profile selected with Rename and Delete greyed out, and the export/import controls"

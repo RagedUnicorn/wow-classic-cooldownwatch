@@ -29,8 +29,8 @@
   Parameterized builder of a proximity cooldown window: a movable vertical
   list of active cooldowns fed by CooldownQueue.GetAllCooldowns - one row per
   cooldown, a category-colored progress bar that empties as the cooldown
-  elapses, the spell icon, the caster's name and the remaining time, ordered
-  newest detection first.
+  elapses, the spell icon and name, the caster's name and the remaining time,
+  ordered newest detection first.
 
   The enemy window (gui/ProximityCooldownBar.lua) and the friendly window
   (gui/FriendlyProximityCooldownBar.lua) instantiate the same machinery here
@@ -144,8 +144,10 @@ function me.CreateInstance(spec)
   --[[
     Create a single row: spell icon on the left, a StatusBar filling the rest
     whose value is the remaining cooldown (full right after the cast, empty
-    when the spell is ready), the caster's name overlaid on the left of the
-    bar and the remaining time on its right.
+    when the spell is ready), the spell's name overlaid on the left of the
+    bar and the caster's name right-aligned beside the remaining time on its
+    right. The spell name truncates first: it is the only fontstring bounded
+    on both sides, so a long caster name squeezes it rather than overlapping.
 
     @param {table} frame
     @param {number} position
@@ -185,15 +187,25 @@ function me.CreateInstance(spec)
     row.remainingText:SetFont(
       STANDARD_TEXT_FONT, RGCW_CONSTANTS.PROXIMITY_COOLDOWN_ROW_TEXT_SIZE, "OUTLINE")
     row.remainingText:SetPoint("RIGHT", row.statusBar, "RIGHT", -4, 0)
+    row.remainingText:SetWidth(RGCW_CONSTANTS.PROXIMITY_COOLDOWN_ROW_TIME_WIDTH)
     row.remainingText:SetJustifyH("RIGHT")
 
     row.casterName = row.statusBar:CreateFontString(nil, "OVERLAY")
     row.casterName:SetFont(
       STANDARD_TEXT_FONT, RGCW_CONSTANTS.PROXIMITY_COOLDOWN_ROW_TEXT_SIZE, "OUTLINE")
-    row.casterName:SetPoint("LEFT", row.statusBar, "LEFT", 4, 0)
-    row.casterName:SetPoint("RIGHT", row.remainingText, "LEFT", -2, 0)
-    row.casterName:SetJustifyH("LEFT")
+    row.casterName:SetPoint("RIGHT", row.remainingText, "LEFT", -4, 0)
+    row.casterName:SetJustifyH("RIGHT")
     row.casterName:SetWordWrap(false)
+
+    row.spellName = row.statusBar:CreateFontString(nil, "OVERLAY")
+    row.spellName:SetFont(
+      STANDARD_TEXT_FONT, RGCW_CONSTANTS.PROXIMITY_COOLDOWN_ROW_TEXT_SIZE, "OUTLINE")
+    row.spellName:SetPoint("LEFT", row.statusBar, "LEFT", 4, 0)
+    row.spellName:SetPoint("RIGHT", row.casterName, "LEFT", -4, 0)
+    row.spellName:SetJustifyH("LEFT")
+    -- word wrap stays on: together with the single-line cap it is what makes
+    -- the engine render a trailing "..." on an overflowing name
+    row.spellName:SetMaxLines(1)
 
     -- a fresh row matches the cleared state ClearRow produces
     row.isCleared = true
@@ -220,6 +232,7 @@ function me.CreateInstance(spec)
     row.iconTexture.spellId = nil
     row.categoryName = nil
     row.sourceGuid = nil
+    row.spellName:SetText("")
     row.casterName:SetText("")
     row.remainingText:SetText("")
     row.statusBar:SetValue(0)
@@ -231,9 +244,9 @@ function me.CreateInstance(spec)
   --[[
     Bind a queue entry to a row and render its current state. Rows bind
     positionally to the snapshot, so identity-dependent widget writes (icon
-    texture, bar color, caster name) are keyed on the entry identity the row
-    currently shows and only re-issued on rebinding; the per-tick writes are
-    the bar value and the remaining-time text.
+    texture, spell name, bar color, caster name) are keyed on the entry
+    identity the row currently shows and only re-issued on rebinding; the
+    per-tick writes are the bar value and the remaining-time text.
 
     @param {table} row
     @param {table} cooldown
@@ -258,6 +271,7 @@ function me.CreateInstance(spec)
     if row.iconTexture.spellId ~= spellData.spellId then
       row.iconTexture:SetTexture(mod.guiHelper.GetIconId(spellData))
       row.iconTexture.spellId = spellData.spellId
+      row.spellName:SetText(spellData.name)
     end
 
     if row.categoryName ~= cooldown.categoryName then

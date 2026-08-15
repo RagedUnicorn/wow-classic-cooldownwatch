@@ -110,6 +110,23 @@ RGCW_CONSTANTS = {
   PROXIMITY_COOLDOWN_WINDOW_PADDING = 5,
   PROXIMITY_COOLDOWN_ROW_TEXT_SIZE = 12,
   --[[
+    Fixed width of a row's remaining-time fontstring. Without it the
+    fontstring resizes to its text on every render tick and everything
+    anchored to it (the caster name) jitters as the countdown changes -
+    sized to fit the four characters Common.FormatCooldownTime is bounded to.
+  ]]--
+  PROXIMITY_COOLDOWN_ROW_TIME_WIDTH = 32,
+  --[[
+    Caster names staged onto the example rows of the proximity windows' test/
+    place mode and the media capture previews. Plausible character names -
+    placeholder labels like "Example 1" read as a rendering bug next to real
+    row content. Sized to the row pool.
+  ]]--
+  PROXIMITY_EXAMPLE_CASTER_NAMES = {
+    "Aelric", "Morgra", "Thendril", "Kaelys", "Durnhal",
+    "Sylvara", "Ragnok", "Elowen", "Brammor", "Nyssara"
+  },
+  --[[
     Cooldowns above this many seconds are hidden from the proximity cooldown
     window while the hideLongCooldowns option is enabled (the shipped default) -
     long cooldowns rarely decide the next engagement and would crowd out the

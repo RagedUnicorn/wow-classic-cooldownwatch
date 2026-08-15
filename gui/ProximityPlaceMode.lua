@@ -119,9 +119,11 @@ function me.CreateInstance(spec)
       spellData.friendly = true
     end
 
+    local names = RGCW_CONSTANTS.PROXIMITY_EXAMPLE_CASTER_NAMES
+
     return {
       ["sourceGuid"] = "preview" .. position,
-      ["sourceName"] = "Example " .. position,
+      ["sourceName"] = names[(position - 1) % #names + 1],
       ["categoryName"] = categoryName,
       ["spellData"] = spellData
     }

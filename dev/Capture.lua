@@ -330,6 +330,60 @@ local setupVerbs = {
     end
 
     mod.targetCooldownBar.GetTargetCooldownBarFrame():Show()
+  end,
+
+  --[[
+    Stage a static, varied proximity cooldown window.
+
+    Deliberately NOT the "Position Window" place mode: its example rows carry synthetic
+    10-60s cooldowns and "Example n" caster names, its preview ticker repaints the rows at
+    20 Hz, and the place-mode look includes the positioning backdrop - all three read wrong
+    in a store screenshot.
+
+    The window's preview seam is still the only way to reach its instance-local row pool,
+    so the verb goes through ShowPreview + RenderPreviewEntries - but frozen: no preview
+    ticker is started, and the positioning backdrop ShowPreview applies is stripped again so
+    the shot shows the live combat look. The entries are the same one-primary-per-category
+    data the target bar preview stages, with real catalog cooldowns back-dated from
+    PREVIEW_REMAINING and the same example caster names the place mode uses
+    (RGCW_CONSTANTS.PROXIMITY_EXAMPLE_CASTER_NAMES).
+
+    previewActive stays on afterwards, which is deliberate: it keeps live combat-log
+    enqueues from waking the render ticker against the staged rows mid-session, and a
+    /reload (required to flush the shot log anyway) ends it.
+  ]]--
+  ["previewProximityWindow"] = function()
+    local rowAmount = RGCW_CONSTANTS.PROXIMITY_COOLDOWN_ROW_AMOUNT
+    local spells = CollectPreviewSpells(rowAmount)
+    local entries = {}
+    local now = GetTime()
+
+    if #spells < rowAmount then
+      mod.logger.PrintUserError("Only " .. #spells .. " preview spell(s) available for " .. rowAmount .. " rows")
+    end
+
+    for position = 1, #spells do
+      local spellData = spells[position].spellData
+      --[[
+        Back-date the cast so the row renders the intended remaining time. A spell whose
+        catalog cooldown is shorter than the staged remainder is simply shown freshly cast.
+      ]]--
+      local remaining = math.min(PREVIEW_REMAINING[position], spellData.cooldown)
+
+      spellData.castTime = now - (spellData.cooldown - remaining)
+
+      table.insert(entries, {
+        ["sourceGuid"] = "capture" .. position,
+        ["sourceName"] = RGCW_CONSTANTS.PROXIMITY_EXAMPLE_CASTER_NAMES[position],
+        ["categoryName"] = spells[position].categoryName,
+        ["spellData"] = spellData
+      })
+    end
+
+    mod.proximityCooldownBar.ShowPreview()
+    mod.proximityCooldownBar.RenderPreviewEntries(entries)
+    -- live combat look, not the place-mode look
+    mod.proximityCooldownBar.GetWindowFrame():SetBackdrop(nil)
   end
 }
 
