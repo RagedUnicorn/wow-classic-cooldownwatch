@@ -53,6 +53,8 @@ describe("Friendly cooldown detection", function()
 
   local FRIEND_GUID = "Player-4234-000000C1"
   local FRIEND_NAME = "Testfriend"
+  local PLAYER_GUID = "Player-4234-000000D7"
+  local PLAYER_NAME = "Testplayer"
   local ENEMY_GUID = "Player-4234-000000AB"
   local ENEMY_NAME = "Testenemy"
   local PET_GUID = "Pet-0-4234-0-6610-417-0303F859E9"
@@ -62,6 +64,8 @@ describe("Friendly cooldown detection", function()
   local HOSTILE_PLAYER_FLAGS = 0x548 -- outsider + hostile + player-controlled + player
   local FRIENDLY_PLAYER_FLAGS = 0x512 -- party + friendly + player-controlled + player
   local FRIENDLY_PET_FLAGS = 0x1112 -- party + friendly + player-controlled + pet
+  local OWN_PLAYER_FLAGS = 0x511 -- mine + friendly + player-controlled + player
+  local OWN_PET_FLAGS = 0x1111 -- mine + friendly + player-controlled + pet
 
   local restoreStubs
 
@@ -118,6 +122,7 @@ describe("Friendly cooldown detection", function()
       COMBATLOG_OBJECT_CONTROL_PLAYER = 0x100,
       COMBATLOG_OBJECT_REACTION_HOSTILE = 0x40,
       COMBATLOG_OBJECT_REACTION_FRIENDLY = 0x10,
+      COMBATLOG_OBJECT_AFFILIATION_MINE = 0x1,
     })
   end)
 
@@ -149,6 +154,30 @@ describe("Friendly cooldown detection", function()
     assert.equal(FRIEND_NAME, friendlyEntry.sourceName)
     -- hostile entries never carry the field, flag on or off
     assert.is_nil(hostileEntry.spellData.friendly)
+  end)
+
+  it("ignores the player's own cast - their cooldowns are on their action bars", function()
+    rgcw.configuration.UpdateTrackFriendlyCooldownsState(true)
+    rgcw.configuration.UpdateCooldownConfigurationState(true, "priest", MIND_BLAST, true)
+
+    processEvent("SPELL_CAST_SUCCESS", PLAYER_GUID, PLAYER_NAME, OWN_PLAYER_FLAGS,
+      ENEMY_GUID, ENEMY_NAME, HOSTILE_PLAYER_FLAGS, MIND_BLAST)
+
+    assert.is_false(rgcw.cooldownQueue.HasCooldowns(PLAYER_GUID))
+  end)
+
+  it("ignores the player's own pet's cast - it would attribute to the player", function()
+    rgcw.configuration.UpdateTrackFriendlyCooldownsState(true)
+    rgcw.configuration.UpdateCooldownConfigurationState(true, "warlock", SPELL_LOCK, true)
+
+    -- the own-unit exclusion covers the summon too, so no pet -> owner mapping is recorded
+    processEvent("SPELL_SUMMON", PLAYER_GUID, PLAYER_NAME, OWN_PLAYER_FLAGS,
+      PET_GUID, PET_NAME, OWN_PET_FLAGS, 0)
+    processEvent("SPELL_CAST_SUCCESS", PET_GUID, PET_NAME, OWN_PET_FLAGS,
+      ENEMY_GUID, ENEMY_NAME, HOSTILE_PLAYER_FLAGS, SPELL_LOCK)
+
+    assert.is_false(rgcw.cooldownQueue.HasCooldowns(PLAYER_GUID))
+    assert.is_false(rgcw.cooldownQueue.HasCooldowns(PET_GUID))
   end)
 
   it("gates each side against its own per-spell state", function()

@@ -26,6 +26,7 @@
 -- luacheck: globals CombatLog_Object_IsA COMBATLOG_FILTER_HOSTILE_PLAYERS GetTime bit
 -- luacheck: globals COMBATLOG_OBJECT_TYPE_PET COMBATLOG_OBJECT_CONTROL_PLAYER COMBATLOG_OBJECT_REACTION_HOSTILE
 -- luacheck: globals COMBATLOG_OBJECT_TYPE_PLAYER COMBATLOG_OBJECT_REACTION_FRIENDLY
+-- luacheck: globals COMBATLOG_OBJECT_AFFILIATION_MINE
 
 local mod = rgcw
 local me = {}
@@ -83,13 +84,16 @@ local function IsHostilePlayerPet(unitFlags)
 end
 
 --[[
-  Whether the acting unit's flags describe a friendly player. Built from the
-  raw object flags because Blizzard ships no COMBATLOG_FILTER_FRIENDLY_PLAYERS
-  counterpart to the hostile filter (COMBATLOG_FILTER_FRIENDLY_UNITS matches
-  npcs and pets too). The reaction flags are the per-event truth - a duel
-  opponent flags hostile for its duration and is tracked as an enemy, which is
-  what the player fighting them wants. No affiliation filter: the player's own
-  casts pass too, the queue simply keys them under the player's guid.
+  Whether the acting unit's flags describe a friendly player other than the
+  player themself. Built from the raw object flags because Blizzard ships no
+  COMBATLOG_FILTER_FRIENDLY_PLAYERS counterpart to the hostile filter
+  (COMBATLOG_FILTER_FRIENDLY_UNITS matches npcs and pets too). The reaction
+  flags are the per-event truth - a duel opponent flags hostile for its
+  duration and is tracked as an enemy, which is what the player fighting them
+  wants. The affiliation check excludes the player's own units: their
+  cooldowns are already on their action bars, and the flag bit covers every
+  attribution path (own casts, the own pet in IsFriendlyPlayerPet, and the
+  dest unit of aura-attributed events like a bandage lockout on the player).
 
   @param {number} unitFlags
 
@@ -99,12 +103,14 @@ local function IsFriendlyPlayer(unitFlags)
   return bit.band(unitFlags, COMBATLOG_OBJECT_TYPE_PLAYER) > 0
     and bit.band(unitFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0
     and bit.band(unitFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) > 0
+    and bit.band(unitFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) == 0
 end
 
 --[[
   Whether the acting unit's flags describe a friendly player's pet - the
   friendly twin of IsHostilePlayerPet, with the same totem/guardian/wild-npc
-  exclusions.
+  exclusions, plus the own-unit exclusion of IsFriendlyPlayer (the player's
+  own pet attributes to the player, whose cooldowns are not tracked).
 
   @param {number} unitFlags
 
@@ -114,6 +120,7 @@ local function IsFriendlyPlayerPet(unitFlags)
   return bit.band(unitFlags, COMBATLOG_OBJECT_TYPE_PET) > 0
     and bit.band(unitFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0
     and bit.band(unitFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) > 0
+    and bit.band(unitFlags, COMBATLOG_OBJECT_AFFILIATION_MINE) == 0
 end
 
 --[[
