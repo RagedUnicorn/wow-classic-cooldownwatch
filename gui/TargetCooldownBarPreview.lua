@@ -72,7 +72,6 @@ function me.ShowExampleTargetCooldownBar()
   previewActive = true
 
   mod.ticker.StopTickerTargetCooldownBar() -- stop regular updates
-  mod.cooldownQueue.ClearCooldownQueue() -- drop all current cooldowns
 
   local cooldownSlots = mod.targetCooldownBar.GetCooldownSlots()
 
@@ -114,8 +113,9 @@ end
 
 --[[
   Stop the preview and hand the slots back to the live render lifecycle. The live ticker is
-  not restarted unconditionally - the wake edge decides whether there is anything to render
-  (the queue was cleared when the preview started, so usually there is not).
+  not restarted unconditionally - the wake edge decides whether there is anything to render:
+  the queue survived the preview, so with an enemy target that has queued cooldowns the bar
+  picks them right back up.
 ]]--
 function me.HideExampleTargetCooldownBar()
   previewActive = false
