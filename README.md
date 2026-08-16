@@ -77,7 +77,7 @@ Each spell also carries two per-spell settings:
 ![](docs/cooldownwatch_worst_case_override.png)
 
 - **Use worst case**: assume the enemy has the talents or gear that shorten this cooldown. The bar then counts down the shortest realistic cooldown instead of the base value.
-- **Cooldown override**: manually set the tracked cooldown in seconds. It takes precedence over all worst case settings, and can only lower the tracked time - values above the base cooldown are capped.
+- **Cooldown override**: manually set the tracked cooldown in seconds. It takes precedence over all worst case settings and accepts any value up to 60 minutes - above the base cooldown too, for when you know the enemy's real cooldown better than the addon does.
 
 **Assume worst case for all cooldowns** applies the worst case to everything at once. Worst case settings on individual cooldowns still take precedence.
 
