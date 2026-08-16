@@ -12,6 +12,12 @@
     <addon.author>Michael Wiesendanger &lt;michael.wiesendanger@gmail.com&gt;</addon.author>
     <addon.description>Addon that tracks cooldowns of enemy players</addon.description>
     <addon.name>CooldownWatch</addon.name>
+    <!--
+      The AddOn folder name. Must match the .toc basename or WoW will not load the AddOn.
+      Used as the package finalName, which drives both the zip filename and - where
+      includeBaseDirectory is enabled - the base directory inside the zip.
+    -->
+    <addon.folderName>CooldownWatch</addon.folderName>
     <addon.displayName>cooldownwatch</addon.displayName>
     <addon.curseforge.projectId>TODO</addon.curseforge.projectId>
     <!--
@@ -56,8 +62,9 @@
         <profile.id.value>development</profile.id.value>
         <package.descriptor>${project.basedir}/build-resources/assembly-development.xml</package.descriptor>
         <package.filter>${project.basedir}/build-resources/addon-development.properties</package.filter>
-        <package.finalName>${addon.name}</package.finalName>
+        <package.finalName>${addon.folderName}</package.finalName>
         <package.appendAssemblyId>true</package.appendAssemblyId>
+        <package.includeBaseDirectory>false</package.includeBaseDirectory>
         <generate.sources.skip>false</generate.sources.skip>
         <generate.sources.filter>${project.basedir}/build-resources/addon-development.properties</generate.sources.filter>
         <generate.sources.descriptor>${project.basedir}/build-resources/generate-development.xml</generate.sources.descriptor>
@@ -70,8 +77,9 @@
         <profile.id.value>release</profile.id.value>
         <package.descriptor>${project.basedir}/build-resources/assembly-release.xml</package.descriptor>
         <package.filter>${project.basedir}/build-resources/addon-release.properties</package.filter>
-        <package.finalName>${addon.name}</package.finalName>
+        <package.finalName>${addon.folderName}</package.finalName>
         <package.appendAssemblyId>false</package.appendAssemblyId>
+        <package.includeBaseDirectory>false</package.includeBaseDirectory>
         <generate.sources.skip>false</generate.sources.skip>
         <generate.sources.filter>${project.basedir}/build-resources/addon-release.properties</generate.sources.filter>
         <generate.sources.descriptor>${project.basedir}/build-resources/generate-release.xml</generate.sources.descriptor>
@@ -84,8 +92,9 @@
         <profile.id.value>deploy</profile.id.value>
         <package.descriptor>${project.basedir}/build-resources/assembly-release.xml</package.descriptor>
         <package.filter>${project.basedir}/build-resources/addon-release.properties</package.filter>
-        <package.finalName>${addon.name}</package.finalName>
+        <package.finalName>${addon.folderName}</package.finalName>
         <package.appendAssemblyId>false</package.appendAssemblyId>
+        <package.includeBaseDirectory>false</package.includeBaseDirectory>
         <generate.sources.skip>true</generate.sources.skip>
       </properties>
       <build>
@@ -110,7 +119,7 @@
                   <name>${addon.tag.version}</name>
                   <releaseNotes>${project.basedir}/build-resources/release-notes.md</releaseNotes>
                   <assets>
-                    <asset>${project.basedir}/target/${addon.name}.zip</asset>
+                    <asset>${project.basedir}/target/${addon.folderName}.zip</asset>
                   </assets>
                 </configuration>
               </execution>
@@ -125,7 +134,7 @@
         <profile.id.value>deploy</profile.id.value>
         <package.descriptor>${project.basedir}/build-resources/assembly-release.xml</package.descriptor>
         <package.filter>${project.basedir}/build-resources/addon-release.properties</package.filter>
-        <package.finalName>${addon.name}</package.finalName>
+        <package.finalName>${addon.folderName}</package.finalName>
         <package.appendAssemblyId>false</package.appendAssemblyId>
         <package.includeBaseDirectory>true</package.includeBaseDirectory>
         <generate.sources.skip>true</generate.sources.skip>
@@ -146,7 +155,7 @@
                 <configuration>
                   <game>wow</game>
                   <projectId>${addon.curseforge.projectId}</projectId>
-                  <displayName>${addon.displayName}-${addon.tag.version}-classic.zip</displayName>
+                  <displayName>${addon.displayName}-${addon.tag.version}.zip</displayName>
                   <changelogFile>${project.basedir}/build-resources/release-notes.md</changelogFile>
                   <changelogType>markdown</changelogType>
                   <gameVersions>
@@ -154,7 +163,7 @@
                     <!-- add ${addon.curseforge.gameVersionTbcc} once the spell catalog supports TBC -->
                   </gameVersions>
                   <releaseType>release</releaseType>
-                  <file>${project.basedir}/target/${addon.name}.zip</file>
+                  <file>${project.basedir}/target/${addon.folderName}.zip</file>
                   <!--suppress UnresolvedMavenProperty -->
                   <authToken>${curseforge.auth-token}</authToken>
                 </configuration>
@@ -170,7 +179,7 @@
         <profile.id.value>deploy</profile.id.value>
         <package.descriptor>${project.basedir}/build-resources/assembly-release.xml</package.descriptor>
         <package.filter>${project.basedir}/build-resources/addon-release.properties</package.filter>
-        <package.finalName>${addon.name}</package.finalName>
+        <package.finalName>${addon.folderName}</package.finalName>
         <package.appendAssemblyId>false</package.appendAssemblyId>
         <package.includeBaseDirectory>true</package.includeBaseDirectory>
         <generate.sources.skip>true</generate.sources.skip>
@@ -190,12 +199,12 @@
                 </goals>
                 <configuration>
                   <projectId>${addon.wago.projectId}</projectId>
-                  <label>${addon.displayName}-${addon.tag.version}-classic.zip</label>
+                  <label>${addon.displayName}-${addon.tag.version}.zip</label>
                   <changelogFile>${project.basedir}/build-resources/release-notes.md</changelogFile>
                   <supportedClassicPatch>${addon.supported.patch.classic}</supportedClassicPatch>
                   <!-- add <supportedBccPatch>${addon.supported.patch.tbcc}</supportedBccPatch> once the spell catalog supports TBC -->
                   <stability>stable</stability>
-                  <file>${project.basedir}/target/${addon.name}.zip</file>
+                  <file>${project.basedir}/target/${addon.folderName}.zip</file>
                   <!--suppress UnresolvedMavenProperty -->
                   <authToken>${wago.auth-token}</authToken>
                 </configuration>
