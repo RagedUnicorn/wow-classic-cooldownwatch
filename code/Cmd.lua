@@ -82,9 +82,28 @@ ParseSlashCommand = function(msg)
     mod.addonConfiguration.OpenMainCategory()
   elseif args[1] == "conf" or args[1] == "configure" then
     if args[2] == "enable" then
+      --[[
+        The example mode is the bar's positioning context, so an active proximity
+        place mode ends first (idempotent no-ops when none is active, and no
+        settings reopen - safeguard parity): positioning contexts are mutually
+        exclusive, and the slash path bypasses the settings-window hook that
+        otherwise enforces that. The bar's own place mode is deliberately left
+        running - the example mode IS that mode's preview.
+      ]]--
+      mod.proximityCooldownBarPreview.FinishPlaceMode(false)
+      mod.friendlyProximityCooldownBarPreview.FinishPlaceMode(false)
       mod.targetCooldownBarPreview.ShowExampleTargetCooldownBar()
     elseif args[2] == "disable" then
-      mod.targetCooldownBarPreview.HideExampleTargetCooldownBar()
+      if mod.targetCooldownBarPlaceMode.IsPlaceModeActive() then
+        --[[
+          The bar place mode's preview IS the example mode - hiding the preview
+          underneath it would strand the mode flag and its floating apply button.
+          Finishing the mode hides the preview through its StopPreview.
+        ]]--
+        mod.targetCooldownBarPlaceMode.FinishPlaceMode(false)
+      else
+        mod.targetCooldownBarPreview.HideExampleTargetCooldownBar()
+      end
     else
       mod.logger.PrintUserError(rgcw.L["invalid_argument"])
     end

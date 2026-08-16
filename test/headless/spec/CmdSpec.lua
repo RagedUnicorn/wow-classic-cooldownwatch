@@ -33,6 +33,13 @@
   The handler is file-local (only reachable through SlashCmdList["COOLDOWNWATCH"]), so each spec
   installs the registry via SetupSlashCmdList and dispatches through the captured handler.
 
+  The conf branches additionally cooperate with the test/place modes, whose mutual exclusivity is
+  otherwise enforced only by the settings-window OnShow hook the slash path bypasses: "conf enable"
+  finishes an active proximity place mode (both windows, reopen false - safeguard parity) but leaves
+  the bar's own place mode running, because the example mode IS that mode's preview; "conf disable"
+  with the bar place mode active finishes the mode (whose StopPreview hides the preview) instead of
+  hiding the preview underneath it, which would strand the mode flag and its floating apply button.
+
   The `opt` case is the regression guard for CW-0042: code/Cmd.lua used to call the non-existent
   mod.addonConfiguration.OpenAddonPanel(), which is nil and threw. The OpenMainCategory spy asserts
   the call resolves to the function that actually exists in gui/AddonConfiguration.lua.
@@ -62,14 +69,21 @@ describe("Cmd", function()
   local openCalls
   local showExampleCalls
   local hideExampleCalls
+  local barPlaceModeActive
+  local barFinishCalls
+  local enemyFinishCalls
+  local friendlyFinishCalls
 
-  -- rgcw.logger / rgcw.addonConfiguration / rgcw.targetCooldownBarPreview / rgcw.L are deep fields
-  -- of the shared `rgcw` table; file insulation snapshots only the top-level reference, so capture
-  -- and restore them to avoid leaking the stubs into later specs (only logger exists in the
-  -- bootstrap, and only with the LogDebug field).
+  -- rgcw.logger / rgcw.addonConfiguration / rgcw.targetCooldownBarPreview / the place-mode wrappers
+  -- / rgcw.L are deep fields of the shared `rgcw` table; file insulation snapshots only the
+  -- top-level reference, so capture and restore them to avoid leaking the stubs into later specs
+  -- (only logger exists in the bootstrap, and only with the LogDebug field).
   local originalLogger = rgcw.logger
   local originalAddonConfiguration = rgcw.addonConfiguration
   local originalTargetCooldownBarPreview = rgcw.targetCooldownBarPreview
+  local originalTargetCooldownBarPlaceMode = rgcw.targetCooldownBarPlaceMode
+  local originalProximityCooldownBarPreview = rgcw.proximityCooldownBarPreview
+  local originalFriendlyProximityCooldownBarPreview = rgcw.friendlyProximityCooldownBarPreview
   local originalL = rgcw.L
 
   before_each(function()
@@ -101,6 +115,24 @@ describe("Cmd", function()
       ShowExampleTargetCooldownBar = function() showExampleCalls = showExampleCalls + 1 end,
       HideExampleTargetCooldownBar = function() hideExampleCalls = hideExampleCalls + 1 end
     }
+
+    barPlaceModeActive = false
+    barFinishCalls = {}
+    enemyFinishCalls = {}
+    friendlyFinishCalls = {}
+
+    -- each FinishPlaceMode records the reopenOptions argument it was passed (false, not nil,
+    -- is the contract - the slash path must never reopen the settings window)
+    rgcw.targetCooldownBarPlaceMode = {
+      IsPlaceModeActive = function() return barPlaceModeActive end,
+      FinishPlaceMode = function(reopen) barFinishCalls[#barFinishCalls + 1] = reopen end
+    }
+    rgcw.proximityCooldownBarPreview = {
+      FinishPlaceMode = function(reopen) enemyFinishCalls[#enemyFinishCalls + 1] = reopen end
+    }
+    rgcw.friendlyProximityCooldownBarPreview = {
+      FinishPlaceMode = function(reopen) friendlyFinishCalls[#friendlyFinishCalls + 1] = reopen end
+    }
     -- ShowInfoMessage / the error path read several L keys; fall back to the key name for any other
     rgcw.L = setmetatable({
       info_title = "CooldownWatch",
@@ -122,6 +154,9 @@ describe("Cmd", function()
     rgcw.logger = originalLogger
     rgcw.addonConfiguration = originalAddonConfiguration
     rgcw.targetCooldownBarPreview = originalTargetCooldownBarPreview
+    rgcw.targetCooldownBarPlaceMode = originalTargetCooldownBarPlaceMode
+    rgcw.proximityCooldownBarPreview = originalProximityCooldownBarPreview
+    rgcw.friendlyProximityCooldownBarPreview = originalFriendlyProximityCooldownBarPreview
     rgcw.L = originalL
   end)
 
@@ -168,10 +203,35 @@ describe("Cmd", function()
       assert.are.equal(0, hideExampleCalls)
     end)
 
+    it("finishes both proximity place modes without reopening the settings window for 'conf enable'", function()
+      handle("conf enable")
+      -- unconditional wiring - FinishPlaceMode itself no-ops when the mode is inactive
+      assert.are.same({ false }, enemyFinishCalls)
+      assert.are.same({ false }, friendlyFinishCalls)
+      assert.are.equal(1, showExampleCalls)
+    end)
+
+    it("leaves the bar's own place mode running for 'conf enable'", function()
+      -- the example mode IS the bar place mode's preview - same surface, no conflict
+      barPlaceModeActive = true
+      handle("conf enable")
+      assert.are.same({}, barFinishCalls)
+      assert.are.equal(1, showExampleCalls)
+    end)
+
     it("hides the example bar for 'conf disable'", function()
       handle("conf disable")
       assert.are.equal(1, hideExampleCalls)
       assert.are.equal(0, showExampleCalls)
+      assert.are.same({}, barFinishCalls)
+    end)
+
+    it("finishes the bar place mode instead of hiding its preview for 'conf disable'", function()
+      -- hiding the preview underneath the mode would strand the mode flag and the apply button
+      barPlaceModeActive = true
+      handle("conf disable")
+      assert.are.same({ false }, barFinishCalls)
+      assert.are.equal(0, hideExampleCalls)
     end)
 
     it("reports a user error for 'conf' without a sub-argument", function()
