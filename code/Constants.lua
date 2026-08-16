@@ -116,6 +116,7 @@ RGCW_CONSTANTS = {
     sized to fit the four characters Common.FormatCooldownTime is bounded to.
   ]]--
   PROXIMITY_COOLDOWN_ROW_TIME_WIDTH = 32,
+  PROXIMITY_COOLDOWN_ROW_CASTER_NAME_MAX_WIDTH = 110,
   --[[
     Caster names staged onto the example rows of the proximity windows' test/
     place mode and the media capture previews. Plausible character names -

@@ -146,8 +146,9 @@ function me.CreateInstance(spec)
     whose value is the remaining cooldown (full right after the cast, empty
     when the spell is ready), the spell's name overlaid on the left of the
     bar and the caster's name right-aligned beside the remaining time on its
-    right. The spell name truncates first: it is the only fontstring bounded
-    on both sides, so a long caster name squeezes it rather than overlapping.
+    right. The spell name truncates first: a longer caster name squeezes it -
+    but only down to a floor, because the caster name's auto-size is capped at
+    PROXIMITY_COOLDOWN_ROW_CASTER_NAME_MAX_WIDTH on binding (see UpdateRow).
 
     @param {table} frame
     @param {number} position
@@ -195,7 +196,9 @@ function me.CreateInstance(spec)
       STANDARD_TEXT_FONT, RGCW_CONSTANTS.PROXIMITY_COOLDOWN_ROW_TEXT_SIZE, "OUTLINE")
     row.casterName:SetPoint("RIGHT", row.remainingText, "LEFT", -4, 0)
     row.casterName:SetJustifyH("RIGHT")
-    row.casterName:SetWordWrap(false)
+    -- word wrap on + single-line cap: the engine's trailing "..." on a name
+    -- longer than the width cap UpdateRow applies (same trick as spellName)
+    row.casterName:SetMaxLines(1)
 
     row.spellName = row.statusBar:CreateFontString(nil, "OVERLAY")
     row.spellName:SetFont(
@@ -282,6 +285,18 @@ function me.CreateInstance(spec)
 
     if row.sourceGuid ~= cooldown.sourceGuid then
       row.casterName:SetText(cooldown.sourceName)
+      --[[
+        The caster name is single-anchored and auto-sizes to its text, which
+        is what lets a short name leave its leftover room to the spell name -
+        but unbounded, a long cross-realm Name-Realm would grow across the
+        spell name region and past its LEFT anchor, turning the spell name
+        rect degenerate. Capping at the measured width keeps the auto-size
+        for everything below the cap and elides only above it.
+      ]]--
+      row.casterName:SetWidth(math.min(
+        row.casterName:GetStringWidth(),
+        RGCW_CONSTANTS.PROXIMITY_COOLDOWN_ROW_CASTER_NAME_MAX_WIDTH
+      ))
       row.sourceGuid = cooldown.sourceGuid
     end
 
