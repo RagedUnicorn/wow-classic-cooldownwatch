@@ -3,5 +3,6 @@ return {
     ROOT = { "test/headless/spec" },
     helper = "test/headless/Bootstrap.lua",
     pattern = "Spec%.lua$",
+    verbose = true
   }
 }
