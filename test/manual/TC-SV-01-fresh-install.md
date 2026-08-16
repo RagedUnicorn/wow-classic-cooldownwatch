@@ -14,7 +14,7 @@
    folder
 2. Log in with the character
 3. Observe the screen and chat for errors
-4. Open `/rgcw opt` and walk through every subpanel (Options, Profiles, all eleven spell
+4. Open `/rgcw opt` and walk through every subpanel (Options, Profiles, all twelve spell
    categories, About)
 5. Target an enemy player (or use `/rgcw test inject` against yourself) and confirm a cooldown
    renders

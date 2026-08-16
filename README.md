@@ -2,7 +2,7 @@
 
 ![](docs/ragedunicorn_wow_banner.png)
 
-> CooldownWatch aims to track your enemies cooldowns and making them visible to the player
+> CooldownWatch aims to track the cooldowns of enemy and friendly players and make them visible at a glance
 
 ![](docs/wow_badge_classic.svg)
 ![](docs/wow_badge_tbc.svg)
@@ -46,8 +46,9 @@ CooldownWatch supports World of Warcraft Classic Era and TBC Anniversary, includ
 * **Worst case handling** for enemies with talents or gear that shorten a cooldown, globally or per spell.
 * **Manual cooldown overrides** per spell when you want the exact number yourself.
 * **Pet cooldowns resolved back to their owner**, so a pet ability counts against the player who owns it.
-* **Season aware** - Season of Discovery and TBC spells are applied on top of the base catalog for the branch you are playing.
+* **Season aware** - Season of Discovery and TBC Anniversary are supported with the Classic catalog as the baseline; season-specific spell data is still being added.
 * **Configuration profiles** with export/import for moving a setup between characters or sharing it.
+* **Update notice** - a one-time chat message when a party, raid or guild member runs a newer version of CooldownWatch.
 
 ## Configuration
 
@@ -59,6 +60,13 @@ CooldownWatch can be configured through the in-game interface options. Access th
 4. Finding "CooldownWatch" in the list
 
 Alternatively, you can use the slash command: `/cooldownwatch opt` or `/rgcw opt`
+
+The full `/rgcw` (or `/cooldownwatch`) command surface:
+
+- `/rgcw help` - print the available commands (plain `/rgcw` does the same)
+- `/rgcw opt` - open the options panel
+- `/rgcw conf enable|disable` - show or hide the example Targetcooldownbar (`configure` also works)
+- `/rgcw rl` - reload the UI (`reload` also works)
 
 ### Positioning the bar and windows
 
@@ -141,7 +149,7 @@ Switching between development and release can be achieved with maven.
 mvn generate-resources -D generate.sources.overwrite=true -P development
 ```
 
-This generates and overwrites `CW_Environment.lua` and `CooldownWatch.toc`. You need to specifically specify that you want to overwrite to files to prevent data loss. It is also possible to omit the profile because development is the default profile that will be used.
+This generates and overwrites `code/Environment.lua` and `CooldownWatch.toc`. You need to specifically specify that you want to overwrite the files to prevent data loss. It is also possible to omit the profile because development is the default profile that will be used.
 
 Switching to release can be done as such:
 
@@ -153,7 +161,7 @@ In this case it is mandatory to add the release profile.
 
 **Note:** Switching environments has the effect changing certain files to match an expected value depending on the environment. To be more specific this means that as an example test and debug files are not included when switching to release. It also means that variables such as loglevel change to match the environment.
 
-As to not change those files all the time the repository should always stay in the development environment. Do not commit `CooldownWatch.toc` and `CW_Environment.lua` in their release state. Changes to those files should always be done inside `build-resources` and their respective template files marked with `.tpl`.
+As to not change those files all the time the repository should always stay in the development environment. Do not commit `CooldownWatch.toc` and `code/Environment.lua` in their release state. Changes to those files should always be done inside `build-resources` and their respective template files marked with `.tpl`.
 
 ### Packaging the Addon
 

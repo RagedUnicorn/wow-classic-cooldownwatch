@@ -38,7 +38,7 @@ Additionally verify that CI is green on `master` for the latest commit:
 Both must pass with zero failures before any in-game testing starts.
 
 Then run the in-game suite once on the dev checkout - it covers the data-integrity validators, the queue mechanics and
-per-spell tracking for all eleven categories:
+per-spell tracking for all twelve categories:
 
 ```
 /reload

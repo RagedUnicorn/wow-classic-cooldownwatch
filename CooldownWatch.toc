@@ -1,7 +1,7 @@
 ## Interface: 11509, 20506
 ## Title: CooldownWatch
 ## Author: Michael Wiesendanger <michael.wiesendanger@gmail.com>
-## Notes: Addon that tracks cooldowns of enemy players
+## Notes: Addon that tracks cooldowns of enemy and friendly players
 ## Version: v1.0.0
 ## SavedVariablesPerCharacter: CooldownWatchConfiguration CooldownWatchTestLog CooldownWatchLogTracker
 ## SavedVariables: CooldownWatchShotLog

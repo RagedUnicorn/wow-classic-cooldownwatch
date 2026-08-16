@@ -68,10 +68,10 @@ docker compose run --rm busted
 ```
 
 This loads `test/headless/Bootstrap.lua`, which stubs the WoW globals the production files reach for at load time, then
-`dofile`s `code/Constants.lua`, `code/Event.lua`, `code/Common.lua`, `code/Categories.lua`, the SpellMap modules
-(the `code/spellmap/base/` category slices, `code/spellmap/Base.lua`, the `code/spellmap/overlay/` files,
-`code/spellmap/Assemble.lua`, `code/SpellMap.lua`),
-`code/SpellMapHelper.lua`, `code/CooldownQueue.lua`, and `test/SpellMapValidation.lua`. Specs in `test/headless/spec/`
+`dofile`s the production modules in dependency order - from `code/Constants.lua` through the configuration and profile
+modules and the SpellMap assembly to `code/CooldownQueue.lua`, `code/GroupRoster.lua`, `code/PetOwner.lua` and
+`code/CombatLog.lua` - plus `test/SpellMapValidation.lua`. The `dofile` list in `test/headless/Bootstrap.lua` is the
+authoritative inventory of what runs headless. Specs in `test/headless/spec/`
 are then discovered by busted's `Spec` pattern.
 
 CI runs the same specs on every push and pull request via `.github/workflows/test.yaml`, using [
@@ -82,12 +82,12 @@ CI runs the same specs on every push and pull request via `.github/workflows/tes
 
 | File                                  | What it covers                                                                                                                                                                                                                                                                      |
 |---------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `test/SpellMapValidation.lua`         | Pure-data validators for the assembled spellMap (`code/spellmap/` + orchestrator; no WoW APIs, no logging). Source of truth for both the in-game `TestSpellMap` suite and the busted spec.                                                                                                                              |
+| `test/SpellMapValidation.lua`         | Pure-data validators for the assembled spellMap (`code/spellmap/` + orchestrator; no WoW APIs, no logging). Source of truth for both the in-game `TestSpellMap` suite and the busted spec.                                                                                          |
 | `test/TestSpellMap.lua`               | In-game wrapper — runs the validators and reports through `testLogger`. No targeting required.                                                                                                                                                                                      |
 | `test/headless/spec/`                 | Busted specs (`*Spec.lua`) — SpellMap validators, cooldown queue, event bus, command dispatch, common helpers, localization parity. Run headlessly under busted (locally and in CI).                                                                                                |
 | `test/TestCooldownQueue.lua`          | Queue mechanics — add, multiple, duplicate-prevention, remove. In-game only.                                                                                                                                                                                                        |
 | `test/TestTargetCooldownBar.lua`      | Target cooldown bar preview suite. In-game only.                                                                                                                                                                                                                                    |
-| `test/category/Test<Class>Spells.lua` | End-to-end per-spell tracking, one file per SpellMap category (all eleven exist): drives `SearchBySpellId` → `AddCooldown` → `GetCooldownsByTarget` for every spell the category declares and asserts a non-primary rank resolves to its primary via the refId chain. In-game only. |
+| `test/category/Test<Class>Spells.lua` | End-to-end per-spell tracking, one file per SpellMap category (all twelve exist): drives `SearchBySpellId` → `AddCooldown` → `GetCooldownsByTarget` for every spell the category declares and asserts a non-primary rank resolves to its primary via the refId chain. In-game only. |
 | `test/framework/`                     | Shared helpers (`testLogger`, `testHelper`, log window, `/rgcw test ...` slash commands).                                                                                                                                                                                           |
 | `test/debug/DebugInjectorWindow.lua`  | Debug spell injector window, toggled with `/rgcw test inject`.                                                                                                                                                                                                                      |
 

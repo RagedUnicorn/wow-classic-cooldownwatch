@@ -59,6 +59,7 @@ body:
         - Warrior
         - Racials
         - Items
+        - Misc
         - Not sure
     validations:
       required: true

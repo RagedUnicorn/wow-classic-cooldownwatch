@@ -10,7 +10,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <addon.author>Michael Wiesendanger &lt;michael.wiesendanger@gmail.com&gt;</addon.author>
-    <addon.description>Addon that tracks cooldowns of enemy players</addon.description>
+    <addon.description>Addon that tracks cooldowns of enemy and friendly players</addon.description>
     <addon.name>CooldownWatch</addon.name>
     <!--
       The AddOn folder name. Must match the .toc basename or WoW will not load the AddOn.

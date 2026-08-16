@@ -9,7 +9,7 @@
 ## Steps
 
 1. `/rgcw opt`
-2. Walk through every subpanel in order: Options, Profiles, and all eleven spell categories
+2. Walk through every subpanel in order: Options, Profiles, and all twelve spell categories
    (Priest, Rogue, Mage, Hunter, Warlock, Paladin, Druid, Shaman, Warrior, Racials, Items, Misc)
 3. On each category: check the panel title, scroll to the bottom of the list, hover a few row icons
 4. Switch back and forth between two categories with very different spell counts (e.g. Warrior and
