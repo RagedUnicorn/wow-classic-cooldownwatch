@@ -141,6 +141,7 @@ function me.CreateAnimation(cooldownWatchSlot)
 
     cooldownWatchSlot.iconHolderTexture:SetTexture(nil)
     cooldownWatchSlot.iconHolderTexture.spellId = nil
+    cooldownWatchSlot.iconHolderTexture.friendly = nil
     cooldownWatchSlot.highlightFrame:Hide()
     cooldownWatchSlot:SetAlpha(1)
     cooldownWatchSlot:Hide()
@@ -375,10 +376,12 @@ end
   @param {table} spellData
 ]]--
 function me.UpdateCooldownSlotTexture(cooldownWatchSlot, spellData)
-  if cooldownWatchSlot.iconHolderTexture.spellId == spellData.spellId then return end
+  if cooldownWatchSlot.iconHolderTexture.spellId == spellData.spellId
+    and cooldownWatchSlot.iconHolderTexture.friendly == spellData.friendly then return end
 
   cooldownWatchSlot.iconHolderTexture:SetTexture(mod.guiHelper.GetIconId(spellData))
   cooldownWatchSlot.iconHolderTexture.spellId = spellData.spellId
+  cooldownWatchSlot.iconHolderTexture.friendly = spellData.friendly
 end
 
 --[[
@@ -468,6 +471,7 @@ function me.ClearCooldownWatchSlot(cooldownWatchSlot)
   cooldownWatchSlot.targetSpellTimeSmall:SetText("")
   cooldownWatchSlot.iconHolderTexture:SetTexture(nil)
   cooldownWatchSlot.iconHolderTexture.spellId = nil
+  cooldownWatchSlot.iconHolderTexture.friendly = nil
   cooldownWatchSlot.highlightFrame:Hide()
   cooldownWatchSlot.targetCooldownOverlay.spellId = nil
   cooldownWatchSlot.isCleared = true
