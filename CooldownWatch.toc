@@ -1,10 +1,13 @@
-## Interface: 11509
+## Interface: 11509, 20506
 ## Title: CooldownWatch
 ## Author: Michael Wiesendanger <michael.wiesendanger@gmail.com>
 ## Notes: Addon that tracks cooldowns of enemy players
 ## Version: v1.0.0
 ## SavedVariablesPerCharacter: CooldownWatchConfiguration CooldownWatchTestLog CooldownWatchLogTracker
 ## SavedVariables: CooldownWatchShotLog
+## X-Category: PvP Combat
+## X-Curse-Project-ID: 1644869
+## X-Wago-ID: L6J919Nv
 ## IconTexture: Interface\AddOns\CooldownWatch\assets\cooldownwatch_icon
 ## Category: RagedUnicorn
 # THIS FILE IS AUTO-GENERATED. ALL CHANGES ARE OVERWRITTEN

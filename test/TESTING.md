@@ -60,18 +60,19 @@ instead.
 |---------------------------|-----------|-----------------------------------------------|
 | Classic Era               | 11509     | Full manual catalog ([test/manual/](manual/)) |
 | Season of Discovery (Era) | 11509     | `TC-SOD-01` - conditional, see note below     |
-| TBC Anniversary           | 20506     | Informational smoke checklist (below)         |
+| TBC Anniversary           | 20506     | Smoke checklist (below) - every release       |
 
 `TC-SOD-01` is **conditional**: run it only if a Season of Discovery character is available or if season-gating code
 (`code/Season.lua`, `code/SpellMapHelper.lua`, `code/spellmap/overlay/Sod.lua`)
 was touched since the last release.
 
-TBC is **not a published target**: the spell catalog is Classic-only, so the tbcc properties in
-`pom.xml` are maintained but excluded from the shipped interface line and store versions. The smoke checklist below is
-informational only - run it when the tbcc properties or anything branch-aware (`SpellMap.DetermineActiveBranch`,
-`code/spellmap/overlay/Tbc.lua`) changed, and do not block a release on it.
+TBC Anniversary is a **published target** with the Classic spell catalog as its baseline: the tbcc properties in
+`pom.xml` feed the shipped interface line and store versions, but `code/spellmap/overlay/Tbc.lua` is still data-empty -
+cooldowns reworked in TBC and TBC-only ranks are not tracked yet. Run the smoke checklist below before every release,
+and additionally whenever the tbcc properties or anything branch-aware (`SpellMap.DetermineActiveBranch`,
+`code/spellmap/overlay/Tbc.lua`) changed.
 
-## 3. Smoke checklist (TBC Anniversary, informational)
+## 3. Smoke checklist (TBC Anniversary)
 
 - [ ] Addon loads without errors on login; the welcome message prints
 - [ ] `/rgcw opt` opens the options panel; every category subpanel opens without errors

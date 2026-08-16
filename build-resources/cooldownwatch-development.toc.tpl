@@ -5,6 +5,9 @@
 ## Version: ${addon.tag.version}
 ## SavedVariablesPerCharacter: ${addon.savedVariablesPerCharacter}
 ## SavedVariables: CooldownWatchShotLog
+## X-Category: ${addon.project.categories}
+## X-Curse-Project-ID: ${addon.curseforge.projectId}
+## X-Wago-ID: ${addon.wago.projectId}
 ## IconTexture: Interface\AddOns\CooldownWatch\assets\cooldownwatch_icon
 ## Category: RagedUnicorn
 ${addon.comment.generated.toc}

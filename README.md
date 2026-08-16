@@ -5,10 +5,15 @@
 > CooldownWatch aims to track your enemies cooldowns and making them visible to the player
 
 ![](docs/wow_badge_classic.svg)
+![](docs/wow_badge_tbc.svg)
 ![](docs/license_mit.svg)
-[![](docs/curseforge.svg)](https://curseforge.overwolf.com/?addonId=TODO&fileId=TODO)
 ![Lint](https://github.com/RagedUnicorn/wow-classic-cooldownwatch/actions/workflows/lint.yaml/badge.svg?branch=master)
 ![Headless Tests](https://github.com/RagedUnicorn/wow-classic-cooldownwatch/actions/workflows/test.yaml/badge.svg?branch=master)
+
+## Providers
+
+[![](docs/curseforge.svg)](https://www.curseforge.com/wow/addons/cooldownwatch)
+[![](docs/wago.svg)](https://addons.wago.io/addons/cooldownwatch)
 
 ## Installation
 

@@ -19,7 +19,7 @@
     -->
     <addon.folderName>CooldownWatch</addon.folderName>
     <addon.displayName>cooldownwatch</addon.displayName>
-    <addon.curseforge.projectId>TODO</addon.curseforge.projectId>
+    <addon.curseforge.projectId>1644869</addon.curseforge.projectId>
     <!--
       CurseForge game version IDs (not WoW interface numbers)
 
@@ -30,15 +30,15 @@
     <addon.curseforge.gameVersionClassic>16630</addon.curseforge.gameVersionClassic>
     <!-- renovate: datasource=custom.wow-game-versions-tbcc depName=wow-gameversion-tbcc versioning=loose -->
     <addon.curseforge.gameVersionTbcc>16533</addon.curseforge.gameVersionTbcc>
-    <addon.wago.projectId>TODO</addon.wago.projectId>
+    <addon.wago.projectId>L6J919Nv</addon.wago.projectId>
     <addon.name.short>CW</addon.name.short>
     <addon.tag.version>v${project.version}</addon.tag.version>
     <!-- renovate: datasource=custom.wow-versions-classic depName=wow-interface-classic versioning=loose -->
     <addon.interface.classic>11509</addon.interface.classic>
     <!-- renovate: datasource=custom.wow-versions-tbcc depName=wow-interface-tbcc versioning=loose -->
     <addon.interface.tbcc>20506</addon.interface.tbcc>
-    <!-- Aggregated interface line consumed by the .toc template. ${addon.interface.tbcc} joins the aggregate once the spell catalog supports TBC. -->
-    <addon.interface>${addon.interface.classic}</addon.interface>
+    <!-- Aggregated interface line consumed by the .toc template. -->
+    <addon.interface>${addon.interface.classic}, ${addon.interface.tbcc}</addon.interface>
     <!--
       Wago patch versions.
       Classic - covers: Classic Era, Hardcore, Season of Discovery
@@ -160,7 +160,7 @@
                   <changelogType>markdown</changelogType>
                   <gameVersions>
                     <gameVersion>${addon.curseforge.gameVersionClassic}</gameVersion>
-                    <!-- add ${addon.curseforge.gameVersionTbcc} once the spell catalog supports TBC -->
+                    <gameVersion>${addon.curseforge.gameVersionTbcc}</gameVersion>
                   </gameVersions>
                   <releaseType>release</releaseType>
                   <file>${project.basedir}/target/${addon.folderName}.zip</file>
@@ -202,7 +202,7 @@
                   <label>${addon.displayName}-${addon.tag.version}.zip</label>
                   <changelogFile>${project.basedir}/build-resources/release-notes.md</changelogFile>
                   <supportedClassicPatch>${addon.supported.patch.classic}</supportedClassicPatch>
-                  <!-- add <supportedBccPatch>${addon.supported.patch.tbcc}</supportedBccPatch> once the spell catalog supports TBC -->
+                  <supportedBccPatch>${addon.supported.patch.tbcc}</supportedBccPatch>
                   <stability>stable</stability>
                   <file>${project.basedir}/target/${addon.folderName}.zip</file>
                   <!--suppress UnresolvedMavenProperty -->
@@ -297,6 +297,7 @@
                   <filtering>false</filtering>
                   <includes>
                     <include>wow_badge_classic.svg</include>
+                    <include>wow_badge_tbc.svg</include>
                   </includes>
                 </resource>
               </resources>
