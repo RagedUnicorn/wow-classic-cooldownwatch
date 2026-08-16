@@ -50,6 +50,7 @@ describe("Friendly cooldown detection", function()
   local MIND_BLAST = 10947
   local INNER_FOCUS = 14751
   local SPELL_LOCK = 19647
+  local RECENTLY_BANDAGED = 11196
 
   local FRIEND_GUID = "Player-4234-000000C1"
   local FRIEND_NAME = "Testfriend"
@@ -170,14 +171,50 @@ describe("Friendly cooldown detection", function()
     rgcw.configuration.UpdateTrackFriendlyCooldownsState(true)
     rgcw.configuration.UpdateCooldownConfigurationState(true, "warlock", SPELL_LOCK, true)
 
-    -- the own-unit exclusion covers the summon too, so no pet -> owner mapping is recorded
     processEvent("SPELL_SUMMON", PLAYER_GUID, PLAYER_NAME, OWN_PLAYER_FLAGS,
       PET_GUID, PET_NAME, OWN_PET_FLAGS, 0)
+
+    -- the own-unit exclusion covers the summon itself: no pet -> owner mapping
+    assert.is_nil((rgcw.petOwner.GetOwner(PET_GUID)))
+
     processEvent("SPELL_CAST_SUCCESS", PET_GUID, PET_NAME, OWN_PET_FLAGS,
       ENEMY_GUID, ENEMY_NAME, HOSTILE_PLAYER_FLAGS, SPELL_LOCK)
 
     assert.is_false(rgcw.cooldownQueue.HasCooldowns(PLAYER_GUID))
     assert.is_false(rgcw.cooldownQueue.HasCooldowns(PET_GUID))
+
+    --[[
+      Prove the cast was dropped at the CLEU gate rather than parked: a
+      sighting flushes every parked cast into the queue, so flushing nothing
+      means nothing entered the attribution pipeline.
+    ]]--
+    rgcw.petOwner.RecordSighting(PET_GUID, PLAYER_GUID, PLAYER_NAME)
+
+    assert.is_false(rgcw.cooldownQueue.HasCooldowns(PLAYER_GUID))
+  end)
+
+  it("attributes a bandage lockout to the bandaged unit but never to the player themself", function()
+    rgcw.configuration.UpdateTrackFriendlyCooldownsState(true)
+
+    -- the tracked event comes from the catalog entry, never restated
+    local category, _, bandage = rgcw.spellMapHelper.GetSpellById(RECENTLY_BANDAGED)
+    assert.is_not_nil(bandage)
+
+    rgcw.configuration.UpdateCooldownConfigurationState(true, category, RECENTLY_BANDAGED, true)
+
+    -- the player bandages a teammate: the lockout lands on the teammate and
+    -- tracks even though the source unit carries the player's own flags
+    processEvent(bandage.trackedEvents[1], PLAYER_GUID, PLAYER_NAME, OWN_PLAYER_FLAGS,
+      FRIEND_GUID, FRIEND_NAME, FRIENDLY_PLAYER_FLAGS, RECENTLY_BANDAGED)
+
+    assert.is_true(rgcw.cooldownQueue.HasCooldowns(FRIEND_GUID))
+
+    -- a teammate bandages the player: same spell, same config, but the aura
+    -- attributes by dest and the player's own flags must exclude it
+    processEvent(bandage.trackedEvents[1], FRIEND_GUID, FRIEND_NAME, FRIENDLY_PLAYER_FLAGS,
+      PLAYER_GUID, PLAYER_NAME, OWN_PLAYER_FLAGS, RECENTLY_BANDAGED)
+
+    assert.is_false(rgcw.cooldownQueue.HasCooldowns(PLAYER_GUID))
   end)
 
   it("gates each side against its own per-spell state", function()
