@@ -40,7 +40,7 @@
   with the bar place mode active finishes the mode (whose StopPreview hides the preview) instead of
   hiding the preview underneath it, which would strand the mode flag and its floating apply button.
 
-  The `opt` case is the regression guard for CW-0042: code/Cmd.lua used to call the non-existent
+  The `opt` case is a regression guard: code/Cmd.lua used to call the non-existent
   mod.addonConfiguration.OpenAddonPanel(), which is nil and threw. The OpenMainCategory spy asserts
   the call resolves to the function that actually exists in gui/AddonConfiguration.lua.
 

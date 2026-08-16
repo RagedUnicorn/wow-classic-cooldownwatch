@@ -225,8 +225,9 @@ end
   the window.
 
   The stored values are untouched: the gate is a ui affordance, the flags
-  stay independent in the store (the CWI-0062 independence convention), so
-  re-enabling a flag brings its dependents back exactly as configured.
+  stay independent in the store (deliberate - no friendly flag ever writes
+  another), so re-enabling a flag brings its dependents back exactly as
+  configured.
 
   Runs on panel build, on every master and window-enable toggle, and on every
   panel show (the master checkbox's OnShow callback), so the gate can never

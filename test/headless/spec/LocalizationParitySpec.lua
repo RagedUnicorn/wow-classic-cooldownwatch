@@ -25,7 +25,7 @@
 --[[
   Key-set parity across CooldownWatch's localization files (localization/*.lua).
 
-  The recurring bug this pins down (CW-0056): deDE.lua replaces rgcw.L wholesale, so a string added
+  The recurring bug this pins down: deDE.lua replaces rgcw.L wholesale, so a string added
   to enUS but not mirrored to deDE resolves to nil on German clients — a SetText(nil) or concat
   error at runtime. Rather than an English fallback in production, parity is enforced here: every
   locale must ship the exact same key set. The locale set is glob-discovered (lfs over

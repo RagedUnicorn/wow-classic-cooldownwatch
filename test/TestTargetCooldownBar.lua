@@ -37,7 +37,8 @@ me.tag = "TestTargetCooldownBar"
   ShowExampleTargetCooldownBar drives every slot through the exact slot-update
   contract the live OnUpdate path uses. A shape mismatch between the synthetic
   cooldown and what UpdateCooldownWatchSlot expects would raise a Lua error here
-  - the regression CW-0002 introduced and that this test now guards against.
+  - a regression that has happened before and that this test now guards
+  against.
 ]]--
 function me.TestShowExampleTargetCooldownBar()
   local testName = "TestTargetCooldownBar_ShowExample"
