@@ -387,14 +387,19 @@ describe("spellMapAssembler ops", function()
     end)
 
     it("does not mutate base or overlay tables", function()
+      -- appendRanks deliberately targets both an added and a replaced spellId:
+      -- those working-map entries came out of the overlay itself, so an
+      -- un-cloned insert would stamp allRanks onto the overlay's own data
       local function BuildOverlays()
         return {
           {
             mage = {
               remove = { 11129 },
               add = { [999001] = { name = "New Spell" } },
+              replace = { [12472] = { name = "Replaced Cold Snap" } },
               appendRanks = {
-                [12472] = { { spellId = 999002, type = RGCW_CONSTANTS.SPELL_TYPE_BASE } }
+                [12472] = { { spellId = 999002, type = RGCW_CONSTANTS.SPELL_TYPE_BASE } },
+                [999001] = { { spellId = 999003, type = RGCW_CONSTANTS.SPELL_TYPE_BASE } }
               }
             }
           }
@@ -403,8 +408,9 @@ describe("spellMapAssembler ops", function()
       local base = BuildBase()
       local overlays = BuildOverlays()
 
-      assembler.Validate(base, overlays)
+      local ok = assembler.Validate(base, overlays)
 
+      assert.is_true(ok)
       assert.are.same(BuildBase(), base)
       assert.are.same(BuildOverlays(), overlays)
     end)

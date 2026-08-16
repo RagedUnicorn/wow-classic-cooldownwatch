@@ -23,11 +23,171 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
+--[[
+  Overlay op engine for the spell catalog. The remove/add/replace/appendRanks rule set is
+  encoded once in the file-local ApplyOverlay; ApplyOne and Validate are presentation
+  wrappers around it (logged-and-skipped vs collected violations). Structure mirrors
+  PVPWarn's code/SpellMapAssembler.lua - keep the rule set in sync across the family when
+  changing op semantics.
+]]--
+
 local mod = rgcw
 local me = {}
 mod.spellMapAssembler = me
 
 me.tag = "SpellMapAssembler"
+
+--[[
+  Violation messages for the ApplyOne flavor (sent to mod.logger.LogError). The rule
+  predicates live in ApplyOverlay - these builders only differ from validateViolationMessage
+  in presentation.
+]]--
+local applyViolationMessage = {
+  removeMissing = function(category, spellId)
+    return string.format(
+      "overlay remove failed: spellId %d not present in category %s", spellId, tostring(category))
+  end,
+  addExists = function(category, spellId)
+    return string.format(
+      "overlay add failed: spellId %d already exists in category %s", spellId, tostring(category))
+  end,
+  replaceMissing = function(category, spellId)
+    return string.format(
+      "overlay replace failed: spellId %d not present in category %s", spellId, tostring(category))
+  end,
+  appendRanksMissing = function(category, baseSpellId)
+    return string.format(
+      "overlay appendRanks failed: spellId %d not present in category %s", baseSpellId, tostring(category))
+  end,
+  appendRanksMalformed = function(category, baseSpellId)
+    return string.format(
+      "overlay appendRanks failed: malformed rank entry under spellId %d in category %s",
+      baseSpellId, tostring(category))
+  end,
+  appendRanksDuplicate = function(category, rankSpellId, baseSpellId)
+    return string.format(
+      "overlay appendRanks failed: spellId %d already in allRanks of %d in category %s",
+      rankSpellId, baseSpellId, tostring(category))
+  end
+}
+
+--[[
+  Violation messages for the Validate flavor (collected into the errs list, prefixed with
+  the overlay index so a test run can point at the offending overlay).
+]]--
+local validateViolationMessage = {
+  removeMissing = function(overlayIndex, category, spellId)
+    return string.format(
+      "overlay #%d %s.remove: spellId %d not present", overlayIndex, tostring(category), spellId)
+  end,
+  addExists = function(overlayIndex, category, spellId)
+    return string.format(
+      "overlay #%d %s.add: spellId %d already exists", overlayIndex, tostring(category), spellId)
+  end,
+  replaceMissing = function(overlayIndex, category, spellId)
+    return string.format(
+      "overlay #%d %s.replace: spellId %d not present", overlayIndex, tostring(category), spellId)
+  end,
+  appendRanksMissing = function(overlayIndex, category, baseSpellId)
+    return string.format(
+      "overlay #%d %s.appendRanks: spellId %d not present", overlayIndex, tostring(category), baseSpellId)
+  end,
+  appendRanksMalformed = function(overlayIndex, category, baseSpellId)
+    return string.format(
+      "overlay #%d %s.appendRanks: malformed rank entry under spellId %d",
+      overlayIndex, tostring(category), baseSpellId)
+  end,
+  appendRanksDuplicate = function(overlayIndex, category, rankSpellId, baseSpellId)
+    return string.format(
+      "overlay #%d %s.appendRanks: spellId %d already in allRanks of %d",
+      overlayIndex, tostring(category), rankSpellId, baseSpellId)
+  end
+}
+
+--[[
+  The single encoding of the overlay op rule set. Applies one overlay to a working map in
+  place, in the order remove, add, replace, appendRanks. Every rule violation is reported
+  through onViolation and the op is skipped; valid ops are applied. Added/replaced spellData
+  and appended rank entries are cloned so the overlay tables are never aliased or mutated.
+
+  @param {table} map
+    The working map; mutated.
+  @param {table} overlay
+    The overlay to apply.
+  @param {function} onViolation
+    Called as onViolation(kind, category, primaryId, secondaryId) where kind is a key of the
+    violation message tables above. secondaryId is only set for appendRanksDuplicate.
+]]--
+local function ApplyOverlay(map, overlay, onViolation)
+  for category, ops in pairs(overlay) do
+    if map[category] == nil then
+      map[category] = {}
+    end
+
+    if ops.remove ~= nil then
+      for _, spellId in ipairs(ops.remove) do
+        if map[category][spellId] == nil then
+          onViolation("removeMissing", category, spellId)
+        else
+          map[category][spellId] = nil
+        end
+      end
+    end
+
+    if ops.add ~= nil then
+      for spellId, spellData in pairs(ops.add) do
+        if map[category][spellId] ~= nil then
+          onViolation("addExists", category, spellId)
+        else
+          map[category][spellId] = mod.common.Clone(spellData)
+        end
+      end
+    end
+
+    if ops.replace ~= nil then
+      for spellId, spellData in pairs(ops.replace) do
+        if map[category][spellId] == nil then
+          onViolation("replaceMissing", category, spellId)
+        else
+          map[category][spellId] = mod.common.Clone(spellData)
+        end
+      end
+    end
+
+    if ops.appendRanks ~= nil then
+      for baseSpellId, ranksToAppend in pairs(ops.appendRanks) do
+        local entry = map[category][baseSpellId]
+
+        if entry == nil then
+          onViolation("appendRanksMissing", category, baseSpellId)
+        else
+          if entry.allRanks == nil then
+            entry.allRanks = {}
+          end
+
+          local existing = {}
+
+          for _, r in ipairs(entry.allRanks) do
+            if type(r) == "table" and type(r.spellId) == "number" then
+              existing[r.spellId] = true
+            end
+          end
+
+          for _, rank in ipairs(ranksToAppend) do
+            if type(rank) ~= "table" or type(rank.spellId) ~= "number" then
+              onViolation("appendRanksMalformed", category, baseSpellId)
+            elseif existing[rank.spellId] then
+              onViolation("appendRanksDuplicate", category, rank.spellId, baseSpellId)
+            else
+              table.insert(entry.allRanks, mod.common.Clone(rank))
+              existing[rank.spellId] = true
+            end
+          end
+        end
+      end
+    end
+  end
+end
 
 --[[
   Apply a list of branch overlays to a base spell map.
@@ -77,83 +237,9 @@ end
     The overlay to apply.
 ]]--
 function me.ApplyOne(map, overlay)
-  for category, ops in pairs(overlay) do
-    if map[category] == nil then
-      map[category] = {}
-    end
-
-    if ops.remove ~= nil then
-      for _, spellId in ipairs(ops.remove) do
-        if map[category][spellId] == nil then
-          mod.logger.LogError(me.tag, string.format(
-            "overlay remove failed: spellId %d not present in category %s", spellId, tostring(category)))
-        else
-          map[category][spellId] = nil
-        end
-      end
-    end
-
-    if ops.add ~= nil then
-      for spellId, spellData in pairs(ops.add) do
-        if map[category][spellId] ~= nil then
-          mod.logger.LogError(me.tag, string.format(
-            "overlay add failed: spellId %d already exists in category %s", spellId, tostring(category)))
-        else
-          map[category][spellId] = mod.common.Clone(spellData)
-        end
-      end
-    end
-
-    if ops.replace ~= nil then
-      for spellId, spellData in pairs(ops.replace) do
-        if map[category][spellId] == nil then
-          mod.logger.LogError(me.tag, string.format(
-            "overlay replace failed: spellId %d not present in category %s", spellId, tostring(category)))
-        else
-          map[category][spellId] = mod.common.Clone(spellData)
-        end
-      end
-    end
-
-    if ops.appendRanks ~= nil then
-      for baseSpellId, ranksToAppend in pairs(ops.appendRanks) do
-        local entry = map[category][baseSpellId]
-
-        if entry == nil then
-          mod.logger.LogError(me.tag, string.format(
-            "overlay appendRanks failed: spellId %d not present in category %s",
-            baseSpellId, tostring(category)))
-        else
-          if entry.allRanks == nil then
-            entry.allRanks = {}
-          end
-
-          local existing = {}
-
-          for _, r in ipairs(entry.allRanks) do
-            if type(r) == "table" and type(r.spellId) == "number" then
-              existing[r.spellId] = true
-            end
-          end
-
-          for _, rank in ipairs(ranksToAppend) do
-            if type(rank) ~= "table" or type(rank.spellId) ~= "number" then
-              mod.logger.LogError(me.tag, string.format(
-                "overlay appendRanks failed: malformed rank entry under spellId %d in category %s",
-                baseSpellId, tostring(category)))
-            elseif existing[rank.spellId] then
-              mod.logger.LogError(me.tag, string.format(
-                "overlay appendRanks failed: spellId %d already in allRanks of %d in category %s",
-                rank.spellId, baseSpellId, tostring(category)))
-            else
-              table.insert(entry.allRanks, mod.common.Clone(rank))
-              existing[rank.spellId] = true
-            end
-          end
-        end
-      end
-    end
-  end
+  ApplyOverlay(map, overlay, function(kind, category, primaryId, secondaryId)
+    mod.logger.LogError(me.tag, applyViolationMessage[kind](category, primaryId, secondaryId))
+  end)
 end
 
 --[[
@@ -169,91 +255,17 @@ end
     ok, errs - errs is a list of strings when not ok; nil otherwise.
 ]]--
 function me.Validate(base, overlays)
-  local errs = {}
-  local working = mod.common.Clone(base)
-
   if overlays == nil then
     return true, nil
   end
 
+  local errs = {}
+  local working = mod.common.Clone(base)
+
   for overlayIndex, overlay in ipairs(overlays) do
-    for category, ops in pairs(overlay) do
-      if working[category] == nil then
-        working[category] = {}
-      end
-
-      if ops.remove ~= nil then
-        for _, spellId in ipairs(ops.remove) do
-          if working[category][spellId] == nil then
-            table.insert(errs, string.format(
-              "overlay #%d %s.remove: spellId %d not present", overlayIndex, tostring(category), spellId))
-          else
-            working[category][spellId] = nil
-          end
-        end
-      end
-
-      if ops.add ~= nil then
-        for spellId, spellData in pairs(ops.add) do
-          if working[category][spellId] ~= nil then
-            table.insert(errs, string.format(
-              "overlay #%d %s.add: spellId %d already exists", overlayIndex, tostring(category), spellId))
-          else
-            working[category][spellId] = spellData
-          end
-        end
-      end
-
-      if ops.replace ~= nil then
-        for spellId, spellData in pairs(ops.replace) do
-          if working[category][spellId] == nil then
-            table.insert(errs, string.format(
-              "overlay #%d %s.replace: spellId %d not present", overlayIndex, tostring(category), spellId))
-          else
-            working[category][spellId] = spellData
-          end
-        end
-      end
-
-      if ops.appendRanks ~= nil then
-        for baseSpellId, ranksToAppend in pairs(ops.appendRanks) do
-          local entry = working[category][baseSpellId]
-
-          if entry == nil then
-            table.insert(errs, string.format(
-              "overlay #%d %s.appendRanks: spellId %d not present",
-              overlayIndex, tostring(category), baseSpellId))
-          else
-            if entry.allRanks == nil then
-              entry.allRanks = {}
-            end
-
-            local existing = {}
-
-            for _, r in ipairs(entry.allRanks) do
-              if type(r) == "table" and type(r.spellId) == "number" then
-                existing[r.spellId] = true
-              end
-            end
-
-            for _, rank in ipairs(ranksToAppend) do
-              if type(rank) ~= "table" or type(rank.spellId) ~= "number" then
-                table.insert(errs, string.format(
-                  "overlay #%d %s.appendRanks: malformed rank entry under spellId %d",
-                  overlayIndex, tostring(category), baseSpellId))
-              elseif existing[rank.spellId] then
-                table.insert(errs, string.format(
-                  "overlay #%d %s.appendRanks: spellId %d already in allRanks of %d",
-                  overlayIndex, tostring(category), rank.spellId, baseSpellId))
-              else
-                table.insert(entry.allRanks, rank)
-                existing[rank.spellId] = true
-              end
-            end
-          end
-        end
-      end
-    end
+    ApplyOverlay(working, overlay, function(kind, category, primaryId, secondaryId)
+      table.insert(errs, validateViolationMessage[kind](overlayIndex, category, primaryId, secondaryId))
+    end)
   end
 
   if #errs == 0 then
