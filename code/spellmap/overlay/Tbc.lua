@@ -40,6 +40,84 @@ me.tag = "SpellMapOverlayTbc"
 ]]--
 function me.GetOverlay()
   return {
+    druid = {
+      appendRanks = {
+        [20748] = { -- Rebirth
+          { spellId = 26994, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [9863] = { -- Tranquility
+          { spellId = 26983, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [17329] = { -- Nature's Grasp
+          { spellId = 27009, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [22896] = { -- Frenzied Regeneration
+          { spellId = 26999, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [9821] = { -- Dash
+          { spellId = 33357, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+      },
+      add = {
+        [22570] = {
+          name = "Maim",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 10,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 22570, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [33831] = {
+          name = "Force of Nature",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 180,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 33831, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+      },
+      replace = {
+        [20748] = { -- Rebirth: 30 min in Classic Era, 20 min in TBC
+          name = "Rebirth",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 1200,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 20748, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+            { spellId = 20484, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+            { spellId = 20739, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+            { spellId = 20742, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+            { spellId = 20747, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+          }
+        },
+        [9863] = { -- Tranquility: 5 min in Classic Era, 10 min in TBC
+          name = "Tranquility",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 600,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 9863, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+            { spellId = 740, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+            { spellId = 8918, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+            { spellId = 9862, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+          }
+        },
+      },
+    },
     hunter = {
       appendRanks = {
         [20904] = { -- Aimed Shot
