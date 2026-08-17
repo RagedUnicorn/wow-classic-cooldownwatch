@@ -169,6 +169,132 @@ function me.GetOverlay()
         },
       },
     },
+    priest = {
+      -- Elune's Grace was reworked for TBC under a new single-rank spellId:
+      -- the Classic Era chain (primary 19293) does not exist on a TBC client,
+      -- so the rework is remove + add (2651 below)
+      remove = {
+        19293,
+      },
+      appendRanks = {
+        [10947] = { -- Mind Blast
+          { spellId = 25372, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          { spellId = 25375, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [10901] = { -- Power Word: Shield
+          { spellId = 25217, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          { spellId = 25218, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [19280] = { -- Devouring Plague
+          { spellId = 25467, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+      },
+      add = {
+        [2651] = {
+          name = "Elune's Grace",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 180,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 2651, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [33206] = {
+          name = "Pain Suppression",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 120,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 33206, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [34433] = {
+          name = "Shadowfiend",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 300,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 34433, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [32379] = {
+          name = "Shadow Word: Death",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 12,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 32379, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [44041] = {
+          name = "Chastise",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 30,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 44041, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+            { spellId = 44043, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+            { spellId = 44044, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+            { spellId = 44045, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+            { spellId = 44046, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+            { spellId = 44047, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [32548] = {
+          name = "Symbol of Hope",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 300,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 32548, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [32676] = {
+          name = "Consume Magic",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 120,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 32676, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+      },
+      replace = {
+        [6346] = { -- Fear Ward: 30s in Classic Era, 3 min since TBC 2.3
+          name = "Fear Ward",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 180,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 6346, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+          }
+        },
+      },
+    },
     rogue = {
       appendRanks = {
         [5277] = { -- Evasion

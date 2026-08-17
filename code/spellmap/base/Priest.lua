@@ -64,7 +64,6 @@ mod.spellMapBaseClasses["priest"] = {
       { spellId = 19277, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       { spellId = 19278, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
       { spellId = 19279, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
-      { spellId = 25467, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
   [19293] = {
