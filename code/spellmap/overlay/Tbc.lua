@@ -90,6 +90,136 @@ function me.GetOverlay()
         },
       },
     },
+    mage = {
+      appendRanks = {
+        [10161] = { -- Cone of Cold
+          { spellId = 27087, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [10199] = { -- Fire Blast
+          { spellId = 27078, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          { spellId = 27079, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [10230] = { -- Frost Nova
+          { spellId = 27088, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [13033] = { -- Ice Barrier
+          { spellId = 27134, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          { spellId = 33405, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        -- appended ward ranks alias to the group-carrying primaries, so the
+        -- mage_wards fan-out needs no group change
+        [10225] = { -- Fire Ward
+          { spellId = 27128, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [28609] = { -- Frost Ward
+          { spellId = 32796, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+      },
+      add = {
+        --[[
+          ID-collision: spell ID 11958 means "Ice Block" in
+          Classic Era but "Cold Snap" in TBC, and 12472 means "Cold Snap" in
+          Classic Era but "Icy Veins" in TBC. Both classic keys are remapped
+          by the replace ops below; Ice Block itself lives under its TBC
+          trainable id 45438 here.
+        ]]--
+        [45438] = {
+          name = "Ice Block",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 300,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 45438, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [66] = {
+          name = "Invisibility",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 300,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 66, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [31661] = {
+          name = "Dragon's Breath",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 20,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 31661, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+            { spellId = 33041, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+            { spellId = 33042, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+            { spellId = 33043, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+      },
+      replace = {
+        [2139] = { -- Counterspell: 30s in Classic Era, 24s in TBC
+          name = "Counterspell",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 24,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 2139, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+          }
+        },
+        --[[
+          ID-collision remaps (see the add-op comment above). The single rank
+          of each remapped entry is typed SPELL_TYPE_TBC - the id exists on
+          Classic Era but means a DIFFERENT spell there, so the usual
+          classic-ranks-stay-BASE replace rule does not apply.
+
+          TBC Cold Snap (patch 2.3.2 final): 8 min cooldown, resets all
+          Frost-school cooldowns - including the new Ice Block id and Icy
+          Veins - but no longer Fire Ward.
+        ]]--
+        [11958] = {
+          name = "Cold Snap",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 480,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 11958, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          },
+          cooldownResets = {
+            10230, -- Frost Nova
+            10161, -- Cone of Cold
+            45438, -- Ice Block
+            13033, -- Ice Barrier
+            28609, -- Frost Ward
+            12472, -- Icy Veins
+          }
+        },
+        [12472] = {
+          name = "Icy Veins",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 180,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 12472, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+      },
+    },
     paladin = {
       appendRanks = {
         [20930] = { -- Holy Shock
