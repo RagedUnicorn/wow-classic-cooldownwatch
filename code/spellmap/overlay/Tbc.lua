@@ -31,13 +31,55 @@ me.tag = "SpellMapOverlayTbc"
 
 --[[
   Branch overlay applied when the Burning Crusade Classic client is active.
-  Empty until a TBC catalog is in scope - changed cooldown values express as
-  replace ops, new TBC reranks as appendRanks ops, and TBC-only spells as add
-  ops against the Classic Era base catalog.
+  Changed cooldown values express as replace ops, new TBC reranks as
+  appendRanks ops, and TBC-only spells as add ops against the Classic Era
+  base catalog - op semantics in docs/DEVELOPMENT.md.
 
   @return {table}
     Overlay table consumed by mod.spellMapAssembler.Apply
 ]]--
 function me.GetOverlay()
-  return {}
+  return {
+    warrior = {
+      appendRanks = {
+        [23894] = { -- Bloodthirst
+          { spellId = 25251, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          { spellId = 30335, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [20617] = { -- Intercept
+          { spellId = 25272, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          { spellId = 25275, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [1672] = { -- Shield Bash
+          { spellId = 29704, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+      },
+      add = {
+        [23920] = {
+          name = "Spell Reflection",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 10,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 23920, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [3411] = {
+          name = "Intervene",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 30,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 3411, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+      },
+    },
+  }
 end

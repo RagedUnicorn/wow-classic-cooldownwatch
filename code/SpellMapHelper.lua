@@ -36,8 +36,8 @@ local ResolvePrimary
 
 --[[
   Whether a primary spell is allowed in the active WoW season. Base spells are
-  always allowed; SOD-only spells require Season of Discovery to be active (or
-  the TEST environment flag).
+  always allowed; SOD-only spells require Season of Discovery to be active and
+  TBC-only spells a Burning Crusade client (or the TEST environment flag).
 
   @param {table} primarySpell
 
@@ -50,6 +50,10 @@ IsPrimaryAllowedInCurrentSeason = function(primarySpell)
 
   if primarySpell.type == RGCW_CONSTANTS.SPELL_TYPE_SOD then
     return mod.season.IsSodActive() or RGCW_ENVIRONMENT.TEST
+  end
+
+  if primarySpell.type == RGCW_CONSTANTS.SPELL_TYPE_TBC then
+    return mod.season.IsTbcActive() or RGCW_ENVIRONMENT.TEST
   end
 
   return false

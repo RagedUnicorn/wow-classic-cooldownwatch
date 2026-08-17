@@ -146,7 +146,19 @@ PVPWarn's `code/spellmap/overlay/Sod.lua` is the worked reference for all op sha
 **Type tags and overlays coexist** (PVPWarn parity): the overlay decides which entries
 exist in the assembled map for a branch, while the `type` tag on each entry still drives
 `SpellMapHelper.IsPrimaryAllowedInCurrentSeason` — season/UI gating of listings and lookups, plus TEST-mode
-visibility. Both an overlay op and a correct `type` tag are required when adding a branch-specific spell.
+visibility (the helper carries one arm per branch type; a new `SPELL_TYPE_*` constant needs its arm added
+there). Both an overlay op and a correct `type` tag are required when adding a branch-specific spell.
+
+**Test surfaces for branch-only entries** (convention settled by the TBC warrior pilot): the in-game
+category suites need **no edits** — `RunAllTests` derives its spell list from the live assembled map via
+`GetSpellsForCategory`, so a client running the branch exercises the overlay entries automatically, and
+`CategorySuiteCoverageSpec` is keyed by category (branch entries land in existing categories), so it is
+unaffected too. Hardcoded extras in a suite (e.g. a rank-resolution check) stay pinned to base entries —
+they must pass on every branch. The headless proof that a branch overlay's real data flows through the
+orchestrator (branch seam, assembly, rank-alias synthesis, decoration) lives in the per-branch overlay spec
+(`test/headless/spec/SpellMapTbcOverlaySpec.lua`, which derives all expectations from the overlay's own ops
+and therefore covers new category blocks without spec edits); the per-branch consistency validators in
+`SpellMapSpec.lua` cover the assembled data itself.
 
 ### Buff-then-consume spells: track `SPELL_AURA_REMOVED`
 

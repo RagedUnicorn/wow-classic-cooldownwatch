@@ -34,8 +34,10 @@
   never builds a map - the sod branch is never requested through the
   orchestrator here, because SpellMapSodOverlaySpec owns the sod cache entry.
   The cache tests request only the classic and tbc branches; the tbc entry is
-  built from the real (data-empty) TBC overlay and stays cached for the rest of
-  the busted run.
+  built from the real TBC overlay and stays cached for the rest of the busted
+  run - SpellMapTbcOverlaySpec (loaded after this file; busted sorts spec
+  files) reads that same cached entry, which is safe because both specs build
+  from the identical real overlay.
 ]]--
 
 -- busted extends `assert` with .same / .equal / etc. at runtime; luacheck
@@ -509,8 +511,9 @@ describe("SpellMap per-branch assembly cache", function()
   end)
 
   it("caches per branch and consults the branch overlay only on first build", function()
-    -- first tbc request in the whole suite: the wrapped getter still returns
-    -- the real (data-empty) overlay, so the cached tbc map matches production
+    -- first tbc request in the whole suite (SpellMapTbcOverlaySpec loads
+    -- after this file): the wrapped getter still returns the real overlay,
+    -- so the cached tbc map matches production
     local overlayCalls = 0
 
     originalGetTbcOverlay = rgcw.spellMapOverlayTbc.GetOverlay
