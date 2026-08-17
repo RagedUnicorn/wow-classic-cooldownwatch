@@ -593,6 +593,64 @@ function me.GetOverlay()
         },
       },
     },
+    warlock = {
+      appendRanks = {
+        [17926] = { -- Death Coil
+          { spellId = 27223, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [17924] = { -- Soul Fire
+          { spellId = 27211, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [18871] = { -- Shadowburn
+          { spellId = 27263, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          { spellId = 30546, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [18932] = { -- Conflagrate
+          { spellId = 27266, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          { spellId = 30912, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        -- appended felhunter ranks alias to the petCast primary, so the
+        -- pet-owner attribution pairing keeps working for TBC casts
+        [19736] = { -- Devour Magic
+          { spellId = 27276, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          { spellId = 27277, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+      },
+      add = {
+        [30414] = {
+          name = "Shadowfury",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 20,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 30414, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+            { spellId = 30283, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+            { spellId = 30413, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+      },
+      replace = {
+        -- Spell Lock: 30s in Classic Era, 24s in TBC. The replace must keep
+        -- petCast - the felhunter attribution pairing rides on the entry
+        [19647] = {
+          name = "Spell Lock",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 24,
+          active = true,
+          petCast = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 19647, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+            { spellId = 19244, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+          }
+        },
+      },
+    },
     warrior = {
       appendRanks = {
         [23894] = { -- Bloodthirst
