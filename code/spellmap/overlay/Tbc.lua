@@ -377,6 +377,92 @@ function me.GetOverlay()
         },
       },
     },
+    shaman = {
+      appendRanks = {
+        -- appended shock ranks resolve through their synthesized aliases to
+        -- the primaries carrying sharedCooldownGroup, so the shaman_shocks
+        -- fan-out needs no group change
+        [10414] = { -- Earth Shock
+          { spellId = 25454, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [10473] = { -- Frost Shock
+          { spellId = 25464, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [29228] = { -- Flame Shock
+          { spellId = 25457, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [11315] = { -- Fire Nova Totem
+          { spellId = 25546, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          { spellId = 25547, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+      },
+      add = {
+        -- Bloodlust (Horde) and Heroism (Alliance) are deliberately two
+        -- independent entries, not one entry with a faction alias: each
+        -- caster shows the correct name and icon, and hand-written aliases
+        -- stay reserved for non-derivable aura ids
+        [2825] = {
+          name = "Bloodlust",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 600,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 2825, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [32182] = {
+          name = "Heroism",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 600,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 32182, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [30823] = {
+          name = "Shamanistic Rage",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 120,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 30823, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [2894] = {
+          name = "Fire Elemental Totem",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 1200,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 2894, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [2062] = {
+          name = "Earth Elemental Totem",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 1200,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 2062, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+      },
+    },
     warrior = {
       appendRanks = {
         [23894] = { -- Bloodthirst
