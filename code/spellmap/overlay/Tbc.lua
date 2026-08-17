@@ -169,6 +169,88 @@ function me.GetOverlay()
         },
       },
     },
+    rogue = {
+      appendRanks = {
+        [5277] = { -- Evasion
+          { spellId = 26669, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [11286] = { -- Gouge
+          { spellId = 38764, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [1769] = { -- Kick
+          { spellId = 38768, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [1857] = { -- Vanish
+          { spellId = 26889, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+      },
+      add = {
+        [31224] = {
+          name = "Cloak of Shadows",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 60,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 31224, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [36554] = {
+          name = "Shadowstep",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 30,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 36554, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+      },
+      replace = {
+        [2094] = { -- Blind: 5 min in Classic Era, 3 min in TBC
+          name = "Blind",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 180,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 2094, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+          }
+        },
+        --[[
+          Preparation's cooldown is unchanged in TBC; the replace narrows the
+          reset list to the patch 2.0.3 set (see the base slice comment):
+          Evasion, Sprint, Vanish, Cold Blood, Adrenaline Rush - plus
+          Premeditation, which is not a tracked spell and stays absent
+          (targets are limited to tracked primaries).
+        ]]--
+        [14185] = {
+          name = "Preparation",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 600,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 14185, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+          },
+          cooldownResets = {
+            5277,  -- Evasion
+            11305, -- Sprint
+            1857,  -- Vanish
+            14177, -- Cold Blood
+            13750, -- Adrenaline Rush
+          }
+        },
+      },
+    },
     warrior = {
       appendRanks = {
         [23894] = { -- Bloodthirst
