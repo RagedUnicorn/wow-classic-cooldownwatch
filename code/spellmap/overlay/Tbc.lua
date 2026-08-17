@@ -503,6 +503,60 @@ function me.GetOverlay()
         },
       },
     },
+    racials = {
+      appendRanks = {
+        -- TBC splits Blood Fury into per-class variants (33697 shaman,
+        -- 33702 caster); all three ids share the one tracked cooldown
+        [20572] = { -- Blood Fury
+          { spellId = 33697, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          { spellId = 33702, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+      },
+      add = {
+        -- Arcane Torrent has one spellId per resource type (28730 mana,
+        -- 25046 energy) - one entry with the variants as ranks, the same
+        -- modeling as Berserking in the base
+        [28730] = {
+          name = "Arcane Torrent",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 120,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 28730, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+            { spellId = 25046, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [28880] = {
+          name = "Gift of the Naaru",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 180,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 28880, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+      },
+      replace = {
+        [20589] = { -- Escape Artist: 60s in Classic Era, 105s in TBC
+          name = "Escape Artist",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 105,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 20589, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+          }
+        },
+      },
+    },
     rogue = {
       appendRanks = {
         [5277] = { -- Evasion

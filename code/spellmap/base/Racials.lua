@@ -105,6 +105,11 @@ mod.spellMapBaseClasses["racials"] = {
       { spellId = 20572, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   },
+  --[[
+    Berserking has one spellId per resource type - 26296 (rage), 26297
+    (energy), 20554 (mana) - all player-cast in Classic Era with the same
+    3 min cooldown, so they are one entry with the variants as ranks.
+  ]]--
   [26296] = {
     name = "Berserking",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
@@ -115,6 +120,8 @@ mod.spellMapBaseClasses["racials"] = {
     },
     allRanks = {
       { spellId = 26296, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 26297, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+      { spellId = 20554, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
     }
   }
 }
