@@ -133,7 +133,9 @@ order:
 - `remove` — drop a base spellId that does not exist (or was replaced) on the branch.
 - `add` — add a branch-only spell (typed `SPELL_TYPE_SOD` / `SPELL_TYPE_TBC`); the spellId must not exist in the
   base.
-- `replace` — swap an existing base entry for branch-specific data, e.g. a SoD rework that changes a cooldown.
+- `replace` — swap an existing base entry for branch-specific data, e.g. a rework or changed cooldown value.
+  The replaced primary carries the branch type (`SPELL_TYPE_SOD` / `SPELL_TYPE_TBC`); ranks in its `allRanks`
+  that also exist on Classic Era stay `SPELL_TYPE_BASE` (branch-only reranks still go through `appendRanks`).
   A rework with a **new** spellId is modeled as `remove` + `add` instead, so each client shows exactly one
   option for the spell.
 - `appendRanks` — append a branch-only rank (`{ spellId, type }`) to an existing base entry's `allRanks`

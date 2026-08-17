@@ -28,8 +28,8 @@
   orchestrator - branch detection via the mod.testHelper.GetActiveBranch seam,
   overlay pickup, assembly, rank-alias synthesis, and normalizedSpellName
   decoration - and surfaces only on the "tbc" branch. Every expectation is
-  derived from the overlay's own add/appendRanks ops, so overlay blocks added
-  for further categories are covered without spec edits. The per-op assembler
+  derived from the overlay's own add/replace/appendRanks ops, so overlay
+  blocks added for further categories are covered without spec edits. The per-op assembler
   matrix and the per-branch cache belong to SpellMapAssemblerSpec, the
   per-branch consistency validators to SpellMapSpec.
 
@@ -89,6 +89,14 @@ describe("SpellMap TBC overlay assembly path", function()
         assert.is_nil(classicMap[category][spellId])
       end
 
+      for spellId in pairs(ops.replace or {}) do
+        assert.equal(RGCW_CONSTANTS.SPELL_TYPE_BASE, classicMap[category][spellId].type)
+        assert.equal(
+          rgcw.spellMapBase.GetMap()[category][spellId].cooldown,
+          classicMap[category][spellId].cooldown
+        )
+      end
+
       for baseSpellId, ranks in pairs(ops.appendRanks or {}) do
         for _, rank in ipairs(ranks) do
           assert.is_false(HasRank(classicMap[category][baseSpellId].allRanks, rank.spellId))
@@ -98,21 +106,23 @@ describe("SpellMap TBC overlay assembly path", function()
     end
   end)
 
-  it("surfaces overlay add ops on the tbc branch with decoration", function()
+  it("surfaces overlay add and replace ops on the tbc branch with decoration", function()
     rgcw.testHelper = { GetActiveBranch = function() return "tbc" end }
 
     local tbcMap = rgcw.spellMap.GetSpellMap()
 
     for category, ops in pairs(overlay) do
-      for spellId, overlayEntry in pairs(ops.add or {}) do
-        local added = tbcMap[category][spellId]
+      for _, opName in ipairs({ "add", "replace" }) do
+        for spellId, overlayEntry in pairs(ops[opName] or {}) do
+          local assembled = tbcMap[category][spellId]
 
-        assert.is_table(added)
-        assert.equal(RGCW_CONSTANTS.SPELL_TYPE_TBC, added.type)
-        assert.equal(overlayEntry.cooldown, added.cooldown)
-        -- post-assembly decoration must cover overlay-added entries (runs in
-        -- the orchestrator, not in Base, for exactly this reason)
-        assert.equal(rgcw.common.NormalizeSpellName(overlayEntry.name), added.normalizedSpellName)
+          assert.is_table(assembled)
+          assert.equal(RGCW_CONSTANTS.SPELL_TYPE_TBC, assembled.type)
+          assert.equal(overlayEntry.cooldown, assembled.cooldown)
+          -- post-assembly decoration must cover overlay-added entries (runs
+          -- in the orchestrator, not in Base, for exactly this reason)
+          assert.equal(rgcw.common.NormalizeSpellName(overlayEntry.name), assembled.normalizedSpellName)
+        end
       end
     end
   end)
@@ -140,6 +150,12 @@ describe("SpellMap TBC overlay assembly path", function()
     for category, ops in pairs(overlay) do
       for spellId in pairs(ops.add or {}) do
         assert.is_nil(base[category][spellId])
+      end
+
+      -- a replaced primary carries SPELL_TYPE_TBC in the overlay; the base
+      -- entry keeping SPELL_TYPE_BASE proves Apply cloned instead of mutating
+      for spellId in pairs(ops.replace or {}) do
+        assert.equal(RGCW_CONSTANTS.SPELL_TYPE_BASE, base[category][spellId].type)
       end
 
       for baseSpellId, ranks in pairs(ops.appendRanks or {}) do

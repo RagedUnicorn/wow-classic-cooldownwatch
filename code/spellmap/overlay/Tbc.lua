@@ -40,6 +40,85 @@ me.tag = "SpellMapOverlayTbc"
 ]]--
 function me.GetOverlay()
   return {
+    paladin = {
+      appendRanks = {
+        [20930] = { -- Holy Shock
+          { spellId = 27174, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          { spellId = 33072, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [10310] = { -- Lay on Hands
+          { spellId = 27154, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+      },
+      add = {
+        [31884] = {
+          name = "Avenging Wrath",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 180,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 31884, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [31842] = {
+          name = "Divine Illumination",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 180,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 31842, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [31935] = {
+          name = "Avenger's Shield",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 30,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 31935, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+      },
+      replace = {
+        -- cooldown-value changes only: the replaced primary carries the
+        -- branch type, classic ranks in allRanks stay SPELL_TYPE_BASE
+        [20930] = { -- Holy Shock: 30s in Classic Era, 15s since TBC 2.3
+          name = "Holy Shock",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 15,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 20930, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+            { spellId = 20473, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+            { spellId = 20929, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+          }
+        },
+        [1044] = { -- Blessing of Freedom: 20s in Classic Era, 25s in TBC
+          name = "Blessing of Freedom",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 25,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 1044, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+          }
+        },
+      },
+    },
     warrior = {
       appendRanks = {
         [23894] = { -- Bloodthirst
