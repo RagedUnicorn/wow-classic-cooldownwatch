@@ -40,6 +40,56 @@ me.tag = "SpellMapOverlayTbc"
 ]]--
 function me.GetOverlay()
   return {
+    hunter = {
+      appendRanks = {
+        [20904] = { -- Aimed Shot
+          { spellId = 27065, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [14287] = { -- Arcane Shot
+          { spellId = 27019, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [25294] = { -- Multi-Shot
+          { spellId = 27021, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [14295] = { -- Volley
+          { spellId = 27022, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [20910] = { -- Counterattack
+          { spellId = 27067, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [24133] = { -- Wyvern Sting
+          { spellId = 27068, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+      },
+      add = {
+        [34490] = {
+          name = "Silencing Shot",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 20,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 34490, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+      },
+      replace = {
+        [1543] = { -- Flare: 15s in Classic Era, 20s in TBC
+          name = "Flare",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 20,
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 1543, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
+          }
+        },
+      },
+    },
     paladin = {
       appendRanks = {
         [20930] = { -- Holy Shock
