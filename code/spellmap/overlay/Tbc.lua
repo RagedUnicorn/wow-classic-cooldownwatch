@@ -168,6 +168,85 @@ function me.GetOverlay()
         },
       },
     },
+    --[[
+      Classic items verdicts for TBC (no remove ops): the per-class insignias
+      still exist with their classic use-effect spells on a TBC client, the
+      engineering gadgets are unchanged, and Zul'Gurub stays open through TBC
+      so the charm trinkets remain obtainable.
+    ]]--
+    items = {
+      add = {
+        -- Medallion of the Alliance (37864) / Horde (37865): both cast the
+        -- same use-effect spell; icon resolution is caster-relative exactly
+        -- like the classic insignias (helpers shared from the base slice)
+        [42292] = {
+          name = "PvP Trinket",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 120,
+          itemId = mod.spellMapItemHelper.OpposingInsigniaItemId(37864, 37865),
+          friendlyItemId = mod.spellMapItemHelper.OwnInsigniaItemId(37864, 37865),
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 42292, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [51582] = {
+          name = "Rocket Boots Engaged",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 300,
+          itemId = 23824, -- Rocket Boots Xtreme
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 51582, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [30507] = {
+          name = "Poultryizer",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 300,
+          itemId = 23835, -- Gnomish Poultryizer
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 30507, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [46567] = {
+          name = "Rocket Launch",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 120,
+          itemId = 23836, -- Goblin Rocket Launcher
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 46567, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [30458] = {
+          name = "Nigh Invulnerability",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 300,
+          itemId = 23825, -- Nigh Invulnerability Belt
+          active = true,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 30458, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+      },
+    },
     mage = {
       appendRanks = {
         [10161] = { -- Cone of Cold

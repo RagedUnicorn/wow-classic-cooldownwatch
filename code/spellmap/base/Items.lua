@@ -76,6 +76,13 @@ local function OwnInsigniaItemId(allianceItemId, hordeItemId)
   return allianceItemId
 end
 
+-- shared with the Tbc overlay: the TBC medallions carry the same
+-- caster-relative faction resolution as the insignias below
+mod.spellMapItemHelper = {
+  OpposingInsigniaItemId = OpposingInsigniaItemId,
+  OwnInsigniaItemId = OwnInsigniaItemId,
+}
+
 --[[
   Every items entry is an item-triggered cooldown: the combat log fires with the
   item's "Use" effect spell, but players recognize these by the item icon, not
