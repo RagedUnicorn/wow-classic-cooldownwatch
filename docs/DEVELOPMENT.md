@@ -130,7 +130,9 @@ Version-specific spell data never goes into `code/spellmap/base/` — it goes in
 (`code/spellmap/overlay/Sod.lua` / `Tbc.lua`) as ops against the Classic Era base, applied per category in this
 order:
 
-- `remove` — drop a base spellId that does not exist (or was replaced) on the branch.
+- `remove` — drop a base spellId that does not exist (or was replaced) on the branch. When the branch merely
+  *demotes* the removed primary to a rank of a new primary (the TBC healthstone rework), list the old id in
+  the new entry's `allRanks` — it reappears as a synthesized rank alias, keeping the old casts tracked.
 - `add` — add a branch-only spell (typed `SPELL_TYPE_SOD` / `SPELL_TYPE_TBC`); the spellId must not exist in the
   base.
 - `replace` — swap an existing base entry for branch-specific data, e.g. a rework or changed cooldown value.

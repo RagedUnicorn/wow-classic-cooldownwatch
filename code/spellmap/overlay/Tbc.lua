@@ -377,6 +377,143 @@ function me.GetOverlay()
         },
       },
     },
+    misc = {
+      --[[
+        TBC potion tiers keep the same-name effect pattern the base entries
+        rely on (Super Healing Potion casts "Healing Potion" 28495, Super
+        Mana Potion "Restore Mana" 28499; Volatile Healing / Unstable Mana
+        even reuse the classic 17534/17531 - no ops needed for those). The
+        replaces below only modernize the icon to the TBC-tier item.
+
+        Healthstones are a rework: the primary becomes Master Healthstone
+        (name + icon), demoting Major Healthstone 11732 to a rank of the new
+        primary - the removed id reappears as a synthesized rank alias, which
+        keeps classic stones tracked on TBC.
+
+        Netherweave bandages still apply the same Recently Bandaged debuff
+        11196, so the bandage entry needs no op.
+      ]]--
+      remove = {
+        11732,
+      },
+      appendRanks = {
+        [17534] = { -- Healing Potion (Super Healing Potion tier)
+          { spellId = 28495, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+        [17531] = { -- Restore Mana (Super Mana Potion tier)
+          { spellId = 28499, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+        },
+      },
+      add = {
+        [27235] = {
+          name = "Master Healthstone",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 120,
+          itemId = 22103, -- Master Healthstone
+          active = false,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 6262, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Minor Healthstone (5512)
+            { spellId = 23468, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Minor Healthstone, Improved r1 (19004)
+            { spellId = 23469, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Minor Healthstone, Improved r2 (19005)
+            { spellId = 6263, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Lesser Healthstone (5511)
+            { spellId = 23470, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Lesser Healthstone, Improved r1 (19006)
+            { spellId = 23471, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Lesser Healthstone, Improved r2 (19007)
+            { spellId = 5720, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Healthstone (5509)
+            { spellId = 23472, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Healthstone, Improved r1 (19008)
+            { spellId = 23473, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Healthstone, Improved r2 (19009)
+            { spellId = 5723, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Greater Healthstone (5510)
+            { spellId = 23474, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Greater Healthstone, Improved r1 (19010)
+            { spellId = 23475, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Greater Healthstone, Improved r2 (19011)
+            { spellId = 11732, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Major Healthstone (9421)
+            { spellId = 23476, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Major Healthstone, Improved r1 (19012)
+            { spellId = 23477, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Major Healthstone, Improved r2 (19013)
+            { spellId = 27235, type = RGCW_CONSTANTS.SPELL_TYPE_TBC }, -- Master Healthstone (22103)
+            { spellId = 27236, type = RGCW_CONSTANTS.SPELL_TYPE_TBC }, -- Master Healthstone, Improved r1 (22104)
+            { spellId = 27237, type = RGCW_CONSTANTS.SPELL_TYPE_TBC }, -- Master Healthstone, Improved r2 (22105)
+          }
+        },
+        [28508] = {
+          name = "Destruction",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 120,
+          itemId = 22839, -- Destruction Potion
+          active = false,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 28508, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [28507] = {
+          name = "Haste",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 120,
+          itemId = 22838, -- Haste Potion
+          active = false,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 28507, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+        [28515] = {
+          name = "Ironshield",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 120,
+          itemId = 22849, -- Ironshield Potion
+          active = false,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 28515, type = RGCW_CONSTANTS.SPELL_TYPE_TBC },
+          }
+        },
+      },
+      replace = {
+        [17534] = { -- Healing Potion: icon modernized to the TBC tier
+          name = "Healing Potion",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 120,
+          itemId = 22829, -- Super Healing Potion
+          active = false,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 439, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Minor Healing Potion (118)
+            { spellId = 440, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Lesser Healing Potion (858)
+            { spellId = 441, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Healing Potion (929)
+            { spellId = 2024, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Greater Healing Potion (1710)
+            { spellId = 4042, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Superior Healing Potion (3928)
+            { spellId = 17534, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Major Healing Potion (13446)
+          }
+        },
+        [17531] = { -- Restore Mana: icon modernized to the TBC tier
+          name = "Restore Mana",
+          type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
+          cooldown = 120,
+          itemId = 22832, -- Super Mana Potion
+          active = false,
+          trackedEvents = {
+            "SPELL_CAST_SUCCESS",
+          },
+          allRanks = {
+            { spellId = 437, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Minor Mana Potion (2455)
+            { spellId = 438, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Lesser Mana Potion (3385)
+            { spellId = 2023, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Mana Potion (3827)
+            { spellId = 11903, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Greater Mana Potion (6149)
+            { spellId = 17530, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Superior Mana Potion (13443)
+            { spellId = 17531, type = RGCW_CONSTANTS.SPELL_TYPE_BASE }, -- Major Mana Potion (13444)
+          }
+        },
+      },
+    },
     paladin = {
       appendRanks = {
         [20930] = { -- Holy Shock

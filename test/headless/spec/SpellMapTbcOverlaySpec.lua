@@ -116,8 +116,13 @@ describe("SpellMap TBC overlay assembly path", function()
     local tbcMap = rgcw.spellMap.GetSpellMap()
 
     for category, ops in pairs(overlay) do
+      -- a removed primary is gone from the tbc branch - either absent
+      -- entirely, or at most re-synthesized as a rank alias when a
+      -- remove+add rework demotes it to a rank of the new primary
       for _, spellId in ipairs(ops.remove or {}) do
-        assert.is_nil(tbcMap[category][spellId])
+        local removed = tbcMap[category][spellId]
+
+        assert.is_true(removed == nil or removed.refId ~= nil)
       end
 
       for _, opName in ipairs({ "add", "replace" }) do
