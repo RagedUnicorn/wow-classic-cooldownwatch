@@ -406,13 +406,24 @@ describe("ConfigProfile", function()
       )
     end)
 
-    it("leaves an already seeded default untouched on a second call", function()
-      configProfile.EnsureDefaultProfile()
-      local seeded = configProfile.GetProfile(defaultName)
+    it("re-seeds a stale default so newer profile fields are covered again", function()
+      -- a default frozen at an older shape (seeded before newer PROFILE_FIELDS
+      -- members existed) breaks "reset to factory settings": ApplySnapshot
+      -- skips fields the payload lacks, so the newer fields kept the player's
+      -- values. EnsureDefaultProfile therefore overwrites on every call.
+      CooldownWatchConfiguration.profiles = {
+        [defaultName] = {
+          globalAssumeWorstCase = false,
+          cooldownConfiguration = {}
+        }
+      }
 
       configProfile.EnsureDefaultProfile()
 
-      assert.is_true(rawequal(seeded, configProfile.GetProfile(defaultName)))
+      local payload = configProfile.GetProfile(defaultName)
+
+      assert.same(configProfile.BuildDefaultSnapshot(), payload)
+      assert.same(rgcw.profile.GetDefaultProfile(), payload.friendlyCooldownConfiguration)
     end)
 
     it("refuses to delete the default profile", function()
