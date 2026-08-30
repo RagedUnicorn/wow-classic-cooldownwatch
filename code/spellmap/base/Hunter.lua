@@ -37,7 +37,6 @@ mod.spellMapBaseClasses["hunter"] = {
     name = "Aimed Shot",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 6,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -55,7 +54,6 @@ mod.spellMapBaseClasses["hunter"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 6,
     cooldownWorstCase = 5,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -74,7 +72,6 @@ mod.spellMapBaseClasses["hunter"] = {
     name = "Bestial Wrath",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -87,7 +84,6 @@ mod.spellMapBaseClasses["hunter"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 12,
     cooldownWorstCase = 11,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -99,7 +95,6 @@ mod.spellMapBaseClasses["hunter"] = {
     name = "Counterattack",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 5,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -113,7 +108,6 @@ mod.spellMapBaseClasses["hunter"] = {
     name = "Rapid Fire",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -125,7 +119,6 @@ mod.spellMapBaseClasses["hunter"] = {
     name = "Scatter Shot",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 30,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -137,7 +130,6 @@ mod.spellMapBaseClasses["hunter"] = {
     name = "Deterrence",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -149,7 +141,6 @@ mod.spellMapBaseClasses["hunter"] = {
     name = "Wyvern Sting",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -169,7 +160,6 @@ mod.spellMapBaseClasses["hunter"] = {
     name = "Intimidation",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 60,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -181,7 +171,6 @@ mod.spellMapBaseClasses["hunter"] = {
     name = "Flare",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 15,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -193,7 +182,6 @@ mod.spellMapBaseClasses["hunter"] = {
     name = "Multi-Shot",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 10,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -209,7 +197,6 @@ mod.spellMapBaseClasses["hunter"] = {
     name = "Volley",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 60,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },

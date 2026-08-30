@@ -44,9 +44,13 @@ change. The essentials:
 
 - **Entries live in per-category slice files** under `code/spellmap/base/` (`Priest.lua`,
   `Rogue.lua`, …, `Racials.lua`, `Items.lua`, `Misc.lua`). Each spell has one **primary entry** (highest
-  rank) with `name`, `type`, `cooldown`, `active`, `trackedEvents`, and a structured `allRanks`
+  rank) with `name`, `type`, `cooldown`, `trackedEvents`, and a structured `allRanks`
   list. Rank alias entries (`[rankSpellId] = { refId = primarySpellId }`) are synthesized from
   `allRanks` at assembly time — do not write them by hand.
+- **Whether a spell tracks out of the box** is not part of the catalog entry: the curated
+  default profile under `code/profile/base/` lists the primary spellIds that are enabled on a
+  never-configured profile (interrupts, hard CC, big defensives, key mobility, PvP trinkets).
+  Everything else is opt-in via the config menu, and an explicit player toggle always wins.
 - **Verify every spellId on Wowhead Classic** (`https://www.wowhead.com/classic/spell=<id>`).
   The `name` must match what `GetSpellInfo(spellId)` returns — the spell name, not an item name.
   Watch out for NPC variants with contiguous spellIds that look like player ranks but aren't.

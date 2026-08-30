@@ -35,14 +35,13 @@ describe("CooldownQueue", function()
   -- plus the timing fields a queue entry carries. Kept inline rather than
   -- pulled from SpellMap: these specs exercise the queue's bookkeeping, not spell
   -- identity, so synthetic ids keep each scenario self-contained.
-  local function makeSpell(spellId, name, castTime, active, cooldown)
+  local function makeSpell(spellId, name, castTime, cooldown)
     return {
       ["spellId"] = spellId,
       ["name"] = name,
       ["castTime"] = castTime,
       ["cooldown"] = cooldown or 30,
-      ["cooldownWorstCase"] = 20,
-      ["active"] = active == nil and true or active
+      ["cooldownWorstCase"] = 20
     }
   end
 
@@ -354,22 +353,22 @@ describe("CooldownQueue", function()
     assert.equal(20, cooldowns[2].spellData.cooldownWorstCase)
   end)
 
-  it("AddCooldown queues a catalog-inactive spell - the enabled gate lives upstream in CombatLog", function()
-    queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100, false))
+  it("AddCooldown queues a non-default-enabled spell - the enabled gate lives upstream in CombatLog", function()
+    queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
 
     local cooldowns = queue.GetCooldownsByTarget("guid-1")
     assert.equal(1, #cooldowns)
     assert.equal(10947, cooldowns[1].spellData.spellId)
   end)
 
-  it("AddCooldown wakes the render ticker on add and refresh, catalog-active or not", function()
+  it("AddCooldown wakes the render ticker on add and refresh", function()
     local wakeCalls = 0
     local originalWake = rgcw.targetCooldownBar.WakeRenderTicker
     rgcw.targetCooldownBar.WakeRenderTicker = function() wakeCalls = wakeCalls + 1 end
 
     queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
     queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 250))
-    queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10890, "Psychic Scream", 100, false))
+    queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10890, "Psychic Scream", 100))
 
     rgcw.targetCooldownBar.WakeRenderTicker = originalWake
 
@@ -477,8 +476,8 @@ describe("CooldownQueue", function()
 
   it("GetCooldownsByTarget ranks a later cast with a shorter cooldown first", function()
     -- Frost Nova is cast first but ready last: 100 + 30 = 130 vs 110 + 10 = 120
-    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(122, "Frost Nova", 100, nil, 30))
-    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(2139, "Counterspell", 110, nil, 10))
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(122, "Frost Nova", 100, 30))
+    queue.AddCooldown("guid-1", "Alice", "mage", makeSpell(2139, "Counterspell", 110, 10))
 
     local cooldowns = queue.GetCooldownsByTarget("guid-1")
 
@@ -626,8 +625,8 @@ describe("CooldownQueue", function()
       assert.equal(15, scheduledTimers[1].delay)
     end)
 
-    it("AddCooldown schedules an expiry timer for a catalog-inactive spell", function()
-      queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100, false))
+    it("AddCooldown schedules an expiry timer for a spell outside the curated default set", function()
+      queue.AddCooldown("guid-1", "Alice", "priest", makeSpell(10947, "Mind Blast", 100))
 
       assert.equal(1, #scheduledTimers)
     end)

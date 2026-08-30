@@ -255,10 +255,11 @@ function me.ProcessNormal(event, eventProperties, isPetSource, friendly, ...)
     The enabled state is keyed by the PRIMARY spellId (the config ui only ever
     writes primaries) - gate on realSpellId so a lower-rank cast of an enabled
     spell tracks like its max rank. Spells the player never configured fall
-    back to the catalog's `active` default - per side: enemy and friendly
-    casts gate against their own store.
+    back to the curated default-enabled set (code/profile/) - per side: enemy
+    and friendly casts gate against their own store.
   ]]--
-  if not me.IsCooldownTracked(category, realSpellId, spell.active, friendly) then
+  if not me.IsCooldownTracked(category, realSpellId,
+    mod.profile.IsDefaultEnabled(category, realSpellId), friendly) then
     mod.logger.LogDebug(me.tag, "Spell is not enabled - aborting...")
     return
   end
@@ -306,8 +307,9 @@ end
   @param {string} category
   @param {number} spellId
   @param {boolean} defaultState
-    Optional. The spell's catalog `active` flag - the tracked state that
-    applies while the player never configured the spell
+    Optional. The tracked state that applies while the player never
+    configured the spell - in production always
+    mod.profile.IsDefaultEnabled (curated default-enabled set membership)
   @param {boolean} friendly
     Optional. true resolves against the friendly-side per-spell state; the
     catalog default applies per side independently

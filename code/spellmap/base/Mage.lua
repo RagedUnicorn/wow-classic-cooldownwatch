@@ -37,7 +37,6 @@ mod.spellMapBaseClasses["mage"] = {
     name = "Combustion",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
-    active = true,
     trackedEvents = {
       "SPELL_AURA_REMOVED",
     },
@@ -49,7 +48,6 @@ mod.spellMapBaseClasses["mage"] = {
     name = "Cone of Cold",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 10,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -65,7 +63,6 @@ mod.spellMapBaseClasses["mage"] = {
     name = "Counterspell",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 30,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -77,7 +74,6 @@ mod.spellMapBaseClasses["mage"] = {
     name = "Presence of Mind",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
-    active = true,
     trackedEvents = {
       "SPELL_AURA_REMOVED",
     },
@@ -89,7 +85,6 @@ mod.spellMapBaseClasses["mage"] = {
     name = "Blink",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 15,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -102,7 +97,6 @@ mod.spellMapBaseClasses["mage"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 8,
     cooldownWorstCase = 6.5,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -120,7 +114,6 @@ mod.spellMapBaseClasses["mage"] = {
     name = "Fire Ward",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 30,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -137,7 +130,6 @@ mod.spellMapBaseClasses["mage"] = {
     name = "Frost Ward",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 30,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -155,7 +147,6 @@ mod.spellMapBaseClasses["mage"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 25,
     cooldownWorstCase = 21,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -170,7 +161,6 @@ mod.spellMapBaseClasses["mage"] = {
     name = "Ice Barrier",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 30,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -185,7 +175,6 @@ mod.spellMapBaseClasses["mage"] = {
     name = "Ice Block",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -197,7 +186,6 @@ mod.spellMapBaseClasses["mage"] = {
     name = "Cold Snap",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 600,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },

@@ -115,8 +115,7 @@ function me.CreateTestSpell(spellId, spellName, cooldown, cooldownWorstCase, cas
     ["rank"] = nil,
     ["castTime"] = GetTime() + castTimeOffset,
     ["cooldown"] = cooldown,
-    ["cooldownWorstCase"] = cooldownWorstCase or cooldown,
-    ["active"] = true
+    ["cooldownWorstCase"] = cooldownWorstCase or cooldown
   }
 end
 

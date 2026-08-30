@@ -38,7 +38,6 @@ mod.spellMapBaseClasses["priest"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 30,
     cooldownWorstCase = 26,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -53,7 +52,6 @@ mod.spellMapBaseClasses["priest"] = {
     name = "Devouring Plague",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -70,7 +68,6 @@ mod.spellMapBaseClasses["priest"] = {
     name = "Elune's Grace",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -82,7 +79,6 @@ mod.spellMapBaseClasses["priest"] = {
     name = "Fear Ward",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 30,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -94,7 +90,6 @@ mod.spellMapBaseClasses["priest"] = {
     name = "Inner Focus",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
-    active = true,
     trackedEvents = {
       "SPELL_AURA_REMOVED",
     },
@@ -107,7 +102,6 @@ mod.spellMapBaseClasses["priest"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 8,
     cooldownWorstCase = 5.5,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -128,7 +122,6 @@ mod.spellMapBaseClasses["priest"] = {
     name = "Power Infusion",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -140,7 +133,6 @@ mod.spellMapBaseClasses["priest"] = {
     name = "Power Word: Shield",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 4,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -161,7 +153,6 @@ mod.spellMapBaseClasses["priest"] = {
     name = "Silence",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 45,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },

@@ -99,7 +99,6 @@ mod.spellMapBaseClasses["items"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
     itemId = 18639, -- Ultra-Flash Shadow Reflector
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -112,7 +111,6 @@ mod.spellMapBaseClasses["items"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
     itemId = 18634, -- Gyrofreeze Ice Reflector
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -125,7 +123,6 @@ mod.spellMapBaseClasses["items"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
     itemId = 18638, -- Hyper-Radiant Flame Reflector
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -140,7 +137,6 @@ mod.spellMapBaseClasses["items"] = {
     -- Horned Viking Helmet (9394, 30 min) casts the same spell; the 20 min
     -- cooldown above already commits this entry to the Goblin Rocket Helmet
     itemId = 10588, -- Goblin Rocket Helmet
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -153,7 +149,6 @@ mod.spellMapBaseClasses["items"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 1800,
     itemId = 10724, -- Gnomish Rocket Boots
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -166,7 +161,6 @@ mod.spellMapBaseClasses["items"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
     itemId = 7189, -- Goblin Rocket Boots
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -179,7 +173,6 @@ mod.spellMapBaseClasses["items"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 600,
     itemId = 10720, -- Gnomish Net-o-Matic Projector
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -202,7 +195,6 @@ mod.spellMapBaseClasses["items"] = {
     cooldown = 300,
     itemId = OpposingInsigniaItemId(18854, 18834),
     friendlyItemId = OwnInsigniaItemId(18854, 18834),
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -216,7 +208,6 @@ mod.spellMapBaseClasses["items"] = {
     cooldown = 300,
     itemId = OpposingInsigniaItemId(18858, 18852),
     friendlyItemId = OwnInsigniaItemId(18858, 18852),
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -230,7 +221,6 @@ mod.spellMapBaseClasses["items"] = {
     cooldown = 300,
     itemId = OpposingInsigniaItemId(18859, 18850),
     friendlyItemId = OwnInsigniaItemId(18859, 18850),
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -244,7 +234,6 @@ mod.spellMapBaseClasses["items"] = {
     cooldown = 300,
     itemId = OpposingInsigniaItemId(18862, 18851),
     friendlyItemId = OwnInsigniaItemId(18862, 18851),
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -258,7 +247,6 @@ mod.spellMapBaseClasses["items"] = {
     cooldown = 300,
     itemId = OpposingInsigniaItemId(18863, 18853),
     friendlyItemId = OwnInsigniaItemId(18863, 18853),
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -271,7 +259,6 @@ mod.spellMapBaseClasses["items"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
     itemId = 19956, -- Wushoolay's Charm of Spirits
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -284,7 +271,6 @@ mod.spellMapBaseClasses["items"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
     itemId = 19954, -- Renataki's Charm of Trickery
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -298,7 +284,6 @@ mod.spellMapBaseClasses["items"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
     itemId = 19951, -- Gri'lek's Charm of Might
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },

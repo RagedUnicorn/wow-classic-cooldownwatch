@@ -38,7 +38,6 @@ mod.spellMapBaseClasses["shaman"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 6,
     cooldownWorstCase = 5,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -58,7 +57,6 @@ mod.spellMapBaseClasses["shaman"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 6,
     cooldownWorstCase = 5,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -75,7 +73,6 @@ mod.spellMapBaseClasses["shaman"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 6,
     cooldownWorstCase = 5,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -93,7 +90,6 @@ mod.spellMapBaseClasses["shaman"] = {
     name = "Elemental Mastery",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
-    active = true,
     trackedEvents = {
       "SPELL_AURA_REMOVED",
     },
@@ -105,7 +101,6 @@ mod.spellMapBaseClasses["shaman"] = {
     name = "Fire Nova Totem",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 15,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -121,7 +116,6 @@ mod.spellMapBaseClasses["shaman"] = {
     name = "Grounding Totem",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 15,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -133,7 +127,6 @@ mod.spellMapBaseClasses["shaman"] = {
     name = "Earthbind Totem",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 15,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -145,7 +138,6 @@ mod.spellMapBaseClasses["shaman"] = {
     name = "Nature's Swiftness",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
-    active = true,
     trackedEvents = {
       "SPELL_AURA_REMOVED",
     },

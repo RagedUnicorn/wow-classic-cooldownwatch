@@ -37,7 +37,6 @@ mod.spellMapBaseClasses["paladin"] = {
     name = "Blessing of Freedom",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 20,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -50,7 +49,6 @@ mod.spellMapBaseClasses["paladin"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
     cooldownWorstCase = 180,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -64,7 +62,6 @@ mod.spellMapBaseClasses["paladin"] = {
     name = "Divine Shield",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -77,7 +74,6 @@ mod.spellMapBaseClasses["paladin"] = {
     name = "Divine Protection",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -91,7 +87,6 @@ mod.spellMapBaseClasses["paladin"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 60,
     cooldownWorstCase = 45,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -106,7 +101,6 @@ mod.spellMapBaseClasses["paladin"] = {
     name = "Repentance",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 60,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -118,7 +112,6 @@ mod.spellMapBaseClasses["paladin"] = {
     name = "Divine Favor",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
-    active = true,
     trackedEvents = {
       "SPELL_AURA_REMOVED",
     },
@@ -130,7 +123,6 @@ mod.spellMapBaseClasses["paladin"] = {
     name = "Holy Shock",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 30,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -145,7 +137,6 @@ mod.spellMapBaseClasses["paladin"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 3600,
     cooldownWorstCase = 2400,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },

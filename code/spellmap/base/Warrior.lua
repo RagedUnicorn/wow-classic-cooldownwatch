@@ -37,7 +37,6 @@ mod.spellMapBaseClasses["warrior"] = {
     name = "Berserker Rage",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 30,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -49,7 +48,6 @@ mod.spellMapBaseClasses["warrior"] = {
     name = "Bloodrage",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 60,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -61,7 +59,6 @@ mod.spellMapBaseClasses["warrior"] = {
     name = "Bloodthirst",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 6,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -76,7 +73,6 @@ mod.spellMapBaseClasses["warrior"] = {
     name = "Death Wish",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -89,7 +85,6 @@ mod.spellMapBaseClasses["warrior"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 30,
     cooldownWorstCase = 20,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -103,7 +98,6 @@ mod.spellMapBaseClasses["warrior"] = {
     name = "Charge",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 15,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -117,7 +111,6 @@ mod.spellMapBaseClasses["warrior"] = {
     name = "Pummel",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 10,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -130,7 +123,6 @@ mod.spellMapBaseClasses["warrior"] = {
     name = "Shield Bash",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 12,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },

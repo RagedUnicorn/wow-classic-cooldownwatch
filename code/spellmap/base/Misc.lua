@@ -55,8 +55,9 @@ mod.spellMapBaseClasses = mod.spellMapBaseClasses or {}
   on a single drink. Only the consumable actually used is queued, with its
   own icon.
 
-  All entries default to active = false: consumables fire frequently and
-  would clutter the bar for users who don't opt in.
+  No misc entry is in the curated default-enabled profile
+  (code/profile/base/Misc.lua registers an empty slice): consumables fire
+  frequently and would clutter the bar for users who don't opt in.
 ]]--
 mod.spellMapBaseClasses["misc"] = {
   --[[
@@ -68,7 +69,6 @@ mod.spellMapBaseClasses["misc"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
     itemId = 13446, -- Major Healing Potion
-    active = false,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -86,7 +86,6 @@ mod.spellMapBaseClasses["misc"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
     itemId = 13444, -- Major Mana Potion
-    active = false,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -104,7 +103,6 @@ mod.spellMapBaseClasses["misc"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
     itemId = 5634, -- Free Action Potion
-    active = false,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -117,7 +115,6 @@ mod.spellMapBaseClasses["misc"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
     itemId = 20008, -- Living Action Potion
-    active = false,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -130,7 +127,6 @@ mod.spellMapBaseClasses["misc"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
     itemId = 3387, -- Limited Invulnerability Potion
-    active = false,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -143,7 +139,6 @@ mod.spellMapBaseClasses["misc"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
     itemId = 2459, -- Swiftness Potion
-    active = false,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -156,7 +151,6 @@ mod.spellMapBaseClasses["misc"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
     itemId = 9030, -- Restorative Potion
-    active = false,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -177,7 +171,6 @@ mod.spellMapBaseClasses["misc"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 60,
     itemId = 14530, -- Heavy Runecloth Bandage
-    active = false,
     trackedEvents = {
       "SPELL_AURA_APPLIED",
     },
@@ -193,7 +186,6 @@ mod.spellMapBaseClasses["misc"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
     itemId = 11951, -- Whipper Root Tuber
-    active = false,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -206,7 +198,6 @@ mod.spellMapBaseClasses["misc"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
     itemId = 11952, -- Night Dragon's Breath
-    active = false,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -225,7 +216,6 @@ mod.spellMapBaseClasses["misc"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
     itemId = 9421, -- Major Healthstone
-    active = false,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },

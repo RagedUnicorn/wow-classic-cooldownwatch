@@ -878,3 +878,167 @@ function me.ValidateBaseEntriesAreBaseType(baseMap)
 
   return failures
 end
+
+--[[
+  Verify the curated default-profile slices (code/profile/base/) and the
+  category catalog are in one-to-one correspondence, and every category key an
+  overlay touches exists in the catalog. Every catalog category must register a
+  base slice - possibly empty (misc) - so a category added to the catalog
+  without its profile slice, or a slice stranded by a category rename, fails
+  red instead of silently defaulting every spell off.
+
+  @param {table} categories - Array of {categoryName, ...} from mod.categories.GetCategories()
+  @param {table} baseSets - Map of categoryName -> array of curated primary
+    spellIds (mod.profileBaseClasses)
+  @param {table} overlays - Map of branchName -> overlay table
+    ({ [category] = { remove = {...}, add = {...} } })
+
+  @return {table}
+]]--
+function me.ValidateDefaultProfileCategoriesKnown(categories, baseSets, overlays)
+  local failures = {}
+  local inCatalog = {}
+
+  for _, category in ipairs(categories) do
+    inCatalog[category.categoryName] = true
+
+    if type(baseSets[category.categoryName]) ~= "table" then
+      table.insert(failures,
+        string.format("catalog category '%s' has no default-profile base slice",
+          tostring(category.categoryName)))
+    end
+  end
+
+  for categoryName in pairs(baseSets) do
+    if not inCatalog[categoryName] then
+      table.insert(failures,
+        string.format("default-profile base category '%s' is missing from the category catalog",
+          tostring(categoryName)))
+    end
+  end
+
+  for branchName, overlay in pairs(overlays) do
+    for categoryName in pairs(overlay) do
+      if not inCatalog[categoryName] then
+        table.insert(failures,
+          string.format("default-profile %s overlay category '%s' is missing from the category catalog",
+            tostring(branchName), tostring(categoryName)))
+      end
+    end
+  end
+
+  return failures
+end
+
+--[[
+  Verify the curated default-profile data holds no dead ops: no id is listed
+  twice within a base slice, every overlay remove targets an id the base slice
+  actually curates (a remove of an uncurated id is a typo - it removes
+  nothing), and no overlay add re-adds an id already present after the
+  overlay's removes ran (a duplicate add is either a typo or a remove/add pair
+  that cancels out). Each overlay is checked against the base alone - branches
+  never stack.
+
+  @param {table} baseSets - Map of categoryName -> array of curated primary
+    spellIds (mod.profileBaseClasses)
+  @param {table} overlays - Map of branchName -> overlay table
+
+  @return {table}
+]]--
+function me.ValidateDefaultProfileNoDuplicateIds(baseSets, overlays)
+  local failures = {}
+  local baseMembership = {}
+
+  for categoryName, spellIds in pairs(baseSets) do
+    local seen = {}
+
+    for _, spellId in ipairs(spellIds) do
+      if seen[spellId] then
+        table.insert(failures,
+          string.format("default-profile base '%s': id %s is listed twice",
+            categoryName, tostring(spellId)))
+      end
+
+      seen[spellId] = true
+    end
+
+    baseMembership[categoryName] = seen
+  end
+
+  for branchName, overlay in pairs(overlays) do
+    for categoryName, ops in pairs(overlay) do
+      local members = {}
+
+      for spellId in pairs(baseMembership[categoryName] or {}) do
+        members[spellId] = true
+      end
+
+      if ops.remove then
+        for _, spellId in ipairs(ops.remove) do
+          if not members[spellId] then
+            table.insert(failures,
+              string.format("default-profile %s overlay '%s': remove id %s is not curated in base",
+                tostring(branchName), categoryName, tostring(spellId)))
+          end
+
+          members[spellId] = nil
+        end
+      end
+
+      if ops.add then
+        for _, spellId in ipairs(ops.add) do
+          if members[spellId] then
+            table.insert(failures,
+              string.format("default-profile %s overlay '%s': add id %s is already curated",
+                tostring(branchName), categoryName, tostring(spellId)))
+          end
+
+          members[spellId] = true
+        end
+      end
+    end
+  end
+
+  return failures
+end
+
+--[[
+  Verify every curated id in a branch's assembled default-enabled sets
+  resolves to a PRIMARY entry in the same category of that branch's assembled
+  spellMap. The enabled gate and the config store both key on primary spellIds
+  (CombatLog gates on realSpellId), so a curated alias id would be a silent
+  no-op - and an id a branch overlay removed from the catalog (or never added)
+  would default-enable a spell that branch cannot track. Run once per branch
+  with the matching pair of assembled structures.
+
+  @param {table} defaultSets - Map of categoryName -> { [spellId] = true }
+    (mod.profile.BuildDefaultEnabledSets for the branch)
+  @param {table} assembledMap - The assembled spellMap for the same branch
+
+  @return {table}
+]]--
+function me.ValidateDefaultProfileIdsArePrimaries(defaultSets, assembledMap)
+  local failures = {}
+
+  for categoryName, set in pairs(defaultSets) do
+    local spells = assembledMap[categoryName]
+
+    if type(spells) ~= "table" then
+      if next(set) ~= nil then
+        table.insert(failures,
+          string.format("default-profile '%s' curates ids but the assembled spellMap has no such category",
+            categoryName))
+      end
+    else
+      for spellId in pairs(set) do
+        if not IsPrimary(spells[spellId]) then
+          table.insert(failures,
+            string.format("default-profile '%s': id %s does not resolve to a primary entry",
+              categoryName, tostring(spellId)))
+        end
+      end
+    end
+  end
+
+  return failures
+end

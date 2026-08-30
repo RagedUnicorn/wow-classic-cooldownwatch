@@ -242,6 +242,45 @@ function me.TestBaseHasNoHandWrittenRankAliases()
     "hand-written rank alias(es)")
 end
 
+-- the default-profile overlays as the named map the validators consume
+local function GetDefaultProfileOverlays()
+  return {
+    sod = mod.profileOverlaySod.GetOverlay(),
+    tbc = mod.profileOverlayTbc.GetOverlay()
+  }
+end
+
+function me.TestDefaultProfileCategoriesKnown()
+  RunValidator("TestDefaultProfileCategoriesKnown",
+    function()
+      return mod.spellMapValidation.ValidateDefaultProfileCategoriesKnown(
+        mod.categories.GetCategories(), mod.profileBaseClasses, GetDefaultProfileOverlays())
+    end,
+    "Default-profile slices and category catalog are in one-to-one correspondence",
+    "default-profile category mismatch(es)")
+end
+
+function me.TestDefaultProfileNoDuplicateIds()
+  RunValidator("TestDefaultProfileNoDuplicateIds",
+    function()
+      return mod.spellMapValidation.ValidateDefaultProfileNoDuplicateIds(
+        mod.profileBaseClasses, GetDefaultProfileOverlays())
+    end,
+    "Default-profile data carries no duplicate ids or dead overlay ops",
+    "default-profile duplicate/dead-op failure(s)")
+end
+
+function me.TestDefaultProfileIdsArePrimaries()
+  RunValidator("TestDefaultProfileIdsArePrimaries",
+    function()
+      return mod.spellMapValidation.ValidateDefaultProfileIdsArePrimaries(
+        mod.profile.BuildDefaultEnabledSets(mod.spellMap.GetActiveBranch()),
+        mod.spellMap.GetSpellMap())
+    end,
+    "Every curated default-profile id resolves to a primary on the active branch",
+    "default-profile unresolved id(s)")
+end
+
 --[[
   Run all spellMap data-integrity tests.
 ]]--
@@ -268,6 +307,9 @@ function me.RunAllTests()
   me.TestSpellTypesMatchBranch()
   me.TestBaseEntriesAreBaseType()
   me.TestBaseHasNoHandWrittenRankAliases()
+  me.TestDefaultProfileCategoriesKnown()
+  me.TestDefaultProfileNoDuplicateIds()
+  me.TestDefaultProfileIdsArePrimaries()
 
   mod.testLogger.LogInfo("SpellMap", "=== SpellMap Tests Complete ===")
 end

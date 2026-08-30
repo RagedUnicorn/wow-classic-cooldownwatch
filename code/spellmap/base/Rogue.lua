@@ -37,7 +37,6 @@ mod.spellMapBaseClasses["rogue"] = {
     name = "Adrenaline Rush",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -49,7 +48,6 @@ mod.spellMapBaseClasses["rogue"] = {
     name = "Blade Flurry",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -61,7 +59,6 @@ mod.spellMapBaseClasses["rogue"] = {
     name = "Blind",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -73,7 +70,6 @@ mod.spellMapBaseClasses["rogue"] = {
     name = "Cold Blood",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
-    active = true,
     trackedEvents = {
       "SPELL_AURA_REMOVED",
     },
@@ -85,7 +81,6 @@ mod.spellMapBaseClasses["rogue"] = {
     name = "Evasion",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -97,7 +92,6 @@ mod.spellMapBaseClasses["rogue"] = {
     name = "Gouge",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 10,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -113,7 +107,6 @@ mod.spellMapBaseClasses["rogue"] = {
     name = "Kick",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 10,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -128,7 +121,6 @@ mod.spellMapBaseClasses["rogue"] = {
     name = "Kidney Shot",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 20,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -141,7 +133,6 @@ mod.spellMapBaseClasses["rogue"] = {
     name = "Preparation",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 600,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -174,7 +165,6 @@ mod.spellMapBaseClasses["rogue"] = {
     name = "Riposte",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 6,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -186,7 +176,6 @@ mod.spellMapBaseClasses["rogue"] = {
     name = "Sprint",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -200,7 +189,6 @@ mod.spellMapBaseClasses["rogue"] = {
     name = "Vanish",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },

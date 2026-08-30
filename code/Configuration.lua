@@ -559,18 +559,20 @@ end
 
   Never-configured and explicitly disabled are distinct states: the config ui
   writes an explicit true/false on every toggle, so a nil entry means the
-  player never touched the spell and the catalog's intended default applies.
+  player never touched the spell and the caller-supplied default applies.
 
   @param {string} categoryName
   @param {number} spellId
   @param {boolean} defaultState
-    Optional. The spell's catalog `active` flag - the tracked state that
-    applies while the player never configured the spell. Omitting it keeps
-    the pure config read (never-configured resolves to false).
+    Optional. The tracked state that applies while the player never
+    configured the spell - in production always
+    mod.profile.IsDefaultEnabled (curated default-enabled set membership).
+    Omitting it keeps the pure config read (never-configured resolves to
+    false).
   @param {boolean} friendly
     Optional. true reads the FRIENDLY-side state (see TrackingStoreField).
-    The catalog default applies per side independently - a spell the player
-    only ever configured for enemies is still never-configured here.
+    The default applies per side independently - a spell the player only
+    ever configured for enemies is still never-configured here.
 
   @return {boolean}
     true  - If the cooldown is tracked (enabled explicitly, or never
@@ -584,7 +586,7 @@ function me.GetCooldownConfigurationState(categoryName, spellId, defaultState, f
   local state = categoryConfig and categoryConfig[spellId]
 
   if state == nil then
-    return defaultState == true -- never configured - the catalog default decides
+    return defaultState == true -- never configured - the supplied default decides
   end
 
   return state == true

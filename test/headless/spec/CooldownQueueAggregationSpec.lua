@@ -47,8 +47,7 @@ describe("CooldownQueue cross-caster aggregation", function()
       ["spellId"] = spellId,
       ["name"] = name,
       ["castTime"] = castTime,
-      ["cooldown"] = cooldown or 30,
-      ["active"] = true
+      ["cooldown"] = cooldown or 30
     }
   end
 

@@ -81,7 +81,6 @@ describe("SpellMap SoD overlay assembly path", function()
               name = FAKE_SOD_SPELL_NAME,
               type = RGCW_CONSTANTS.SPELL_TYPE_SOD,
               cooldown = 42,
-              active = true,
               trackedEvents = {
                 "SPELL_CAST_SUCCESS"
               },

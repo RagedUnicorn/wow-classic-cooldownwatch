@@ -37,7 +37,6 @@ mod.spellMapBaseClasses["racials"] = {
     name = "Escape Artist",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 60,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -49,7 +48,6 @@ mod.spellMapBaseClasses["racials"] = {
     name = "Perception",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -61,7 +59,6 @@ mod.spellMapBaseClasses["racials"] = {
     name = "Stoneform",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -73,7 +70,6 @@ mod.spellMapBaseClasses["racials"] = {
     name = "Will of the Forsaken",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -85,7 +81,6 @@ mod.spellMapBaseClasses["racials"] = {
     name = "War Stomp",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -97,7 +92,6 @@ mod.spellMapBaseClasses["racials"] = {
     name = "Blood Fury",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -114,7 +108,6 @@ mod.spellMapBaseClasses["racials"] = {
     name = "Berserking",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },

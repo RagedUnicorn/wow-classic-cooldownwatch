@@ -37,7 +37,6 @@ mod.spellMapBaseClasses["warlock"] = {
     name = "Amplify Curse",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
-    active = true,
     trackedEvents = {
       "SPELL_AURA_REMOVED",
     },
@@ -49,7 +48,6 @@ mod.spellMapBaseClasses["warlock"] = {
     name = "Death Coil",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 120,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -63,7 +61,6 @@ mod.spellMapBaseClasses["warlock"] = {
     name = "Howl of Terror",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 40,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -76,7 +73,6 @@ mod.spellMapBaseClasses["warlock"] = {
     name = "Shadow Ward",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 30,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -91,7 +87,6 @@ mod.spellMapBaseClasses["warlock"] = {
     name = "Soul Fire",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 60,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -104,7 +99,6 @@ mod.spellMapBaseClasses["warlock"] = {
     name = "Fel Domination",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 900,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -116,7 +110,6 @@ mod.spellMapBaseClasses["warlock"] = {
     name = "Shadowburn",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 15,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -133,7 +126,6 @@ mod.spellMapBaseClasses["warlock"] = {
     name = "Conflagrate",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 10,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -154,7 +146,6 @@ mod.spellMapBaseClasses["warlock"] = {
     name = "Spell Lock",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 30,
-    active = true,
     petCast = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
@@ -168,7 +159,6 @@ mod.spellMapBaseClasses["warlock"] = {
     name = "Devour Magic",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 8,
-    active = false,
     petCast = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",

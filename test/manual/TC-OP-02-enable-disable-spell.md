@@ -2,9 +2,9 @@
 
 **Area:** Options | **Client:** Era | **Mandatory:** yes
 
-> The player's toggle is the authority; the catalog's `active` flag only applies while a spell was
-> never configured. An explicit toggle wins in both directions - including enabling a spell that
-> ships disabled.
+> The player's toggle is the authority; the curated default profile (`code/profile/base/`) only
+> applies while a spell was never configured. An explicit toggle wins in both directions -
+> including enabling a spell that ships disabled.
 
 ## Preconditions
 
@@ -23,8 +23,8 @@
 ## Expected
 
 - The unchecked spell is not tracked - injecting it produces no slot
-- The explicitly checked `active = false` entry **is** tracked - it produces a slot (this is the
-  regression guard: the enqueue path must not re-add a hard `active` gate)
+- The explicitly checked non-curated entry **is** tracked - it produces a slot (this is the
+  regression guard: the enqueue path must not re-add a hard enabled gate)
 - Both toggle states survive the reload and are reflected by the checkboxes
 - Re-checking the disabled spell restores tracking immediately, without a reload
 - No Lua errors

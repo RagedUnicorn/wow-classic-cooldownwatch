@@ -63,7 +63,6 @@ function me.GetOverlay()
           name = "Maim",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 10,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -75,7 +74,6 @@ function me.GetOverlay()
           name = "Force of Nature",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 180,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -89,7 +87,6 @@ function me.GetOverlay()
           name = "Rebirth",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 1200,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -105,7 +102,6 @@ function me.GetOverlay()
           name = "Tranquility",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 600,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -144,7 +140,6 @@ function me.GetOverlay()
           name = "Silencing Shot",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 20,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -158,7 +153,6 @@ function me.GetOverlay()
           name = "Flare",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 20,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -185,7 +179,6 @@ function me.GetOverlay()
           cooldown = 120,
           itemId = mod.spellMapItemHelper.OpposingInsigniaItemId(37864, 37865),
           friendlyItemId = mod.spellMapItemHelper.OwnInsigniaItemId(37864, 37865),
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -198,7 +191,6 @@ function me.GetOverlay()
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 300,
           itemId = 23824, -- Rocket Boots Xtreme
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -211,7 +203,6 @@ function me.GetOverlay()
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 300,
           itemId = 23835, -- Gnomish Poultryizer
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -224,7 +215,6 @@ function me.GetOverlay()
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 120,
           itemId = 23836, -- Goblin Rocket Launcher
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -237,7 +227,6 @@ function me.GetOverlay()
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 300,
           itemId = 23825, -- Nigh Invulnerability Belt
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -284,7 +273,6 @@ function me.GetOverlay()
           name = "Ice Block",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 300,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -296,7 +284,6 @@ function me.GetOverlay()
           name = "Invisibility",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 300,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -308,7 +295,6 @@ function me.GetOverlay()
           name = "Dragon's Breath",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 20,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -325,7 +311,6 @@ function me.GetOverlay()
           name = "Counterspell",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 24,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -347,7 +332,6 @@ function me.GetOverlay()
           name = "Cold Snap",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 480,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -367,7 +351,6 @@ function me.GetOverlay()
           name = "Icy Veins",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 180,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -410,7 +393,6 @@ function me.GetOverlay()
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 120,
           itemId = 22103, -- Master Healthstone
-          active = false,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -440,7 +422,6 @@ function me.GetOverlay()
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 120,
           itemId = 22839, -- Destruction Potion
-          active = false,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -453,7 +434,6 @@ function me.GetOverlay()
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 120,
           itemId = 22838, -- Haste Potion
-          active = false,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -466,7 +446,6 @@ function me.GetOverlay()
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 120,
           itemId = 22849, -- Ironshield Potion
-          active = false,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -481,7 +460,6 @@ function me.GetOverlay()
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 120,
           itemId = 22829, -- Super Healing Potion
-          active = false,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -499,7 +477,6 @@ function me.GetOverlay()
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 120,
           itemId = 22832, -- Super Mana Potion
-          active = false,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -529,7 +506,6 @@ function me.GetOverlay()
           name = "Avenging Wrath",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 180,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -541,7 +517,6 @@ function me.GetOverlay()
           name = "Divine Illumination",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 180,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -553,7 +528,6 @@ function me.GetOverlay()
           name = "Avenger's Shield",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 30,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -569,7 +543,6 @@ function me.GetOverlay()
           name = "Holy Shock",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 15,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -583,7 +556,6 @@ function me.GetOverlay()
           name = "Blessing of Freedom",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 25,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -618,7 +590,6 @@ function me.GetOverlay()
           name = "Elune's Grace",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 180,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -630,7 +601,6 @@ function me.GetOverlay()
           name = "Pain Suppression",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 120,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -642,7 +612,6 @@ function me.GetOverlay()
           name = "Shadowfiend",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 300,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -654,7 +623,6 @@ function me.GetOverlay()
           name = "Shadow Word: Death",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 12,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -666,7 +634,6 @@ function me.GetOverlay()
           name = "Chastise",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 30,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -683,7 +650,6 @@ function me.GetOverlay()
           name = "Symbol of Hope",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 300,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -695,7 +661,6 @@ function me.GetOverlay()
           name = "Consume Magic",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 120,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -709,7 +674,6 @@ function me.GetOverlay()
           name = "Fear Ward",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 180,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -736,7 +700,6 @@ function me.GetOverlay()
           name = "Arcane Torrent",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 120,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -749,7 +712,6 @@ function me.GetOverlay()
           name = "Gift of the Naaru",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 180,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -763,7 +725,6 @@ function me.GetOverlay()
           name = "Escape Artist",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 105,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -793,7 +754,6 @@ function me.GetOverlay()
           name = "Cloak of Shadows",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 60,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -805,7 +765,6 @@ function me.GetOverlay()
           name = "Shadowstep",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 30,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -819,7 +778,6 @@ function me.GetOverlay()
           name = "Blind",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 180,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -838,7 +796,6 @@ function me.GetOverlay()
           name = "Preparation",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 600,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -883,7 +840,6 @@ function me.GetOverlay()
           name = "Bloodlust",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 600,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -895,7 +851,6 @@ function me.GetOverlay()
           name = "Heroism",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 600,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -907,7 +862,6 @@ function me.GetOverlay()
           name = "Shamanistic Rage",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 120,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -919,7 +873,6 @@ function me.GetOverlay()
           name = "Fire Elemental Totem",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 1200,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -931,7 +884,6 @@ function me.GetOverlay()
           name = "Earth Elemental Totem",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 1200,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -969,7 +921,6 @@ function me.GetOverlay()
           name = "Shadowfury",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 20,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -987,7 +938,6 @@ function me.GetOverlay()
           name = "Spell Lock",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 24,
-          active = true,
           petCast = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
@@ -1018,7 +968,6 @@ function me.GetOverlay()
           name = "Spell Reflection",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 10,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },
@@ -1030,7 +979,6 @@ function me.GetOverlay()
           name = "Intervene",
           type = RGCW_CONSTANTS.SPELL_TYPE_TBC,
           cooldown = 30,
-          active = true,
           trackedEvents = {
             "SPELL_CAST_SUCCESS",
           },

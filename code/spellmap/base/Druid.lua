@@ -37,7 +37,6 @@ mod.spellMapBaseClasses["druid"] = {
     name = "Bash",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 60,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -51,7 +50,6 @@ mod.spellMapBaseClasses["druid"] = {
     name = "Feral Charge",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 15,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -63,7 +61,6 @@ mod.spellMapBaseClasses["druid"] = {
     name = "Frenzied Regeneration",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -77,7 +74,6 @@ mod.spellMapBaseClasses["druid"] = {
     name = "Nature's Swiftness",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 180,
-    active = true,
     trackedEvents = {
       "SPELL_AURA_REMOVED",
     },
@@ -89,7 +85,6 @@ mod.spellMapBaseClasses["druid"] = {
     name = "Innervate",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 360,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -101,7 +96,6 @@ mod.spellMapBaseClasses["druid"] = {
     name = "Swiftmend",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 15,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -113,7 +107,6 @@ mod.spellMapBaseClasses["druid"] = {
     name = "Barkskin",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 60,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -125,7 +118,6 @@ mod.spellMapBaseClasses["druid"] = {
     name = "Dash",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -138,7 +130,6 @@ mod.spellMapBaseClasses["druid"] = {
     name = "Enrage",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 60,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -150,7 +141,6 @@ mod.spellMapBaseClasses["druid"] = {
     name = "Rebirth",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 1800,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -166,7 +156,6 @@ mod.spellMapBaseClasses["druid"] = {
     name = "Tranquility",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 300,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },
@@ -181,7 +170,6 @@ mod.spellMapBaseClasses["druid"] = {
     name = "Nature's Grasp",
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE,
     cooldown = 60,
-    active = true,
     trackedEvents = {
       "SPELL_CAST_SUCCESS",
     },

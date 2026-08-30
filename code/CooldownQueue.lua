@@ -72,11 +72,6 @@ me.tag = "CooldownQueue"
         friendly tracking is enabled. Hostile entries never carry the field. Selects
         which per-side configuration ResolveCooldown resolves against and lets display
         surfaces separate the sides; both sides share one caster-keyed queue
-      ["active"] = boolean
-        - {boolean} The catalog's intended default tracked state. Not read on
-        the queue path - the enabled authority is the player's
-        cooldownConfiguration, checked upstream in CombatLog.IsCooldownTracked
-        with this flag as the never-configured fallback
     }
   }
 ]]--

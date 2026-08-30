@@ -808,7 +808,8 @@ end
 ]]--
 function me.UpdateCooldownUiState(row, cooldown, categoryName)
   local enabled = mod.configuration.GetCooldownConfigurationState(
-    categoryName, cooldown.spellId, cooldown.active, friendlySideActive)
+    categoryName, cooldown.spellId,
+    mod.profile.IsDefaultEnabled(categoryName, cooldown.spellId), friendlySideActive)
 
   --[[
     Drop an in-progress edit *before* the identity below is rebound. Leaving a

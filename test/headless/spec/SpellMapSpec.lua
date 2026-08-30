@@ -253,7 +253,6 @@ describe("ValidateSpellTypesMatchBranch rejections", function()
           name = "Branch Fixture Spell",
           type = primaryType,
           cooldown = 30,
-          active = true,
           trackedEvents = { "SPELL_CAST_SUCCESS" },
           allRanks = {
             { spellId = 999001, type = rankType }

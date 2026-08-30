@@ -16,6 +16,8 @@
         <include>code/spellmap/*.lua</include>
         <include>code/spellmap/base/*.lua</include>
         <include>code/spellmap/overlay/*.lua</include>
+        <include>code/profile/base/*.lua</include>
+        <include>code/profile/overlay/*.lua</include>
         <include>gui/*.lua</include>
         <include>gui/*.xml</include>
         <include>assets/*.blp</include>

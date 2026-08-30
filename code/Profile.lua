@@ -67,3 +67,107 @@ end
 function me.GetDefaultCooldownOverrides()
   return mod.common.Clone(defaultProfile)
 end
+
+--[[
+  Curated default-enabled sets, assembled per branch from the
+  code/profile/base/ slices plus the matching code/profile/overlay/ diff and
+  keyed by active branch ("classic" / "sod" / "tbc"). Built lazily on first
+  IsDefaultEnabled call - never at load time, because this file loads before
+  the spellmap block (headless Bootstrap included) and the branch decision
+  belongs to mod.spellMap.GetActiveBranch.
+]]--
+local defaultSetsByBranch = {}
+
+--[[
+  Build the curated default-enabled sets for a branch: the base slice arrays
+  turned into per-category id sets, with the branch overlay's remove ops
+  applied before its add ops. Pure and cache-free; exposed (rather than kept
+  local to EnsureDefaultSets) for the per-branch validation specs, which
+  build all three branches without touching the cache.
+
+  @param {string} branch
+    "classic" | "sod" | "tbc"
+
+  @return {table}
+    Table of categoryName -> { [primarySpellId] = true }
+]]--
+function me.BuildDefaultEnabledSets(branch)
+  local sets = {}
+
+  for categoryName, spellIds in pairs(mod.profileBaseClasses) do
+    local set = {}
+
+    for _, spellId in ipairs(spellIds) do
+      set[spellId] = true
+    end
+
+    sets[categoryName] = set
+  end
+
+  local overlay
+
+  if branch == "sod" then
+    overlay = mod.profileOverlaySod.GetOverlay()
+  elseif branch == "tbc" then
+    overlay = mod.profileOverlayTbc.GetOverlay()
+  end
+
+  if overlay then
+    for categoryName, ops in pairs(overlay) do
+      local set = sets[categoryName] or {}
+      sets[categoryName] = set
+
+      if ops.remove then
+        for _, spellId in ipairs(ops.remove) do
+          set[spellId] = nil
+        end
+      end
+
+      if ops.add then
+        for _, spellId in ipairs(ops.add) do
+          set[spellId] = true
+        end
+      end
+    end
+  end
+
+  return sets
+end
+
+--[[
+  Get the curated default-enabled sets for the active branch, building and
+  caching them on first access.
+
+  @return {table}
+    Table of categoryName -> { [primarySpellId] = true }
+]]--
+local function EnsureDefaultSets()
+  local branch = mod.spellMap.GetActiveBranch()
+
+  if defaultSetsByBranch[branch] == nil then
+    defaultSetsByBranch[branch] = me.BuildDefaultEnabledSets(branch)
+  end
+
+  return defaultSetsByBranch[branch]
+end
+
+--[[
+  Whether a spell is in the curated default-enabled set of the active
+  branch - the tracked state that applies while the player never configured
+  the spell (the never-configured default fed into
+  Configuration.GetCooldownConfigurationState; an explicit player toggle
+  always wins in both directions). O(1) - sits on the combat-log hot path.
+
+  @param {string} categoryName
+  @param {number} spellId
+    A PRIMARY spellId - the enabled state is keyed by primaries
+
+  @return {boolean}
+    true  - the spell tracks by default
+    false - the spell is opt-in
+]]--
+function me.IsDefaultEnabled(categoryName, spellId)
+  local set = EnsureDefaultSets()[categoryName]
+
+  return set ~= nil and set[spellId] == true
+end

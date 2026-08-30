@@ -90,7 +90,6 @@ mod.spellMapBaseClasses["priest"] = {
     type = RGCW_CONSTANTS.SPELL_TYPE_BASE, -- BASE = always available, SOD = SoD-only
     cooldown = 30,
     cooldownWorstCase = 26, -- optional: worst case (talents/items)
-    active = true, -- default tracked state on a fresh profile; an explicit player toggle always wins
     trackedEvents = { "SPELL_CAST_SUCCESS" }, -- SPELL_AURA_REMOVED for buff-then-consume spells, see below
     allRanks = { -- structured per-rank entries; MUST contain the primary's own id
       { spellId = 10890, type = RGCW_CONSTANTS.SPELL_TYPE_BASE },
@@ -105,6 +104,15 @@ mod.spellMapBaseClasses["priest"] = {
   -- ...next primary
 }
 ```
+
+Whether a spell tracks **out of the box** is deliberately not part of the catalog entry. The curated default
+profile under `code/profile/` (same base + Sod/Tbc overlay layout, one slice per category registering an array of
+primary spellIds on `mod.profileBaseClasses`) lists the spells enabled on a never-configured profile —
+interrupts, hard CC, big defensives, key mobility, PvP trinkets; everything else is opt-in via the config menu,
+and an explicit player toggle always wins in both directions. A new catalog entry that should track by default
+gets its primary id added to the matching `code/profile/base/<Category>.lua` slice (`code/Profile.lua` assembles
+the sets per branch; `ValidateDefaultProfileIdsArePrimaries` rejects alias ids and ids the branch does not
+carry).
 
 ### Required invariants (enforced by `SpellMapValidation`)
 

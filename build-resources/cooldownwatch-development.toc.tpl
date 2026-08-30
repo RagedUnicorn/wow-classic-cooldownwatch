@@ -58,6 +58,20 @@ code/Configuration.lua
 code/Serializer.lua
 code/Encoder.lua
 code/ConfigProfile.lua
+code/profile/base/Priest.lua
+code/profile/base/Rogue.lua
+code/profile/base/Shaman.lua
+code/profile/base/Mage.lua
+code/profile/base/Warrior.lua
+code/profile/base/Hunter.lua
+code/profile/base/Warlock.lua
+code/profile/base/Paladin.lua
+code/profile/base/Druid.lua
+code/profile/base/Racials.lua
+code/profile/base/Items.lua
+code/profile/base/Misc.lua
+code/profile/overlay/Sod.lua
+code/profile/overlay/Tbc.lua
 code/Profile.lua
 code/Season.lua
 

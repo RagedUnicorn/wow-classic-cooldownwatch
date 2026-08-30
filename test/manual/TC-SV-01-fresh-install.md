@@ -25,9 +25,10 @@
 - No Lua errors on login; the welcome message prints
 - Options shows both checkboxes unchecked (`lockTargetCooldownBar`, `globalAssumeWorstCase` both
   default to `false`)
-- Every spell category lists its spells; class spells are checked (`active = true`), the whole
-  `items` and `misc` categories are unchecked (`active = false`, opt-in) and Devour Magic is
-  unchecked
+- Every spell category lists its spells; exactly the curated default set is checked (the primary
+  ids in `code/profile/base/<Category>.lua` - interrupts, hard CC, big defensives, key mobility;
+  in `items` only the five insignias). Everything else is unchecked, including the whole `misc`
+  category and Devour Magic
 - The bar renders at screen center (no saved frame position yet) and is draggable (unlocked
   default shows the dialog backdrop)
 - `CooldownWatchConfiguration` contains every field from `Configuration.GetDefaults()`:
