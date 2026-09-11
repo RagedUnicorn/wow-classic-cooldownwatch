@@ -4,6 +4,7 @@ on: [workflow_dispatch]
 jobs:
   curseforge-release-job:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     name: CurseForge Release
     steps:
       - name: checkout
