@@ -22,6 +22,22 @@
   SOFTWARE.
 ]]--
 
+--[[
+  The Profiles settings page - the family feature every sibling addon carries, laid
+  out exactly like theirs: the title, a "Saved Profiles" list with the action buttons
+  beside it, and the "Profile String (Export / Import)" box with its two buttons. A
+  profile is the whole configuration (see code/ConfigProfile.lua), and one of them is
+  the active profile the live configuration belongs to: its row reads "<name> (active)"
+  in gold, every edit made in the settings is its own, and a switch mirrors it before
+  the other profile is loaded, so nothing is lost between profiles. The page creates a
+  new profile from the current settings (it becomes the active one), loads a selected
+  one (which reloads the UI), renames and deletes (deleting the active profile falls
+  back to Default), resets the active profile to the factory settings, and exports /
+  imports profiles as CooldownWatch1: strings. Default is the editable home profile
+  every character starts on - it cannot be renamed or deleted, and "Reset to defaults"
+  is how the factory settings come back.
+]]--
+
 -- luacheck: globals CreateFrame STANDARD_TEXT_FONT StaticPopupDialogs StaticPopup_Show ReloadUI ScrollUtil
 -- luacheck: globals ACCEPT CANCEL YES NO
 
@@ -52,10 +68,29 @@ local rows = {}
 local profileEditBox
 
 --[[
-  The action buttons that are greyed out while the immutable default profile is selected
+  The action buttons that act on the selection and are greyed out while they could
+  not act (see UpdateActionButtonState)
 ]]--
+local loadButton
 local renameButton
 local deleteButton
+local exportButton
+
+--[[
+  The row label colours: the active profile stands out in the title gold, every other
+  row keeps the body colour of the family list - set by hand on every refresh, so a
+  row that stops being the active one loses the gold again.
+]]--
+local ACTIVE_ROW_COLOR = RGCW_CONSTANTS.COLOR.TITLE_GOLD
+local ROW_COLOR = RGCW_CONSTANTS.COLOR.BODY
+
+--[[
+  The action button column beside the list: x offset and the vertical step between
+  buttons. Five buttons from the list's top edge end above its bottom edge.
+]]--
+local ACTION_BUTTON_LEFT = 320
+local ACTION_BUTTON_TOP = -64
+local ACTION_BUTTON_SPACING = 32
 
 -- forward declarations
 local SetupStaticPopups
@@ -66,8 +101,9 @@ local UpdateActionButtonState
 local PrintDefaultProfileError
 local Trim
 local IsNameTooLong
-local HandleSave
-local HandleApply
+local HandleCreate
+local HandleLoad
+local HandleReset
 local HandleDelete
 local HandleRename
 local HandleExport
@@ -152,44 +188,55 @@ function me.BuildProfileList(frame)
 end
 
 --[[
-  Build the action buttons that operate on the selected profile plus the
-  save-current button.
+  Build the five action buttons beside the list: Create new Profile, Load, Rename,
+  Delete and Reset to defaults. Load, Delete and Reset confirm; Load, Rename and
+  Delete act on the selected profile and are greyed while they could not act (see
+  UpdateActionButtonState), Reset acts on the active profile.
 
   @param {table} frame
 ]]--
 function me.BuildActionButtons(frame)
-  CreateActionButton(
-    frame,
-    RGCW_CONSTANTS.ELEMENT_PROFILE_SAVE_BUTTON,
-    RGCW_CONSTANTS.ELEMENT_PROFILE_ACTION_BUTTON_WIDTH,
-    {"TOPLEFT", 320, -64},
-    rgcw.L["profile_save_button"],
-    function()
-      StaticPopup_Show("COOLDOWNWATCH_PROFILE_SAVE")
-    end
-  )
+  local buttonWidth = RGCW_CONSTANTS.ELEMENT_PROFILE_ACTION_BUTTON_WIDTH
 
   CreateActionButton(
     frame,
-    RGCW_CONSTANTS.ELEMENT_PROFILE_APPLY_BUTTON,
-    RGCW_CONSTANTS.ELEMENT_PROFILE_ACTION_BUTTON_WIDTH,
-    {"TOPLEFT", 320, -96},
-    rgcw.L["profile_apply_button"],
+    RGCW_CONSTANTS.ELEMENT_PROFILE_CREATE_BUTTON,
+    buttonWidth,
+    {"TOPLEFT", ACTION_BUTTON_LEFT, ACTION_BUTTON_TOP},
+    rgcw.L["profile_create_button"],
+    function()
+      StaticPopup_Show("COOLDOWNWATCH_PROFILE_CREATE")
+    end
+  )
+
+  loadButton = CreateActionButton(
+    frame,
+    RGCW_CONSTANTS.ELEMENT_PROFILE_LOAD_BUTTON,
+    buttonWidth,
+    {"TOPLEFT", ACTION_BUTTON_LEFT, ACTION_BUTTON_TOP - ACTION_BUTTON_SPACING},
+    rgcw.L["profile_load_button"],
     function()
       if not me.selectedProfile then
         mod.logger.PrintUserError(rgcw.L["profile_error_no_selection"])
         return
       end
 
-      StaticPopup_Show("COOLDOWNWATCH_PROFILE_APPLY", me.selectedProfile, nil, me.selectedProfile)
+      local activeName = mod.configProfile.GetActiveProfileName()
+
+      -- the active profile is loaded already (the button is greyed for it)
+      if me.selectedProfile == activeName then
+        return
+      end
+
+      StaticPopup_Show("COOLDOWNWATCH_PROFILE_LOAD", me.selectedProfile, activeName, me.selectedProfile)
     end
   )
 
   renameButton = CreateActionButton(
     frame,
     RGCW_CONSTANTS.ELEMENT_PROFILE_RENAME_BUTTON,
-    RGCW_CONSTANTS.ELEMENT_PROFILE_ACTION_BUTTON_WIDTH,
-    {"TOPLEFT", 320, -128},
+    buttonWidth,
+    {"TOPLEFT", ACTION_BUTTON_LEFT, ACTION_BUTTON_TOP - 2 * ACTION_BUTTON_SPACING},
     rgcw.L["profile_rename_button"],
     function()
       if not me.selectedProfile then
@@ -209,8 +256,8 @@ function me.BuildActionButtons(frame)
   deleteButton = CreateActionButton(
     frame,
     RGCW_CONSTANTS.ELEMENT_PROFILE_DELETE_BUTTON,
-    RGCW_CONSTANTS.ELEMENT_PROFILE_ACTION_BUTTON_WIDTH,
-    {"TOPLEFT", 320, -160},
+    buttonWidth,
+    {"TOPLEFT", ACTION_BUTTON_LEFT, ACTION_BUTTON_TOP - 3 * ACTION_BUTTON_SPACING},
     rgcw.L["profile_delete_button"],
     function()
       if not me.selectedProfile then
@@ -223,7 +270,29 @@ function me.BuildActionButtons(frame)
         return
       end
 
+      -- deleting the active profile says what follows: Default takes over and the UI reloads
+      if me.selectedProfile == mod.configProfile.GetActiveProfileName() then
+        StaticPopup_Show(
+          "COOLDOWNWATCH_PROFILE_DELETE_ACTIVE",
+          me.selectedProfile,
+          RGCW_CONSTANTS.DEFAULT_PROFILE_NAME,
+          me.selectedProfile
+        )
+        return
+      end
+
       StaticPopup_Show("COOLDOWNWATCH_PROFILE_DELETE", me.selectedProfile, nil, me.selectedProfile)
+    end
+  )
+
+  CreateActionButton(
+    frame,
+    RGCW_CONSTANTS.ELEMENT_PROFILE_RESET_BUTTON,
+    buttonWidth,
+    {"TOPLEFT", ACTION_BUTTON_LEFT, ACTION_BUTTON_TOP - 4 * ACTION_BUTTON_SPACING},
+    rgcw.L["profile_reset_button"],
+    function()
+      StaticPopup_Show("COOLDOWNWATCH_PROFILE_RESET", mod.configProfile.GetActiveProfileName())
     end
   )
 
@@ -275,7 +344,7 @@ function me.BuildStringBox(frame)
     self:ClearFocus()
   end)
 
-  CreateActionButton(
+  exportButton = CreateActionButton(
     frame,
     RGCW_CONSTANTS.ELEMENT_PROFILE_EXPORT_BUTTON,
     RGCW_CONSTANTS.ELEMENT_PROFILE_STRING_BUTTON_WIDTH,
@@ -292,6 +361,8 @@ function me.BuildStringBox(frame)
     rgcw.L["profile_import_button"],
     HandleImport
   )
+
+  UpdateActionButtonState()
 end
 
 --[[
@@ -314,17 +385,23 @@ function me.SelectProfile(name)
 end
 
 --[[
-  Grey out Rename and Delete while the immutable default profile is selected. The
-  click handlers guard the same condition - this only makes the refusal visible
-  before the click.
+  Grey out the buttons that act on the selection while they could not act: Load,
+  Rename, Delete and Export with nothing selected, Load also on the active profile
+  (it is loaded already), Rename and Delete also on the Default profile. Create,
+  Reset to defaults and Import never depend on the selection. The click handlers
+  guard the same conditions - this only makes the refusal visible before the click.
 ]]--
 UpdateActionButtonState = function()
-  if not renameButton or not deleteButton then return end
+  if not loadButton or not renameButton or not deleteButton or not exportButton then return end
 
-  local isDefault = me.selectedProfile ~= nil and mod.configProfile.IsDefaultProfile(me.selectedProfile)
+  local selected = me.selectedProfile ~= nil and mod.configProfile.ProfileExists(me.selectedProfile)
+  local editable = selected and not mod.configProfile.IsDefaultProfile(me.selectedProfile)
+  local loadable = selected and me.selectedProfile ~= mod.configProfile.GetActiveProfileName()
 
-  renameButton:SetEnabled(not isDefault)
-  deleteButton:SetEnabled(not isDefault)
+  loadButton:SetEnabled(loadable)
+  renameButton:SetEnabled(editable)
+  deleteButton:SetEnabled(editable)
+  exportButton:SetEnabled(selected)
 end
 
 --[[
@@ -375,12 +452,15 @@ CreateProfileRow = function(index)
 end
 
 --[[
-  Rebuild the visible profile rows from the saved profile list.
+  Rebuild the visible profile rows from the saved profile list. The active profile's
+  row reads "<name> (active)" in gold; the selection is the translucent row texture,
+  so a row can be active, selected or both.
 ]]--
 RefreshList = function()
   if not profileListContent then return end
 
   local names = mod.configProfile.ListProfiles()
+  local activeName = mod.configProfile.GetActiveProfileName()
 
   -- drop a selection that no longer exists
   if me.selectedProfile and not mod.configProfile.ProfileExists(me.selectedProfile) then
@@ -399,7 +479,14 @@ RefreshList = function()
     end
 
     row.profileName = name
-    row.label:SetText(name)
+
+    if name == activeName then
+      row.label:SetText(string.format(rgcw.L["profile_active_suffix"], name))
+      mod.guiHelper.SetColor(row.label, ACTIVE_ROW_COLOR)
+    else
+      row.label:SetText(name)
+      mod.guiHelper.SetColor(row.label, ROW_COLOR)
+    end
 
     if name == me.selectedProfile then
       row.selectedTexture:Show()
@@ -471,11 +558,12 @@ IsNameTooLong = function(name)
 end
 
 --[[
-  Save the live configuration as a new (or overwritten) named profile.
+  Create a new named profile from the current settings and make it the active one.
+  A name another profile carries is refused, and so is the reserved Default name.
 
   @param {string} name
 ]]--
-HandleSave = function(name)
+HandleCreate = function(name)
   name = Trim(name)
 
   if name == "" then
@@ -485,42 +573,58 @@ HandleSave = function(name)
 
   if IsNameTooLong(name) then return end
 
-  --[[ save-as overwrites an existing profile of the same name - the default profile is frozen ]]--
   if mod.configProfile.IsDefaultProfile(name) then
     PrintDefaultProfileError("profile_error_default_cannot_be_overwritten")
     return
   end
 
-  mod.configProfile.SaveProfile(name, mod.configProfile.BuildSnapshot())
+  if mod.configProfile.ProfileExists(name) then
+    mod.logger.PrintUserError(rgcw.L["profile_error_name_exists"])
+    return
+  end
+
+  mod.configProfile.CreateProfile(name)
   me.selectedProfile = name
   RefreshList()
-  mod.logger.PrintUserMessage(string.format(rgcw.L["profile_save_success"], name))
+  mod.logger.PrintUserMessage(string.format(rgcw.L["profile_create_success"], name))
 end
 
 --[[
-  Apply a stored profile to the live configuration and reload the UI.
+  Switch to a stored profile and reload the UI: the profile that was active keeps the
+  settings as they are now, the loaded one takes over, and every surface rebuilds
+  from it at login. The active profile itself has nothing to load.
 
   @param {string} name
 ]]--
-HandleApply = function(name)
-  local payload = mod.configProfile.GetProfile(name)
-
-  if not payload then
+HandleLoad = function(name)
+  if not mod.configProfile.ProfileExists(name) then
     mod.logger.PrintUserError(rgcw.L["profile_error_no_selection"])
     return
   end
 
-  mod.configProfile.ApplySnapshot(payload)
+  if mod.configProfile.SwitchProfile(name) then
+    ReloadUI()
+  end
+end
+
+--[[
+  Reset the active profile to the factory settings and reload the UI.
+]]--
+HandleReset = function()
+  mod.configProfile.ResetActiveProfile()
   ReloadUI()
 end
 
 --[[
-  Delete a stored profile.
+  Delete a stored profile. Deleting the active profile falls back to Default, which
+  takes over the live configuration - that path reloads the UI like a load does.
 
   @param {string} name
 ]]--
 HandleDelete = function(name)
-  if not mod.configProfile.DeleteProfile(name) then
+  local deleted, fellBack = mod.configProfile.DeleteProfile(name)
+
+  if not deleted then
     PrintDefaultProfileError("profile_error_default_cannot_be_deleted")
     return
   end
@@ -529,12 +633,19 @@ HandleDelete = function(name)
     me.selectedProfile = nil
   end
 
-  RefreshList()
   mod.logger.PrintUserMessage(string.format(rgcw.L["profile_delete_success"], name))
+
+  if fellBack then
+    ReloadUI()
+    return
+  end
+
+  RefreshList()
 end
 
 --[[
-  Rename a stored profile.
+  Rename a stored profile. Neither the Default profile itself nor its name as the
+  target are allowed, and a name another profile carries is refused.
 
   @param {string} oldName
   @param {string} newName
@@ -554,7 +665,6 @@ HandleRename = function(oldName, newName)
     return
   end
 
-  --[[ renaming another profile onto the default name would replace the frozen baseline ]]--
   if mod.configProfile.IsDefaultProfile(newName) then
     PrintDefaultProfileError("profile_error_default_cannot_be_overwritten")
     return
@@ -572,24 +682,20 @@ HandleRename = function(oldName, newName)
 end
 
 --[[
-  Export the selected profile into the string box and select it for copying.
+  Export the selected profile into the string box and select it for copying. The
+  live configuration is mirrored into the active profile first, so the active row
+  always exports the settings as they are now.
 ]]--
 HandleExport = function()
   local name = me.selectedProfile
 
-  if not name then
+  if not name or not mod.configProfile.ProfileExists(name) then
     mod.logger.PrintUserError(rgcw.L["profile_error_no_selection"])
     return
   end
 
-  local payload = mod.configProfile.GetProfile(name)
-
-  if not payload then
-    mod.logger.PrintUserError(rgcw.L["profile_error_no_selection"])
-    return
-  end
-
-  profileEditBox:SetText(mod.configProfile.ExportString(payload, name))
+  mod.configProfile.SaveActiveProfile()
+  profileEditBox:SetText(mod.configProfile.ExportString(mod.configProfile.GetProfile(name), name))
   profileEditBox:HighlightText()
   profileEditBox:SetFocus()
 end
@@ -610,7 +716,8 @@ HandleImport = function()
 end
 
 --[[
-  Store an imported, already-validated envelope under a user-given name.
+  Store an imported, already-validated envelope under a user-given name. The
+  imported profile is stored without becoming the active one.
 
   @param {string} name
   @param {table} envelope
@@ -646,9 +753,10 @@ end
 
 --[[
   Register the StaticPopup dialogs used for naming and destructive confirmation.
+  Name prompts answer Accept / Cancel, every confirm answers Yes / No.
 ]]--
 SetupStaticPopups = function()
-  StaticPopupDialogs["COOLDOWNWATCH_PROFILE_SAVE"] = {
+  StaticPopupDialogs["COOLDOWNWATCH_PROFILE_CREATE"] = {
     text = rgcw.L["profile_name_prompt"],
     button1 = ACCEPT,
     button2 = CANCEL,
@@ -661,10 +769,10 @@ SetupStaticPopups = function()
       self.EditBox:SetFocus()
     end,
     OnAccept = function(self)
-      HandleSave(self.EditBox:GetText())
+      HandleCreate(self.EditBox:GetText())
     end,
     EditBoxOnEnterPressed = function(self)
-      HandleSave(self:GetText())
+      HandleCreate(self:GetText())
       self:GetParent():Hide()
     end,
     timeout = 0,
@@ -723,29 +831,33 @@ SetupStaticPopups = function()
     preferredIndex = 3
   }
 
-  StaticPopupDialogs["COOLDOWNWATCH_PROFILE_APPLY"] = {
-    text = rgcw.L["profile_apply_confirm"],
-    button1 = YES,
-    button2 = NO,
-    OnAccept = function(self)
-      HandleApply(self.data)
-    end,
-    timeout = 0,
-    whileDead = true,
-    hideOnEscape = true,
-    preferredIndex = 3
-  }
+  --[[
+    A Yes / No question, the family rule for every confirm popup
 
-  StaticPopupDialogs["COOLDOWNWATCH_PROFILE_DELETE"] = {
-    text = rgcw.L["profile_delete_confirm"],
-    button1 = YES,
-    button2 = NO,
-    OnAccept = function(self)
-      HandleDelete(self.data)
-    end,
-    timeout = 0,
-    whileDead = true,
-    hideOnEscape = true,
-    preferredIndex = 3
-  }
+    @param {string} textKey
+    @param {function} commit
+      invoked with the popup's data
+    @return {table}
+  ]]--
+  local function ConfirmPopup(textKey, commit)
+    return {
+      text = rgcw.L[textKey],
+      button1 = YES,
+      button2 = NO,
+      OnAccept = function(self)
+        commit(self.data)
+      end,
+      timeout = 0,
+      whileDead = true,
+      hideOnEscape = true,
+      preferredIndex = 3
+    }
+  end
+
+  StaticPopupDialogs["COOLDOWNWATCH_PROFILE_LOAD"] = ConfirmPopup("profile_load_confirm", HandleLoad)
+  StaticPopupDialogs["COOLDOWNWATCH_PROFILE_DELETE"] = ConfirmPopup("profile_delete_confirm", HandleDelete)
+  -- deleting the active profile says what follows: Default takes over and the UI reloads
+  StaticPopupDialogs["COOLDOWNWATCH_PROFILE_DELETE_ACTIVE"] =
+    ConfirmPopup("profile_delete_active_confirm", HandleDelete)
+  StaticPopupDialogs["COOLDOWNWATCH_PROFILE_RESET"] = ConfirmPopup("profile_reset_confirm", HandleReset)
 end

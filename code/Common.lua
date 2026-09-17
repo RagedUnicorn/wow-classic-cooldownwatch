@@ -208,3 +208,34 @@ function me.Clone(obj)
 
   return res
 end
+
+--[[
+  Strict structural equality: tables are compared recursively over both key sets,
+  every other value with a plain ==. No epsilon on numbers - the two sides of the
+  one comparison this serves (a stored profile against the live configuration in
+  ConfigProfile.EnsureActiveProfile) went through the same SavedVariables writer.
+
+  @param {any} a
+  @param {any} b
+
+  @return {boolean}
+]]--
+function me.DeepEquals(a, b)
+  if type(a) ~= "table" or type(b) ~= "table" then
+    return a == b
+  end
+
+  for key, inner in pairs(a) do
+    if not me.DeepEquals(inner, b[key]) then
+      return false
+    end
+  end
+
+  for key in pairs(b) do
+    if a[key] == nil then
+      return false
+    end
+  end
+
+  return true
+end

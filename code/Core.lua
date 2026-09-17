@@ -32,6 +32,7 @@ me.tag = "Core"
 
 -- Forward declarations
 local OnPlayerLogin
+local OnPlayerLogout
 local OnCombatLog
 local OnTargetChanged
 local OnRosterChanged
@@ -46,6 +47,17 @@ local InitializeTestFramework
 OnPlayerLogin = function()
   Initialize()
   me.event.SetReady()
+end
+
+--[[
+  Mirror the live configuration into the active settings profile before the
+  SavedVariables are written. PLAYER_LOGOUT fires on logout, /reload and a
+  disconnect - not on a crash, where the SavedVariables are not written either
+  (the login adoption mirrors again). Gated so a logout before initialization
+  completes skips the write.
+]]--
+OnPlayerLogout = function()
+  me.configProfile.SaveActiveProfile()
 end
 
 --[[
@@ -100,6 +112,8 @@ end
 function me.OnLoad(self)
   -- Register to player login event also fires on /reload
   me.event.Register("PLAYER_LOGIN", OnPlayerLogin)
+  -- Fires before the SavedVariables are written on logout, /reload and disconnect
+  me.event.Register("PLAYER_LOGOUT", OnPlayerLogout, { gated = true })
   --[[
     Register to combat event unfiltered. Gated so combat log events are ignored
     until initialization completes.
@@ -149,8 +163,10 @@ Initialize = function()
   me.friendlyProximityCooldownBar.BuildUi()
   -- load addon variables
   me.configuration.SetupConfiguration()
-  -- guarantee the undeletable default profile exists (needs the defaults applied above)
+  -- seed the undeletable Default profile when the store has none (needs the defaults
+  -- applied above), then adopt the active profile and mirror the live configuration into it
   me.configProfile.EnsureDefaultProfile()
+  me.configProfile.EnsureActiveProfile()
   -- update initial view of gearBars after addon initialization
   me.targetCooldownBar.TargetCooldownBarUiUpdate()
   -- apply the proximity windows' saved state

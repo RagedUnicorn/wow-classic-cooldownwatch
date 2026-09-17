@@ -13,7 +13,7 @@
 2. Copy the string out of the string box (Ctrl+A / Ctrl+C)
 3. Delete the profile, paste the string back into the box and click "Import"; enter a name in the
    prompt
-4. Apply the imported profile and verify every setting
+4. Load the imported profile and verify every setting
 5. Log in on a second character, paste the same string and import it there
 6. Import the same string again under a name that already exists
 7. Paste a string with leading/trailing whitespace and newlines and import it

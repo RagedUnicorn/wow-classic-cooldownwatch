@@ -271,9 +271,12 @@ RGCW_CONSTANTS = {
     Profile (import/export and named profiles)
   ]]--
   --[[
-    Name of the profile that is seeded on first login and can never be deleted,
-    renamed or overwritten. It holds a frozen snapshot of the shipped defaults so
-    every character keeps a baseline to fall back to
+    Name of the editable home profile every character starts on. Seeded from the
+    shipped defaults when the store has none and never deleted, renamed or created /
+    imported over - otherwise a profile like any other: the live configuration is
+    mirrored into it while it is the active one, and "Reset to defaults" is how the
+    factory settings come back. A SavedVariables key and the export envelope name,
+    so it is never localized
   ]]--
   DEFAULT_PROFILE_NAME = "Default",
   --[[
@@ -287,10 +290,11 @@ RGCW_CONSTANTS = {
   ELEMENT_PROFILE_LIST_SCROLL_FRAME = "CW_ProfileListScrollFrame",
   ELEMENT_PROFILE_LIST_CONTENT_FRAME = "CW_ProfileListContentFrame",
   ELEMENT_PROFILE_LIST_ROW = "CW_ProfileListRow", -- suffixed with the row index
-  ELEMENT_PROFILE_SAVE_BUTTON = "CW_ProfileSaveButton",
-  ELEMENT_PROFILE_APPLY_BUTTON = "CW_ProfileApplyButton",
+  ELEMENT_PROFILE_CREATE_BUTTON = "CW_ProfileCreateButton",
+  ELEMENT_PROFILE_LOAD_BUTTON = "CW_ProfileLoadButton",
   ELEMENT_PROFILE_RENAME_BUTTON = "CW_ProfileRenameButton",
   ELEMENT_PROFILE_DELETE_BUTTON = "CW_ProfileDeleteButton",
+  ELEMENT_PROFILE_RESET_BUTTON = "CW_ProfileResetButton",
   ELEMENT_PROFILE_EXPORT_BUTTON = "CW_ProfileExportButton",
   ELEMENT_PROFILE_IMPORT_BUTTON = "CW_ProfileImportButton",
   ELEMENT_PROFILE_STRING_SCROLL_FRAME = "CW_ProfileStringScrollFrame",

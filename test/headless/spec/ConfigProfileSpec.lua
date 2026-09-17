@@ -54,7 +54,8 @@ describe("ConfigProfile", function()
     "friendlyProximityCooldowns",
     "frames",
     "addonVersion",
-    "profiles"
+    "profiles",
+    "activeProfile"
   }
 
   setup(function()
@@ -92,6 +93,7 @@ describe("ConfigProfile", function()
     CooldownWatchConfiguration.frames = { CW_TargetCooldownWatchBar = { posX = 10, posY = -20, point = "CENTER" } }
     CooldownWatchConfiguration.addonVersion = "vLive"
     CooldownWatchConfiguration.profiles = {}
+    CooldownWatchConfiguration.activeProfile = nil
   end)
 
   after_each(function()
@@ -112,6 +114,17 @@ describe("ConfigProfile", function()
     -- bookkeeping and the store itself must never leak into a profile
     assert.is_nil(snapshot.addonVersion)
     assert.is_nil(snapshot.profiles)
+  end)
+
+  it("never carries the active profile name inside a profile", function()
+    CooldownWatchConfiguration.activeProfile = "Raid"
+
+    assert.is_nil(configProfile.BuildSnapshot().activeProfile)
+    assert.is_nil(configProfile.BuildDefaultSnapshot().activeProfile)
+
+    for _, field in ipairs(configProfile.PROFILE_FIELDS) do
+      assert.are_not.equal("activeProfile", field)
+    end
   end)
 
   it("BuildSnapshot deep-copies so the snapshot never aliases the live config", function()
@@ -406,24 +419,48 @@ describe("ConfigProfile", function()
       )
     end)
 
-    it("re-seeds a stale default so newer profile fields are covered again", function()
-      -- a default frozen at an older shape (seeded before newer PROFILE_FIELDS
-      -- members existed) breaks "reset to factory settings": ApplySnapshot
-      -- skips fields the payload lacks, so the newer fields kept the player's
-      -- values. EnsureDefaultProfile therefore overwrites on every call.
+    it("leaves an existing Default alone and seeds it only when absent", function()
+      -- Default is the editable home profile: its stored copy holds the player's own
+      -- settings, so a login must never overwrite it with the factory defaults
       CooldownWatchConfiguration.profiles = {
         [defaultName] = {
-          globalAssumeWorstCase = false,
-          cooldownConfiguration = {}
+          globalAssumeWorstCase = true,
+          cooldownConfiguration = { priest = { [10890] = false } }
         }
       }
 
       configProfile.EnsureDefaultProfile()
 
-      local payload = configProfile.GetProfile(defaultName)
+      assert.same(
+        { globalAssumeWorstCase = true, cooldownConfiguration = { priest = { [10890] = false } } },
+        configProfile.GetProfile(defaultName)
+      )
 
-      assert.same(configProfile.BuildDefaultSnapshot(), payload)
-      assert.same(rgcw.profile.GetDefaultProfile(), payload.friendlyCooldownConfiguration)
+      CooldownWatchConfiguration.profiles = {}
+      configProfile.EnsureDefaultProfile()
+
+      assert.same(configProfile.BuildDefaultSnapshot(), configProfile.GetProfile(defaultName))
+    end)
+
+    it("is an editable home profile: loading it resets nothing, ResetActiveProfile does", function()
+      configProfile.EnsureDefaultProfile()
+      configProfile.EnsureActiveProfile()
+      CooldownWatchConfiguration.globalAssumeWorstCase = true
+      CooldownWatchConfiguration.targetCooldownBarScale = 0.6
+      CooldownWatchConfiguration.frames = { CW_TargetCooldownWatchBar = { posX = 5, posY = 5, point = "CENTER" } }
+
+      -- the edits belong to the active Default, so there is nothing to load
+      assert.is_false(configProfile.SwitchProfile(defaultName))
+      assert.is_true(CooldownWatchConfiguration.globalAssumeWorstCase)
+      assert.equal(0.6, CooldownWatchConfiguration.targetCooldownBarScale)
+
+      configProfile.ResetActiveProfile()
+
+      assert.is_false(CooldownWatchConfiguration.globalAssumeWorstCase)
+      assert.equal(1.0, CooldownWatchConfiguration.targetCooldownBarScale)
+      assert.same({}, CooldownWatchConfiguration.frames)
+      assert.same(configProfile.BuildDefaultSnapshot(), configProfile.BuildSnapshot())
+      assert.same(configProfile.BuildDefaultSnapshot(), configProfile.GetProfile(defaultName))
     end)
 
     it("refuses to delete the default profile", function()
@@ -471,6 +508,245 @@ describe("ConfigProfile", function()
       assert.is_true(configProfile.IsDefaultProfile(defaultName))
       assert.is_false(configProfile.IsDefaultProfile("default"))
       assert.is_false(configProfile.IsDefaultProfile(nil))
+    end)
+  end)
+
+  describe("active profile", function()
+    local defaultName = RGCW_CONSTANTS.DEFAULT_PROFILE_NAME
+
+    before_each(function()
+      --[[
+        Every apply path ends in SetupConfiguration, whose reconcile backfills the
+        category buckets the fixture's live configuration does not carry. Normalize the
+        live configuration once up front, so a snapshot taken before an apply still
+        deep-equals the live configuration after it.
+      ]]--
+      rgcw.configuration.SetupConfiguration()
+    end)
+
+    it("has none until one is adopted, and the defaults never name one", function()
+      assert.is_nil(configProfile.GetActiveProfileName())
+      assert.is_nil(rgcw.configuration.GetDefaults().activeProfile)
+
+      -- the reconcile must not backfill it either, or the adoption below would be dead code
+      rgcw.configuration.SetupConfiguration()
+      assert.is_nil(configProfile.GetActiveProfileName())
+
+      configProfile.EnsureDefaultProfile()
+      assert.is_nil(configProfile.GetActiveProfileName())
+
+      configProfile.EnsureActiveProfile()
+
+      assert.equal(defaultName, configProfile.GetActiveProfileName())
+      assert.same(configProfile.BuildSnapshot(), configProfile.GetProfile(defaultName))
+    end)
+
+    it("mirrors the live configuration into the active profile, a missing or dangling name repaired to Default",
+      function()
+      configProfile.EnsureDefaultProfile()
+      CooldownWatchConfiguration.globalAssumeWorstCase = true
+
+      -- no active name yet: the mirror lands in Default
+      assert.equal(defaultName, configProfile.SaveActiveProfile())
+      assert.equal(defaultName, configProfile.GetActiveProfileName())
+      assert.is_true(configProfile.GetProfile(defaultName).globalAssumeWorstCase)
+
+      configProfile.SaveProfile("Raid", configProfile.BuildSnapshot())
+      CooldownWatchConfiguration.activeProfile = "Raid"
+      CooldownWatchConfiguration.targetCooldownBarScale = 0.5
+
+      assert.equal("Raid", configProfile.SaveActiveProfile())
+      assert.equal(0.5, configProfile.GetProfile("Raid").targetCooldownBarScale)
+      assert.equal(1.3, configProfile.GetProfile(defaultName).targetCooldownBarScale)
+
+      -- the mirrored copy is its own table
+      CooldownWatchConfiguration.cooldownOverrides.priest[10890].value = 7
+      assert.equal(20, configProfile.GetProfile("Raid").cooldownOverrides.priest[10890].value)
+
+      -- a name whose profile went is repaired to Default
+      CooldownWatchConfiguration.activeProfile = "Gone"
+      assert.equal(defaultName, configProfile.SaveActiveProfile())
+      assert.equal(defaultName, configProfile.GetActiveProfileName())
+      assert.equal(0.5, configProfile.GetProfile(defaultName).targetCooldownBarScale)
+    end)
+
+    it("adopts the profile the player applied and left untouched on a store without an active name", function()
+      -- the upgrade from the snapshot model: the player applied Raid before the update and
+      -- changed nothing since, so the live configuration still equals its stored copy
+      configProfile.EnsureDefaultProfile()
+      configProfile.SaveProfile("Raid", configProfile.BuildSnapshot())
+      configProfile.SaveProfile("PvP", configProfile.BuildSnapshot())
+      -- PvP drifted from the live configuration by one field
+      configProfile.GetProfile("PvP").globalAssumeWorstCase = true
+
+      configProfile.EnsureActiveProfile()
+
+      assert.equal("Raid", configProfile.GetActiveProfileName())
+      assert.same(configProfile.BuildSnapshot(), configProfile.GetProfile("Raid"))
+      -- Default kept its factory copy: the live settings went to Raid, not to Default
+      assert.equal(1.0, configProfile.GetProfile(defaultName).targetCooldownBarScale)
+      assert.is_false(configProfile.GetProfile(defaultName).trackFriendlyCooldowns)
+    end)
+
+    it("falls back to Default when no stored profile equals the live configuration, on a dangling name too", function()
+      configProfile.EnsureDefaultProfile()
+      configProfile.SaveProfile("Raid", configProfile.BuildSnapshot())
+      -- edited after the apply: the drift makes Raid no match
+      CooldownWatchConfiguration.globalAssumeWorstCase = true
+
+      configProfile.EnsureActiveProfile()
+
+      assert.equal(defaultName, configProfile.GetActiveProfileName())
+      assert.is_true(configProfile.GetProfile(defaultName).globalAssumeWorstCase)
+      assert.is_false(configProfile.GetProfile("Raid").globalAssumeWorstCase)
+
+      -- a name whose profile went: the same rule, and here the live configuration equals Raid again
+      CooldownWatchConfiguration.activeProfile = "Gone"
+      CooldownWatchConfiguration.globalAssumeWorstCase = false
+
+      configProfile.EnsureActiveProfile()
+
+      assert.equal("Raid", configProfile.GetActiveProfileName())
+    end)
+
+    it("keeps an active profile that exists and mirrors the live configuration into it at every login", function()
+      configProfile.EnsureDefaultProfile()
+      configProfile.SaveProfile("Raid", configProfile.BuildSnapshot())
+      CooldownWatchConfiguration.activeProfile = "Raid"
+      -- an edit no logout mirrored (a crash)
+      CooldownWatchConfiguration.showFriendlyTargetCooldowns = false
+
+      configProfile.EnsureActiveProfile()
+
+      assert.equal("Raid", configProfile.GetActiveProfileName())
+      assert.is_false(configProfile.GetProfile("Raid").showFriendlyTargetCooldowns)
+      assert.is_false(configProfile.GetProfile(defaultName).showFriendlyTargetCooldowns)
+      -- Default's factory copy was not touched by a mirror aimed at Raid
+      assert.equal(1.0, configProfile.GetProfile(defaultName).targetCooldownBarScale)
+    end)
+
+    it("switches by mirroring the active profile first, then applying and activating the target", function()
+      configProfile.EnsureDefaultProfile()
+      configProfile.EnsureActiveProfile()
+      configProfile.SaveProfile("Raid", configProfile.BuildSnapshot())
+      configProfile.GetProfile("Raid").globalAssumeWorstCase = true
+      configProfile.GetProfile("Raid").cooldownOverrides.priest[10890].value = 40
+      -- an edit that belongs to the active Default
+      CooldownWatchConfiguration.targetCooldownBarScale = 0.5
+
+      assert.is_true(configProfile.SwitchProfile("Raid"))
+
+      assert.equal("Raid", configProfile.GetActiveProfileName())
+      assert.is_true(CooldownWatchConfiguration.globalAssumeWorstCase)
+      assert.equal(40, CooldownWatchConfiguration.cooldownOverrides.priest[10890].value)
+      assert.equal(1.3, CooldownWatchConfiguration.targetCooldownBarScale)
+      assert.equal(0.5, configProfile.GetProfile(defaultName).targetCooldownBarScale)
+
+      -- the active profile and an unknown name are no switch, and nothing is mirrored either
+      CooldownWatchConfiguration.trackFriendlyCooldowns = false
+      assert.is_false(configProfile.SwitchProfile("Raid"))
+      assert.is_false(configProfile.SwitchProfile("Gone"))
+      assert.equal("Raid", configProfile.GetActiveProfileName())
+      assert.is_false(CooldownWatchConfiguration.trackFriendlyCooldowns)
+      assert.is_true(configProfile.GetProfile("Raid").trackFriendlyCooldowns)
+    end)
+
+    it("creates a profile as a copy of the current settings and activates it, the live configuration untouched",
+      function()
+      configProfile.EnsureDefaultProfile()
+      configProfile.EnsureActiveProfile()
+      CooldownWatchConfiguration.globalAssumeWorstCase = true
+
+      assert.is_true(configProfile.CreateProfile("Raid"))
+
+      assert.equal("Raid", configProfile.GetActiveProfileName())
+      assert.same(configProfile.BuildSnapshot(), configProfile.GetProfile("Raid"))
+      assert.is_true(configProfile.GetProfile("Raid").globalAssumeWorstCase)
+      -- Default was mirrored before the copy, so both hold the same settings in separate tables
+      assert.same(configProfile.GetProfile("Raid"), configProfile.GetProfile(defaultName))
+      configProfile.GetProfile("Raid").cooldownOverrides.priest[10890].value = 1
+      assert.equal(20, configProfile.GetProfile(defaultName).cooldownOverrides.priest[10890].value)
+      assert.equal(20, CooldownWatchConfiguration.cooldownOverrides.priest[10890].value)
+
+      assert.is_false(configProfile.CreateProfile("Raid"))
+      assert.is_false(configProfile.CreateProfile(defaultName))
+      assert.is_false(configProfile.CreateProfile(""))
+      assert.is_false(configProfile.CreateProfile(nil))
+      assert.same({ defaultName, "Raid" }, configProfile.ListProfiles())
+      assert.equal("Raid", configProfile.GetActiveProfileName())
+    end)
+
+    it("deleting the active profile falls back to Default and says so, deleting another does not", function()
+      configProfile.EnsureDefaultProfile()
+      configProfile.EnsureActiveProfile()
+      CooldownWatchConfiguration.globalAssumeWorstCase = true
+      configProfile.CreateProfile("Raid")
+      configProfile.CreateProfile("PvP")
+      -- an edit of the active PvP
+      CooldownWatchConfiguration.targetCooldownBarScale = 0.5
+
+      local deleted, fellBack = configProfile.DeleteProfile("Raid")
+
+      assert.is_true(deleted)
+      assert.is_false(fellBack)
+      assert.equal("PvP", configProfile.GetActiveProfileName())
+      assert.equal(0.5, CooldownWatchConfiguration.targetCooldownBarScale)
+
+      deleted, fellBack = configProfile.DeleteProfile("PvP")
+
+      assert.is_true(deleted)
+      assert.is_true(fellBack)
+      assert.equal(defaultName, configProfile.GetActiveProfileName())
+      assert.is_nil(configProfile.GetProfile("PvP"))
+      -- Default's stored copy took over the live configuration, the edit went with PvP
+      assert.is_true(CooldownWatchConfiguration.globalAssumeWorstCase)
+      assert.equal(1.3, CooldownWatchConfiguration.targetCooldownBarScale)
+      assert.same(configProfile.GetProfile(defaultName), configProfile.BuildSnapshot())
+      assert.same({ defaultName }, configProfile.ListProfiles())
+
+      assert.is_false(configProfile.DeleteProfile(defaultName))
+      assert.equal(defaultName, configProfile.GetActiveProfileName())
+    end)
+
+    it("renaming the active profile moves the active name along", function()
+      configProfile.EnsureDefaultProfile()
+      configProfile.EnsureActiveProfile()
+      configProfile.CreateProfile("Raid")
+      configProfile.SaveProfile("PvP", configProfile.BuildSnapshot())
+
+      assert.is_true(configProfile.RenameProfile("PvP", "Arena"))
+      assert.equal("Raid", configProfile.GetActiveProfileName())
+
+      assert.is_true(configProfile.RenameProfile("Raid", "Raid Night"))
+      assert.equal("Raid Night", configProfile.GetActiveProfileName())
+      assert.equal("Raid Night", configProfile.SaveActiveProfile())
+      assert.same({ defaultName, "Arena", "Raid Night" }, configProfile.ListProfiles())
+    end)
+
+    it("resets the active profile to the factory state and mirrors it, the other profiles untouched", function()
+      configProfile.EnsureDefaultProfile()
+      configProfile.EnsureActiveProfile()
+      CooldownWatchConfiguration.targetCooldownBarScale = 0.5
+      configProfile.CreateProfile("Raid")
+      CooldownWatchConfiguration.globalAssumeWorstCase = true
+
+      configProfile.ResetActiveProfile()
+
+      assert.equal("Raid", configProfile.GetActiveProfileName())
+      assert.same(configProfile.BuildDefaultSnapshot(), configProfile.BuildSnapshot())
+      assert.same(configProfile.BuildDefaultSnapshot(), configProfile.GetProfile("Raid"))
+      assert.is_false(CooldownWatchConfiguration.globalAssumeWorstCase)
+      assert.equal(1.0, CooldownWatchConfiguration.targetCooldownBarScale)
+      assert.equal(0.5, configProfile.GetProfile(defaultName).targetCooldownBarScale)
+    end)
+
+    it("lists Default first and the rest sorted", function()
+      configProfile.EnsureDefaultProfile()
+      configProfile.SaveProfile("Zulu", configProfile.BuildSnapshot())
+      configProfile.SaveProfile("Alpha", configProfile.BuildSnapshot())
+      configProfile.SaveProfile("alts", configProfile.BuildSnapshot())
+
+      assert.same({ defaultName, "Alpha", "Zulu", "alts" }, configProfile.ListProfiles())
     end)
   end)
 

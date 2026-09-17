@@ -402,6 +402,107 @@ The configuration panels follow the shared design of Pulse and GearMenu (derived
   recycling. The export/import box keeps `InputScrollFrameTemplate`'s own bar (family precedent; it only appears on
   overflow).
 
+## Settings profiles
+
+Two things in this repo are called "profile", and they are unrelated. `code/profile/` with `rgcw.profile` is the
+curated set of cooldowns that track out of the box (the never-configured default the enabled-state gate falls back
+to). `code/ConfigProfile.lua` (`rgcw.configProfile`; the page is `gui/ProfileMenu.lua`, `rgcw.profileMenu`) is the
+settings profiles feature every sibling addon carries, cloned from the Quartermaster reference implementation. This
+section is about the latter - keep the shape below when touching it, so a reader can move between the repos.
+
+**Two data homes.** The live configuration is `CooldownWatchConfiguration`: what every accessor in
+`code/Configuration.lua` writes and every reader reads. The profile store is
+`CooldownWatchConfiguration.profiles = { [name] = snapshot }`, one stored copy per profile. A profile captures the
+`PROFILE_FIELDS` fields - the bar scale, the global worst-case default, the two friendly flags, the per-side tracking
+and override stores, both proximity window blocks and `frames` (every surface's position). Bookkeeping stays out of
+it: `addonVersion`, `lastNotifiedVersion`, the store itself and `activeProfile`, the name of the profile the live
+configuration belongs to. `activeProfile` is written only by `EnsureActiveProfile`, `SwitchProfile`, `CreateProfile`,
+`DeleteProfile` and `RenameProfile` (and repaired by `SaveActiveProfile`), and it is deliberately absent from
+`GetDefaults()` - the reconcile would backfill `"Default"` before the adoption below could run and make it dead code.
+
+**The mirror rule.** Edits always belong to the active profile, but nothing hooks the setters. `SaveActiveProfile()`
+copies the live configuration into `store[activeProfile]` at five moments: before a switch, on `PLAYER_LOGOUT` (a
+gated bus registration in `Core.OnLoad`; the event fires on logout, `/reload` and disconnect before the SavedVariables
+are written, and not on a crash - where the SavedVariables are not written either), on export, after a reset, and at
+the end of `EnsureActiveProfile()` at every login - the self-heal for a logout the mirror missed. Between those
+moments the live SavedVariable is the truth. A nil or dangling active name is repaired to Default before the mirror
+lands.
+
+**Adoption at login.** `Core.Initialize` runs `EnsureDefaultProfile()`, which seeds Default only when the store has
+none, and then `EnsureActiveProfile()`: a store that names a stored profile keeps it; the first login after the
+upgrade from the snapshot model (no `activeProfile` yet) or a name whose profile went activates the first non-Default
+profile whose stored copy deep-equals the live configuration (`Common.DeepEquals` - the player applied it and changed
+nothing since), else Default. Either way the login ends with the active profile equal to the live configuration.
+
+**Default and Reset to defaults.** Default is the editable home profile every character starts on: never deleted,
+renamed, imported over or created over (`profile_error_default_cannot_be_overwritten` reads "reserved name"; the name
+is a SavedVariables key and the export envelope name, never localized), otherwise a profile like any other. The
+factory settings are not a profile any more - `ResetActiveProfile()` applies `BuildDefaultSnapshot()` (`GetDefaults()`
+cut to the profile fields: the curated default-enabled sets, empty overrides, the factory window options, no
+positions) to the live configuration and mirrors the result into the active profile.
+
+**Switch, delete, export.** `SwitchProfile(name)` mirrors, applies `store[name]` and makes it active; `false` for the
+active or an unknown name. `DeleteProfile(name)` of the active profile applies Default and returns a second value
+`fellBack`, with no mirror before or after (it would resurrect the deleted profile). Every page path that applies a
+snapshot - Load, Reset to defaults, deleting the active profile - ends in a plain `ReloadUI()`, so the bar, both
+proximity windows and every settings panel rebuild from the applied state at login (the post-reload logout mirror
+re-writes the `SetupConfiguration`-normalised copy - harmless). Export mirrors first and then exports the stored copy
+of the selected row, so the active row exports the live settings; an import is stored inactive. Accepted quirk: a
+stored profile from an older schema lacks the newer fields, `ApplySnapshot` keeps the live value for those and the
+first mirror persists it.
+
+**Adding a field to a profile.** One entry in `GetDefaults()` in `code/Configuration.lua` (plus the
+`CooldownWatchConfiguration` literal at its top, which only applies to a never-saved character - the reconcile covers
+existing characters) and one line in `PROFILE_FIELDS` in `code/ConfigProfile.lua`. Never `activeProfile`. The
+`ConfigProfileSpec` fixture saves and restores every field it touches through its `MANAGED_FIELDS` list, so a field the
+fixture sets goes there too.
+
+**Page to module.** Every confirm answers Yes / No, every name prompt Accept / Cancel (the client `YES` / `NO` /
+`ACCEPT` / `CANCEL` globals); the click guards print the refusal a greyed button already shows.
+
+| Button / popup | Module call | Greyed while | Reloads |
+|---|---|---|---|
+| Create new Profile (`COOLDOWNWATCH_PROFILE_CREATE`, name prompt) | `CreateProfile(name)` - mirror, copy, activate | never | no |
+| Load (`COOLDOWNWATCH_PROFILE_LOAD`) | `SwitchProfile(name)` | nothing selected, the active row | yes |
+| Rename (`COOLDOWNWATCH_PROFILE_RENAME`, name prompt) | `RenameProfile(old, new)` - the active name follows | nothing selected, Default | no |
+| Delete (`COOLDOWNWATCH_PROFILE_DELETE`, `COOLDOWNWATCH_PROFILE_DELETE_ACTIVE` on the active row) | `DeleteProfile(name)` -> `deleted, fellBack` | nothing selected, Default | only when `fellBack` |
+| Reset to defaults (`COOLDOWNWATCH_PROFILE_RESET`) | `ResetActiveProfile()` | never | yes |
+| Export | `SaveActiveProfile()`, then `ExportString(GetProfile(name), name)` | nothing selected | no |
+| Import (`COOLDOWNWATCH_PROFILE_IMPORT`, name prompt prefilled from the string) | `ImportString(text)`, then `SaveProfile(name, payload)` - stored inactive | never | no |
+
+**Profile data flow**
+
+```mermaid
+flowchart LR
+  live[("CooldownWatchConfiguration<br/>the live configuration")]
+  store[("CooldownWatchConfiguration.profiles<br/>the profile store")]
+  defaults["GetDefaults()"]
+  live -- "SaveActiveProfile()<br/>before a switch, on PLAYER_LOGOUT,<br/>on export, after a reset, at login" --> store
+  store -- "ApplySnapshot(store[name])<br/>SwitchProfile, delete-active fallback" --> live
+  defaults -- "ResetActiveProfile()<br/>ApplySnapshot(BuildDefaultSnapshot())" --> live
+```
+
+**Adoption at login**
+
+```mermaid
+flowchart TD
+  start(["EnsureActiveProfile()<br/>right after EnsureDefaultProfile()"]) --> named{"activeProfile names<br/>a stored profile?"}
+  named -- yes --> mirror["SaveActiveProfile()"]
+  named -- no --> walk["walk ListProfiles()"]
+  walk --> match{"first non-Default profile<br/>deep-equal to BuildSnapshot()?"}
+  match -- found --> adopt["activeProfile = that profile"]
+  match -- none --> fallback["activeProfile = Default"]
+  adopt --> mirror
+  fallback --> mirror
+  mirror --> done(["the active profile equals<br/>the live configuration"])
+```
+
+Headless coverage: the `default profile` and `active profile` blocks of `test/headless/spec/ConfigProfileSpec.lua`
+(the fixture runs against the real `SetupConfiguration`, so the `active profile` block normalises the live
+configuration once up front - every apply path reconciles, and a snapshot taken before an apply must still deep-equal
+the live configuration after it) and the `DeepEquals` block of `CommonSpec.lua`. `PLAYER_LOGOUT` itself is not
+headless-testable; the mirror it runs is.
+
 ## Linting
 
 ```

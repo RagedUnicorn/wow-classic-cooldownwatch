@@ -150,15 +150,15 @@ say so explicitly and need a duel partner or a battleground.
 
 ### Profiles
 
-| ID                                                       | Case                                  |
-|----------------------------------------------------------|---------------------------------------|
-| [TC-PR-01](manual/TC-PR-01-save-profile.md)              | Save current configuration as profile |
-| [TC-PR-02](manual/TC-PR-02-apply-profile.md)             | Apply profile restores configuration  |
-| [TC-PR-03](manual/TC-PR-03-rename-and-delete-profile.md) | Rename and delete a profile           |
-| [TC-PR-04](manual/TC-PR-04-export-import-round-trip.md)  | Export / import round-trip            |
-| [TC-PR-05](manual/TC-PR-05-corrupted-import-rejected.md) | Corrupted import string rejected      |
-| [TC-PR-06](manual/TC-PR-06-default-profile.md)           | Default profile seeded and immutable  |
-| [TC-PR-07](manual/TC-PR-07-profile-name-length.md)       | Profile name length limit             |
+| ID                                                       | Case                                             |
+|----------------------------------------------------------|--------------------------------------------------|
+| [TC-PR-01](manual/TC-PR-01-create-profile.md)            | Create a profile from the current settings       |
+| [TC-PR-02](manual/TC-PR-02-switch-profile.md)            | Switch profiles without losing edits             |
+| [TC-PR-03](manual/TC-PR-03-rename-and-delete-profile.md) | Rename and delete a profile, the active one too  |
+| [TC-PR-04](manual/TC-PR-04-export-import-round-trip.md)  | Export / import round-trip                       |
+| [TC-PR-05](manual/TC-PR-05-corrupted-import-rejected.md) | Corrupted import string rejected                 |
+| [TC-PR-06](manual/TC-PR-06-default-profile.md)           | Default profile editable, Reset to defaults      |
+| [TC-PR-07](manual/TC-PR-07-profile-name-length.md)       | Profile name length limit                        |
 
 ### Slash commands
 

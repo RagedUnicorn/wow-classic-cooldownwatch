@@ -172,6 +172,35 @@ describe("Common pure helpers", function()
     end)
   end)
 
+  describe("DeepEquals", function()
+    it("compares scalars with a plain equality", function()
+      assert.is_true(common.DeepEquals(1, 1))
+      assert.is_true(common.DeepEquals("a", "a"))
+      assert.is_true(common.DeepEquals(nil, nil))
+      assert.is_false(common.DeepEquals(1, "1"))
+      assert.is_false(common.DeepEquals(1, 1.5))
+      assert.is_false(common.DeepEquals(true, false))
+    end)
+
+    it("compares tables recursively over both key sets", function()
+      local a = { scale = 1, nested = { priest = { [10890] = true }, list = { 1, 2, 3 } } }
+      local b = { scale = 1, nested = { priest = { [10890] = true }, list = { 1, 2, 3 } } }
+
+      assert.is_true(common.DeepEquals(a, b))
+      assert.is_true(common.DeepEquals({}, {}))
+
+      -- a key missing on either side is a difference, not a match on the common keys
+      assert.is_false(common.DeepEquals({ scale = 1 }, { scale = 1, extra = true }))
+      assert.is_false(common.DeepEquals({ scale = 1, extra = true }, { scale = 1 }))
+      -- a nested leaf that differs
+      local drifted = { scale = 1, nested = { priest = { [10890] = false }, list = { 1, 2, 3 } } }
+      assert.is_false(common.DeepEquals(a, drifted))
+      -- a nested table replaced by a scalar, and an empty table against nil
+      assert.is_false(common.DeepEquals(a, { scale = 1, nested = "x" }))
+      assert.is_false(common.DeepEquals({}, nil))
+    end)
+  end)
+
   describe("FormatCooldownDuration", function()
     -- { input, expected, note }
     local cases = {

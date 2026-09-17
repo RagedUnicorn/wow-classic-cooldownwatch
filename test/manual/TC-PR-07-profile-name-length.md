@@ -13,8 +13,8 @@
 
 ## Steps
 
-1. `/rgcw opt` → Profiles → "Save current as...", try to type a 40-character name
-2. Save a name of exactly 30 characters
+1. `/rgcw opt` → Profiles → "Create new Profile", try to type a 40-character name
+2. Create a profile with a name of exactly 30 characters
 3. Repeat both in the "Rename" popup and in the import-name popup
 4. Type a 30-character name using multi-byte characters (e.g. German umlauts, Cyrillic)
 5. If available: import a string whose envelope name exceeds 30 characters
@@ -22,7 +22,7 @@
 ## Expected
 
 - The popups stop accepting input at 30 characters - the typed name cannot exceed the limit
-- A 30-character name saves normally
+- A 30-character name is created normally
 - A 30-character multi-byte name is accepted in full (it is not cut off at ~15 characters, which
   would be the byte-counting bug)
 - An over-long name arriving through import is refused with the "cannot be longer than 30
