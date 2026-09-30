@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: read globals UnitIsEnemy UnitIsFriend UnitGUID UnitName UnitPlayerControlled UnitOwnerGUID
+-- luacheck: read globals UnitIsEnemy UnitIsFriend UnitGUID UnitPlayerControlled UnitOwnerGUID
 -- luacheck: read globals GetPlayerInfoByGUID
 
 local mod = rgcw
@@ -34,7 +34,6 @@ mod.target = me
 me.tag = "Target"
 
 local currentTargetGuid = ""
-local currentTargetName = ""
 
 --[[
   Resolve a targeted player pet to its owning player. Cooldowns are keyed by
@@ -46,35 +45,30 @@ local currentTargetName = ""
   showFriendlyTargetCooldowns gate in UpdateCurrentTarget.
 
   @param {string} targetId
-  @param {string} targetName
 
-  @return ({string} {string})
-    ownerGuid/ownerName when the target is a player pet with a resolvable
-    owner; the passed target identity otherwise.
+  @return {string}
+    the owner's guid when the target is a player pet with a resolvable owner;
+    the passed targetId otherwise.
 ]]--
-local function ResolvePetTarget(targetId, targetName)
-  if targetId == nil then return targetId, targetName end
-  if string.find(targetId, "^Pet%-") == nil then return targetId, targetName end
-  if not UnitPlayerControlled(RGCW_CONSTANTS.UNIT_ID_TARGET) then return targetId, targetName end
-  if UnitOwnerGUID == nil then return targetId, targetName end
+local function ResolvePetTarget(targetId)
+  if targetId == nil then return targetId end
+  if string.find(targetId, "^Pet%-") == nil then return targetId end
+  if not UnitPlayerControlled(RGCW_CONSTANTS.UNIT_ID_TARGET) then return targetId end
+  if UnitOwnerGUID == nil then return targetId end
 
   local ownerGuid = UnitOwnerGUID(RGCW_CONSTANTS.UNIT_ID_TARGET)
 
-  if ownerGuid == nil then return targetId, targetName end
+  if ownerGuid == nil then return targetId end
 
-  -- may return nothing for players the client has not met yet
+  -- may return nothing for players the client has not met yet; the sighting keeps
+  -- a name it already knows
   local ownerName = select(6, GetPlayerInfoByGUID(ownerGuid))
 
   mod.petOwner.RecordSighting(targetId, ownerGuid, ownerName)
 
-  if ownerName == nil then
-    local _, recordedName = mod.petOwner.GetOwner(targetId)
-    ownerName = recordedName
-  end
-
   mod.logger.LogDebug(me.tag, "Redirecting pet target " .. targetId .. " to owner " .. ownerGuid)
 
-  return ownerGuid, ownerName or targetName
+  return ownerGuid
 end
 
 --[[
@@ -84,15 +78,6 @@ end
 ]]--
 function me.GetCurrentTargetGuid()
   return currentTargetGuid
-end
-
---[[
-  Returns the players current target name or an empty string if the player has no target.
-
-  @return {string}
-]]--
-function me.GetCurrentTargetName()
-  return currentTargetName
 end
 
 --[[
@@ -126,7 +111,6 @@ end
 ]]--
 function me.UpdateCurrentTarget()
   local targetId
-  local targetName
 
   --[[
     For debugging purpose allow any target in debug mode
@@ -134,9 +118,7 @@ function me.UpdateCurrentTarget()
   if UnitIsEnemy(RGCW_CONSTANTS.UNIT_ID_PLAYER, RGCW_CONSTANTS.UNIT_ID_TARGET)
     or IsShowableFriendlyTarget()
     or RGCW_ENVIRONMENT.DEBUG then
-    targetId = UnitGUID(RGCW_CONSTANTS.UNIT_ID_TARGET)
-    targetName = UnitName(RGCW_CONSTANTS.UNIT_ID_TARGET)
-    targetId, targetName = ResolvePetTarget(targetId, targetName)
+    targetId = ResolvePetTarget(UnitGUID(RGCW_CONSTANTS.UNIT_ID_TARGET))
   end
 
   if targetId == nil then
@@ -145,13 +127,5 @@ function me.UpdateCurrentTarget()
   else
     currentTargetGuid = targetId
     mod.logger.LogDebug(me.tag, "Update players targetGUID: " .. currentTargetGuid)
-  end
-
-  if targetName == nil then
-    currentTargetName = ""
-    mod.logger.LogDebug(me.tag, "Update players targetName: [Empty-target]")
-  else
-    currentTargetName = targetName
-    mod.logger.LogDebug(me.tag, "Update players targetName: " .. currentTargetName)
   end
 end

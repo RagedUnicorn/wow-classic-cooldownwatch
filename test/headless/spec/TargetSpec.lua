@@ -47,7 +47,6 @@ describe("Target", function()
       isFriend = false,
       playerControlled = false,
       guid = nil,
-      name = nil,
       ownerGuid = nil,
       ownerName = nil
     }
@@ -57,7 +56,6 @@ describe("Target", function()
       UnitIsFriend = function() return unit.isFriend end,
       UnitPlayerControlled = function() return unit.playerControlled end,
       UnitGUID = function() return unit.guid end,
-      UnitName = function() return unit.name end,
       UnitOwnerGUID = function() return unit.ownerGuid end,
       GetPlayerInfoByGUID = function()
         return nil, nil, nil, nil, nil, unit.ownerName
@@ -82,24 +80,20 @@ describe("Target", function()
   it("accepts an enemy target while the friendly display flag is off", function()
     unit.isEnemy = true
     unit.guid = "Player-1234-000000EE"
-    unit.name = "Enemyrogue"
 
     rgcw.target.UpdateCurrentTarget()
 
     assert.equal("Player-1234-000000EE", rgcw.target.GetCurrentTargetGuid())
-    assert.equal("Enemyrogue", rgcw.target.GetCurrentTargetName())
   end)
 
   it("ignores a friendly player while showFriendlyTargetCooldowns is off - the display is opt-in", function()
     unit.isFriend = true
     unit.playerControlled = true
     unit.guid = "Player-1234-000000AA"
-    unit.name = "Friendlymage"
 
     rgcw.target.UpdateCurrentTarget()
 
     assert.equal("", rgcw.target.GetCurrentTargetGuid())
-    assert.equal("", rgcw.target.GetCurrentTargetName())
   end)
 
   it("accepts a friendly player while showFriendlyTargetCooldowns is on", function()
@@ -107,12 +101,10 @@ describe("Target", function()
     unit.isFriend = true
     unit.playerControlled = true
     unit.guid = "Player-1234-000000AA"
-    unit.name = "Friendlymage"
 
     rgcw.target.UpdateCurrentTarget()
 
     assert.equal("Player-1234-000000AA", rgcw.target.GetCurrentTargetGuid())
-    assert.equal("Friendlymage", rgcw.target.GetCurrentTargetName())
   end)
 
   it("rejects a friendly npc even while the flag is on - player-controlled units only", function()
@@ -120,12 +112,10 @@ describe("Target", function()
     unit.isFriend = true
     unit.playerControlled = false
     unit.guid = "Creature-0-1234-5-6789-4949-0000AAAA"
-    unit.name = "Stormwind Guard"
 
     rgcw.target.UpdateCurrentTarget()
 
     assert.equal("", rgcw.target.GetCurrentTargetGuid())
-    assert.equal("", rgcw.target.GetCurrentTargetName())
   end)
 
   it("redirects a friendly player pet to its owner while the flag is on", function()
@@ -133,43 +123,38 @@ describe("Target", function()
     unit.isFriend = true
     unit.playerControlled = true
     unit.guid = "Pet-0-1234-5-6789-165189-0102030405"
-    unit.name = "Ziljin"
     unit.ownerGuid = "Player-1234-000000BB"
     unit.ownerName = "Friendlylock"
 
     rgcw.target.UpdateCurrentTarget()
 
     assert.equal("Player-1234-000000BB", rgcw.target.GetCurrentTargetGuid())
-    assert.equal("Friendlylock", rgcw.target.GetCurrentTargetName())
     -- the redirect records the sighting, so parked pet casts can flush
-    assert.equal("Player-1234-000000BB", (rgcw.petOwner.GetOwner("Pet-0-1234-5-6789-165189-0102030405")))
+    local ownerGuid, ownerName = rgcw.petOwner.GetOwner("Pet-0-1234-5-6789-165189-0102030405")
+    assert.equal("Player-1234-000000BB", ownerGuid)
+    assert.equal("Friendlylock", ownerName)
   end)
 
   it("keeps the debug-mode bypass independent of the flag", function()
     RGCW_ENVIRONMENT.DEBUG = true
     unit.guid = "Player-1234-000000CC"
-    unit.name = "Debugtarget"
 
     rgcw.target.UpdateCurrentTarget()
 
     assert.equal("Player-1234-000000CC", rgcw.target.GetCurrentTargetGuid())
-    assert.equal("Debugtarget", rgcw.target.GetCurrentTargetName())
   end)
 
   it("clears the target when nothing passes the gate anymore", function()
     unit.isEnemy = true
     unit.guid = "Player-1234-000000EE"
-    unit.name = "Enemyrogue"
 
     rgcw.target.UpdateCurrentTarget()
 
     unit.isEnemy = false
     unit.guid = nil
-    unit.name = nil
 
     rgcw.target.UpdateCurrentTarget()
 
     assert.equal("", rgcw.target.GetCurrentTargetGuid())
-    assert.equal("", rgcw.target.GetCurrentTargetName())
   end)
 end)

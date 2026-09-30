@@ -50,20 +50,6 @@ local mainCategoryId
 local categoryIds = {}
 
 --[[
-  Retrieve a reference to the main category of the addon
-
-  @return {table | nil}
-    The main category of the addon or nil if not found
-]]--
-function me.GetMainCategory()
-  if mainCategoryId ~= nil then
-    return Settings.GetCategory(mainCategoryId)
-  end
-
-  return nil
-end
-
---[[
   Retrieve the numeric id of a registered category for use with Settings.OpenToCategory
 
   @param {string} key
