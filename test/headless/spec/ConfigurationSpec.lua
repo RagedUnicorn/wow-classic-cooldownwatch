@@ -150,7 +150,7 @@ describe("Configuration cooldown overrides", function()
   end)
 
   it("UpdateCooldownManualOverride stores a value below the base cooldown unchanged", function()
-    -- base cooldown read from SpellMap rather than restated (see CLAUDE.md)
+    -- base cooldown read from SpellMap, the single source of truth for spell data, rather than restated
     local category, spellId, spell = rgcw.spellMapHelper.GetSpellById(RGCW_CONSTANTS.EXAMPLE_COOLDOWN_SPELL_ID)
 
     local storedValue = configuration.UpdateCooldownManualOverride(spell.cooldown - 1, category, spellId)
@@ -227,7 +227,7 @@ describe("Configuration cooldown overrides", function()
   end)
 
   it("UpdateCooldownWorstCaseValue rejects a value at or above the spell's base cooldown", function()
-    -- base cooldown read from SpellMap rather than restated (see CLAUDE.md)
+    -- base cooldown read from SpellMap, the single source of truth for spell data, rather than restated
     local category, spellId, spell = rgcw.spellMapHelper.GetSpellById(RGCW_CONSTANTS.EXAMPLE_COOLDOWN_SPELL_ID)
 
     assert.is_nil(configuration.UpdateCooldownWorstCaseValue(spell.cooldown, category, spellId))

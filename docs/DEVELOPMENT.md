@@ -132,6 +132,37 @@ carry).
 These run in-game via `TestSpellMap` and headless under busted via `test/headless/spec/SpellMapSpec.lua`. See
 `docs/TEST.md` for how to invoke them.
 
+### Adding new spells or a new category
+
+The catalog is the single source of truth for spell data: tests, combat-log handlers and debug tools derive
+spellIds, names, ranks, tracked events and shared-cooldown members from it through the SpellMap accessors, never
+from a restated list. Verify every spellId, rank and cooldown on Wowhead Classic
+(`https://www.wowhead.com/classic/spell=<id>`) — the combat log carries the *spell* name and id, so an
+item-triggered cooldown uses the item's "Use" effect spell (`name` must match `GetSpellInfo(spellId)`, not the item
+name).
+
+**A new spell in an existing category** is one primary entry in the category's slice under
+`code/spellmap/base/` with `name` / `type` / `cooldown` / `trackedEvents` / `allRanks`, every rank listed in
+`allRanks` as a `{ spellId, type }` entry (the aliases are synthesized). Add its primary id to
+`code/profile/base/<Category>.lua` only if it should track out of the box. A branch-only spell goes into the branch
+overlay instead (see below). The category suites and the validators pick the entry up without edits.
+
+**A new category:**
+
+1. Add the category to the `categories` array in `code/Categories.lua` (`categoryName`, `localizationKey`, options
+   frame `name`) and its `category_<name>` label to every `localization/*.lua` file.
+2. Create `code/spellmap/base/<Category>.lua` registering `mod.spellMapBaseClasses["<category>"] = { ... }` (copy
+   an existing slice's header).
+3. Create `code/profile/base/<Category>.lua` registering `mod.profileBaseClasses["<category>"] = { ... }` — the
+   curated primary ids that track by default, possibly `{}`.
+4. List both new slices in `build-resources/cooldownwatch-development.toc.tpl`,
+   `build-resources/cooldownwatch-release.toc.tpl`, `CooldownWatch.toc` and `test/headless/Bootstrap.lua` (the
+   assembly descriptors already glob `code/spellmap/base/*.lua` and `code/profile/base/*.lua`).
+5. Create `test/category/Test<Category>Spells.lua` and register it in `CooldownWatch.toc` and the development
+   `.toc` template (see "Adding a test suite for a new category" in `docs/TEST.md`).
+6. Run `docker compose run --rm luacheck` and `docker compose run --rm busted` — the class-agnostic validators,
+   `ValidateDefaultProfileCategoriesKnown` and `CategorySuiteCoverageSpec` fail while a piece is missing.
+
 ### Branch-specific spells (Season of Discovery / TBC)
 
 Version-specific spell data never goes into `code/spellmap/base/` — it goes into the branch overlay

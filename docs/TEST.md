@@ -94,7 +94,7 @@ CI runs the same specs on every push and pull request via `.github/workflows/tes
 ## Adding a test suite for a new category
 
 Every category currently in `code/Categories.lua` already has a suite under `test/category/`. These steps apply when a *
-*new** category is added to the SpellMap (see the "Adding new spells or a new category" checklist in `CLAUDE.md`):
+*new** category is added to the SpellMap (see the "Adding new spells or a new category" checklist in `docs/DEVELOPMENT.md`):
 
 1. **Create `test/category/Test<Category>Spells.lua`.** Copy an existing suite — `TestRacialsSpells.lua` for single-rank
    categories, `TestPriestSpells.lua` for multi-rank ones — and change `CATEGORY`. There is no hand-written spell list

@@ -229,7 +229,8 @@ describe("Common pure helpers", function()
         Guards the floating point split against real data: a cooldown that is a
         whole number of minutes must never come out as "5m 0s", and a remainder
         must never surface an artifact like "3m 5.699999s". Values are walked
-        out of SpellMap rather than restated (see CLAUDE.md).
+        out of SpellMap rather than restated - the catalog is the single
+        source of truth for spell data.
       ]]--
       local function AssertClean(name, value)
         if value == nil then return end
