@@ -35,6 +35,7 @@ local OnPlayerLogin
 local OnPlayerLogout
 local OnCombatLog
 local OnTargetChanged
+local OnEnteringWorld
 local OnRosterChanged
 local Initialize
 local ShowWelcomeMessage
@@ -94,14 +95,26 @@ OnTargetChanged = function()
 end
 
 --[[
-  Composite handler for the roster edges: the event bus holds one handler per
-  event, and both consumers want the same two events - the group roster guid
-  sets behind the friendly proximity window's scope filter, and the version
-  broadcast of the update notifier.
+  Composite handler for PLAYER_ENTERING_WORLD: the event bus holds one handler per
+  event, and both the group roster guid sets behind the friendly proximity window's
+  scope filter and the version broadcast of the update notifier want it. The guild
+  is announced to only on login and reload - a loading screen changes no guild.
+
+  @param {boolean} isInitialLogin
+  @param {boolean} isReloadingUi
+]]--
+OnEnteringWorld = function(isInitialLogin, isReloadingUi)
+  me.groupRoster.RefreshRoster()
+  me.comm.BroadcastVersion(isInitialLogin == true or isReloadingUi == true)
+end
+
+--[[
+  Composite handler for GROUP_ROSTER_UPDATE (see OnEnteringWorld). A group change
+  announces to the group only - the guild already got the version at login.
 ]]--
 OnRosterChanged = function()
   me.groupRoster.RefreshRoster()
-  me.comm.BroadcastVersion()
+  me.comm.BroadcastVersion(false)
 end
 
 --[[
@@ -127,11 +140,8 @@ function me.OnLoad(self)
   -- Version broadcast: receive other players' versions on the addon channel
   me.event.Register("CHAT_MSG_ADDON", me.comm.OnChatMsgAddon, { gated = true })
   -- Roster edges: refresh the group roster guid sets and announce our version
-  me.event.Register(
-    { "PLAYER_ENTERING_WORLD", "GROUP_ROSTER_UPDATE" },
-    OnRosterChanged,
-    { gated = true }
-  )
+  me.event.Register("PLAYER_ENTERING_WORLD", OnEnteringWorld, { gated = true })
+  me.event.Register("GROUP_ROSTER_UPDATE", OnRosterChanged, { gated = true })
 
   me.event.Setup(self)
 end
