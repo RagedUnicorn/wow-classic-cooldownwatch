@@ -32,37 +32,13 @@ mod.testCmd = me
 
 me.tag = "TestCmd"
 
--- Forward declarations for local functions
-local HandleTestCommand
-local ShowTestHelp
-local ToggleDebugMode
-
---[[
-  Initialize test command module
-]]--
-function me.Initialize()
-  mod.cmd.RegisterCommand("test", function(args)
-    if #args > 0 then
-      HandleTestCommand(args[1], args)
-    else
-      ShowTestHelp()
-    end
-  end)
-
-  mod.cmd.RegisterCommand("debug", function()
-    ToggleDebugMode()
-  end)
-
-  mod.logger.LogDebug(me.tag, "Test commands registered")
-end
-
 --[[
   Show test command help. Per-suite lines come from the testRunner registry;
   static lines (utility commands, sub-test invocation) are hand-written.
 
   Note: Will not be translated as this is a development-only feature
 ]]--
-ShowTestHelp = function()
+local function ShowTestHelp()
   print("|cFF00FFFFTest Commands:|r")
   print("|cFF00FFFF/rgcw test all|r - Run all test suites")
 
@@ -89,7 +65,7 @@ end
   @param {string} testCommand - The test command to execute
   @param {table} args - All command arguments
 ]]--
-HandleTestCommand = function(testCommand, args)
+local function HandleTestCommand(testCommand, args)
   if testCommand == "all" then
     mod.testRunner.RunAllTests()
     return
@@ -131,7 +107,7 @@ end
   Toggle debug mode. The logger's logLevel is the runtime source of truth;
   RGCW_ENVIRONMENT.LOG_LEVEL is only its load-time initial value.
 ]]--
-ToggleDebugMode = function()
+local function ToggleDebugMode()
   if mod.logger.logLevel == mod.logger.debug then
     -- log before lowering the level so the confirmation still prints
     mod.logger.LogInfo(me.tag, "Debug mode disabled")
@@ -140,4 +116,23 @@ ToggleDebugMode = function()
     mod.logger.logLevel = mod.logger.debug
     mod.logger.LogInfo(me.tag, "Debug mode enabled")
   end
+end
+
+--[[
+  Initialize test command module
+]]--
+function me.Initialize()
+  mod.cmd.RegisterCommand("test", function(args)
+    if #args > 0 then
+      HandleTestCommand(args[1], args)
+    else
+      ShowTestHelp()
+    end
+  end)
+
+  mod.cmd.RegisterCommand("debug", function()
+    ToggleDebugMode()
+  end)
+
+  mod.logger.LogDebug(me.tag, "Test commands registered")
 end
