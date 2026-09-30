@@ -30,16 +30,72 @@ local me = rgcw
 
 me.tag = "Core"
 
--- Forward declarations
-local OnPlayerLogin
-local OnPlayerLogout
-local OnCombatLog
-local OnTargetChanged
-local OnEnteringWorld
-local OnRosterChanged
-local Initialize
-local ShowWelcomeMessage
-local InitializeTestFramework
+--[[
+  Initialize test framework modules if in development mode
+]]--
+local function InitializeTestFramework()
+  if not RGCW_ENVIRONMENT.DEBUG then
+    return
+  end
+
+  if me.testLogWindow then
+    me.testLogWindow.Initialize()
+  end
+
+  if me.testCmd then
+    me.testCmd.Initialize()
+  end
+
+  if me.debugInjectorWindow then
+    me.debugInjectorWindow.Initialize()
+  end
+
+  me.logger.LogDebug(me.tag, "Test framework modules initialized")
+end
+
+--[[
+  Show welcome message to user
+]]--
+local function ShowWelcomeMessage()
+  print(
+    string.format("|cFF00FFB0" .. RGCW_CONSTANTS.ADDON_NAME .. rgcw.L["help"],
+      C_AddOns.GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version"))
+  )
+end
+
+--[[
+  Initialize addon
+]]--
+local function Initialize()
+  me.logger.LogDebug(me.tag, "Initialize addon")
+  -- setup slash commands
+  me.cmd.SetupSlashCmdList()
+  -- setup addon configuration ui
+  me.addonConfiguration.SetupAddonConfiguration()
+  -- build ui for targetcooldownbar
+  me.targetCooldownBar.BuildUi()
+  -- build ui for proximitycooldownbar
+  me.proximityCooldownBar.BuildUi()
+  -- build ui for friendlyproximitycooldownbar
+  me.friendlyProximityCooldownBar.BuildUi()
+  -- load addon variables
+  me.configuration.SetupConfiguration()
+  -- seed the undeletable Default profile when the store has none (needs the defaults
+  -- applied above), then adopt the active profile and mirror the live configuration into it
+  me.configProfile.EnsureDefaultProfile()
+  me.configProfile.EnsureActiveProfile()
+  -- update initial view of gearBars after addon initialization
+  me.targetCooldownBar.TargetCooldownBarUiUpdate()
+  -- apply the proximity windows' saved state
+  me.proximityCooldownBar.ProximityCooldownBarUiUpdate()
+  me.friendlyProximityCooldownBar.FriendlyProximityCooldownBarUiUpdate()
+  -- register addon message prefix for the version broadcast
+  me.comm.Initialize()
+  -- initialize test commands and logger (debug mode only)
+
+  InitializeTestFramework()
+  ShowWelcomeMessage()
+end
 
 --[[
   Run the bootstrap sequence on login, then open the readiness gate so gated
@@ -48,7 +104,7 @@ local InitializeTestFramework
   until the next reload - the error is logged and handed to the client's error
   handler (the script error frame, BugSack) and the gate opens regardless.
 ]]--
-OnPlayerLogin = function()
+local function OnPlayerLogin()
   xpcall(Initialize, function(err)
     me.logger.LogError(me.tag, "Initialization failed: " .. tostring(err))
 
@@ -65,7 +121,7 @@ end
   (the login adoption mirrors again). Gated so a logout before initialization
   completes skips the write.
 ]]--
-OnPlayerLogout = function()
+local function OnPlayerLogout()
   me.configProfile.SaveActiveProfile()
 end
 
@@ -73,7 +129,7 @@ end
   Process the current unfiltered combat log event. Gated until initialization
   is complete (see OnLoad).
 ]]--
-OnCombatLog = function()
+local function OnCombatLog()
   me.combatLog.ProcessUnfilteredCombatLogEvent(CombatLogGetCurrentEventInfo())
 end
 
@@ -94,7 +150,7 @@ end
   window's ticker may have stopped while every queued cooldown belonged to the
   target it was excluding.
 ]]--
-OnTargetChanged = function()
+local function OnTargetChanged()
   me.target.UpdateCurrentTarget()
   me.cooldownQueue.PruneExpiredCooldowns(GetTime())
   me.targetCooldownBar.WakeRenderTicker()
@@ -111,7 +167,7 @@ end
   @param {boolean} isInitialLogin
   @param {boolean} isReloadingUi
 ]]--
-OnEnteringWorld = function(isInitialLogin, isReloadingUi)
+local function OnEnteringWorld(isInitialLogin, isReloadingUi)
   me.groupRoster.RefreshRoster()
   me.comm.BroadcastVersion(isInitialLogin == true or isReloadingUi == true)
 end
@@ -120,7 +176,7 @@ end
   Composite handler for GROUP_ROSTER_UPDATE (see OnEnteringWorld). A group change
   announces to the group only - the guild already got the version at login.
 ]]--
-OnRosterChanged = function()
+local function OnRosterChanged()
   me.groupRoster.RefreshRoster()
   me.comm.BroadcastVersion(false)
 end
@@ -162,71 +218,4 @@ end
 ]]--
 function me.OnEvent(event, ...)
   me.event.Dispatch(event, ...)
-end
-
---[[
-  Initialize addon
-]]--
-Initialize = function()
-  me.logger.LogDebug(me.tag, "Initialize addon")
-  -- setup slash commands
-  me.cmd.SetupSlashCmdList()
-  -- setup addon configuration ui
-  me.addonConfiguration.SetupAddonConfiguration()
-  -- build ui for targetcooldownbar
-  me.targetCooldownBar.BuildUi()
-  -- build ui for proximitycooldownbar
-  me.proximityCooldownBar.BuildUi()
-  -- build ui for friendlyproximitycooldownbar
-  me.friendlyProximityCooldownBar.BuildUi()
-  -- load addon variables
-  me.configuration.SetupConfiguration()
-  -- seed the undeletable Default profile when the store has none (needs the defaults
-  -- applied above), then adopt the active profile and mirror the live configuration into it
-  me.configProfile.EnsureDefaultProfile()
-  me.configProfile.EnsureActiveProfile()
-  -- update initial view of gearBars after addon initialization
-  me.targetCooldownBar.TargetCooldownBarUiUpdate()
-  -- apply the proximity windows' saved state
-  me.proximityCooldownBar.ProximityCooldownBarUiUpdate()
-  me.friendlyProximityCooldownBar.FriendlyProximityCooldownBarUiUpdate()
-  -- register addon message prefix for the version broadcast
-  me.comm.Initialize()
-  -- initialize test commands and logger (debug mode only)
-
-  InitializeTestFramework()
-  ShowWelcomeMessage()
-end
-
---[[
-  Show welcome message to user
-]]--
-ShowWelcomeMessage = function()
-  print(
-    string.format("|cFF00FFB0" .. RGCW_CONSTANTS.ADDON_NAME .. rgcw.L["help"],
-      C_AddOns.GetAddOnMetadata(RGCW_CONSTANTS.ADDON_NAME, "Version"))
-  )
-end
-
---[[
-  Initialize test framework modules if in development mode
-]]--
-InitializeTestFramework = function()
-  if not RGCW_ENVIRONMENT.DEBUG then
-    return
-  end
-
-  if me.testLogWindow then
-    me.testLogWindow.Initialize()
-  end
-
-  if me.testCmd then
-    me.testCmd.Initialize()
-  end
-
-  if me.debugInjectorWindow then
-    me.debugInjectorWindow.Initialize()
-  end
-
-  me.logger.LogDebug(me.tag, "Test framework modules initialized")
 end
