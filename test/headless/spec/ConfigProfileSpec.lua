@@ -316,6 +316,37 @@ describe("ConfigProfile", function()
     assert.equal("profile_error_invalid", err)
   end)
 
+  it("drops payload keys that are not profile fields on import", function()
+    local crafted = CraftImportString({
+      addon = "CooldownWatch",
+      schemaVersion = 1,
+      payload = {
+        globalAssumeWorstCase = true,
+        frames = { CW_TargetCooldownWatchBar = { posX = 1 } },
+        junk = string.rep("x", 64),
+        profiles = { Other = {} },
+        activeProfile = "Other"
+      }
+    })
+
+    local envelope, err = configProfile.ImportString(crafted)
+
+    assert.is_nil(err)
+    assert.same({
+      globalAssumeWorstCase = true,
+      frames = { CW_TargetCooldownWatchBar = { posX = 1 } }
+    }, envelope.payload)
+  end)
+
+  it("rejects an input longer than the import limit before decoding", function()
+    local oversized = "CooldownWatch1:" .. string.rep("A", RGCW_CONSTANTS.PROFILE_IMPORT_MAX_LENGTH)
+
+    local envelope, err = configProfile.ImportString(oversized)
+
+    assert.is_nil(envelope)
+    assert.equal("profile_error_invalid", err)
+  end)
+
   it("manages the named profile store", function()
     assert.same({}, configProfile.ListProfiles())
     assert.is_false(configProfile.ProfileExists("Raid"))

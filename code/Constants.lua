@@ -285,6 +285,13 @@ RGCW_CONSTANTS = {
     the chat messages that quote it
   ]]--
   PROFILE_NAME_MAX_LENGTH = 30,
+  --[[
+    Upper bound for a pasted profile import string, counted in characters. The largest
+    realistic export - every catalog primary configured on both sides with all three
+    override fields set - is about 35k characters, so this leaves ample headroom for a
+    growing catalog while keeping an arbitrary paste from being decoded
+  ]]--
+  PROFILE_IMPORT_MAX_LENGTH = 131072,
   ELEMENT_PROFILE_SUB_OPTION_FRAME = "CW_ProfileMenuOptionsFrame",
   ELEMENT_PROFILE_TITLE = "CW_ProfileTitle",
   ELEMENT_PROFILE_LIST_SCROLL_FRAME = "CW_ProfileListScrollFrame",
