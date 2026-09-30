@@ -34,13 +34,6 @@ mod.testLogWindow = me
 
 me.tag = "TestLogWindow"
 
--- Forward declarations for local functions
-local CreateTimestamp
-local CreateLevelText
-local CreateTestNameText
-local CreateMessageText
-local AddDataTooltip
-
 -- UI elements
 me.logMessages = {}
 me.maxMessages = 1000
@@ -206,7 +199,7 @@ end
 
   @return {FontString} - Created timestamp
 ]]--
-CreateTimestamp = function(parent)
+local function CreateTimestamp(parent)
   local timestamp = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
   timestamp:SetPoint("LEFT", parent, "LEFT", 0, 0)
   timestamp:SetText(date("%H:%M:%S"))
@@ -226,7 +219,7 @@ end
 
   @return {FontString} - Created level text
 ]]--
-CreateLevelText = function(parent, anchor, level)
+local function CreateLevelText(parent, anchor, level)
   local levelText = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
   levelText:SetPoint("LEFT", anchor, "RIGHT", 5, 0)
   levelText:SetText(string.format("[%s]", level))
@@ -248,7 +241,7 @@ end
 
   @return {FontString} - Created test name text
 ]]--
-CreateTestNameText = function(parent, anchor, testName)
+local function CreateTestNameText(parent, anchor, testName)
   local testNameText = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
   testNameText:SetPoint("LEFT", anchor, "RIGHT", 5, 0)
   testNameText:SetText(testName .. ":")
@@ -269,7 +262,7 @@ end
 
   @return {FontString} - Created message text
 ]]--
-CreateMessageText = function(parent, anchor, message, defaultColor)
+local function CreateMessageText(parent, anchor, message, defaultColor)
   local messageText = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
   messageText:SetPoint("LEFT", anchor, "RIGHT", 5, 0)
   messageText:SetPoint("RIGHT", parent, "RIGHT", -5, 0)
@@ -286,7 +279,7 @@ end
   @param {Frame} frame - Frame to add tooltip to
   @param {table} data - Data to display in tooltip
 ]]--
-AddDataTooltip = function(frame, data)
+local function AddDataTooltip(frame, data)
   frame:EnableMouse(true)
   frame:SetScript("OnEnter", function(self)
     local tooltip = _G["GameTooltip"]
