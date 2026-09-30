@@ -42,8 +42,6 @@ local function IsPrimary(entry)
   return type(entry) == "table" and type(entry.name) == "string"
 end
 
-local GetItemIdFailure
-
 --[[
   Verify every refId entry points at a primary entry in the same category.
 
@@ -590,7 +588,7 @@ end
   @return {string|nil}
     A failure description, or nil if the entry has no such field or a valid one
 ]]--
-GetItemIdFailure = function(category, spellId, entry, fieldName)
+local function GetItemIdFailure(category, spellId, entry, fieldName)
   local itemId = entry[fieldName]
 
   if itemId == nil then return nil end
