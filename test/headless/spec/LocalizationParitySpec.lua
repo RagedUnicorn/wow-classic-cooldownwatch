@@ -25,11 +25,13 @@
 --[[
   Key-set parity across CooldownWatch's localization files (localization/*.lua).
 
-  The recurring bug this pins down: deDE.lua replaces rgcw.L wholesale, so a string added
-  to enUS but not mirrored to deDE resolves to nil on German clients — a SetText(nil) or concat
-  error at runtime. Rather than an English fallback in production, parity is enforced here: every
-  locale must ship the exact same key set. The locale set is glob-discovered (lfs over
-  localization/) rather than hard-coded, so a new locale file is picked up automatically.
+  The recurring bug this pins down: a string added to enUS but not mirrored to deDE. deDE.lua
+  layers its table over the enUS one (an __index fallback), so at runtime such a key shows the
+  English text instead of resolving to nil - but that fallback only hides the gap, so parity is
+  still enforced here: every locale must ship the exact same key set. The key sets are read with
+  pairs, which sees a locale's own keys only, so the fallback cannot mask a missing key. The
+  locale set is glob-discovered (lfs over localization/) rather than hard-coded, so a new locale
+  file is picked up automatically.
 
   On top of key parity, each shared key's string.format placeholder set is compared against enUS
   (the declared source of truth): a translation dropping or adding a %s/%d would crash the
@@ -222,6 +224,29 @@ describe("Localization parity", function()
     for locale, strings in pairs(shippedStrings) do
       if locale ~= "enUS" then
         assert.are.same({}, findPlaceholderMismatches(shippedStrings.enUS, strings, locale))
+      end
+    end
+  end)
+
+  it("falls back to the enUS table for a key a non-English locale does not ship", function()
+    for _, file in ipairs(localeFiles) do
+      if file.locale ~= "enUS" then
+        local restore = wowStubs.install({
+          GetLocale = wowStubs.stubs.GetLocale(file.locale),
+          C_AddOns = wowStubs.stubs.C_AddOns({ Version = "1.2.3" })
+        })
+
+        rgcw.L = { onlyInEnUS = "english text" }
+        dofile(file.path)
+
+        local fallback = rgcw.L.onlyInEnUS
+        local own = rawget(rgcw.L, "onlyInEnUS")
+
+        restore()
+        rgcw.L = originalL
+
+        assert.equal("english text", fallback, file.locale)
+        assert.is_nil(own, file.locale)
       end
     end
   end)

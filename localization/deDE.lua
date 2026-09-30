@@ -3,7 +3,8 @@
 
 if (GetLocale() == "deDE") then
   rgcw = rgcw or {}
-  rgcw.L = {}
+  -- layer over the enUS table (loaded first) so a key missing here falls back to English
+  rgcw.L = setmetatable({}, { __index = rgcw.L or {} })
 
   rgcw.L["addon_name"] = "CooldownWatch"
 
