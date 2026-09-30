@@ -748,6 +748,24 @@ describe("ConfigProfile", function()
       assert.same({ defaultName, "Arena", "Raid Night" }, configProfile.ListProfiles())
     end)
 
+    it("renaming a profile to its own name keeps it and the active name", function()
+      configProfile.EnsureDefaultProfile()
+      configProfile.EnsureActiveProfile()
+      CooldownWatchConfiguration.targetCooldownBarScale = 0.5
+      configProfile.CreateProfile("Raid")
+      configProfile.SaveProfile("PvP", { globalAssumeWorstCase = true })
+      local defaultCopy = configProfile.GetProfile(defaultName)
+
+      assert.is_true(configProfile.RenameProfile("Raid", "Raid"))
+      assert.is_true(configProfile.RenameProfile("PvP", "PvP"))
+
+      assert.same({ defaultName, "PvP", "Raid" }, configProfile.ListProfiles())
+      assert.equal("Raid", configProfile.GetActiveProfileName())
+      assert.equal("Raid", configProfile.SaveActiveProfile())
+      assert.equal(defaultCopy, configProfile.GetProfile(defaultName))
+      assert.is_true(configProfile.GetProfile("PvP").globalAssumeWorstCase)
+    end)
+
     it("resets the active profile to the factory state and mirrors it, the other profiles untouched", function()
       configProfile.EnsureDefaultProfile()
       configProfile.EnsureActiveProfile()

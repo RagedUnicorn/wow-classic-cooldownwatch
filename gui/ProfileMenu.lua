@@ -671,7 +671,10 @@ HandleRename = function(oldName, newName)
     return
   end
 
-  if newName ~= oldName and mod.configProfile.ProfileExists(newName) then
+  -- the popup is prefilled with the current name: accepting it unchanged is a no-op
+  if newName == oldName then return end
+
+  if mod.configProfile.ProfileExists(newName) then
     mod.logger.PrintUserError(rgcw.L["profile_error_name_exists"])
     return
   end
