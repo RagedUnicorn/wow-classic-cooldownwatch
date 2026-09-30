@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: read globals C_AddOns CombatLogGetCurrentEventInfo GetTime
+-- luacheck: read globals C_AddOns CombatLogGetCurrentEventInfo GetTime geterrorhandler
 
 rgcw = rgcw or {}
 local me = rgcw
@@ -43,10 +43,18 @@ local InitializeTestFramework
 
 --[[
   Run the bootstrap sequence on login, then open the readiness gate so gated
-  handlers (e.g. combat log) begin processing.
+  handlers (e.g. combat log) begin processing. PLAYER_LOGIN fires once per
+  session, so a step of Initialize that raises must not keep the gate closed
+  until the next reload - the error is logged and handed to the client's error
+  handler (the script error frame, BugSack) and the gate opens regardless.
 ]]--
 OnPlayerLogin = function()
-  Initialize()
+  xpcall(Initialize, function(err)
+    me.logger.LogError(me.tag, "Initialization failed: " .. tostring(err))
+
+    return geterrorhandler()(err)
+  end)
+
   me.event.SetReady()
 end
 
