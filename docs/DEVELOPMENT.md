@@ -536,6 +536,15 @@ configuration once up front - every apply path reconciles, and a snapshot taken 
 the live configuration after it) and the `DeepEquals` block of `CommonSpec.lua`. `PLAYER_LOGOUT` itself is not
 headless-testable; the mirror it runs is.
 
+## Local functions
+
+A file-private helper is a plain `local function Name()` defined above its first caller, so a module reads
+bottom-up: helpers first, then the public `me.X` functions that use them. Self-recursion needs nothing extra - the
+name is in scope inside its own body (the serializer's `EncodeValue` / `ReadValue`). Forward-declare a local
+(`local Name` and later `Name = function()`) only for mutual recursion; group those declarations in one commented
+block at the top of the file. A local function referenced before its definition reads an undefined global, which
+`luacheck` reports.
+
 ## Linting
 
 ```
