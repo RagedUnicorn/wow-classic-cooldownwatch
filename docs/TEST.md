@@ -50,6 +50,14 @@ Or invoke a single suite directly from chat:
 /run rgcw.testPriestSpells.RunAllTests()
 ```
 
+With the debug log level on, a module's log lines can be muted for the session by its tag (a Lua pattern matched
+against the tag each module logs with) — useful to silence the chatty combat log path while debugging something else:
+
+```
+/run rgcw.filter.RegisterFilter("combatlog", "^CombatLog$")
+/run rgcw.filter.DeregisterFilter("combatlog")
+```
+
 For tests that exercise the cooldown bar UI (currently the `TestCooldownQueue` suite), target yourself first so the bar
 has somewhere to render:
 

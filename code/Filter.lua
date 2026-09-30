@@ -23,6 +23,18 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
+--[[
+  Log-tag filter - a debugging tool, deliberately without a production caller.
+  With the debug log level on, the combat log path is chatty; mute a module's tag
+  from chat while debugging another one:
+
+    /run rgcw.filter.RegisterFilter("combatlog", "^CombatLog$")
+    /run rgcw.filter.DeregisterFilter("combatlog")
+
+  Filters live for the session only (a /reload clears them). The Logger checks
+  every line against the list; with no filter registered that is an empty loop.
+]]--
+
 local mod = rgcw
 local me = {}
 
