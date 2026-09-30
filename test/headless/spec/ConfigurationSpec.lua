@@ -879,6 +879,14 @@ describe("Configuration target cooldown bar scale", function()
     assert.equal(1.0, configuration.GetTargetCooldownBarScale())
   end)
 
+  it("resolves a stored value that is not a positive finite number to the shipped default", function()
+    for _, stored in ipairs({ 0, -1, 0 / 0, math.huge, "1.5", {} }) do
+      CooldownWatchConfiguration.targetCooldownBarScale = stored
+
+      assert.equal(1.0, configuration.GetTargetCooldownBarScale())
+    end
+  end)
+
   it("ships the scale default in GetDefaults so the reconcile backfills it", function()
     assert.equal(1.0, configuration.GetDefaults().targetCooldownBarScale)
   end)

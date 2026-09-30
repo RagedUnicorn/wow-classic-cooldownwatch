@@ -410,11 +410,21 @@ end
 --[[
   @return {number}
     The render scale of the target cooldown bar. A missing field (an older
-    saved shape before the reconcile ran, or headless) resolves to the shipped
-    default.
+    saved shape before the reconcile ran, or headless) or a value that is not a
+    positive finite number (a hand-edited SavedVariables file) resolves to the
+    shipped default, so it never reaches SetScale.
 ]]--
 function me.GetTargetCooldownBarScale()
-  return CooldownWatchConfiguration.targetCooldownBarScale or TARGET_COOLDOWN_BAR_DEFAULT_SCALE
+  local scale = CooldownWatchConfiguration.targetCooldownBarScale
+
+  if type(scale) ~= "number"
+    or scale ~= scale -- NaN is the only value not equal to itself
+    or scale <= 0
+    or scale == math.huge then
+    return TARGET_COOLDOWN_BAR_DEFAULT_SCALE
+  end
+
+  return scale
 end
 
 --[[
@@ -739,6 +749,9 @@ local function IsValidOverrideValue(value)
     -- also excludes math.huge, which fails every finite comparison
     and value <= RGCW_CONSTANTS.COOLDOWN_MAX_SECONDS
 end
+
+-- public for the profile import, which holds imported override values to the same rule
+me.IsValidOverrideValue = IsValidOverrideValue
 
 --[[
   Write one numeric field of a spell's override entry. Shared by the cooldown
@@ -1261,6 +1274,16 @@ local VALID_PROXIMITY_SCOPES = {
 }
 
 --[[
+  @param {any} scope
+
+  @return {boolean}
+    true - The scope is one the friendly proximity window accepts
+]]--
+function me.IsValidProximityScope(scope)
+  return VALID_PROXIMITY_SCOPES[scope] == true
+end
+
+--[[
   Update which friendly casters the friendly proximity window renders. The
   scope exists on the friendly side only, so unlike the shared accessors above
   there is no trailing flag to pass.
@@ -1272,7 +1295,7 @@ local VALID_PROXIMITY_SCOPES = {
     The value that was stored, nil when it was rejected
 ]]--
 function me.UpdateFriendlyProximityCooldownsScope(scope)
-  if VALID_PROXIMITY_SCOPES[scope] ~= true then
+  if not me.IsValidProximityScope(scope) then
     mod.logger.LogWarn(me.tag, "Rejected invalid friendly proximity scope: " .. tostring(scope))
 
     return nil

@@ -453,9 +453,11 @@ first mirror persists it.
 
 **Adding a field to a profile.** One entry in `GetDefaults()` in `code/Configuration.lua` (plus the
 `CooldownWatchConfiguration` literal at its top, which only applies to a never-saved character - the reconcile covers
-existing characters) and one line in `PROFILE_FIELDS` in `code/ConfigProfile.lua`. Never `activeProfile`. The
-`ConfigProfileSpec` fixture saves and restores every field it touches through its `MANAGED_FIELDS` list, so a field the
-fixture sets goes there too.
+existing characters) and one entry in `PROFILE_FIELD_SPEC` in `code/ConfigProfile.lua` - the field name plus the
+validator an imported value must pass (`ImportString` rejects a string whose payload carries a field failing it, so a
+crafted scale or frame position never reaches `SetScale` / `SetPoint`; `PROFILE_FIELDS` is derived from it). Never
+`activeProfile`. The `ConfigProfileSpec` fixture saves and restores every field it touches through its
+`MANAGED_FIELDS` list, so a field the fixture sets goes there too.
 
 **Page to module.** Every confirm answers Yes / No, every name prompt Accept / Cancel (the client `YES` / `NO` /
 `ACCEPT` / `CANCEL` globals); the click guards print the refusal a greyed button already shows.

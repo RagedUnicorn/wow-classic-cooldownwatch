@@ -316,7 +316,7 @@ describe("ConfigProfile", function()
       schemaVersion = 1,
       payload = {
         globalAssumeWorstCase = true,
-        frames = { CW_TargetCooldownWatchBar = { posX = 1 } },
+        frames = { CW_TargetCooldownWatchBar = { point = "CENTER", posX = 1, posY = 2 } },
         junk = string.rep("x", 64),
         profiles = { Other = {} },
         activeProfile = "Other"
@@ -328,8 +328,84 @@ describe("ConfigProfile", function()
     assert.is_nil(err)
     assert.same({
       globalAssumeWorstCase = true,
-      frames = { CW_TargetCooldownWatchBar = { posX = 1 } }
+      frames = { CW_TargetCooldownWatchBar = { point = "CENTER", posX = 1, posY = 2 } }
     }, envelope.payload)
+  end)
+
+  describe("payload validation", function()
+    --[[
+      @param {table} payload
+      @return {table | nil}, {string | nil}
+    ]]--
+    local function ImportPayload(payload)
+      return configProfile.ImportString(CraftImportString({
+        addon = "CooldownWatch",
+        schemaVersion = 1,
+        payload = payload
+      }))
+    end
+
+    it("accepts an exported live configuration", function()
+      CooldownWatchConfiguration.frames.CW_ProximityCooldownWindow = {
+        point = "TOPLEFT", relativePoint = "TOPLEFT", posX = 100.5, posY = -40
+      }
+
+      local envelope, err = ImportPayload(configProfile.BuildSnapshot())
+
+      assert.is_nil(err)
+      assert.same(configProfile.BuildSnapshot(), envelope.payload)
+    end)
+
+    it("accepts a proximity block carrying an orphaned lock flag", function()
+      local envelope, err = ImportPayload({
+        proximityCooldowns = { enabled = true, locked = true }
+      })
+
+      assert.is_nil(err)
+      assert.is_true(envelope.payload.proximityCooldowns.enabled)
+    end)
+
+    local invalidPayloads = {
+      { "a scale below the slider range", { targetCooldownBarScale = 0 } },
+      { "a negative scale", { targetCooldownBarScale = -1 } },
+      { "a scale above the slider range", { targetCooldownBarScale = 50 } },
+      { "a string scale", { targetCooldownBarScale = "1.0" } },
+      { "a non-boolean flag", { globalAssumeWorstCase = "yes" } },
+      { "a non-table tracking store", { cooldownConfiguration = "priest" } },
+      { "a non-table tracking category", { cooldownConfiguration = { priest = true } } },
+      { "a non-boolean tracking entry",
+        { friendlyCooldownConfiguration = { priest = { [10890] = 1 } } } },
+      { "a non-table override entry", { cooldownOverrides = { priest = { [10890] = 20 } } } },
+      { "an override above the cooldown ceiling",
+        { friendlyCooldownOverrides = {
+          priest = { [10890] = { value = RGCW_CONSTANTS.COOLDOWN_MAX_SECONDS + 1 } }
+        } } },
+      { "a non-boolean worst-case toggle", { cooldownOverrides = { priest = { [10890] = { worstCase = 1 } } } } },
+      { "a non-table proximity block", { proximityCooldowns = true } },
+      { "a proximity scale outside the slider range", { proximityCooldowns = { scale = 10 } } },
+      { "a fractional display count", { proximityCooldowns = { maxDisplayedCooldowns = 2.5 } } },
+      { "a zero display count", { friendlyProximityCooldowns = { maxDisplayedCooldowns = 0 } } },
+      { "an unknown scope", { friendlyProximityCooldowns = { scope = "guild" } } },
+      { "a non-table frames map", { frames = "x" } },
+      { "a frame entry without a point", { frames = { CW_TargetCooldownWatchBar = { posX = 1, posY = 2 } } } },
+      { "an unknown anchor point",
+        { frames = { CW_TargetCooldownWatchBar = { point = "MIDDLE", posX = 1, posY = 2 } } } },
+      { "an unknown relative point",
+        { frames = { CW_TargetCooldownWatchBar = { point = "CENTER", relativePoint = 3, posX = 1, posY = 2 } } } },
+      { "a table relativeTo",
+        { frames = { CW_TargetCooldownWatchBar = { point = "CENTER", relativeTo = {}, posX = 1, posY = 2 } } } },
+      { "a non-numeric offset",
+        { frames = { CW_TargetCooldownWatchBar = { point = "CENTER", posX = "1", posY = 2 } } } }
+    }
+
+    for _, case in ipairs(invalidPayloads) do
+      it("rejects " .. case[1], function()
+        local envelope, err = ImportPayload(case[2])
+
+        assert.is_nil(envelope)
+        assert.equal("profile_error_invalid", err)
+      end)
+    end
   end)
 
   it("drops an envelope name that is not a string on import", function()

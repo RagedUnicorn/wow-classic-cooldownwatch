@@ -66,26 +66,222 @@ local EXPORT_PREFIX = "CooldownWatch1:"
 local ADDON_TAG = "CooldownWatch"
 
 --[[
-  The single source of truth for what a profile contains. Snapshot and apply
-  both iterate this list, so adding a new configurable option is a one-line
-  change here. Deliberately excludes the bookkeeping (addonVersion,
-  lastNotifiedVersion, and activeProfile - which profile the live configuration
-  belongs to is not a setting of that profile) and the profile store itself
-  (profiles).
+  @param {any} value
+  @return {boolean}
+    true - if value is a number that is neither NaN nor infinite
 ]]--
-me.PROFILE_FIELDS = {
-  "targetCooldownBarScale",
-  "globalAssumeWorstCase",
-  "trackFriendlyCooldowns",
-  "showFriendlyTargetCooldowns",
-  "cooldownConfiguration",
-  "cooldownOverrides",
-  "friendlyCooldownConfiguration",
-  "friendlyCooldownOverrides",
-  "proximityCooldowns",
-  "friendlyProximityCooldowns",
-  "frames"
+local function IsFiniteNumber(value)
+  return type(value) == "number"
+    and value == value -- NaN is the only value not equal to itself
+    and value ~= math.huge
+    and value ~= -math.huge
+end
+
+--[[
+  @param {number} min
+  @param {number} max
+  @return {function}
+    a validator accepting a finite number within [min, max] - the range of the
+    options slider that is the only other producer of the value
+]]--
+local function IsNumberInRange(min, max)
+  return function(value)
+    return IsFiniteNumber(value) and value >= min and value <= max
+  end
+end
+
+--[[
+  @param {any} value
+  @return {boolean}
+]]--
+local function IsBoolean(value)
+  return type(value) == "boolean"
+end
+
+--[[
+  @param {any} value
+  @return {boolean}
+    true - if value is nil or a boolean, the shape of an optional flag
+]]--
+local function IsOptionalBoolean(value)
+  return value == nil or type(value) == "boolean"
+end
+
+--[[
+  @param {any} value
+  @param {function} isValidEntry
+    called with each value of the table
+  @return {boolean}
+    true - if value is a table whose every value passes isValidEntry
+]]--
+local function IsTableOf(value, isValidEntry)
+  if type(value) ~= "table" then
+    return false
+  end
+
+  for _, entry in pairs(value) do
+    if not isValidEntry(entry) then
+      return false
+    end
+  end
+
+  return true
+end
+
+--[[
+  A per-side tracking store: category -> spellId -> explicit enabled flag.
+
+  @param {any} value
+  @return {boolean}
+]]--
+local function IsValidCooldownConfiguration(value)
+  return IsTableOf(value, function(category)
+    return IsTableOf(category, IsBoolean)
+  end)
+end
+
+--[[
+  A per-side overrides store: category -> spellId -> { worstCase, value,
+  worstCaseValue }, the numbers held to the same rule the store enforces on
+  player input.
+
+  @param {any} value
+  @return {boolean}
+]]--
+local function IsValidCooldownOverrides(value)
+  local function IsOptionalOverrideValue(overrideValue)
+    return overrideValue == nil or mod.configuration.IsValidOverrideValue(overrideValue)
+  end
+
+  return IsTableOf(value, function(category)
+    return IsTableOf(category, function(entry)
+      return type(entry) == "table"
+        and IsOptionalBoolean(entry.worstCase)
+        and IsOptionalOverrideValue(entry.value)
+        and IsOptionalOverrideValue(entry.worstCaseValue)
+    end)
+  end)
+end
+
+--[[
+  A proximity window options block. Every field is optional (an older-shaped
+  block is backfilled by the reconcile on apply) and unknown keys are ignored
+  (an old export may still carry the removed lock flag, which nothing reads).
+
+  @param {any} value
+  @return {boolean}
+]]--
+local function IsValidProximityCooldowns(value)
+  if type(value) ~= "table" then
+    return false
+  end
+
+  local isValidScale = IsNumberInRange(
+    RGCW_CONSTANTS.PROXIMITY_SCALE_SLIDER_MIN,
+    RGCW_CONSTANTS.PROXIMITY_SCALE_SLIDER_MAX
+  )
+  local maxDisplayed = value.maxDisplayedCooldowns
+
+  return IsOptionalBoolean(value.enabled)
+    and IsOptionalBoolean(value.hideLongCooldowns)
+    and (value.scale == nil or isValidScale(value.scale))
+    and (maxDisplayed == nil
+      or (IsFiniteNumber(maxDisplayed) and maxDisplayed >= 1 and maxDisplayed == math.floor(maxDisplayed)))
+    and (value.scope == nil or mod.configuration.IsValidProximityScope(value.scope))
+end
+
+-- the anchor points SetPoint accepts
+local VALID_ANCHOR_POINTS = {
+  ["TOPLEFT"] = true,
+  ["TOP"] = true,
+  ["TOPRIGHT"] = true,
+  ["LEFT"] = true,
+  ["CENTER"] = true,
+  ["RIGHT"] = true,
+  ["BOTTOMLEFT"] = true,
+  ["BOTTOM"] = true,
+  ["BOTTOMRIGHT"] = true
 }
+
+--[[
+  The saved frame positions: frameName -> the SetPoint arguments a drag stored.
+  relativeTo is nil (relative to the parent) or a frame name, a missing
+  relativePoint defaults to point in SetPoint.
+
+  @param {any} value
+  @return {boolean}
+]]--
+local function IsValidFrames(value)
+  return IsTableOf(value, function(position)
+    return type(position) == "table"
+      and VALID_ANCHOR_POINTS[position.point] == true
+      and (position.relativePoint == nil or VALID_ANCHOR_POINTS[position.relativePoint] == true)
+      and (position.relativeTo == nil or type(position.relativeTo) == "string")
+      and IsFiniteNumber(position.posX)
+      and IsFiniteNumber(position.posY)
+  end)
+end
+
+--[[
+  The single source of truth for what a profile contains: every configurable field
+  with the validator an imported value must pass. Snapshot and apply iterate the
+  names, import rejects a string whose payload carries a field that fails its
+  validator - a crafted or corrupt value would otherwise flow straight into
+  SetScale / SetPoint or break the category menus after the reload. Adding a new
+  configurable option is a one-line change here. Deliberately excludes the
+  bookkeeping (addonVersion, lastNotifiedVersion, and activeProfile - which
+  profile the live configuration belongs to is not a setting of that profile) and
+  the profile store itself (profiles).
+]]--
+local PROFILE_FIELD_SPEC = {
+  {
+    ["name"] = "targetCooldownBarScale",
+    ["isValid"] = IsNumberInRange(
+      RGCW_CONSTANTS.TARGET_BAR_SCALE_SLIDER_MIN,
+      RGCW_CONSTANTS.TARGET_BAR_SCALE_SLIDER_MAX
+    )
+  },
+  { ["name"] = "globalAssumeWorstCase", ["isValid"] = IsBoolean },
+  { ["name"] = "trackFriendlyCooldowns", ["isValid"] = IsBoolean },
+  { ["name"] = "showFriendlyTargetCooldowns", ["isValid"] = IsBoolean },
+  { ["name"] = "cooldownConfiguration", ["isValid"] = IsValidCooldownConfiguration },
+  { ["name"] = "cooldownOverrides", ["isValid"] = IsValidCooldownOverrides },
+  { ["name"] = "friendlyCooldownConfiguration", ["isValid"] = IsValidCooldownConfiguration },
+  { ["name"] = "friendlyCooldownOverrides", ["isValid"] = IsValidCooldownOverrides },
+  { ["name"] = "proximityCooldowns", ["isValid"] = IsValidProximityCooldowns },
+  { ["name"] = "friendlyProximityCooldowns", ["isValid"] = IsValidProximityCooldowns },
+  { ["name"] = "frames", ["isValid"] = IsValidFrames }
+}
+
+--[[
+  Ordered list of profile field names, derived from PROFILE_FIELD_SPEC. Public so
+  BuildSnapshot / ApplySnapshot and the specs can iterate it.
+]]--
+me.PROFILE_FIELDS = {}
+
+for _, spec in ipairs(PROFILE_FIELD_SPEC) do
+  me.PROFILE_FIELDS[#me.PROFILE_FIELDS + 1] = spec.name
+end
+
+--[[
+  @param {table} payload
+  @return {boolean}
+    true - if every profile field the payload carries passes its validator
+    (an absent field is fine, the reconcile backfills it on apply)
+]]--
+local function IsValidPayload(payload)
+  for _, spec in ipairs(PROFILE_FIELD_SPEC) do
+    local value = payload[spec.name]
+
+    if value ~= nil and not spec.isValid(value) then
+      mod.logger.LogWarn(me.tag, "Rejected imported profile - invalid field: " .. spec.name)
+
+      return false
+    end
+  end
+
+  return true
+end
 
 --[[
   Recursively copy a value so a profile and the live config never share table
@@ -330,6 +526,10 @@ function me.ImportString(encoded)
   end
 
   envelope.payload = ProjectPayload(envelope.payload)
+
+  if not IsValidPayload(envelope.payload) then
+    return nil, "profile_error_invalid"
+  end
 
   -- the name only prefills the import popup's edit box; anything but a string would
   -- raise in SetText, so it is dropped and the player types a name instead
