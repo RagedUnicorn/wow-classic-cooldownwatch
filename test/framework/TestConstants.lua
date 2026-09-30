@@ -51,4 +51,6 @@ RGCW_TEST_CONSTANTS = {
     SavedVariables
   ]]--
   SAVED_VARIABLE_TEST_LOG = "CooldownWatchTestLog",
+  -- test sessions kept in the test log SavedVariable - older ones are pruned
+  TEST_LOG_MAX_SESSIONS = 20,
 }

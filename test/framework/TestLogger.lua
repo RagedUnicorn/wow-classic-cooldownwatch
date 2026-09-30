@@ -63,6 +63,53 @@ function me.RegisterSetup(fn)
 end
 
 --[[
+  A session id unique within the log. The timestamp has a one-second resolution, so a
+  second run within the same second gets a numeric suffix instead of replacing the
+  first run's session.
+
+  @param {table} sessions
+  @return {string}
+]]--
+local function CreateSessionId(sessions)
+  local baseId = date("%Y%m%d_%H%M%S")
+  local sessionId = baseId
+  local suffix = 1
+
+  while sessions[sessionId] ~= nil do
+    suffix = suffix + 1
+    sessionId = baseId .. "_" .. suffix
+  end
+
+  return sessionId
+end
+
+--[[
+  Drop the oldest sessions until at most RGCW_TEST_CONSTANTS.TEST_LOG_MAX_SESSIONS
+  remain. Session ids start with a sortable timestamp, so the smallest ids are the
+  oldest; the current session is never dropped.
+
+  @param {table} sessions
+  @param {string} currentSessionId
+]]--
+local function PruneSessions(sessions, currentSessionId)
+  local sessionIds = {}
+
+  for sessionId in pairs(sessions) do
+    if sessionId ~= currentSessionId then
+      table.insert(sessionIds, sessionId)
+    end
+  end
+
+  table.sort(sessionIds)
+
+  local excess = #sessionIds + 1 - RGCW_TEST_CONSTANTS.TEST_LOG_MAX_SESSIONS
+
+  for i = 1, excess do
+    sessions[sessionIds[i]] = nil
+  end
+end
+
+--[[
   Initialize test logger
 ]]--
 function me.Initialize()
@@ -74,7 +121,7 @@ function me.Initialize()
   end
 
   -- Create new test session
-  local sessionId = date("%Y%m%d_%H%M%S")
+  local sessionId = CreateSessionId(CooldownWatchTestLog.sessions)
   CooldownWatchTestLog.currentSession = sessionId
   CooldownWatchTestLog.sessions[sessionId] = {
     startTime = date("%Y-%m-%d %H:%M:%S"),
@@ -87,6 +134,7 @@ function me.Initialize()
       errors = 0
     }
   }
+  PruneSessions(CooldownWatchTestLog.sessions, sessionId)
 
   mod.logger.LogInfo(me.tag, "Test logger initialized - Session: " .. sessionId)
 
