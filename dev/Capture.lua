@@ -137,19 +137,6 @@ local hidden = {}
 -- cursor for the keybind-safe `shot next` driver
 local cursor = 1
 
--- forward declarations
-local FindShot
-local RunSetup
-local HideChrome
-local HideFrames
-local RestoreChrome
-local ResolveFrame
-local MeasureFrame
-local MeasureShotRect
-local RecordShot
-local TakeShot
-local HandleShotCommand
-
 --[[
   Collect one primary spell per catalog category, in category order, up to `amount`.
   Everything is derived from the SpellMap through its public accessors - no spellId, name
@@ -392,7 +379,7 @@ local setupVerbs = {
   @return {table}, {number}
     The manifest entry and its index, or nil
 ]]--
-FindShot = function(name)
+local function FindShot(name)
   for i = 1, #RGCW_SHOTS do
     if RGCW_SHOTS[i].name == name or RGCW_SHOTS[i].shot == name then
       return RGCW_SHOTS[i], i
@@ -405,7 +392,7 @@ end
 --[[
   @param {table} entry
 ]]--
-RunSetup = function(entry)
+local function RunSetup(entry)
   for _, step in ipairs(entry.setup) do
     local verb, argument = string.match(step, "^(%w+):?(.*)$")
     local handler = setupVerbs[verb]
@@ -419,71 +406,6 @@ RunSetup = function(entry)
 end
 
 --[[
-  Hide the default chrome for a clean capture. Frames named in keepFrames (the shot's
-  capture.includeFrames) are spared so a shot can deliberately keep, e.g., the TargetFrame
-  next to the target cooldown bar.
-
-  @param {table | nil} keepFrames
-    Array of frame names to leave visible
-]]--
-HideChrome = function(keepFrames)
-  local keep = {}
-
-  if keepFrames ~= nil then
-    for _, name in ipairs(keepFrames) do
-      keep[name] = true
-    end
-  end
-
-  for _, name in ipairs(CHROME) do
-    if not keep[name] then
-      local frame = ResolveFrame(name)
-
-      if frame ~= nil and frame.IsShown ~= nil and frame:IsShown() then
-        -- alpha 0 on top of Hide: the modern action bar controller re-Shows bars on state
-        -- changes (stance, paging) mid-capture - the alpha keeps them invisible
-        frame:SetAlpha(0)
-        frame:Hide()
-        table.insert(hidden, frame)
-      end
-    end
-  end
-end
-
-RestoreChrome = function()
-  for _, frame in ipairs(hidden) do
-    frame:SetAlpha(1)
-    frame:Show()
-  end
-
-  hidden = {}
-end
-
---[[
-  Hide specific frames named by the shot's capture.hideFrames, right before the screenshot
-  and restored afterwards (queued onto the same `hidden` list as the chrome). Used to
-  suppress a frame an earlier shot's setup left visible - for CooldownWatch that is above
-  all the target cooldown bar, which ghosts through the semi-transparent settings window on
-  the three panel shots.
-
-  @param {table | nil} names
-    Array of frame names to hide
-]]--
-HideFrames = function(names)
-  if names == nil then return end
-
-  for _, name in ipairs(names) do
-    local frame = ResolveFrame(name)
-
-    if frame ~= nil and frame.IsShown ~= nil and frame:IsShown() then
-      frame:SetAlpha(0)
-      frame:Hide()
-      table.insert(hidden, frame)
-    end
-  end
-end
-
---[[
   Resolve a manifest frame name to a live frame.
 
   @param {string} name
@@ -491,7 +413,7 @@ end
   @return {table | nil}
     The frame or nil
 ]]--
-ResolveFrame = function(name)
+local function ResolveFrame(name)
   local frame = _G[name]
 
   if frame ~= nil then
@@ -520,6 +442,71 @@ ResolveFrame = function(name)
 end
 
 --[[
+  Hide the default chrome for a clean capture. Frames named in keepFrames (the shot's
+  capture.includeFrames) are spared so a shot can deliberately keep, e.g., the TargetFrame
+  next to the target cooldown bar.
+
+  @param {table | nil} keepFrames
+    Array of frame names to leave visible
+]]--
+local function HideChrome(keepFrames)
+  local keep = {}
+
+  if keepFrames ~= nil then
+    for _, name in ipairs(keepFrames) do
+      keep[name] = true
+    end
+  end
+
+  for _, name in ipairs(CHROME) do
+    if not keep[name] then
+      local frame = ResolveFrame(name)
+
+      if frame ~= nil and frame.IsShown ~= nil and frame:IsShown() then
+        -- alpha 0 on top of Hide: the modern action bar controller re-Shows bars on state
+        -- changes (stance, paging) mid-capture - the alpha keeps them invisible
+        frame:SetAlpha(0)
+        frame:Hide()
+        table.insert(hidden, frame)
+      end
+    end
+  end
+end
+
+local function RestoreChrome()
+  for _, frame in ipairs(hidden) do
+    frame:SetAlpha(1)
+    frame:Show()
+  end
+
+  hidden = {}
+end
+
+--[[
+  Hide specific frames named by the shot's capture.hideFrames, right before the screenshot
+  and restored afterwards (queued onto the same `hidden` list as the chrome). Used to
+  suppress a frame an earlier shot's setup left visible - for CooldownWatch that is above
+  all the target cooldown bar, which ghosts through the semi-transparent settings window on
+  the three panel shots.
+
+  @param {table | nil} names
+    Array of frame names to hide
+]]--
+local function HideFrames(names)
+  if names == nil then return end
+
+  for _, name in ipairs(names) do
+    local frame = ResolveFrame(name)
+
+    if frame ~= nil and frame.IsShown ~= nil and frame:IsShown() then
+      frame:SetAlpha(0)
+      frame:Hide()
+      table.insert(hidden, frame)
+    end
+  end
+end
+
+--[[
   Convert a frame's UI coordinates to screenshot pixel coordinates. Two conversions are
   needed:
 
@@ -536,7 +523,7 @@ end
   @return {number}, {number}, {number}, {number}, {number}, {number}
     x, y, width, height, screenWidth, screenHeight
 ]]--
-MeasureFrame = function(frame)
+local function MeasureFrame(frame)
   local screenWidth, screenHeight = GetPhysicalScreenSize()
 
   -- referenceHeight is 768; derived live rather than hardcoded so it survives any future
@@ -565,7 +552,7 @@ end
   @return {number}, {number}, {number}, {number}, {number}, {number}
     x, y, width, height, screenWidth, screenHeight
 ]]--
-MeasureShotRect = function(entry, frame)
+local function MeasureShotRect(entry, frame)
   local x, y, width, height, screenWidth, screenHeight = MeasureFrame(frame)
   local left, top, right, bottom = x, y, x + width, y + height
 
@@ -594,7 +581,7 @@ end
   @param {table} entry
   @param {table} frame
 ]]--
-RecordShot = function(entry, frame)
+local function RecordShot(entry, frame)
   if CooldownWatchShotLog == nil then
     CooldownWatchShotLog = {}
   end
@@ -620,7 +607,7 @@ end
 --[[
   @param {table} entry
 ]]--
-TakeShot = function(entry)
+local function TakeShot(entry)
   if InCombatLockdown() then
     mod.logger.PrintUserError("Refusing to capture in combat - hiding protected frames would taint the UI")
     return
@@ -785,7 +772,7 @@ end
 
   @param {table} args
 ]]--
-HandleShotCommand = function(args)
+local function HandleShotCommand(args)
   if args[1] == nil or args[1] == "help" then
     print(rgcw.L["info_title"] .. " media capture (development only)")
     print("  |cFFFFC300list|r - show the shot manifest")
