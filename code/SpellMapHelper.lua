@@ -29,11 +29,6 @@ mod.spellMapHelper = me
 
 me.tag = "SpellMapHelper"
 
--- Forward declarations
-local GetFilteredSpellMap
-local IsPrimaryAllowedInCurrentSeason
-local ResolvePrimary
-
 --[[
   Whether a primary spell is allowed in the active WoW season. Base spells are
   always allowed; SOD-only spells require Season of Discovery to be active and
@@ -43,7 +38,7 @@ local ResolvePrimary
 
   @return {boolean}
 ]]--
-IsPrimaryAllowedInCurrentSeason = function(primarySpell)
+local function IsPrimaryAllowedInCurrentSeason(primarySpell)
   if primarySpell.type == RGCW_CONSTANTS.SPELL_TYPE_BASE then
     return true
   end
@@ -71,7 +66,7 @@ end
   @return {table}
     The filtered spellMap
 ]]--
-GetFilteredSpellMap = function()
+local function GetFilteredSpellMap()
   local filteredSpellMap = {}
   local baseSpellMap = mod.spellMap.GetSpellMap()
 
@@ -131,7 +126,7 @@ end
     Returns nil for unknown spellIds and for SOD spells outside Season of
     Discovery.
 ]]--
-ResolvePrimary = function(spellId)
+local function ResolvePrimary(spellId)
   local baseSpellMap = mod.spellMap.GetSpellMap()
 
   for category, spells in pairs(baseSpellMap) do
