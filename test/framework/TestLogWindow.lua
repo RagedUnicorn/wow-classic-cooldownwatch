@@ -149,9 +149,15 @@ end
 ]]--
 function me.AddLogMessage(level, testName, message, data)
   local scrollFrame = _G[RGCW_TEST_CONSTANTS.ELEMENT_TEST_LOG_WINDOW_SCROLL_FRAME]
+
+  -- the window was never created
+  if not scrollFrame then
+    return
+  end
+
   local scrollChild = scrollFrame:GetScrollChild()
 
-  if not scrollFrame or not scrollChild then
+  if not scrollChild then
     return
   end
 
