@@ -332,6 +332,23 @@ describe("ConfigProfile", function()
     }, envelope.payload)
   end)
 
+  it("drops an envelope name that is not a string on import", function()
+    for _, craftedName in ipairs({ { nested = "table" }, 42, true }) do
+      local crafted = CraftImportString({
+        addon = "CooldownWatch",
+        schemaVersion = 1,
+        name = craftedName,
+        payload = { globalAssumeWorstCase = true }
+      })
+
+      local envelope, err = configProfile.ImportString(crafted)
+
+      assert.is_nil(err)
+      assert.is_nil(envelope.name)
+      assert.same({ globalAssumeWorstCase = true }, envelope.payload)
+    end
+  end)
+
   it("rejects an input longer than the import limit before decoding", function()
     local oversized = "CooldownWatch1:" .. string.rep("A", RGCW_CONSTANTS.PROFILE_IMPORT_MAX_LENGTH)
 
