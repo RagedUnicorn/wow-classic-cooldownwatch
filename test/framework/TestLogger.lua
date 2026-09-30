@@ -23,7 +23,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals C_AddOns CooldownWatchTestLog date
+-- luacheck: read globals C_AddOns date
 
 -- Test logger for CooldownWatch addon
 -- Writes test results to SavedVariables for external analysis

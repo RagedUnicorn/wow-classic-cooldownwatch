@@ -22,12 +22,6 @@
   SOFTWARE.
 ]]--
 
--- busted extends `assert` with .same / .equal / etc. at runtime; luacheck
--- cannot verify those fields statically. Suppress warning 143 (accessing
--- undefined field of a global variable) for this file.
--- luacheck: globals describe it setup teardown before_each after_each CooldownWatchConfiguration RGCW_CONSTANTS
--- luacheck: ignore 143
-
 local wowStubs = require("WowStubs")
 
 --[[

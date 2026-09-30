@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals C_ChatInfo C_AddOns C_Timer UnitName IsInGuild IsInGroup IsInRaid GetTime
+-- luacheck: read globals C_ChatInfo C_AddOns C_Timer UnitName IsInGuild IsInGroup IsInRaid GetTime
 
 local mod = rgcw
 local me = {}

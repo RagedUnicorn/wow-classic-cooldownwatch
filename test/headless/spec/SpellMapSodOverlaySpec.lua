@@ -36,12 +36,6 @@
   spec requests the sod branch.
 ]]--
 
--- busted extends `assert` with .same / .equal / etc. at runtime; luacheck
--- cannot verify those fields statically. Suppress warning 143 (accessing
--- undefined field of a global variable) for this file.
--- luacheck: globals describe it setup teardown
--- luacheck: ignore 143
-
 describe("SpellMap SoD overlay assembly path", function()
   -- deliberately outside any real spellId range - asserted absent from the base in setup
   local FAKE_SOD_SPELL_ID = 999001

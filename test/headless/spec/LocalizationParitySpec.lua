@@ -47,11 +47,6 @@
   (nil) is restored once loading is done.
 ]]--
 
--- busted extends `assert` with .same / .equal / etc. at runtime; luacheck cannot verify those
--- fields statically. Suppress warning 143 (accessing undefined field of a global variable).
--- luacheck: globals describe it rgcw
--- luacheck: ignore 143
-
 local lfs = require("lfs")
 local wowStubs = require("WowStubs")
 

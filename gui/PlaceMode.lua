@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals CreateFrame Settings SettingsPanel HideUIPanel
+-- luacheck: read globals CreateFrame Settings SettingsPanel HideUIPanel
 
 --[[
   Parameterized builder of a test/place mode SHELL: the transient mode

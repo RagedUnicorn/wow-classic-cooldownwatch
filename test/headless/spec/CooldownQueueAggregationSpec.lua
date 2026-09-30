@@ -22,12 +22,6 @@
   SOFTWARE.
 ]]--
 
--- busted extends `assert` with .same / .equal / etc. at runtime; luacheck
--- cannot verify those fields statically. Suppress warning 143 (accessing
--- undefined field of a global variable) for this file.
--- luacheck: globals describe it before_each
--- luacheck: ignore 143
-
 --[[
   Cross-caster aggregation: GetAllCooldowns / HasAnyCooldowns read the queue
   across every caster bucket - the data foundation the proximity cooldown

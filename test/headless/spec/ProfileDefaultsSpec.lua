@@ -33,8 +33,6 @@
   covered without spec edits.
 ]]--
 
--- luacheck: globals describe it setup teardown
--- luacheck: ignore 143
 
 describe("Curated default-enabled profile", function()
   local profileOverlays

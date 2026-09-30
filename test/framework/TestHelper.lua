@@ -22,7 +22,7 @@
   SOFTWARE.
 ]]--
 
--- luacheck: globals UnitGUID UnitName UnitExists GetTime
+-- luacheck: read globals UnitGUID UnitName UnitExists GetTime
 
 local mod = rgcw
 local me = {}

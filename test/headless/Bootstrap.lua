@@ -30,7 +30,7 @@
   Expected cwd: addon repo root. Run from elsewhere and the dofile()s will fail.
 ]]--
 
--- luacheck: globals rgcw RGCW_ENVIRONMENT unpack bit UnitFactionGroup C_Timer GetTime
+-- luacheck: globals unpack bit UnitFactionGroup C_Timer GetTime
 
 -- allow specs to require the opt-in WoW-global stub registry as `require("WowStubs")`
 package.path = "./test/headless/?.lua;" .. package.path

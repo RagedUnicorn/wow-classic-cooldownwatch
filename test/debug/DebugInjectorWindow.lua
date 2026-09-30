@@ -22,7 +22,7 @@
   SOFTWARE.
 ]]--
 
--- luacheck: globals CreateFrame GetSpellInfo GetTime
+-- luacheck: read globals CreateFrame GetSpellInfo GetTime
 
 -- Debug spell injector window. Lets the dev push spells into the cooldown queue
 -- with the player as both source and target so the cooldown bar renders without

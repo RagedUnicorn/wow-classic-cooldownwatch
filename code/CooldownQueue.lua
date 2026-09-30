@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals C_Timer GetTime
+-- luacheck: read globals C_Timer GetTime
 
 local mod = rgcw
 local me = {}

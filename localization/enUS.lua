@@ -1,5 +1,5 @@
 
--- luacheck: globals C_AddOns
+-- luacheck: read globals C_AddOns
 
 rgcw = rgcw or {}
 rgcw.L = {}

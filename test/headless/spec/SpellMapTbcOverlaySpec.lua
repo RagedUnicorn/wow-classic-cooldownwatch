@@ -39,12 +39,6 @@
   assembler spec's "first tbc request in the whole suite" counter still holds.)
 ]]--
 
--- busted extends `assert` with .same / .equal / etc. at runtime; luacheck
--- cannot verify those fields statically. Suppress warning 143 (accessing
--- undefined field of a global variable) for this file.
--- luacheck: globals describe it setup teardown
--- luacheck: ignore 143
-
 describe("SpellMap TBC overlay assembly path", function()
   local overlay
   local previousTestHelper

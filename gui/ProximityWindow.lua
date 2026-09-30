@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals CreateFrame UIParent STANDARD_TEXT_FONT GetTime
+-- luacheck: read globals CreateFrame UIParent STANDARD_TEXT_FONT GetTime
 
 --[[
   Parameterized builder of a proximity cooldown window: a movable vertical

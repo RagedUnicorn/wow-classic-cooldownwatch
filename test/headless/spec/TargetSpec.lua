@@ -31,10 +31,7 @@
   default.
 ]]--
 
--- busted extends `assert` with .same / .equal / etc. at runtime; luacheck
--- cannot know that, so field accesses on assert are ignored (143)
--- luacheck: globals describe it teardown before_each after_each RGCW_ENVIRONMENT
--- luacheck: ignore 143
+-- luacheck: globals RGCW_ENVIRONMENT
 
 local wowStubs = require("WowStubs")
 

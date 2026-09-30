@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals GetTime
+-- luacheck: read globals GetTime
 
 --[[
   Preview ("example") mode for the TargetCooldownBar. Drives the slot widgets with synthetic cooldowns so

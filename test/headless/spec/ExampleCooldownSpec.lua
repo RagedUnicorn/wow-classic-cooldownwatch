@@ -22,12 +22,6 @@
   SOFTWARE.
 ]]--
 
--- busted extends `assert` with .same / .is_not_nil / etc. at runtime; luacheck
--- cannot verify those fields statically. Suppress warning 143 (accessing
--- undefined field of a global variable) for this file.
--- luacheck: globals describe it setup
--- luacheck: ignore 143
-
 --[[
   Guards the configuration preview data. The preview is rendered from frame code
   that cannot run headlessly, but the example entry it builds is pure - these tests

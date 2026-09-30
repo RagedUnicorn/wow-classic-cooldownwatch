@@ -22,8 +22,8 @@
   SOFTWARE.
 ]]--
 
--- luacheck: globals GetSpellInfo GetItemIcon CreateFrame CreateColor STANDARD_TEXT_FONT
--- luacheck: globals Settings MinimalSliderWithSteppersMixin
+-- luacheck: read globals GetSpellInfo GetItemIcon CreateFrame CreateColor STANDARD_TEXT_FONT
+-- luacheck: read globals Settings MinimalSliderWithSteppersMixin
 
 local mod = rgcw
 local me = {}

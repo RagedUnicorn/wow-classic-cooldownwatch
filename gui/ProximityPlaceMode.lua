@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals GetTime
+-- luacheck: read globals GetTime
 
 --[[
   Parameterized builder of a PROXIMITY WINDOW test/place mode: the preview

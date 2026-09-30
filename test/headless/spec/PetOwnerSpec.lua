@@ -41,11 +41,7 @@
   by the Bootstrap against the real _G) would never see it.
 ]]--
 
--- busted extends `assert` with .same / .equal / etc. at runtime; luacheck
--- cannot verify those fields statically. Suppress warning 143 (accessing
--- undefined field of a global variable) for this file.
--- luacheck: globals describe it before_each after_each rgcw bit
--- luacheck: ignore 143
+-- luacheck: read globals bit
 
 local wowStubs = require("WowStubs")
 

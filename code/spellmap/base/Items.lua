@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals UnitFactionGroup
+-- luacheck: read globals UnitFactionGroup
 
 local mod = rgcw
 

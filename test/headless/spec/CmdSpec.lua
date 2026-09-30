@@ -52,10 +52,7 @@
   The module is re-dofile'd in before_each per the bootstrap module-state convention.
 ]]--
 
--- busted extends `assert` with .same / .equal / etc. at runtime; luacheck cannot verify those
--- fields statically. Suppress warning 143 (accessing undefined field of a global variable).
--- luacheck: globals describe it before_each after_each rgcw SLASH_COOLDOWNWATCH1 SLASH_COOLDOWNWATCH2 SlashCmdList
--- luacheck: ignore 143
+-- luacheck: read globals SLASH_COOLDOWNWATCH1 SLASH_COOLDOWNWATCH2 SlashCmdList
 
 local wowStubs = require("WowStubs")
 

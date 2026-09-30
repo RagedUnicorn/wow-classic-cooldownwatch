@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals CreateFrame GetCVar GetTime UIParent
+-- luacheck: read globals CreateFrame GetCVar GetTime UIParent
 
 local mod = rgcw
 local me = {}

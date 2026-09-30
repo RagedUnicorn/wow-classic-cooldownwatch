@@ -22,7 +22,7 @@
   SOFTWARE.
 ]]--
 
--- luacheck: globals CreateFrame CreateColor STANDARD_TEXT_FONT ScrollUtil GameTooltip
+-- luacheck: read globals CreateFrame CreateColor STANDARD_TEXT_FONT ScrollUtil GameTooltip
 
 local mod = rgcw
 local me = {}

@@ -22,7 +22,7 @@
   SOFTWARE.
 ]]--
 
--- luacheck: globals GetTime
+-- luacheck: read globals GetTime
 
 local mod = rgcw
 local me = {}

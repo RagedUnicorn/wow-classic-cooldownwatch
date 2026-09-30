@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals UnitGUID IsInRaid
+-- luacheck: read globals UnitGUID IsInRaid
 
 --[[
   Guid sets of the player's current group, refreshed on the roster edges

@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals CreateFrame UIParent
+-- luacheck: read globals CreateFrame UIParent
 
 --[[
   Lifecycle, frame construction and per-tick orchestration for the TargetCooldownBar. Owns the bar frame

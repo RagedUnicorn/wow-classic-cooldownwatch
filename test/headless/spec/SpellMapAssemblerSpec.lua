@@ -40,12 +40,6 @@
   from the identical real overlay.
 ]]--
 
--- busted extends `assert` with .same / .equal / etc. at runtime; luacheck
--- cannot verify those fields statically. Suppress warning 143 (accessing
--- undefined field of a global variable) for this file.
--- luacheck: globals describe it before_each after_each
--- luacheck: ignore 143
-
 describe("spellMapAssembler ops", function()
   local assembler
   local loggedErrors

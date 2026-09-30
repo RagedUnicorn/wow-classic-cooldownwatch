@@ -23,8 +23,8 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals UnitIsEnemy UnitIsFriend UnitGUID UnitName UnitPlayerControlled UnitOwnerGUID
--- luacheck: globals GetPlayerInfoByGUID
+-- luacheck: read globals UnitIsEnemy UnitIsFriend UnitGUID UnitName UnitPlayerControlled UnitOwnerGUID
+-- luacheck: read globals GetPlayerInfoByGUID
 
 local mod = rgcw
 local me = {}

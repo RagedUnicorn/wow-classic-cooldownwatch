@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals CreateFrame STANDARD_TEXT_FONT GetTime
+-- luacheck: read globals CreateFrame STANDARD_TEXT_FONT GetTime
 
 --[[
   Per-slot construction and update logic for the TargetCooldownBar. Every function operates on an explicit

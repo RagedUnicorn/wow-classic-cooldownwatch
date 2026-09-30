@@ -23,7 +23,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals C_Timer date CreateFrame CooldownWatchTestLog
+-- luacheck: read globals C_Timer date CreateFrame
 
 -- Test log window UI for CooldownWatch addon
 -- Displays test logs in a scrollable window

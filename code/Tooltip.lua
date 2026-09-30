@@ -23,7 +23,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ]]--
 
--- luacheck: globals UIParent GameTooltip_SetDefaultAnchor
+-- luacheck: read globals UIParent GameTooltip_SetDefaultAnchor
 
 local mod = rgcw
 local me = {}

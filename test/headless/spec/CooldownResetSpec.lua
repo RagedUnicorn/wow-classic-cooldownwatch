@@ -35,12 +35,6 @@
   WowStubs, since it is a SavedVariable and no other spec needs it yet.
 ]]--
 
--- busted extends `assert` with .same / .equal / etc. at runtime; luacheck
--- cannot verify those fields statically. Suppress warning 143 (accessing
--- undefined field of a global variable) for this file.
--- luacheck: globals describe it setup teardown after_each rgcw CooldownWatchConfiguration
--- luacheck: ignore 143
-
 describe("CombatLog cooldown resets", function()
   local CASTER_GUID = "Player-0000-00000001"
   local CASTER_NAME = "Testcaster"

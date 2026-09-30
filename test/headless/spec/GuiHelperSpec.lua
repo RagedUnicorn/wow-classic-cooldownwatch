@@ -35,12 +35,6 @@
   assertions about which id was resolved, not about real icon data.
 ]]--
 
--- busted extends `assert` with .same / .equal / etc. at runtime; luacheck
--- cannot verify those fields statically. Suppress warning 143 (accessing
--- undefined field of a global variable) for this file.
--- luacheck: globals describe it setup before_each after_each rgcw
--- luacheck: ignore 143
-
 local wowStubs = require("WowStubs")
 
 describe("GuiHelper icon resolution", function()
