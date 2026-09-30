@@ -31,9 +31,6 @@ mod.cmd = me
 
 me.tag = "Cmd"
 
--- forward declaration
-local ParseSlashCommand
-
 -- registered subcommands
 me.registeredCommands = {}
 
@@ -52,20 +49,10 @@ local function ShowInfoMessage()
 end
 
 --[[
-  Setup slash command handler
-]]--
-function me.SetupSlashCmdList()
-  SLASH_COOLDOWNWATCH1 = "/rgcw"
-  SLASH_COOLDOWNWATCH2 = "/cooldownwatch"
-
-  SlashCmdList["COOLDOWNWATCH"] = ParseSlashCommand
-end
-
---[[
   Parse and handle slash command arguments
   @param {string} msg - The message/arguments passed to the slash command
 ]]--
-ParseSlashCommand = function(msg)
+local function ParseSlashCommand(msg)
   local args = {}
 
   mod.logger.LogDebug(me.tag, "/rgcw passed argument: " .. msg)
@@ -118,6 +105,16 @@ ParseSlashCommand = function(msg)
       mod.logger.PrintUserError(rgcw.L["invalid_argument"])
     end
   end
+end
+
+--[[
+  Setup slash command handler
+]]--
+function me.SetupSlashCmdList()
+  SLASH_COOLDOWNWATCH1 = "/rgcw"
+  SLASH_COOLDOWNWATCH2 = "/cooldownwatch"
+
+  SlashCmdList["COOLDOWNWATCH"] = ParseSlashCommand
 end
 
 --[[
