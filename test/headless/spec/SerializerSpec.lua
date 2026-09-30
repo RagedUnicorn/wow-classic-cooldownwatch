@@ -100,6 +100,38 @@ describe("Serializer", function()
     assert.has_error(function() serialize(function() end) end)
   end)
 
+  it("raises on non-finite numbers", function()
+    assert.has_error(function() serialize(math.huge) end)
+    assert.has_error(function() serialize(-math.huge) end)
+    assert.has_error(function() serialize(0 / 0) end)
+    assert.has_error(function() serialize({ value = math.huge }) end)
+  end)
+
+  it("round-trips numbers in exponent notation", function()
+    for _, value in ipairs({ 1e20, -1.5e-7 }) do
+      assert.equal(value, deserialize(serialize(value)))
+    end
+  end)
+
+  it("rejects non-finite and non-decimal number text without raising", function()
+    local numberTexts = { "1e999", "-1e999", "nan", "-nan", "inf", "0x10", " 1", "1 ", "1.", ".5", "1e", "+1" }
+
+    for _, text in ipairs(numberTexts) do
+      local encoded = "n" .. #text .. ":" .. text
+
+      for _, input in ipairs({ encoded, "t1:" .. encoded .. "T", "t1:s1:k" .. encoded }) do
+        local decoded
+        local err
+
+        assert.has_no.errors(function()
+          decoded, err = deserialize(input)
+        end)
+        assert.is_nil(decoded)
+        assert.equal("invalid number value", err)
+      end
+    end
+  end)
+
   it("returns nil plus an error for malformed input instead of raising", function()
     local malformedInputs = {
       "",
