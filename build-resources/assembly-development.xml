@@ -30,7 +30,7 @@
         <include>assets/*.blp</include>
         <include>assets/*.tga</include>
         <include>localization/*.lua</include>
-        <include>docs/TEST.md</include>
+        <include>TEST.md</include>
         <include>DEVELOPMENT.md</include>
       </includes>
     </fileSet>

@@ -12,7 +12,7 @@ test/                 in-game test framework (dev builds only)
   debug/              debug spell injector window (TOC-loaded in dev builds)
   headless/           busted bootstrap + specs (CI/local only, never TOC-loaded)
 build-resources/      Maven assembly descriptors, TOC + Environment templates
-docs/                 documentation and image assets
+docs/                 README images, badges and media captures
 target/               Maven output (generated)
 CooldownWatch.toc     live TOC consumed by WoW (auto-generated)
 pom.xml               Maven build
@@ -130,7 +130,7 @@ carry).
   branch-specific spells live in their branch overlay, never in the base slices (see below).
 
 These run in-game via `TestSpellMap` and headless under busted via `test/headless/spec/SpellMapSpec.lua`. See
-`docs/TEST.md` for how to invoke them.
+`TEST.md` for how to invoke them.
 
 ### Adding new spells or a new category
 
@@ -159,7 +159,7 @@ overlay instead (see below). The category suites and the validators pick the ent
    `build-resources/cooldownwatch-release.toc.tpl`, `CooldownWatch.toc` and `test/headless/Bootstrap.lua` (the
    assembly descriptors already glob `code/spellmap/base/*.lua` and `code/profile/base/*.lua`).
 5. Create `test/category/Test<Category>Spells.lua` and register it in `CooldownWatch.toc` and the development
-   `.toc` template (see "Adding a test suite for a new category" in `docs/TEST.md`).
+   `.toc` template (see "Adding a test suite for a new category" in `TEST.md`).
 6. Run `docker compose run --rm luacheck` and `docker compose run --rm busted` — the class-agnostic validators,
    `ValidateDefaultProfileCategoriesKnown` and `CategorySuiteCoverageSpec` fail while a piece is missing.
 

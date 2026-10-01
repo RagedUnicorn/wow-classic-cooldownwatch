@@ -31,7 +31,7 @@ docker compose run --rm busted
   including the SpellMap data-integrity validators. CI runs the same suites on every push and
   pull request, so a red local run means a red PR.
 
-See [docs/TEST.md](docs/TEST.md) for the full testing surface, including the in-game test
+See [TEST.md](TEST.md) for the full testing surface, including the in-game test
 framework available in development builds. The manual test procedure that gates a release lives in
 [test/TESTING.md](test/TESTING.md) - contributors don't have to run it, but it is a good map of
 what a change is expected not to break.

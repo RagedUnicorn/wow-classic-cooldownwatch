@@ -2,7 +2,7 @@
 
 > This document describes the test procedure that must pass before a new CooldownWatch release is created.
 > Deployment steps live in [RELEASE.md](../RELEASE.md); this document is the testing gate referenced there.
-> The testing *surface* (how to run the harnesses, how to add suites) is [docs/TEST.md](../docs/TEST.md) -
+> The testing *surface* (how to run the harnesses, how to add suites) is [TEST.md](../TEST.md) -
 > this document only says what has to be exercised before shipping.
 
 A release passes when:
