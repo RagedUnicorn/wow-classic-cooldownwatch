@@ -26,7 +26,9 @@
   Headless spec for the login bootstrap in code/Core.lua. Bootstrap does not load
   Core.lua (its Initialize builds the whole gui layer); this spec dofiles it against a
   capturing event bus, grabs the PLAYER_LOGIN handler OnLoad registers, and drives it
-  with a first Initialize step that raises. Every rgcw field Core.lua or the spec
+  with a first Initialize step that raises. The capturing bus also pins the event
+  wiring of OnLoad: which events get a handler and which are gated behind the
+  readiness flag. Every rgcw field Core.lua or the spec
   replaces is restored in after_each - busted's file insulation only snapshots the
   top-level `rgcw` reference.
 ]]--
@@ -39,6 +41,10 @@ describe("Core", function()
   local originalLogError
   local restore
   local handlers
+  -- the options table each event was registered with
+  local registrationOptions
+  -- the login steps in the order they ran
+  local loginSteps
   local ready
   local handledErrors
   local loggedErrors
@@ -52,6 +58,8 @@ describe("Core", function()
 
     originalLogError = rgcw.logger.LogError
     handlers = {}
+    registrationOptions = {}
+    loginSteps = {}
     ready = false
     handledErrors = {}
     loggedErrors = {}
@@ -70,10 +78,12 @@ describe("Core", function()
 
     rgcw.event = {
       Setup = function() end,
-      Register = function(eventName, handler)
+      Register = function(eventName, handler, options)
         handlers[eventName] = handler
+        registrationOptions[eventName] = options
       end,
       SetReady = function()
+        loginSteps[#loginSteps + 1] = "SetReady"
         ready = true
       end
     }
@@ -84,6 +94,7 @@ describe("Core", function()
     -- the first step of Initialize raises
     rgcw.cmd = {
       SetupSlashCmdList = function()
+        loginSteps[#loginSteps + 1] = "Initialize"
         error("slash command setup failed")
       end
     }
@@ -99,6 +110,35 @@ describe("Core", function()
     for _, field in ipairs(REPLACED_FIELDS) do
       rgcw[field] = savedFields[field]
     end
+  end)
+
+  it("registers every event handler, gating all but login and target change", function()
+    local expectedGated = {
+      PLAYER_LOGIN = false,
+      PLAYER_TARGET_CHANGED = false,
+      PLAYER_LOGOUT = true,
+      COMBAT_LOG_EVENT_UNFILTERED = true,
+      CHAT_MSG_ADDON = true,
+      PLAYER_ENTERING_WORLD = true,
+      GROUP_ROSTER_UPDATE = true,
+    }
+
+    for eventName, gated in pairs(expectedGated) do
+      assert.is_function(handlers[eventName], eventName .. " has no handler")
+
+      local options = registrationOptions[eventName]
+      assert.equal(gated, options ~= nil and options.gated == true, eventName .. " gating")
+    end
+
+    for eventName in pairs(handlers) do
+      assert.is_not_nil(expectedGated[eventName], "unexpected registration " .. eventName)
+    end
+  end)
+
+  it("opens the readiness gate only after Initialize ran", function()
+    handlers.PLAYER_LOGIN()
+
+    assert.same({ "Initialize", "SetReady" }, loginSteps)
   end)
 
   it("opens the readiness gate even when a step of Initialize raises", function()
