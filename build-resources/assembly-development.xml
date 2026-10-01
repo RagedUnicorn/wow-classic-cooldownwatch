@@ -31,7 +31,7 @@
         <include>assets/*.tga</include>
         <include>localization/*.lua</include>
         <include>docs/TEST.md</include>
-        <include>docs/DEVELOPMENT.md</include>
+        <include>DEVELOPMENT.md</include>
       </includes>
     </fileSet>
   </fileSets>

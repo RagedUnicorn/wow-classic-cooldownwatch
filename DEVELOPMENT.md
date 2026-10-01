@@ -573,3 +573,101 @@ Renovate runs on Mondays UTC, max 2 concurrent PRs, prefix `chore(deps):`. Valid
 ```
 npx --yes --package=renovate -- renovate-config-validator renovate.json
 ```
+
+## Build and Release
+
+### Switching between Environments
+
+Switching between development and release can be achieved with maven.
+
+```
+mvn generate-resources -D generate.sources.overwrite=true -P development
+```
+
+This generates and overwrites `code/Environment.lua` and `CooldownWatch.toc`. You need to specifically specify that you want to overwrite the files to prevent data loss. It is also possible to omit the profile because development is the default profile that will be used.
+
+Switching to release can be done as such:
+
+```
+mvn generate-resources -D generate.sources.overwrite=true -P release
+```
+
+In this case it is mandatory to add the release profile.
+
+**Note:** Switching environments has the effect of changing certain files to match an expected value depending on the environment. To be more specific this means that as an example test and debug files are not included when switching to release. It also means that variables such as loglevel change to match the environment.
+
+To avoid changing those files all the time the repository should always stay in the development environment. Do not commit `CooldownWatch.toc` and `code/Environment.lua` in their release state. Changes to those files should always be done inside `build-resources` and their respective template files marked with `.tpl`.
+
+### Packaging the Addon
+
+To package the addon use the `package` phase.
+
+```
+mvn package -D generate.sources.overwrite=true -P development
+```
+
+This generates an addon package for development. For generating a release package the release profile can be used.
+
+```
+mvn package -D generate.sources.overwrite=true -P release
+```
+
+**Note:** This packaging and switching resources can also be done one after another.
+
+```
+# switch environment to release
+mvn generate-resources -D generate.sources.overwrite=true -P release
+# package release
+mvn package -P release
+```
+
+**Note:** Packaging a release switches the working tree to release state. The release package takes `code/Environment.lua` from the working tree (only `CooldownWatch.toc` is rendered by the assembly itself), so the overwrite cannot be skipped. Switch back to development afterwards so the release-state `CooldownWatch.toc` and `code/Environment.lua` are not committed:
+
+```
+mvn generate-resources -D generate.sources.overwrite=true -P development
+```
+
+### Deploy GitHub Release
+
+Before creating a new release update `addon.tag.version` in `pom.xml`. Afterwards to create a new release and deploy to GitHub the `deploy-github` profile has to be used.
+
+```
+# switch environment to release
+mvn generate-resources -D generate.sources.overwrite=true -P release
+# deploy release
+mvn package -P deploy-github -D github.auth-token=[token]
+```
+
+**Note:** This is only intended for manual deployment to GitHub. With GitHub actions the token is supplied as a secret to the build process. Switch back to development afterwards, see [Packaging the Addon](#packaging-the-addon).
+
+### Deploy CurseForge Release
+
+**Note:** It's best to create the release for GitHub first and only afterwards the CurseForge release. That way the tag was already created.
+
+```
+# switch environment to release
+mvn generate-resources -D generate.sources.overwrite=true -P release
+# deploy release
+mvn package -P deploy-curseforge -D curseforge.auth-token=[token]
+```
+
+**Note:** This is only intended for manual deployment to CurseForge. With GitHub actions the token is supplied as a secret to the build process. Switch back to development afterwards, see [Packaging the Addon](#packaging-the-addon).
+
+### Deploy Wago.io Release
+
+**Note:** It's best to create the release for GitHub first and only afterwards the Wago.io release. That way the tag was already created.
+
+```
+# switch environment to release
+mvn generate-resources -D generate.sources.overwrite=true -P release
+# deploy release
+mvn package -P deploy-wago -D wago.auth-token=[token]
+```
+
+**Note:** This is only intended for manual deployment to Wago.io. With GitHub actions the token is supplied as a secret to the build process. Switch back to development afterwards, see [Packaging the Addon](#packaging-the-addon).
+
+### GitHub Action Profiles
+
+This project has GitHub action profiles for different DevOps-related work such as linting, headless tests, source generation and deployments to different providers. See `.github` folder for details.
+
+The three release workflows (`release_github.yaml`, `release_curseforge.yaml`, `release_wago.yaml`) publish only after the lint and test workflows pass - both are called as reusable workflows - and after a package contents check: the zip is built with `mvn assembly:single -P deploy-<target>` (no publish goal runs) and the release fails when the `.toc` or the `code/` / `localization/` folders are missing from it.

@@ -35,7 +35,7 @@ me.tag = "Categories"
   key in SpellMap) to its UI naming (`localizationKey`, `name`).
 
   The display order is the array order. Add a new category here when porting a new
-  class / group in — see docs/DEVELOPMENT.md "Adding new spells or a new category".
+  class / group in — see DEVELOPMENT.md "Adding new spells or a new category".
 
   [{number}] = {
     -- catalog identity, matches a SpellMap top-level key (e.g. "priest")

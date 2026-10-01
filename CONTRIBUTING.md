@@ -63,7 +63,7 @@ change. The essentials:
   Presence of Mind, …) and track `SPELL_AURA_REMOVED` — check this class of spell carefully.
 
 The worked walkthrough with a full example entry, the overlay op shapes, and the list of
-invariants lives in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) ("Adding a class to the
+invariants lives in [DEVELOPMENT.md](DEVELOPMENT.md) ("Adding a class to the
 spellMap").
 
 **Acceptance gate:** the validators in `test/SpellMapValidation.lua` check every entry's
@@ -80,7 +80,7 @@ verification above matters.
 `CooldownWatch.toc` and `code/Environment.lua` are generated from templates in
 `build-resources/`. Never edit the generated files directly — change the `.tpl` (and matching
 `.properties`) file instead, and keep the repository in its development-environment state. See
-[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) ("Templated files") for details.
+[DEVELOPMENT.md](DEVELOPMENT.md) ("Templated files") for details.
 
 ## Pull request flow
 

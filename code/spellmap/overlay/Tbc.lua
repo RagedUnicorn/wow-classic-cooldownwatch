@@ -33,7 +33,7 @@ me.tag = "SpellMapOverlayTbc"
   Branch overlay applied when the Burning Crusade Classic client is active.
   Changed cooldown values express as replace ops, new TBC reranks as
   appendRanks ops, and TBC-only spells as add ops against the Classic Era
-  base catalog - op semantics in docs/DEVELOPMENT.md.
+  base catalog - op semantics in DEVELOPMENT.md.
 
   @return {table}
     Overlay table consumed by mod.spellMapAssembler.Apply
