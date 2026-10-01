@@ -73,12 +73,11 @@ The spell catalog lives in per-category slice files under `code/spellmap/base/` 
 `allRanks` list after assembly (`SpellMap.SynthesizeRankAliases`), so a slice only ever carries an explicit
 `refId` entry for an alias that is not derivable from `allRanks` (an aura id differing from the cast id, see the
 buff-then-consume section). Every slice registers its category on the shared `mod.spellMapBaseClasses` table, and
-`code/spellmap/Base.lua` assembles the slices (plus the central `sharedCooldownGroups`) into the Classic Era base
-map. Per-branch differences (SoD / TBC) go into `code/spellmap/overlay/Sod.lua` / `Tbc.lua` as `remove` / `add` /
-`replace` / `appendRanks` ops; `code/SpellMap.lua` is the orchestrator that detects the active branch, merges
-base + overlays through `code/spellmap/Assemble.lua`, caches the assembled map per branch, and exposes the public
-accessors (`GetSpellMap` and friends — consumers never read Base or overlays directly). Walk through with priest
-as the model.
+`code/spellmap/Base.lua` assembles the slices (plus the central `sharedCooldownGroups`) into the Classic Era base map.
+Per-branch differences (SoD / TBC) go into `code/spellmap/overlay/Sod.lua` / `Tbc.lua` as `remove` / `add` /
+`replace` / `appendRanks` ops; `code/SpellMap.lua` is the orchestrator that detects the active branch, merges base +
+overlays through `code/spellmap/Assemble.lua`, caches the assembled map per branch, and exposes the public accessors
+(`GetSpellMap` and friends — consumers never read Base or overlays directly). Walk through with priest as the model.
 
 ```lua
 -- code/spellmap/base/Priest.lua
@@ -105,26 +104,25 @@ mod.spellMapBaseClasses["priest"] = {
 }
 ```
 
-Whether a spell tracks **out of the box** is deliberately not part of the catalog entry. The curated default
-profile under `code/profile/` (same base + Sod/Tbc overlay layout, one slice per category registering an array of
-primary spellIds on `mod.profileBaseClasses`) lists the spells enabled on a never-configured profile —
-interrupts, hard CC, big defensives, key mobility, PvP trinkets; everything else is opt-in via the config menu,
-and an explicit player toggle always wins in both directions. A new catalog entry that should track by default
-gets its primary id added to the matching `code/profile/base/<Category>.lua` slice (`code/Profile.lua` assembles
-the sets per branch; `ValidateDefaultProfileIdsArePrimaries` rejects alias ids and ids the branch does not
-carry).
+Whether a spell tracks **out of the box** is deliberately not part of the catalog entry. The curated default profile
+under `code/profile/` (same base + Sod/Tbc overlay layout, one slice per category registering an array of primary
+spellIds on `mod.profileBaseClasses`) lists the spells enabled on a never-configured profile — interrupts, hard CC, big
+defensives, key mobility, PvP trinkets; everything else is opt-in via the config menu, and an explicit player toggle
+always wins in both directions. A new catalog entry that should track by default gets its primary id added to the
+matching `code/profile/base/<Category>.lua` slice (`code/Profile.lua` assembles the sets per branch;
+`ValidateDefaultProfileIdsArePrimaries` rejects alias ids and ids the branch does not carry).
 
 ### Required invariants (enforced by `SpellMapValidation`)
 
 - Every `refId` must point at a primary entry in the same category.
-- Every `allRanks` element must be a structured `{ spellId, type }` table with a positive integer `spellId` and a
-  known spell type constant (`SPELL_TYPE_BASE` / `SPELL_TYPE_SOD` / `SPELL_TYPE_TBC`).
+- Every `allRanks` element must be a structured `{ spellId, type }` table with a positive integer `spellId` and a known
+  spell type constant (`SPELL_TYPE_BASE` / `SPELL_TYPE_SOD` / `SPELL_TYPE_TBC`).
 - Every primary's `allRanks` must include an entry for its own spellId.
-- Every spellId in `allRanks` must exist in the same category as either the primary or a `refId` pointing back to
-  that primary.
+- Every spellId in `allRanks` must exist in the same category as either the primary or a `refId` pointing back to that
+  primary.
 - A spellId cannot be primary in more than one category. (Rank aliases may repeat.)
-- No base slice may hand-write a rank alias stub: a spellId listed in a primary's `allRanks` must not have its
-  own entry in the base catalog — those aliases are synthesized at assembly. (Aura aliases, which are not in
+- No base slice may hand-write a rank alias stub: a spellId listed in a primary's `allRanks` must not have its own entry
+  in the base catalog — those aliases are synthesized at assembly. (Aura aliases, which are not in
   `allRanks`, stay hand-written and pass this check.)
 - Base catalog entries (each primary's `type` and every `allRanks` entry's `type`) must be `SPELL_TYPE_BASE` —
   branch-specific spells live in their branch overlay, never in the base slices (see below).
@@ -134,12 +132,11 @@ These run in-game via `TestSpellMap` and headless under busted via `test/headles
 
 ### Adding new spells or a new category
 
-The catalog is the single source of truth for spell data: tests, combat-log handlers and debug tools derive
-spellIds, names, ranks, tracked events and shared-cooldown members from it through the SpellMap accessors, never
-from a restated list. Verify every spellId, rank and cooldown on Wowhead Classic
-(`https://www.wowhead.com/classic/spell=<id>`) — the combat log carries the *spell* name and id, so an
-item-triggered cooldown uses the item's "Use" effect spell (`name` must match `GetSpellInfo(spellId)`, not the item
-name).
+The catalog is the single source of truth for spell data: tests, combat-log handlers and debug tools derive spellIds,
+names, ranks, tracked events and shared-cooldown members from it through the SpellMap accessors, never from a restated
+list. Verify every spellId, rank and cooldown on Wowhead Classic (`https://www.wowhead.com/classic/spell=<id>`) — the
+combat log carries the *spell* name and id, so an item-triggered cooldown uses the item's "Use" effect spell (`name`
+must match `GetSpellInfo(spellId)`, not the item name).
 
 **A new spell in an existing category** is one primary entry in the category's slice under
 `code/spellmap/base/` with `name` / `type` / `cooldown` / `trackedEvents` / `allRanks`, every rank listed in
@@ -149,15 +146,15 @@ overlay instead (see below). The category suites and the validators pick the ent
 
 **A new category:**
 
-1. Add the category to the `categories` array in `code/Categories.lua` (`categoryName`, `localizationKey`, options
-   frame `name`) and its `category_<name>` label to every `localization/*.lua` file.
-2. Create `code/spellmap/base/<Category>.lua` registering `mod.spellMapBaseClasses["<category>"] = { ... }` (copy
-   an existing slice's header).
-3. Create `code/profile/base/<Category>.lua` registering `mod.profileBaseClasses["<category>"] = { ... }` — the
-   curated primary ids that track by default, possibly `{}`.
+1. Add the category to the `categories` array in `code/Categories.lua` (`categoryName`, `localizationKey`, options frame
+   `name`) and its `category_<name>` label to every `localization/*.lua` file.
+2. Create `code/spellmap/base/<Category>.lua` registering `mod.spellMapBaseClasses["<category>"] = { ... }` (copy an
+   existing slice's header).
+3. Create `code/profile/base/<Category>.lua` registering `mod.profileBaseClasses["<category>"] = { ... }` — the curated
+   primary ids that track by default, possibly `{}`.
 4. List both new slices in `build-resources/cooldownwatch-development.toc.tpl`,
-   `build-resources/cooldownwatch-release.toc.tpl`, `CooldownWatch.toc` and `test/headless/Bootstrap.lua` (the
-   assembly descriptors already glob `code/spellmap/base/*.lua` and `code/profile/base/*.lua`).
+   `build-resources/cooldownwatch-release.toc.tpl`, `CooldownWatch.toc` and `test/headless/Bootstrap.lua` (the assembly
+   descriptors already glob `code/spellmap/base/*.lua` and `code/profile/base/*.lua`).
 5. Create `test/category/Test<Category>Spells.lua` and register it in `CooldownWatch.toc` and the development
    `.toc` template (see "Adding a test suite for a new category" in `TEST.md`).
 6. Run `docker compose run --rm luacheck` and `docker compose run --rm busted` — the class-agnostic validators,
@@ -166,62 +163,59 @@ overlay instead (see below). The category suites and the validators pick the ent
 ### Branch-specific spells (Season of Discovery / TBC)
 
 Version-specific spell data never goes into `code/spellmap/base/` — it goes into the branch overlay
-(`code/spellmap/overlay/Sod.lua` / `Tbc.lua`) as ops against the Classic Era base, applied per category in this
-order:
+(`code/spellmap/overlay/Sod.lua` / `Tbc.lua`) as ops against the Classic Era base, applied per category in this order:
 
-- `remove` — drop a base spellId that does not exist (or was replaced) on the branch. When the branch merely
-  *demotes* the removed primary to a rank of a new primary (the TBC healthstone rework), list the old id in
-  the new entry's `allRanks` — it reappears as a synthesized rank alias, keeping the old casts tracked.
-- `add` — add a branch-only spell (typed `SPELL_TYPE_SOD` / `SPELL_TYPE_TBC`); the spellId must not exist in the
-  base.
-- `replace` — swap an existing base entry for branch-specific data, e.g. a rework or changed cooldown value.
-  The replaced primary carries the branch type (`SPELL_TYPE_SOD` / `SPELL_TYPE_TBC`); ranks in its `allRanks`
-  that also exist on Classic Era stay `SPELL_TYPE_BASE` (branch-only reranks still go through `appendRanks`).
-  A rework with a **new** spellId is modeled as `remove` + `add` instead, so each client shows exactly one
-  option for the spell.
+- `remove` — drop a base spellId that does not exist (or was replaced) on the branch. When the branch merely *demotes*
+  the removed primary to a rank of a new primary (the TBC healthstone rework), list the old id in the new entry's
+  `allRanks` — it reappears as a synthesized rank alias, keeping the old casts tracked.
+- `add` — add a branch-only spell (typed `SPELL_TYPE_SOD` / `SPELL_TYPE_TBC`); the spellId must not exist in the base.
+- `replace` — swap an existing base entry for branch-specific data, e.g. a rework or changed cooldown value. The
+  replaced primary carries the branch type (`SPELL_TYPE_SOD` / `SPELL_TYPE_TBC`); ranks in its `allRanks`
+  that also exist on Classic Era stay `SPELL_TYPE_BASE` (branch-only reranks still go through `appendRanks`). A rework
+  with a **new** spellId is modeled as `remove` + `add` instead, so each client shows exactly one option for the spell.
 - `appendRanks` — append a branch-only rank (`{ spellId, type }`) to an existing base entry's `allRanks`
   without duplicating the whole entry.
 
-Ops are validated on assembly (`spellMapAssembler.Validate` logs every violation; `Apply` skips invalid ops),
-and `ValidateBaseEntriesAreBaseType` fails the test suites if a branch-typed entry sneaks into the base.
-PVPWarn's `code/spellmap/overlay/Sod.lua` is the worked reference for all op shapes.
+Ops are validated on assembly (`spellMapAssembler.Validate` logs every violation; `Apply` skips invalid ops), and
+`ValidateBaseEntriesAreBaseType` fails the test suites if a branch-typed entry sneaks into the base. PVPWarn's
+`code/spellmap/overlay/Sod.lua` is the worked reference for all op shapes.
 
-**Type tags and overlays coexist** (PVPWarn parity): the overlay decides which entries
-exist in the assembled map for a branch, while the `type` tag on each entry still drives
-`SpellMapHelper.IsPrimaryAllowedInCurrentSeason` — season/UI gating of listings and lookups, plus TEST-mode
-visibility (the helper carries one arm per branch type; a new `SPELL_TYPE_*` constant needs its arm added
-there). Both an overlay op and a correct `type` tag are required when adding a branch-specific spell.
+**Type tags and overlays coexist** (PVPWarn parity): the overlay decides which entries exist in the assembled map for a
+branch, while the `type` tag on each entry still drives
+`SpellMapHelper.IsPrimaryAllowedInCurrentSeason` — season/UI gating of listings and lookups, plus TEST-mode visibility
+(the helper carries one arm per branch type; a new `SPELL_TYPE_*` constant needs its arm added there). Both an overlay
+op and a correct `type` tag are required when adding a branch-specific spell.
 
-**Test surfaces for branch-only entries** (convention settled by the TBC warrior pilot): the in-game
-category suites need **no edits** — `RunAllTests` derives its spell list from the live assembled map via
+**Test surfaces for branch-only entries** (convention settled by the TBC warrior pilot): the in-game category suites
+need **no edits** — `RunAllTests` derives its spell list from the live assembled map via
 `GetSpellsForCategory`, so a client running the branch exercises the overlay entries automatically, and
-`CategorySuiteCoverageSpec` is keyed by category (branch entries land in existing categories), so it is
-unaffected too. Hardcoded extras in a suite (e.g. a rank-resolution check) stay pinned to base entries —
-they must pass on every branch. The headless proof that a branch overlay's real data flows through the
-orchestrator (branch seam, assembly, rank-alias synthesis, decoration) lives in the per-branch overlay spec
-(`test/headless/spec/SpellMapTbcOverlaySpec.lua`, which derives all expectations from the overlay's own ops
-and therefore covers new category blocks without spec edits); the per-branch consistency validators in
+`CategorySuiteCoverageSpec` is keyed by category (branch entries land in existing categories), so it is unaffected too.
+Hardcoded extras in a suite (e.g. a rank-resolution check) stay pinned to base entries — they must pass on every branch.
+The headless proof that a branch overlay's real data flows through the orchestrator (branch seam, assembly, rank-alias
+synthesis, decoration) lives in the per-branch overlay spec (`test/headless/spec/SpellMapTbcOverlaySpec.lua`, which
+derives all expectations from the overlay's own ops and therefore covers new category blocks without spec edits); the
+per-branch consistency validators in
 `SpellMapSpec.lua` cover the assembled data itself.
 
 ### Buff-then-consume spells: track `SPELL_AURA_REMOVED`
 
-Next-spell-modifier buffs (Cold Blood, Presence of Mind, Inner Focus, Divine Favor, Nature's Swiftness,
-Elemental Mastery, Combustion, Amplify Curse) start their cooldown when the buff **disappears** — consumed,
-cancelled, or purged — not when it is cast. Their entries use
-`trackedEvents = { "SPELL_AURA_REMOVED" }` instead of `SPELL_CAST_SUCCESS`; tracking the cast would queue the
-cooldown too early.
+Next-spell-modifier buffs (Cold Blood, Presence of Mind, Inner Focus, Divine Favor, Nature's Swiftness, Elemental
+Mastery, Combustion, Amplify Curse) start their cooldown when the buff **disappears** — consumed, cancelled, or purged —
+not when it is cast. Their entries use
+`trackedEvents = { "SPELL_AURA_REMOVED" }` instead of `SPELL_CAST_SUCCESS`; tracking the cast would queue the cooldown
+too early.
 
 Two things to check when adding such a spell:
 
-- **Aura spellId vs cast spellId.** Verify on the wowhead spell page that the buff is applied by the same
-  spellId ("Apply Aura" effect on the cast spell). If the cast *triggers* a separate buff spell, the removal
-  event carries the **buff's** id — add a `refId` alias entry for the aura id pointing at the primary. The
-  tell that no alias is needed: the cast id itself carries the DB2 "starts cooldown after aura fades"
+- **Aura spellId vs cast spellId.** Verify on the wowhead spell page that the buff is applied by the same spellId (
+  "Apply Aura" effect on the cast spell). If the cast *triggers* a separate buff spell, the removal event carries the
+  **buff's** id — add a `refId` alias entry for the aura id pointing at the primary. The tell that no alias is needed:
+  the cast id itself carries the DB2 "starts cooldown after aura fades"
   attribute (wowhead spell filter 63;1;0). Every current buff-then-consume entry does — including Combustion
   `11129`, whose lookalike buff spell `28682` is not player-used — so the catalog has no such alias today.
-- **Supported events.** `CombatLog` only dispatches events listed in its `supportedEvents` table
-  (`GetSupportedEvents`); the `ValidateTrackedEventsSupported` validator fails on anything else. Aura events
-  attribute the acting player via the **dest** unit (the buff owner) since aura events may carry no source.
+- **Supported events.** `CombatLog` only dispatches events listed in its `supportedEvents` table (`GetSupportedEvents`);
+  the `ValidateTrackedEventsSupported` validator fails on anything else. Aura events attribute the acting player via the
+  **dest** unit (the buff owner) since aura events may carry no source.
 
 ### Shared-cooldown groups
 
@@ -260,18 +254,18 @@ all members share the same `cooldown`.
    `IsCooldownWorstCaseAssumed` collapses only the per-spell tri-state and is suitable **only** for the checkbox's own
    state — it must not fold in the global default, or ticking the global option would make every checkbox appear
    individually set.
-4. **Base cooldown** — spells without a `cooldownWorstCase` value are never affected by the worst-case settings
-   (the manual override applies to every spell).
+4. **Base cooldown** — spells without a `cooldownWorstCase` value are never affected by the worst-case settings (the
+   manual override applies to every spell).
 
-Whichever worst-case value is used comes from `cooldownOverrides[category][spellId].worstCaseValue` when the player
-set one (the `Worst case` input in the cooldown menu), and from the catalog's `cooldownWorstCase` otherwise. That
+Whichever worst-case value is used comes from `cooldownOverrides[category][spellId].worstCaseValue` when the player set
+one (the `Worst case` input in the cooldown menu), and from the catalog's `cooldownWorstCase` otherwise. That
 substitution happens before the toggle is consulted, so a corrected value also shows up on the bar's hint timer while
 the worst case is *not* assumed. Whether a spell has a worst case at all stays the catalog's call — a stored
 `worstCaseValue` for a spell without a catalog `cooldownWorstCase` is stale data and stays inert.
 
 When the manual override or the worst case applies the value is promoted into `cooldown` and `cooldownWorstCase` is
-cleared, so the bar renders a single authoritative timer. Changing a setting only affects future casts — in-flight
-queue entries keep their resolved value.
+cleared, so the bar renders a single authoritative timer. Changing a setting only affects future casts — in-flight queue
+entries keep their resolved value.
 
 Both numeric fields share one store helper, so they cannot drift apart in validation: non-numbers, NaN, values `<= 0`
 and values above `RGCW_CONSTANTS.COOLDOWN_MAX_SECONDS` are rejected, `nil` clears the field, and nothing else is
@@ -285,9 +279,9 @@ The **worst-case** field carries one extra rule on top (`UpdateCooldownWorstCase
 the spell's base cooldown. A worst case at or above the base describes nothing — assuming it would make the tracked
 cooldown longer than the spell can possibly have, and at exactly the base the toggle would silently do nothing. The
 comparison is against the *catalog* cooldown, never a manual override: an override replaces the resolution wholesale
-(worst-case settings included), so it is not the value this field is a worst case of. Spells unknown to SpellMap have
-no base to compare against and skip the check. `SpellMapValidation.ValidateCooldownWorstCaseSane` holds the catalog to
-the identical rule, so the catalog cannot ship a shape the UI would refuse for it.
+(worst-case settings included), so it is not the value this field is a worst case of. Spells unknown to SpellMap have no
+base to compare against and skip the check. `SpellMapValidation.ValidateCooldownWorstCaseSane` holds the catalog to the
+identical rule, so the catalog cannot ship a shape the UI would refuse for it.
 
 ### The 60 minute cooldown limit
 
@@ -304,38 +298,38 @@ rather than a spell — and an accepted one would sit on the bar for the rest of
 
 ### Fractional cooldowns
 
-The catalog holds fractional values (priest Mind Blast `cooldownWorstCase = 5.5`, mage `6.5`) and typed overrides may
-be fractional too. Three places have to agree for that to work, and all three are exercised:
+The catalog holds fractional values (priest Mind Blast `cooldownWorstCase = 5.5`, mage `6.5`) and typed overrides may be
+fractional too. Three places have to agree for that to work, and all three are exercised:
 
 - **Display** goes through one of the two formatters below, both of which keep fractions.
 - **Parsing** is `Common.ParseSeconds`, not a bare `tonumber`. `tonumber` accepts hex (`0x10` → 16) and scientific
-  notation (`1e5` → 100000), neither of which anyone types into a seconds box and both of which land far from what
-  the text looks like. It also normalizes a decimal comma (`12,5`) because the addon ships a deDE locale.
+  notation (`1e5` → 100000), neither of which anyone types into a seconds box and both of which land far from what the
+  text looks like. It also normalizes a decimal comma (`12,5`) because the addon ships a deDE locale.
 
 `VALUE_FIELD_MAX_LETTERS` is sized for the longest input the limit allows plus two decimals (`3600.99`). This is not
-cosmetic: with a limit that only fit whole seconds, `120.5` was cut to `120.` and `tonumber` read that back as `120` —
-a silently wrong value the player had no way to notice.
+cosmetic: with a limit that only fit whole seconds, `120.5` was cut to `120.` and `tonumber` read that back as `120` — a
+silently wrong value the player had no way to notice.
 
 ### Two cooldown formatters, two different constraints
 
 `Common` owns both. They are deliberately **not** one function — the difference is the space they render into, and
 collapsing them would force one of the two surfaces to accept a bad trade.
 
-| | `FormatCooldownTime` | `FormatCooldownDuration` |
-|---|---|---|
-| Renders into | a 60px bar slot at font size 17 | the description line under a spell name |
-| Optimised for | staying inside the slot | being read at a glance |
-| `>= 60s` | `60m` `30m` `2m` (ceil) | `1m 30s`, or `2m` on the dot |
-| `10s`–`59s` | `59` `10` | `30s` |
-| `< 10s` | `9.9` `0.4` | `5.5s` |
-| Longest output | 4 characters | — |
+|                | `FormatCooldownTime`            | `FormatCooldownDuration`                |
+|----------------|---------------------------------|-----------------------------------------|
+| Renders into   | a 60px bar slot at font size 17 | the description line under a spell name |
+| Optimised for  | staying inside the slot         | being read at a glance                  |
+| `>= 60s`       | `60m` `30m` `2m` (ceil)         | `1m 30s`, or `2m` on the dot            |
+| `10s`–`59s`    | `59` `10`                       | `30s`                                   |
+| `< 10s`        | `9.9` `0.4`                     | `5.5s`                                  |
+| Longest output | 4 characters                    | —                                       |
 
-The bar formatter's length bound is the actual fix for the overflow, and `CommonSpec` asserts it by walking every
-tenth of a second up to `COOLDOWN_MAX_SECONDS` rather than by spot-checking the values the catalog happens to hold
-today. The second half of the fix is in `TargetCooldownBarSlot.CreateBigTimerCooldown`: the font string spans the slot
+The bar formatter's length bound is the actual fix for the overflow, and `CommonSpec` asserts it by walking every tenth
+of a second up to `COOLDOWN_MAX_SECONDS` rather than by spot-checking the values the catalog happens to hold today. The
+second half of the fix is in `TargetCooldownBarSlot.CreateBigTimerCooldown`: the font string spans the slot
 (`TARGET_COOLDOWN_TEXT_INSET` from both edges) and centers, replacing a left anchor at one of two hardcoded x offsets
-chosen by whether the value was above or below 10s. That was an approximation of centering that only held for the
-string lengths it was tuned against — `3600.0` blew straight past it into the neighbouring slot.
+chosen by whether the value was above or below 10s. That was an approximation of centering that only held for the string
+lengths it was tuned against — `3600.0` blew straight past it into the neighbouring slot.
 
 The editable value fields in the options menu are the one place that stays raw seconds: they are inputs, and a unit
 suffix inside the box would have to be parsed back out.
@@ -348,8 +342,8 @@ The configuration panels follow the shared design of Pulse and GearMenu (derived
   `DISABLED`, `SUBNOTE`), applied via `GuiHelper.SetColor`. The table mirrors Pulse's and GearMenu's values exactly —
   when a token changes, change it in the whole family. It is distinct from `RGCW_CONSTANTS.COLORS`, the
   CooldownWatch-specific `{ r, g, b, a }` slot colors of the target cooldown bar.
-- **Panel titles** are `GameFontNormalLarge` font strings anchored `TOPLEFT 16, -16` in `TITLE_GOLD` — not centered,
-  not `STANDARD_TEXT_FONT`.
+- **Panel titles** are `GameFontNormalLarge` font strings anchored `TOPLEFT 16, -16` in `TITLE_GOLD` — not centered, not
+  `STANDARD_TEXT_FONT`.
 - **Checkboxes** are built through `GuiHelper.CreateCheckBox` (`SettingsCheckboxTemplate`, sized by
   `CHECK_OPTION_SIZE`): the template's list-row hover scripts are removed, a `BODY`-colored label is created as
   `.text` (the template ships none), and an optional always-visible `SUBNOTE` description renders beneath the box
@@ -363,55 +357,55 @@ The configuration panels follow the shared design of Pulse and GearMenu (derived
   wires one shared set of scripts; each caller points `GetOverride` / `SetOverride` / `GetCatalogValue` at its own
   configuration field. Editing semantics are uniform and match ordinary form inputs: **Enter or leaving the box
   applies**, Escape abandons, and an emptied box clears the override. Two rules keep that safe. Text identical to
-  `boundText` (what the field was last bound to) is a no-op, so clicking into an unconfigured field and back out
-  cannot turn the displayed catalog value into a stored override. And when the *addon* takes focus away rather than
-  the player — a recycled row rebinding onto another spell, a row being locked because the spell was untracked — the
-  commit is skipped via `DropFieldEdit`, never a plain `ClearFocus`.
-- **Two visual channels per value field** (`ApplySingleFieldHighlight`): the lit border marks the value the runtime
-  will actually use for the spell, while solid vs. dimmed text marks the player's own value vs. the catalog value
-  merely displayed in the box. The dimmed state reads as placeholder text, which is what it is — without it there is
-  no way to tell a configured spell from an untouched one.
+  `boundText` (what the field was last bound to) is a no-op, so clicking into an unconfigured field and back out cannot
+  turn the displayed catalog value into a stored override. And when the *addon* takes focus away rather than the
+  player — a recycled row rebinding onto another spell, a row being locked because the spell was untracked — the commit
+  is skipped via `DropFieldEdit`, never a plain `ClearFocus`.
+- **Two visual channels per value field** (`ApplySingleFieldHighlight`): the lit border marks the value the runtime will
+  actually use for the spell, while solid vs. dimmed text marks the player's own value vs. the catalog value merely
+  displayed in the box. The dimmed state reads as placeholder text, which is what it is — without it there is no way to
+  tell a configured spell from an untouched one.
 
-  The border lights in the field's **own** colour (`valueField.liveBorderColor`) — gold for the cooldown field, cyan
-  for the worst-case field — so it says *which kind* of value is live, not merely that one is. Lighting the worst-case
-  field gold would have it claim the player set a value on this spell when the global default may be what switched it
-  on. Same palette as the description line, and the same cyan as the bar's small worst-case timer.
+  The border lights in the field's **own** colour (`valueField.liveBorderColor`) — gold for the cooldown field, cyan for
+  the worst-case field — so it says *which kind* of value is live, not merely that one is. Lighting the worst-case field
+  gold would have it claim the player set a value on this spell when the global default may be what switched it on. Same
+  palette as the description line, and the same cyan as the bar's small worst-case timer.
 - **The collapsed row's description line** (`BuildCooldownValueSegments` / `UpdateCooldownValueLine`) lists **every**
   value the spell has, worst case first, joined with ` / `:
 
-  | State | Line |
-  |---|---|
-  | plain | `30s cooldown` |
-  | "Use worst case" **on** | `20s worst case / 30s cooldown` |
-  | …and the cooldown overridden | `20s worst case / 15s override (base 30s)` |
-  | "Use worst case" **off** | `30s cooldown` |
+| State                        | Line                                       |
+|------------------------------|--------------------------------------------|
+| plain                        | `30s cooldown`                             |
+| "Use worst case" **on**      | `20s worst case / 30s cooldown`            |
+| …and the cooldown overridden | `20s worst case / 15s override (base 30s)` |
+| "Use worst case" **off**     | `30s cooldown`                             |
 
   The worst-case segment tracks the **toggle**, not the resolution: it appears whenever the worst case is switched on
   for the spell (per-spell toggle, or the global default for a spell that was never configured) and disappears the
-  moment it is switched off. A cooldown override beats the worst case at resolution time but does **not** hide it here
-  — the two are independent settings, and an earlier version that hid the worst case whenever an override existed lost
+  moment it is switched off. A cooldown override beats the worst case at resolution time but does **not** hide it here —
+  the two are independent settings, and an earlier version that hid the worst case whenever an override existed lost
   information the player had put in.
 
   Because segments need different colours in one font string, they are wrapped in inline escapes via
-  `Common.ColorText`; the font string's own colour (`SUBNOTE`) shows through on the separators. Colour says what kind
-  of value each segment is — `WORST_CASE` cyan for a worst case, `TITLE_GOLD` for a cooldown the player set on this
-  spell, `SUBNOTE` for an untouched catalog value.
+  `Common.ColorText`; the font string's own colour (`SUBNOTE`) shows through on the separators. Colour says what kind of
+  value each segment is — `WORST_CASE` cyan for a worst case, `TITLE_GOLD` for a cooldown the player set on this spell,
+  `SUBNOTE` for an untouched catalog value.
 
   So gold only ever means "the player set this value on **this** spell" and is never reached by the global worst-case
   default; marking a spell as customized when the player never touched it is the confusion the line exists to remove.
-  The cyan is the one the bar's small worst-case timer and the strip's worst-case field border use, so worst case
-  keeps one hue across all three surfaces.
+  The cyan is the one the bar's small worst-case timer and the strip's worst-case field border use, so worst case keeps
+  one hue across all three surfaces.
 
-  An untracked row emits its segments **without** escapes so `SetTextColor(DISABLED)` can dim the whole line — an
-  inline escape would survive it and leave a greyed-out row still showing live colours.
+  An untracked row emits its segments **without** escapes so `SetTextColor(DISABLED)` can dim the whole line — an inline
+  escape would survive it and leave a greyed-out row still showing live colours.
 
   Whether the worst case is switched on comes from `Configuration.IsWorstCaseEffective`, which is the same accessor
   `ResolveCooldown` uses, so the line and the runtime cannot disagree about it. (`IsCooldownWorstCaseAssumed` is its
-  deliberately different sibling: it collapses only the per-spell tri-state and drives the checkbox's own checked
-  state, which must *not* fold in the global default or ticking the global option would make every checkbox appear
-  individually set.) The gold border in the expansion strip still marks the truly-live value via a scratch
-  `ResolveCooldown`, so with an override set the line shows the worst case while the border sits on the cooldown
-  field — the line is an inventory of settings, the border marks the winner. The line is rebound from
+  deliberately different sibling: it collapses only the per-spell tri-state and drives the checkbox's own checked state,
+  which must *not* fold in the global default or ticking the global option would make every checkbox appear individually
+  set.) The gold border in the expansion strip still marks the truly-live value via a scratch
+  `ResolveCooldown`, so with an override set the line shows the worst case while the border sits on the cooldown field —
+  the line is an inventory of settings, the border marks the winner. The line is rebound from
   `UpdateRowControlsState` (which covers the row rebind and the tracking checkbox), and from `RefreshRowResolvedState`
   on the three paths that change the resolution without touching that checkbox (`WorstCaseToggleOnClick`,
   `CommitValueField`, `ValueFieldResetOnClick`). Escape and a rejected value restore rather than change it, so they
@@ -426,61 +420,60 @@ The configuration panels follow the shared design of Pulse and GearMenu (derived
   canvas. The elements after each key anchor **past** it rather than to the field's suffix, so the space is reserved
   whether the key is shown or not and the strip does not shuffle sideways when a value is overridden. Their
   `OnEnter`/`OnLeave` are `HookScript`ed, not `SetScript`ed — `CreateSlateKey` owns those for the hover glow.
-- **Scrollbars** are minimal: a bare `ScrollFrame` plus a `MinimalScrollBar` EventFrame anchored 8px to its right,
-  wired with `ScrollUtil.InitScrollFrameWithScrollBar` (handles the wheel too). `UIPanelScrollFrameTemplate` and
-  `FauxScrollFrameTemplate` are not used anymore — the spell list keeps one real row per spell in the scroll child
-  (rows created on demand, surplus rows hidden, scroll range driven by the content height) instead of faux-scroll row
+- **Scrollbars** are minimal: a bare `ScrollFrame` plus a `MinimalScrollBar` EventFrame anchored 8px to its right, wired
+  with `ScrollUtil.InitScrollFrameWithScrollBar` (handles the wheel too). `UIPanelScrollFrameTemplate` and
+  `FauxScrollFrameTemplate` are not used anymore — the spell list keeps one real row per spell in the scroll child (rows
+  created on demand, surplus rows hidden, scroll range driven by the content height) instead of faux-scroll row
   recycling. The export/import box keeps `InputScrollFrameTemplate`'s own bar (family precedent; it only appears on
   overflow).
 
 ## Settings profiles
 
-Two things in this repo are called "profile", and they are unrelated. `code/profile/` with `rgcw.profile` is the
-curated set of cooldowns that track out of the box (the never-configured default the enabled-state gate falls back
-to). `code/ConfigProfile.lua` (`rgcw.configProfile`; the page is `gui/ProfileMenu.lua`, `rgcw.profileMenu`) is the
-settings profiles feature every sibling addon carries, cloned from the Quartermaster reference implementation. This
-section is about the latter - keep the shape below when touching it, so a reader can move between the repos.
+Two things in this repo are called "profile", and they are unrelated. `code/profile/` with `rgcw.profile` is the curated
+set of cooldowns that track out of the box (the never-configured default the enabled-state gate falls back to).
+`code/ConfigProfile.lua` (`rgcw.configProfile`; the page is `gui/ProfileMenu.lua`, `rgcw.profileMenu`) is the settings
+profiles feature every sibling addon carries, cloned from the Quartermaster reference implementation. This section is
+about the latter - keep the shape below when touching it, so a reader can move between the repos.
 
 **Two data homes.** The live configuration is `CooldownWatchConfiguration`: what every accessor in
 `code/Configuration.lua` writes and every reader reads. The profile store is
 `CooldownWatchConfiguration.profiles = { [name] = snapshot }`, one stored copy per profile. A profile captures the
 `PROFILE_FIELDS` fields - the bar scale, the global worst-case default, the two friendly flags, the per-side tracking
-and override stores, both proximity window blocks and `frames` (every surface's position). Bookkeeping stays out of
-it: `addonVersion`, `lastNotifiedVersion`, the store itself and `activeProfile`, the name of the profile the live
+and override stores, both proximity window blocks and `frames` (every surface's position). Bookkeeping stays out of it:
+`addonVersion`, `lastNotifiedVersion`, the store itself and `activeProfile`, the name of the profile the live
 configuration belongs to. `activeProfile` is written only by `EnsureActiveProfile`, `SwitchProfile`, `CreateProfile`,
 `DeleteProfile` and `RenameProfile` (and repaired by `SaveActiveProfile`), and it is deliberately absent from
 `GetDefaults()` - the reconcile would backfill `"Default"` before the adoption below could run and make it dead code.
 
 **The mirror rule.** Edits always belong to the active profile, but nothing hooks the setters. `SaveActiveProfile()`
-copies the live configuration into `store[activeProfile]` at five moments: before a switch, on `PLAYER_LOGOUT` (a
-gated bus registration in `Core.OnLoad`; the event fires on logout, `/reload` and disconnect before the SavedVariables
-are written, and not on a crash - where the SavedVariables are not written either), on export, after a reset, and at
-the end of `EnsureActiveProfile()` at every login - the self-heal for a logout the mirror missed. Between those
-moments the live SavedVariable is the truth. A nil or dangling active name is repaired to Default before the mirror
-lands.
+copies the live configuration into `store[activeProfile]` at five moments: before a switch, on `PLAYER_LOGOUT` (a gated
+bus registration in `Core.OnLoad`; the event fires on logout, `/reload` and disconnect before the SavedVariables are
+written, and not on a crash - where the SavedVariables are not written either), on export, after a reset, and at the end
+of `EnsureActiveProfile()` at every login - the self-heal for a logout the mirror missed. Between those moments the live
+SavedVariable is the truth. A nil or dangling active name is repaired to Default before the mirror lands.
 
 **Adoption at login.** `Core.Initialize` runs `EnsureDefaultProfile()`, which seeds Default only when the store has
-none, and then `EnsureActiveProfile()`: a store that names a stored profile keeps it; the first login after the
-upgrade from the snapshot model (no `activeProfile` yet) or a name whose profile went activates the first non-Default
-profile whose stored copy deep-equals the live configuration (`Common.DeepEquals` - the player applied it and changed
-nothing since), else Default. Either way the login ends with the active profile equal to the live configuration.
+none, and then `EnsureActiveProfile()`: a store that names a stored profile keeps it; the first login after the upgrade
+from the snapshot model (no `activeProfile` yet) or a name whose profile went activates the first non-Default profile
+whose stored copy deep-equals the live configuration (`Common.DeepEquals` - the player applied it and changed nothing
+since), else Default. Either way the login ends with the active profile equal to the live configuration.
 
 **Default and Reset to defaults.** Default is the editable home profile every character starts on: never deleted,
-renamed, imported over or created over (`profile_error_default_cannot_be_overwritten` reads "reserved name"; the name
-is a SavedVariables key and the export envelope name, never localized), otherwise a profile like any other. The
-factory settings are not a profile any more - `ResetActiveProfile()` applies `BuildDefaultSnapshot()` (`GetDefaults()`
-cut to the profile fields: the curated default-enabled sets, empty overrides, the factory window options, no
-positions) to the live configuration and mirrors the result into the active profile.
+renamed, imported over or created over (`profile_error_default_cannot_be_overwritten` reads "reserved name"; the name is
+a SavedVariables key and the export envelope name, never localized), otherwise a profile like any other. The factory
+settings are not a profile any more - `ResetActiveProfile()` applies `BuildDefaultSnapshot()` (`GetDefaults()`
+cut to the profile fields: the curated default-enabled sets, empty overrides, the factory window options, no positions)
+to the live configuration and mirrors the result into the active profile.
 
 **Switch, delete, export.** `SwitchProfile(name)` mirrors, applies `store[name]` and makes it active; `false` for the
 active or an unknown name. `DeleteProfile(name)` of the active profile applies Default and returns a second value
 `fellBack`, with no mirror before or after (it would resurrect the deleted profile). Every page path that applies a
 snapshot - Load, Reset to defaults, deleting the active profile - ends in a plain `ReloadUI()`, so the bar, both
 proximity windows and every settings panel rebuild from the applied state at login (the post-reload logout mirror
-re-writes the `SetupConfiguration`-normalised copy - harmless). Export mirrors first and then exports the stored copy
-of the selected row, so the active row exports the live settings; an import is stored inactive. Accepted quirk: a
-stored profile from an older schema lacks the newer fields, `ApplySnapshot` keeps the live value for those and the
-first mirror persists it.
+re-writes the `SetupConfiguration`-normalised copy - harmless). Export mirrors first and then exports the stored copy of
+the selected row, so the active row exports the live settings; an import is stored inactive. Accepted quirk: a stored
+profile from an older schema lacks the newer fields, `ApplySnapshot` keeps the live value for those and the first mirror
+persists it.
 
 **Adding a field to a profile.** One entry in `GetDefaults()` in `code/Configuration.lua` (plus the
 `CooldownWatchConfiguration` literal at its top, which only applies to a never-saved character - the reconcile covers
@@ -493,15 +486,15 @@ crafted scale or frame position never reaches `SetScale` / `SetPoint`; `PROFILE_
 **Page to module.** Every confirm answers Yes / No, every name prompt Accept / Cancel (the client `YES` / `NO` /
 `ACCEPT` / `CANCEL` globals); the click guards print the refusal a greyed button already shows.
 
-| Button / popup | Module call | Greyed while | Reloads |
-|---|---|---|---|
-| Create new Profile (`COOLDOWNWATCH_PROFILE_CREATE`, name prompt) | `CreateProfile(name)` - mirror, copy, activate | never | no |
-| Load (`COOLDOWNWATCH_PROFILE_LOAD`) | `SwitchProfile(name)` | nothing selected, the active row | yes |
-| Rename (`COOLDOWNWATCH_PROFILE_RENAME`, name prompt) | `RenameProfile(old, new)` - the active name follows | nothing selected, Default | no |
-| Delete (`COOLDOWNWATCH_PROFILE_DELETE`, `COOLDOWNWATCH_PROFILE_DELETE_ACTIVE` on the active row) | `DeleteProfile(name)` -> `deleted, fellBack` | nothing selected, Default | only when `fellBack` |
-| Reset to defaults (`COOLDOWNWATCH_PROFILE_RESET`) | `ResetActiveProfile()` | never | yes |
-| Export | `SaveActiveProfile()`, then `ExportString(GetProfile(name), name)` | nothing selected | no |
-| Import (`COOLDOWNWATCH_PROFILE_IMPORT`, name prompt prefilled from the string) | `ImportString(text)`, then `SaveProfile(name, payload)` - stored inactive | never | no |
+| Button / popup                                                                                   | Module call                                                               | Greyed while                     | Reloads              |
+|--------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|----------------------------------|----------------------|
+| Create new Profile (`COOLDOWNWATCH_PROFILE_CREATE`, name prompt)                                 | `CreateProfile(name)` - mirror, copy, activate                            | never                            | no                   |
+| Load (`COOLDOWNWATCH_PROFILE_LOAD`)                                                              | `SwitchProfile(name)`                                                     | nothing selected, the active row | yes                  |
+| Rename (`COOLDOWNWATCH_PROFILE_RENAME`, name prompt)                                             | `RenameProfile(old, new)` - the active name follows                       | nothing selected, Default        | no                   |
+| Delete (`COOLDOWNWATCH_PROFILE_DELETE`, `COOLDOWNWATCH_PROFILE_DELETE_ACTIVE` on the active row) | `DeleteProfile(name)` -> `deleted, fellBack`                              | nothing selected, Default        | only when `fellBack` |
+| Reset to defaults (`COOLDOWNWATCH_PROFILE_RESET`)                                                | `ResetActiveProfile()`                                                    | never                            | yes                  |
+| Export                                                                                           | `SaveActiveProfile()`, then `ExportString(GetProfile(name), name)`        | nothing selected                 | no                   |
+| Import (`COOLDOWNWATCH_PROFILE_IMPORT`, name prompt prefilled from the string)                   | `ImportString(text)`, then `SaveProfile(name, payload)` - stored inactive | never                            | no                   |
 
 **Profile data flow**
 
@@ -510,9 +503,9 @@ flowchart LR
   live[("CooldownWatchConfiguration<br/>the live configuration")]
   store[("CooldownWatchConfiguration.profiles<br/>the profile store")]
   defaults["GetDefaults()"]
-  live -- "SaveActiveProfile()<br/>before a switch, on PLAYER_LOGOUT,<br/>on export, after a reset, at login" --> store
-  store -- "ApplySnapshot(store[name])<br/>SwitchProfile, delete-active fallback" --> live
-  defaults -- "ResetActiveProfile()<br/>ApplySnapshot(BuildDefaultSnapshot())" --> live
+  live -- " SaveActiveProfile()<br/>before a switch, on PLAYER_LOGOUT,<br/>on export, after a reset, at login " --> store
+  store -- " ApplySnapshot(store[name])<br/>SwitchProfile, delete-active fallback " --> live
+  defaults -- " ResetActiveProfile()<br/>ApplySnapshot(BuildDefaultSnapshot()) " --> live
 ```
 
 **Adoption at login**
@@ -531,18 +524,18 @@ flowchart TD
 ```
 
 Headless coverage: the `default profile` and `active profile` blocks of `test/headless/spec/ConfigProfileSpec.lua`
-(the fixture runs against the real `SetupConfiguration`, so the `active profile` block normalises the live
-configuration once up front - every apply path reconciles, and a snapshot taken before an apply must still deep-equal
-the live configuration after it) and the `DeepEquals` block of `CommonSpec.lua`. `PLAYER_LOGOUT` itself is not
-headless-testable; the mirror it runs is.
+(the fixture runs against the real `SetupConfiguration`, so the `active profile` block normalises the live configuration
+once up front - every apply path reconciles, and a snapshot taken before an apply must still deep-equal the live
+configuration after it) and the `DeepEquals` block of `CommonSpec.lua`. `PLAYER_LOGOUT` itself is not headless-testable;
+the mirror it runs is.
 
 ## Local functions
 
-A file-private helper is a plain `local function Name()` defined above its first caller, so a module reads
-bottom-up: helpers first, then the public `me.X` functions that use them. Self-recursion needs nothing extra - the
-name is in scope inside its own body (the serializer's `EncodeValue` / `ReadValue`). Forward-declare a local
-(`local Name` and later `Name = function()`) only for mutual recursion; group those declarations in one commented
-block at the top of the file. A local function referenced before its definition reads an undefined global, which
+A file-private helper is a plain `local function Name()` defined above its first caller, so a module reads bottom-up:
+helpers first, then the public `me.X` functions that use them. Self-recursion needs nothing extra - the name is in scope
+inside its own body (the serializer's `EncodeValue` / `ReadValue`). Forward-declare a local (`local Name` and later
+`Name = function()`) only for mutual recursion; group those declarations in one commented block at the top of the file.
+A local function referenced before its definition reads an undefined global, which
 `luacheck` reports.
 
 ## Linting
@@ -584,7 +577,9 @@ Switching between development and release can be achieved with maven.
 mvn generate-resources -D generate.sources.overwrite=true -P development
 ```
 
-This generates and overwrites `code/Environment.lua` and `CooldownWatch.toc`. You need to specifically specify that you want to overwrite the files to prevent data loss. It is also possible to omit the profile because development is the default profile that will be used.
+This generates and overwrites `code/Environment.lua` and `CooldownWatch.toc`. You need to specifically specify that you
+want to overwrite the files to prevent data loss. It is also possible to omit the profile because development is the
+default profile that will be used.
 
 Switching to release can be done as such:
 
@@ -594,9 +589,13 @@ mvn generate-resources -D generate.sources.overwrite=true -P release
 
 In this case it is mandatory to add the release profile.
 
-**Note:** Switching environments has the effect of changing certain files to match an expected value depending on the environment. To be more specific this means that as an example test and debug files are not included when switching to release. It also means that variables such as loglevel change to match the environment.
+**Note:** Switching environments has the effect of changing certain files to match an expected value depending on the
+environment. To be more specific this means that as an example test and debug files are not included when switching to
+release. It also means that variables such as loglevel change to match the environment.
 
-To avoid changing those files all the time the repository should always stay in the development environment. Do not commit `CooldownWatch.toc` and `code/Environment.lua` in their release state. Changes to those files should always be done inside `build-resources` and their respective template files marked with `.tpl`.
+To avoid changing those files all the time the repository should always stay in the development environment. Do not
+commit `CooldownWatch.toc` and `code/Environment.lua` in their release state. Changes to those files should always be
+done inside `build-resources` and their respective template files marked with `.tpl`.
 
 ### Packaging the Addon
 
@@ -621,7 +620,10 @@ mvn generate-resources -D generate.sources.overwrite=true -P release
 mvn package -P release
 ```
 
-**Note:** Packaging a release switches the working tree to release state. The release package takes `code/Environment.lua` from the working tree (only `CooldownWatch.toc` is rendered by the assembly itself), so the overwrite cannot be skipped. Switch back to development afterwards so the release-state `CooldownWatch.toc` and `code/Environment.lua` are not committed:
+**Note:** Packaging a release switches the working tree to release state. The release package takes
+`code/Environment.lua` from the working tree (only `CooldownWatch.toc` is rendered by the assembly itself), so the
+overwrite cannot be skipped. Switch back to development afterwards so the release-state `CooldownWatch.toc` and
+`code/Environment.lua` are not committed:
 
 ```
 mvn generate-resources -D generate.sources.overwrite=true -P development
@@ -629,7 +631,8 @@ mvn generate-resources -D generate.sources.overwrite=true -P development
 
 ### Deploy GitHub Release
 
-Before creating a new release update `addon.tag.version` in `pom.xml`. Afterwards to create a new release and deploy to GitHub the `deploy-github` profile has to be used.
+Before creating a new release update `addon.tag.version` in `pom.xml`. Afterwards to create a new release and deploy to
+GitHub the `deploy-github` profile has to be used.
 
 ```
 # switch environment to release
@@ -638,11 +641,13 @@ mvn generate-resources -D generate.sources.overwrite=true -P release
 mvn package -P deploy-github -D github.auth-token=[token]
 ```
 
-**Note:** This is only intended for manual deployment to GitHub. With GitHub actions the token is supplied as a secret to the build process. Switch back to development afterwards, see [Packaging the Addon](#packaging-the-addon).
+**Note:** This is only intended for manual deployment to GitHub. With GitHub actions the token is supplied as a secret
+to the build process. Switch back to development afterwards, see [Packaging the Addon](#packaging-the-addon).
 
 ### Deploy CurseForge Release
 
-**Note:** It's best to create the release for GitHub first and only afterwards the CurseForge release. That way the tag was already created.
+**Note:** It's best to create the release for GitHub first and only afterwards the CurseForge release. That way the tag
+was already created.
 
 ```
 # switch environment to release
@@ -651,11 +656,13 @@ mvn generate-resources -D generate.sources.overwrite=true -P release
 mvn package -P deploy-curseforge -D curseforge.auth-token=[token]
 ```
 
-**Note:** This is only intended for manual deployment to CurseForge. With GitHub actions the token is supplied as a secret to the build process. Switch back to development afterwards, see [Packaging the Addon](#packaging-the-addon).
+**Note:** This is only intended for manual deployment to CurseForge. With GitHub actions the token is supplied as a
+secret to the build process. Switch back to development afterwards, see [Packaging the Addon](#packaging-the-addon).
 
 ### Deploy Wago.io Release
 
-**Note:** It's best to create the release for GitHub first and only afterwards the Wago.io release. That way the tag was already created.
+**Note:** It's best to create the release for GitHub first and only afterwards the Wago.io release. That way the tag was
+already created.
 
 ```
 # switch environment to release
@@ -664,10 +671,15 @@ mvn generate-resources -D generate.sources.overwrite=true -P release
 mvn package -P deploy-wago -D wago.auth-token=[token]
 ```
 
-**Note:** This is only intended for manual deployment to Wago.io. With GitHub actions the token is supplied as a secret to the build process. Switch back to development afterwards, see [Packaging the Addon](#packaging-the-addon).
+**Note:** This is only intended for manual deployment to Wago.io. With GitHub actions the token is supplied as a secret
+to the build process. Switch back to development afterwards, see [Packaging the Addon](#packaging-the-addon).
 
 ### GitHub Action Profiles
 
-This project has GitHub action profiles for different DevOps-related work such as linting, headless tests, source generation and deployments to different providers. See `.github` folder for details.
+This project has GitHub action profiles for different DevOps-related work such as linting, headless tests, source
+generation and deployments to different providers. See `.github` folder for details.
 
-The three release workflows (`release_github.yaml`, `release_curseforge.yaml`, `release_wago.yaml`) publish only after the lint and test workflows pass - both are called as reusable workflows - and after a package contents check: the zip is built with `mvn assembly:single -P deploy-<target>` (no publish goal runs) and the release fails when the `.toc` or the `code/` / `localization/` folders are missing from it.
+The three release workflows (`release_github.yaml`, `release_curseforge.yaml`, `release_wago.yaml`) publish only after
+the lint and test workflows pass - both are called as reusable workflows - and after a package contents check: the zip
+is built with `mvn assembly:single -P deploy-<target>` (no publish goal runs) and the release fails when the `.toc` or
+the `code/` / `localization/` folders are missing from it.
