@@ -12,8 +12,8 @@
 
 ## Providers
 
-[![](docs/curseforge.svg)](https://www.curseforge.com/wow/addons/cooldownwatch)
-[![](docs/wago.svg)](https://addons.wago.io/addons/cooldownwatch)
+[![](docs/curseforge.svg)](https://www.curseforge.com/wow/addons/cooldownwatch-rg)
+[![](docs/wago.svg)](https://addons.wago.io/addons/cooldownwatch-rg)
 
 ## Installation
 
