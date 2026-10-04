@@ -91,6 +91,6 @@ RGCW_SHOTS = {
     hideFrames = { "CW_TargetCooldownWatchBar", "CW_ProximityCooldownWindow" },
     hideChrome = true,
     padding = 0,
-    shows = "The Profiles panel with the named-profile list, the Default profile selected with Rename and Delete greyed out, and the export/import controls"
+    shows = "The Profiles panel with the named-profile list - the active profile selected and drawn in gold with its (active) suffix (Load greyed - the active profile is already loaded) - the Create / Load / Rename / Delete / Reset to defaults button column, and the export/import controls"
   }
 }
