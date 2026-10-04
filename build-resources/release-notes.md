@@ -1,4 +1,13 @@
 * Initial release
-* Settings profiles follow the live active profile model: the profile you are on is marked "(active)" in gold and every change you make belongs to it - it is saved automatically when you switch profiles, at logout and reload, on export and at every login, so there is no Save / Update step to remember
-* Create new Profile copies the current settings into a new profile and makes it active; Load switches to the selected profile and reloads the UI, the profile you leave keeping your settings as they are; deleting the active profile falls back to Default
-* Default is your editable home profile - never deleted or renamed, but loading it brings back what you last had in it; Reset to defaults restores the factory settings into the active profile
+* Tracks enemy cooldowns from the combat log
+* Target cooldown bar that follows your current target and shows which cooldowns that player has used and when each one is ready again
+* Proximity cooldown window (opt-in) listing the active cooldowns of every enemy around you, not just your target
+* Friendly cooldown tracking (opt-in) - teammate cooldowns on the target bar and in a window of their own, scoped to your party, raid or everyone
+* Curated spell catalog covering all nine classes plus racials, items and consumables, with every rank of a spell recognized; a default selection of interrupts, crowd control, defensives and PvP trinkets is tracked out of the box, and anything else can be switched on per spell
+* Pet abilities such as Spell Lock count against the player who owns the pet
+* Worst case handling for cooldowns that talents or gear shorten, globally or per spell, plus manual cooldown overrides per spell
+* Spells that reset other cooldowns, such as Preparation and Cold Snap, clear them from the bar
+* Position Bar and Position Window buttons show example cooldowns and let you drag each surface into place; scale and the number of displayed cooldowns are adjustable
+* Settings profiles with export and import - the active profile saves your changes automatically, and Reset to defaults restores the factory settings
+* Supports Classic Era (including Hardcore and Season of Discovery) and TBC Anniversary with its own spell data
+* Update notice - a one-time chat message when a party, raid or guild member runs a newer version
