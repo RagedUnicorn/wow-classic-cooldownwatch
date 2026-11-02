@@ -8,14 +8,14 @@
 
 services:
   luacheck:
-    image: ragedunicorn/luacheck:1.2.0-alpine3.24.1-1
+    image: ragedunicorn/luacheck:1.2.0-alpine3.24.3-1
     container_name: cooldown-watch-luacheck
     volumes:
       - ./:/workspace:ro
     working_dir: /workspace
     command: ["."]
   luacheck-report:
-    image: ragedunicorn/luacheck:1.2.0-alpine3.24.1-1
+    image: ragedunicorn/luacheck:1.2.0-alpine3.24.3-1
     container_name: cooldown-watch-luacheck-report
     volumes:
       - ./:/workspace:ro
@@ -24,7 +24,7 @@ services:
     entrypoint: /bin/sh
     command: ["-c", "luacheck --formatter JUnit . > /reports/luacheck-junit.xml"]
   busted-report:
-    image: ragedunicorn/busted:2.3.0-alpine3.24.1-1
+    image: ragedunicorn/busted:2.3.0-alpine3.24.3-1
     container_name: cooldown-watch-busted-report
     volumes:
       - ./:/workspace:ro
@@ -33,7 +33,7 @@ services:
     entrypoint: /bin/sh
     command: ["-c", "busted --output=junit . > /reports/busted-junit.xml"]
   busted:
-    image: ragedunicorn/busted:2.3.0-alpine3.24.1-1
+    image: ragedunicorn/busted:2.3.0-alpine3.24.3-1
     container_name: cooldown-watch-busted
     volumes:
       - ./:/workspace:ro
